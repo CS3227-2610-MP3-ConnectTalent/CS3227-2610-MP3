@@ -1,0 +1,1 @@
+-- Synthetic job and test users will be added with the first database migration.
