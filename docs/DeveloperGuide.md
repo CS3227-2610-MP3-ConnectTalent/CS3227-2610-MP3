@@ -1,10 +1,10 @@
 # Developer Guide
 
-Status: scaffold baseline (2 October 2026). Update this guide to match each release.
+Status: scaffold baseline (updated 5 October 2026). Update this guide to match each release.
 
 ## Architecture
 
-The project is one company's hiring portal. It uses one Next.js App Router application for the UI and future server endpoints. Supabase Auth will identify external Applicants and the company's HR users; PostgreSQL row-level security and server-side checks will authorize data access. The SoCLaaS API will be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod will validate user input and AI output. The current app has none of those runtime flows yet.
+The project is a careers site dedicated to one company per deployment. The company's identity is fixed rather than selected by users, and all job records belong to that company. It uses one Next.js App Router application for the UI and future server endpoints. Supabase Auth will identify external Applicants and the company's HR users; PostgreSQL row-level security and server-side checks will authorize data access. The SoCLaaS API will be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod will validate user input and AI output. The current app has none of those runtime flows yet.
 
 ```text
 Applicant/HR browser → Next.js pages and server routes
@@ -12,7 +12,7 @@ Applicant/HR browser → Next.js pages and server routes
                            └─ server-only SoCLaaS client
 ```
 
-The intended tables are `profiles`, `jobs`, `applications`, `hr_notes`, and `audit_events`. No multi-company tenant table is planned for the first release. Migrations and RLS policies will be added with the first feature slice. Separate Vercel and Supabase projects are planned for staging and production. The Next.js application has not been deployed.
+The intended tables are `profiles`, `jobs`, `applications`, `hr_notes`, and `audit_events`. Each job will have a required category from the controlled list in `../workflow/ProductSpec.md` and a draft, published, or closed status. HR will create and edit drafts, then publish or close this company's jobs; published content stays fixed. Applicants will see and filter published jobs only. A unique constraint on applicant and job will permit one application per applicant per job. There is no multi-company tenant table. Migrations and RLS policies will be added with the first feature slice. Separate Vercel and Supabase projects are planned for staging and production. The Next.js application has not been deployed.
 
 ## Local development and checks
 

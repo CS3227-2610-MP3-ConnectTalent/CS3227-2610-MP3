@@ -1,6 +1,6 @@
-# Job Application Portal
+# Company Careers
 
-Scaffold for one company's text-only hiring portal with one published opening and two roles: Applicant and HR. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
+Scaffold for one company's careers site, where external Applicants browse that company's categorized openings and its HR staff review applications. The site supports one text-only application per applicant per job. The company identity will be chosen before release. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; job browsing, authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
 
 ## Prerequisites
 

@@ -12,6 +12,10 @@ The first spec names both roles, one-application constraint, AI input/output bou
 
 On 5 October, we narrowed the product to one company's portal and one published opening. This removes employer onboarding and cross-company permissions from the first release. We also adopted `develop` for integration and `master` for releases. That branch flow records which code is ready for staging or production, while separate Supabase/Vercel projects are still needed to isolate runtime data and secrets.
 
+Later on 5 October, the team proposed adding job categories such as Engineering, HR, Legal, and Sales. Spec version 0.3 expands the planned portal to several preconfigured openings for the same company. The application uniqueness rule now applies per applicant and job, and each AI request must use the selected job's requirements. Categories help applicants browse; they do not change permissions. This is a specification decision, not an implemented feature.
+
+The later clarification was that the product should resemble a single employer's Workday careers page: all listings and applications belong to the company operating this deployment. Spec version 0.4 makes that identity boundary explicit and plans an HR publishing workflow. The design fixes a published job's requirements so the HR AI summary reviews the same criteria the applicant saw. This remains a planned behavior requiring implementation and tests.
+
 The first GitHub Pages run failed because the repository had no Pages site. After enabling Pages, a second run failed because its deployment environment permitted `develop` while the publication workflow ran from `master`. Restricting that environment to `master` made the third run pass. This showed that a passing workflow definition alone does not establish a working deployment; repository settings and environment rules also need release checks.
 
 ## Basic multi-agent SE
