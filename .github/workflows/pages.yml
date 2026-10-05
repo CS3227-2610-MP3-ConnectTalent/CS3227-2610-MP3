@@ -2,7 +2,7 @@ name: Product website
 
 on:
   push:
-    branches: [main, master]
+    branches: [master]
     paths:
       - "docs/**"
       - ".github/workflows/pages.yml"

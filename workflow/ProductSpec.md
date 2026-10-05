@@ -1,10 +1,12 @@
 # Product specification
 
-Version: 0.1 (scaffold baseline, 2 October 2026)
+Version: 0.2 (single-company scope, 5 October 2026)
 
 ## Scope
 
-A single published job opening accepts one text-only application per applicant. Two user roles are supported: Applicant and HR. The planned AI features use the course-required SoC LLM. This document defines intended behavior; the current scaffold implements only a placeholder home page.
+This is one company's hiring portal, not a marketplace for multiple employers. The first release has one published job opening and accepts one text-only application per applicant for that opening. Its two user roles are external Applicant and that company's HR staff. The planned AI features use the course-required SoC LLM. This document defines intended behavior; the current scaffold implements only a placeholder home page.
+
+The company is fixed for this deployment. There is no employer sign-up, company dashboard, cross-company search, or multi-tenant company table in the first release. A later decision to support multiple companies would require a new spec and authorization design before implementation.
 
 | Role | Owns | AI feature | Human control |
 | --- | --- | --- | --- |
@@ -15,7 +17,7 @@ Assign one student primary responsibility for each role. Record team-level work 
 
 ## Core behavior
 
-1. Public sign-up creates an Applicant account. HR accounts are assigned only through a controlled administrative step.
+1. Public sign-up creates an Applicant account for this company's portal. HR accounts for the company are assigned only through a controlled administrative step.
 2. An Applicant reads the published job, drafts and edits a cover letter, and submits at most one application for that job.
 3. An Applicant reads only their own application and cannot change its HR status.
 4. HR reads submitted applications, writes HR-only notes, and updates status through a separate authorized action.
@@ -28,7 +30,7 @@ No resume upload, email automation, or AI hiring decision is in the first releas
 
 | Data | Applicant access | HR access |
 | --- | --- | --- |
-| Published job and requirements | Read | Read |
+| This company's published job and requirements | Read | Read |
 | Application and cover letter | Own record only | Read for review |
 | HR notes | None | Read/write by authorized HR |
 | Role assignment | Cannot set or change | Controlled administration only |
@@ -49,12 +51,13 @@ The database must enforce row-level security in addition to server-side authoriz
 
 ## Acceptance evidence required before release
 
-1. Anonymous users cannot access protected records or AI endpoints.
-2. Applicant A cannot read Applicant B's application or AI draft; an Applicant cannot invoke the HR summary.
-3. HR summary requests contain only the selected letter and published requirements; adversarial letters cannot expose HR notes or change status.
-4. Malformed AI output is rejected safely; script-like output is displayed as text.
-5. Oversized and repeated AI requests are limited, including behavior when the SoC LLM is unavailable or returns a quota error.
-6. Browser flows demonstrate distinct Applicant and HR interfaces and human-controlled submission/status changes.
-7. Staging and production use separate app/database settings. The deployed release, guides, tests, and reflections describe the same behavior.
+1. The UI and data expose only this company's published opening; there is no employer registration or cross-company browsing flow.
+2. Anonymous users cannot access protected records or AI endpoints.
+3. Applicant A cannot read Applicant B's application or AI draft; an Applicant cannot invoke the HR summary.
+4. HR summary requests contain only the selected letter and published requirements; adversarial letters cannot expose HR notes or change status.
+5. Malformed AI output is rejected safely; script-like output is displayed as text.
+6. Oversized and repeated AI requests are limited, including behavior when the SoC LLM is unavailable or returns a quota error.
+7. Browser flows demonstrate distinct Applicant and HR interfaces and human-controlled submission/status changes.
+8. Staging and production use separate app/database settings. The deployed release, guides, tests, and reflections describe the same behavior.
 
 Record tests and observed results in feature records. These criteria are not yet met by the scaffold.
