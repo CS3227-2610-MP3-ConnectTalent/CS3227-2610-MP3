@@ -1,12 +1,12 @@
 # Product specification
 
-Version: 0.4 (single-company careers site, 5 October 2026)
+Version: 0.5 (neutral careers portal branding, 5 October 2026)
 
 ## Scope
 
 This product is the careers site for one company. Each deployment represents that company's own vacancies, applicants, and HR staff. The first release supports multiple job openings and accepts one text-only application per applicant per job. Its two user roles are external Applicant and the company's HR staff. The planned AI features use the course-required SoC LLM. This document defines intended behavior; the current scaffold implements only a placeholder home page.
 
-The company identity is fixed for the deployment and will be chosen before release. The site may show a short company introduction alongside its careers pages, but it is not a full corporate website. There is no employer sign-up, company switching, cross-company search, or multi-tenant company table. A later decision to host other employers would require a new spec and authorization design.
+The product is reusable and can use neutral "Careers" branding without a named company. Each deployed portal still contains the listings and applications of one employer. There is no employer sign-up, company switching, cross-company search, or multi-tenant company table in this release. A later decision to host several employers in one deployment would require a new spec and authorization design.
 
 Each job has a title, description, requirements, and one required category from a small controlled list: Engineering, Human Resources, Legal, Sales, or Other. HR manages the company's jobs as draft, published, or closed. HR can edit draft content; published content stays fixed so submitted applications can be reviewed against the same requirements. Applicants can browse published jobs and filter by category. The category is descriptive metadata; it does not grant access or determine hiring decisions.
 

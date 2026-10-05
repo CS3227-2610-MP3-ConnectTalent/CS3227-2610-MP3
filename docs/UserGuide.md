@@ -4,7 +4,7 @@ Status: scaffold only (updated 5 October 2026).
 
 ## Access
 
-Run `corepack pnpm install` and `corepack pnpm dev` from the repository root, then open <http://localhost:3000>. The placeholder home page describes the planned careers site for one company, with Applicant and HR workflows. The company identity has not been chosen yet.
+Run `corepack pnpm install` and `corepack pnpm dev` from the repository root, then open <http://localhost:3000>. The placeholder home page describes the planned single-employer careers portal, with Applicant and HR workflows. The demo uses neutral branding and does not require a company name.
 
 There is currently no sign-in, job listing, category filter, application form, HR review page, or AI feature to test. No public app deployment or test accounts are available yet. This guide must be updated as each feature is released so peer testers see only accurate instructions.
 

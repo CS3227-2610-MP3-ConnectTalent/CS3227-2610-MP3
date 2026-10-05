@@ -16,6 +16,8 @@ Later on 5 October, the team proposed adding job categories such as Engineering,
 
 The later clarification was that the product should resemble a single employer's Workday careers page: all listings and applications belong to the company operating this deployment. Spec version 0.4 makes that identity boundary explicit and plans an HR publishing workflow. The design fixes a published job's requirements so the HR AI summary reviews the same criteria the applicant saw. This remains a planned behavior requiring implementation and tests.
 
+The team then clarified that naming a fictional company is unnecessary. Spec version 0.5 treats the product as a reusable careers portal with neutral branding. Each deployment still serves one employer; supporting several employers in one deployment would need separate requirements and access controls.
+
 The first GitHub Pages run failed because the repository had no Pages site. After enabling Pages, a second run failed because its deployment environment permitted `develop` while the publication workflow ran from `master`. Restricting that environment to `master` made the third run pass. This showed that a passing workflow definition alone does not establish a working deployment; repository settings and environment rules also need release checks.
 
 ## Basic multi-agent SE

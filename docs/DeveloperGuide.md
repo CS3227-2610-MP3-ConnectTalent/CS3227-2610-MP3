@@ -4,7 +4,7 @@ Status: scaffold baseline (updated 5 October 2026). Update this guide to match e
 
 ## Architecture
 
-The project is a careers site dedicated to one company per deployment. The company's identity is fixed rather than selected by users, and all job records belong to that company. It uses one Next.js App Router application for the UI and future server endpoints. Supabase Auth will identify external Applicants and the company's HR users; PostgreSQL row-level security and server-side checks will authorize data access. The SoCLaaS API will be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod will validate user input and AI output. The current app has none of those runtime flows yet.
+The project is a reusable careers portal for one employer per deployment. It needs no employer name or employer selector; all job records in a deployment belong to the same employer. It uses one Next.js App Router application for the UI and future server endpoints. Supabase Auth will identify external Applicants and that employer's HR users; PostgreSQL row-level security and server-side checks will authorize data access. The SoCLaaS API will be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod will validate user input and AI output. The current app has none of those runtime flows yet.
 
 ```text
 Applicant/HR browser → Next.js pages and server routes
