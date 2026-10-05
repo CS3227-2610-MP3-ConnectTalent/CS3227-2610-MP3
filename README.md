@@ -1,6 +1,6 @@
 # Company Careers
 
-Scaffold for a reusable, Workday-style careers portal. Each deployment serves one employer: external Applicants browse that employer's categorized openings, and its HR staff review applications. The site supports one text-only application per applicant per job and does not require a fictional company name. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; job browsing, authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
+Reusable careers portal for one employer per deployment. Applicants can now browse published jobs by category and read each job's details. A Supabase migration defines the shared job fields and protects unpublished jobs with row-level security. HR job management, authentication, applications, and the course-required SoC LLM features are still planned. The stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and SoCLaaS.
 
 ## Prerequisites
 
@@ -15,13 +15,13 @@ corepack pnpm install
 corepack pnpm db:start
 ```
 
-Copy `.env.example` to `.env.local`. Run `corepack pnpm supabase status` and set the local Supabase URL and publishable key. Fill in the SoC LLM values from the course guide when AI endpoints are implemented, and keep the key in server code only. Then start the app:
+For a fresh local Supabase stack, `db:start` applies the jobs migration and synthetic seed postings. Copy `.env.example` to `.env.local`. Run `corepack pnpm supabase status` and set the local Supabase URL and publishable key. Fill in the SoC LLM values from the course guide when AI endpoints are implemented, and keep the key in server code only. Then start the app:
 
 ```sh
 corepack pnpm dev
 ```
 
-Visit <http://localhost:3000>. The home page runs without credentials; Supabase and the SoC LLM are not called by the scaffold.
+Visit <http://localhost:3000> to browse published jobs. Select a category or open a job card to read its details. The sample draft and closed postings must not appear. Browsing needs the configured Supabase database; no sign-in or SoC LLM call is needed.
 
 ## Checks
 
@@ -31,7 +31,7 @@ corepack pnpm typecheck
 corepack pnpm build
 ```
 
-Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. Add behavior and permission tests alongside each feature, then run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, and `corepack pnpm test:db`. The initial CI workflow runs lint, typecheck, and build; add the test commands once their first tests exist.
+Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. The job-browsing slice includes unit, browser, and database permission tests. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, and `corepack pnpm test:db`. CI runs lint, typecheck, unit tests, and build. Database and browser tests pass locally but are not yet CI gates.
 
 ## Project layout
 

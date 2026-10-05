@@ -1,6 +1,6 @@
 # Product specification
 
-Version: 0.5 (neutral careers portal branding, 5 October 2026)
+Version: 0.6 (job listing detail, 5 October 2026)
 
 ## Scope
 
@@ -8,7 +8,7 @@ This product is the careers site for one company. Each deployment represents tha
 
 The product is reusable and can use neutral "Careers" branding without a named company. Each deployed portal still contains the listings and applications of one employer. There is no employer sign-up, company switching, cross-company search, or multi-tenant company table in this release. A later decision to host several employers in one deployment would require a new spec and authorization design.
 
-Each job has a title, description, requirements, and one required category from a small controlled list: Engineering, Human Resources, Legal, Sales, or Other. HR manages the company's jobs as draft, published, or closed. HR can edit draft content; published content stays fixed so submitted applications can be reviewed against the same requirements. Applicants can browse published jobs and filter by category. The category is descriptive metadata; it does not grant access or determine hiring decisions.
+Each job has a title, team name, description, requirements, and one required category from a small controlled list: Engineering, Human Resources, Legal, Sales, or Other. HR manages the company's jobs as draft, published, or closed. HR can edit draft content; published content stays fixed so submitted applications can be reviewed against the same requirements. Applicants can browse published jobs, filter by category, and open a published job to read its title, team, description, and requirements. The category is descriptive metadata; it does not grant access or determine hiring decisions.
 
 | Role | Owns | AI feature | Human control |
 | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ The database must enforce row-level security in addition to server-side authoriz
 
 ## Acceptance evidence required before release
 
-1. The UI and data expose only this company's published openings to the public. Every job has a valid category, and applicants can filter published jobs by category; there is no employer registration or cross-company browsing flow.
+1. The UI and data expose only this company's published openings to the public. Every job has a valid category, applicants can filter published jobs by category, and a published job's detail page shows its title, team, description, and requirements; there is no employer registration or cross-company browsing flow.
 2. HR can create a draft, edit it, publish it, and close a published job. Published requirements stay fixed. Applicants cannot perform those actions, see draft jobs, or submit to draft or closed jobs. Category filters never expose unpublished jobs, invalid categories are rejected, and an applicant can submit at most one application for each selected job.
 3. Anonymous users cannot access protected records or AI endpoints.
 4. Applicant A cannot read Applicant B's application or AI draft; an Applicant cannot invoke the HR summary.

@@ -1,10 +1,10 @@
 # Developer Guide
 
-Status: scaffold baseline (updated 5 October 2026). Update this guide to match each release.
+Status: applicant job browsing slice implemented locally (5 October 2026). Update this guide to match each release.
 
 ## Architecture
 
-The project is a reusable careers portal for one employer per deployment. It needs no employer name or employer selector; all job records in a deployment belong to the same employer. It uses one Next.js App Router application for the UI and future server endpoints. Supabase Auth will identify external Applicants and that employer's HR users; PostgreSQL row-level security and server-side checks will authorize data access. The SoCLaaS API will be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod will validate user input and AI output. The current app has none of those runtime flows yet.
+The project is a reusable careers portal for one employer per deployment. It needs no employer name or employer selector; all job records in a deployment belong to the same employer. The Next.js home page and job detail route now read jobs server-side through a Supabase publishable key. Queries explicitly require `published` status, while PostgreSQL row-level security independently limits public reads to published rows. Supabase Auth will later identify Applicants and HR users. The SoCLaaS API will later be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod validates returned job data; AI input/output validation is still planned.
 
 ```text
 Applicant/HR browser → Next.js pages and server routes
@@ -12,15 +12,15 @@ Applicant/HR browser → Next.js pages and server routes
                            └─ server-only SoCLaaS client
 ```
 
-The intended tables are `profiles`, `jobs`, `applications`, `hr_notes`, and `audit_events`. Each job will have a required category from the controlled list in `../workflow/ProductSpec.md` and a draft, published, or closed status. HR will create and edit drafts, then publish or close this company's jobs; published content stays fixed. Applicants will see and filter published jobs only. A unique constraint on applicant and job will permit one application per applicant per job. There is no multi-company tenant table. Migrations and RLS policies will be added with the first feature slice. Separate Vercel and Supabase projects are planned for staging and production. The Next.js application has not been deployed.
+The `jobs` table is defined in `../supabase/migrations/20261005000000_create_jobs.sql` with title, team, description, requirements, category, status, and publication time. Its public roles have read-only grants and a published-only select policy. `../supabase/seed.sql` provides synthetic published, draft, and closed jobs for local testing. HR write permissions and controls are a separate feature slice. The `profiles`, `applications`, `hr_notes`, and `audit_events` tables are still planned; the future application table will enforce one application per applicant per job. There is no multi-company tenant table. Separate Vercel and Supabase projects are planned for staging and production. The Next.js application has not been deployed.
 
 ## Local development and checks
 
-See the root `README.md` for prerequisites and commands. `.env.example` lists nonsecret placeholders; `.env.local` is ignored by Git. The home page builds without credentials. Use synthetic data in development. The current CI workflow runs lint, typecheck, and build. Vitest, Playwright, and pgTAP test commands are configured, but no feature tests exist yet.
+See the root `README.md` for prerequisites and commands. `.env.example` lists nonsecret placeholders; `.env.local` is ignored by Git. Job browsing requires a configured Supabase URL and publishable key at runtime. Use synthetic data in development. The current CI workflow runs lint, typecheck, unit tests, and build. Vitest tests cover public query filters and input validation. Playwright and pgTAP cases cover published browsing and hidden job states; they require a running, seeded local Supabase stack and are not yet CI gates.
 
 ## Security design and evidence
 
-`../workflow/ProductSpec.md` defines permissions, AI data limits, prompt-injection boundaries, and acceptance evidence. The future endpoints must authenticate and authorize before fetching data or calling SoCLaaS. The SoCLaaS key must stay server-side. Model output will have no database or status-changing tools. Security controls and their tests must be added together; this scaffold is not a secured production app yet.
+`../workflow/ProductSpec.md` defines permissions, AI data limits, prompt-injection boundaries, and acceptance evidence. The public job read uses a publishable key, never a service-role key, and selects only published jobs. The database policy also hides draft and closed rows from anonymous and authenticated reads. Future protected endpoints must authenticate and authorize before fetching data or calling SoCLaaS. The SoCLaaS key must stay server-side. Model output will have no database or status-changing tools. The app is not yet a secured production release.
 
 ## Spec-driven and agent workflow
 

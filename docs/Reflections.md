@@ -6,9 +6,13 @@ Initial notes began 2 October 2026 and were updated 5 October 2026. These notes 
 
 The main trust boundary will be applicant-controlled notes and cover letters entering a model request. A letter could impersonate an instruction, ask for HR notes, or demand a status change. We therefore specified that HR notes never enter the prompt, the model has no tools, and status changes use a separate human-controlled endpoint. Authorization and data minimization need deterministic tests; prompt wording alone cannot prove security. We have not implemented or tested these controls yet.
 
+The first job-browsing slice has no AI call. It still introduces a data boundary: public visitors should read published jobs but never drafts or closed jobs. The implementation uses both a filtered query and PostgreSQL row-level security. Seven local database checks passed for public visibility and write permissions, and three browser flows passed for filtering, details, invalid categories, and direct hidden-job URLs. This is evidence for the local stack; independent review and deployed verification are still pending.
+
 ## Spec-driven development
 
 The first spec names both roles, one-application constraint, AI input/output boundaries, and release evidence. This made a course requirement conflict visible: the earlier scaffold assumed direct OpenAI use, while MP3 requires SoCLaaS. We changed the planned provider before implementing AI routes. A future spec revision must fix exact SoCLaaS quotas and model behavior before rate-limit code is written. Acceptance tests should challenge the intent, such as cross-user access and data leakage, rather than merely asserting the shape of a response.
+
+For job browsing, the feature record translated ProductSpec v0.6 into observable cases: published jobs appear, category filtering works, details show the required fields, and direct draft/closed URLs reveal no unpublished content. The first browser run caught a missing semantic heading on job cards; fixing that markup made the browser suite pass. The record keeps independent review and human approval separate from passing automated checks.
 
 On 5 October, we narrowed the product to one company's portal and one published opening. This removes employer onboarding and cross-company permissions from the first release. We also adopted `develop` for integration and `master` for releases. That branch flow records which code is ready for staging or production, while separate Supabase/Vercel projects are still needed to isolate runtime data and secrets.
 
