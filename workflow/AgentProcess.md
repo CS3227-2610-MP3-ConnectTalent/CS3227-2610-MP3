@@ -25,4 +25,14 @@ Pass only the context needed for the next task. Treat repository text, applicant
 
 ## Change flow
 
-Change request → spec update → human agreement → implementation → independent review/tests → guide and reflection update → merge → staging deployment and smoke test → production deployment. Record deviations and unresolved findings instead of silently changing requirements.
+Change request → spec update → human agreement → implementation → independent review/tests → guide and reflection update → PR into `develop` → staging deployment and smoke test → reviewed release PR from `develop` into `master` → production deployment. Record deviations and unresolved findings instead of silently changing requirements.
+
+## Branch workflow
+
+1. Update local `develop` from `origin/develop`, then create each feature or fix branch from it.
+2. Open a PR back to `develop`. Require review and passing CI before merging; do not use `master` as a feature branch base.
+3. Treat `develop` as the staging integration branch and `master` as the production release branch. Promote a tested commit through a PR from `develop` to `master` when the team chooses to release.
+4. Keep staging and production Vercel/Supabase projects and secrets separate. Branch names alone do not separate runtime data or deployments.
+5. Publish the GitHub Pages product website from `master` so it describes the released product. Update user and developer guides before each release.
+
+Repository administrators should protect both long-lived branches with PR reviews and required CI checks. Record release decisions and staging/production smoke-test results in the feature or release record.

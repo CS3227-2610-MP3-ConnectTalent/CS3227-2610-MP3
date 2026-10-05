@@ -10,6 +10,8 @@ The main trust boundary will be applicant-controlled notes and cover letters ent
 
 The first spec names both roles, one-application constraint, AI input/output boundaries, and release evidence. This made a course requirement conflict visible: the earlier scaffold assumed direct OpenAI use, while MP3 requires SoCLaaS. We changed the planned provider before implementing AI routes. A future spec revision must fix exact SoCLaaS quotas and model behavior before rate-limit code is written. Acceptance tests should challenge the intent, such as cross-user access and data leakage, rather than merely asserting the shape of a response.
 
+On 5 October, we narrowed the product to one company's portal and one published opening. This removes employer onboarding and cross-company permissions from the first release. We also adopted `develop` for integration and `master` for releases. That branch flow records which code is ready for staging or production, while separate Supabase/Vercel projects are still needed to isolate runtime data and secrets.
+
 ## Basic multi-agent SE
 
 The proposed analyst → implementer → independent reviewer handoff records the spec version, assumptions, changed files, and test evidence. A malicious instruction can enter through repository text, applicant data, or an agent's summary. The human owner must verify source material and review sensitive changes. This process is defined in `../workflow/AgentProcess.md`; actual agent runs, disagreements, and decisions still need to be recorded.

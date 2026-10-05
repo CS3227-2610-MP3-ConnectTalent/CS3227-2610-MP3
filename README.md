@@ -1,6 +1,6 @@
 # Job Application Portal
 
-Scaffold for a one-opening, text-only portal with two roles: Applicant and HR. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
+Scaffold for one company's text-only hiring portal with one published opening and two roles: Applicant and HR. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
 
 ## Prerequisites
 
@@ -47,4 +47,4 @@ Vitest, Playwright, and Supabase database test runners are configured through `v
 
 Use separate staging and production Vercel projects, each connected to its own Supabase project. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in each Vercel environment. Set the SoC LLM settings as server-side secrets when AI endpoints are implemented. Apply reviewed database migrations before deploying features that depend on them. Do not use a service-role key in browser code or a `NEXT_PUBLIC_` variable. The team must manage deployment outside any Codex/Claude build-and-host environment.
 
-The repository currently tracks `main`; the assignment requires an up-to-date `master` branch at submission. Coordinate the branch/default-branch change with the team before the deadline. The GitHub Pages workflow can publish the static website from either branch after GitHub Pages is enabled in repository settings.
+The remote has `develop` as its default branch and `master` as its release branch. Create feature branches from `develop` and merge them back through reviewed PRs. Promote tested releases from `develop` to `master` through a separate PR. The GitHub Pages workflow publishes the static website from `master` after GitHub Pages is enabled in repository settings. See `workflow/AgentProcess.md` for the full change flow.

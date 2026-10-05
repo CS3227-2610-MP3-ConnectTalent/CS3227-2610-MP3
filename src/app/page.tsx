@@ -8,7 +8,7 @@ export default function Home() {
         <Badge variant="secondary">Project scaffold</Badge>
         <h1 className="text-4xl font-semibold tracking-tight">Job Application Portal</h1>
         <p className="max-w-2xl text-muted-foreground">
-          A starting point for the applicant and HR workflows. Authentication,
+          A starting point for one company&apos;s applicant and HR workflows. Authentication,
           applications, and AI features will be added in later implementation slices.
         </p>
       </div>
@@ -18,7 +18,7 @@ export default function Home() {
         </CardHeader>
         <CardContent>
           <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-            <li>One published job opening and one application per applicant</li>
+            <li>One company, one published opening, and one application per applicant</li>
             <li>Text-only cover letters with applicant-controlled SoC LLM drafts</li>
             <li>HR review with SoC LLM summaries and human decisions</li>
           </ul>
