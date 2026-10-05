@@ -12,7 +12,7 @@ Applicant/HR browser → Next.js pages and server routes
                            └─ server-only SoCLaaS client
 ```
 
-The intended tables are `profiles`, `jobs`, `applications`, `hr_notes`, and `audit_events`. No multi-company tenant table is planned for the first release. Migrations and RLS policies will be added with the first feature slice. Separate Vercel and Supabase projects are planned for staging and production. Deployment has not been configured or performed.
+The intended tables are `profiles`, `jobs`, `applications`, `hr_notes`, and `audit_events`. No multi-company tenant table is planned for the first release. Migrations and RLS policies will be added with the first feature slice. Separate Vercel and Supabase projects are planned for staging and production. The Next.js application has not been deployed.
 
 ## Local development and checks
 
@@ -31,7 +31,7 @@ Two students should each own one product role, Applicant and HR, and share datab
 ## Deployment and submission tasks
 
 - Configure staging and production separately, using team-managed deployment automation rather than an AI tool's build-and-host environment.
-- Enable GitHub Pages with GitHub Actions in repository settings; `.github/workflows/pages.yml` publishes the static product site in `docs/` after a push. This has not been deployed yet.
+- GitHub Pages uses GitHub Actions. `.github/workflows/pages.yml` publishes the static product site in `docs/` from `master` to <https://cs3227-2610-mp3-connecttalent.github.io/CS3227-2610-MP3/>. The `github-pages` environment permits deployments from `master` only. The product website is deployed; the Next.js application is not.
 - `develop` is the default integration branch and `master` is the release branch. Feature branches start from `develop` and return by PR. Release PRs promote tested changes to `master`; keep both branches protected with reviews and CI. Branch separation is in place, while staging and production infrastructure still need configuration.
 - Keep the public organization repository named `CS3227-2610-MP3`, update these guides and reflections, and verify deployed flows with both roles before submission.
 
