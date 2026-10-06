@@ -53,11 +53,11 @@
 - Consumes: `workflow/ProductSpec.md` version 0.6 as the source baseline.
 - Produces: a stable overview/index and capability specs with stable IDs for use in change deltas, task checklists, and feature records.
 
-- [ ] **Step 1: Map the existing specification sections to the approved module table** in `workflow/design/2026-10-06-sdd-multi-agent-workflow.md`. Record the source section and target file for scope, each core behavior, each data-access rule, each AI/security rule, and all nine release-acceptance items.
-- [ ] **Step 2: Create `workflow/specs/README.md`** with the ID format (`OVR`, `ACC`, `JOB`, `JMG`, `APP`, `AID`, `AIS`, `SEC`, `OPS` plus a zero-padded number), normative-language and scenario conventions, cross-spec link rules, baseline/version policy, and change/retirement rules for IDs.
-- [ ] **Step 3: Create the nine capability specification files** by moving the mapped v0.6 requirements without changing their intended behavior. Add stable IDs and observable scenarios where appropriate; keep one canonical home for cross-cutting authorization/privacy rules and link to it from capability specs.
-- [ ] **Step 4: Replace the contents of `workflow/ProductSpec.md` with the concise product boundary, current baseline version/date, module index, and a statement that the split preserved v0.6 behavior.** Retain this filename so existing historical references continue to resolve.
-- [ ] **Step 5: Manually trace every original requirement and acceptance item to its new file and verify the source/destination meaning.** Record unresolved product decisions (including student ownership assignments) as unresolved; do not decide them during migration.
+- [x] **Step 1: Map the existing specification sections to the approved module table** in `workflow/design/2026-10-06-sdd-multi-agent-workflow.md`. Record the source section and target file for scope, each core behavior, each data-access rule, each AI/security rule, and all nine release-acceptance items.
+- [x] **Step 2: Create `workflow/specs/README.md`** with the ID format (`OVR`, `ACC`, `JOB`, `JMG`, `APP`, `AID`, `AIS`, `SEC`, `OPS` plus a zero-padded number), normative-language and scenario conventions, cross-spec link rules, baseline/version policy, and change/retirement rules for IDs.
+- [x] **Step 3: Create the nine capability specification files** by moving the mapped v0.6 requirements without changing their intended behavior. Add stable IDs and observable scenarios where appropriate; keep one canonical home for cross-cutting authorization/privacy rules and link to it from capability specs.
+- [x] **Step 4: Replace the contents of `workflow/ProductSpec.md` with the concise product boundary, current baseline version/date, module index, and a statement that the split preserved v0.6 behavior.** Retain this filename so existing historical references continue to resolve.
+- [x] **Step 5: Manually trace every original requirement and acceptance item to its new file and verify the source/destination meaning.** Record unresolved product decisions (including student ownership assignments) as unresolved; do not decide them during migration.
 
 ### Task 2: Create change-packet templates and organize existing feature evidence
 
