@@ -1,7 +1,7 @@
 # Design: Codex Agent Profiles and Contributor Guidance
 
 - Change ID/issues: `2026-10-06-codex-agent-profiles-guidance`; [#13](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/13)
-- Owner/status/date: Student owner pending assignment; draft pending approval; 2026-10-06
+- Owner/status/date: Student owner pending assignment; approved for implementation; 2026-10-07
 - Inputs: `proposal.md`; workflow baseline at commit `64f5e36`; no product requirement IDs or deltas
 - Scope and affected components/files: Root `AGENTS.md`, root `CONTRIBUTING.md`, `.codex/agents/*.toml`, packet/evidence, developer-guide and root README navigation, and a dated session summary during final closeout.
 
@@ -9,10 +9,10 @@
 
 | Decision | Considered alternatives | Reason and tradeoffs | Human approval reference |
 | --- | --- | --- | --- |
-| Keep `AGENTS.md` concise and put detailed contribution steps in `CONTRIBUTING.md`, pointing to canonical `workflow/` documents. | One very long root instruction file; duplicate workflow policy in both files. | Codex reads root instructions for project tasks and has a default combined instruction limit; concise stable rules reduce context noise and direct contributors to authoritative detail. The contributor guide remains human-readable and comprehensive. | Approved by requester in chat on 2026-10-06. |
-| Use six profiles mapped to existing specialist skills: product analyst, solution architect, implementer, test engineer, security/privacy reviewer, integration/evidence lead. | One general agent; three broader roles; duplicate prompts that restate complete skills. | Six profiles preserve the project's reviewed role boundaries; each profile points to the existing matching skill and stage instructions rather than duplicating those documents. | Approved by requester in chat on 2026-10-06. |
-| Use standalone TOML files at `.codex/agents/<name>.toml` with only required identity/instruction fields and role-appropriate `sandbox_mode`. | Global configuration, per-agent model/MCP overrides, more settings. | The official Codex docs identify this project-scope path and required keys. Omitting optional settings avoids pinning unavailable models, adding external services, or changing project-wide defaults. Read-only is the default for analysis/review; implementer profile uses `workspace-write`, subject to the live parent permission mode. | Approved by requester in chat on 2026-10-06. |
-| Treat existing skills as detailed operating procedures and agent TOMLs as identity, trigger, boundary, and default-sandbox configuration. | Copy skill content into each TOML; no cross-links. | One source of detailed instructions is easier to maintain. The profile should tell Codex which skill to read, while the skill remains authoritative for its stage/role. | Approved by requester in chat on 2026-10-06. |
+| Keep `AGENTS.md` concise and put detailed contribution steps in `CONTRIBUTING.md`, pointing to canonical `workflow/` documents. | One very long root instruction file; duplicate workflow policy in both files. | Codex reads root instructions for project tasks and has a default combined instruction limit; concise stable rules reduce context noise and direct contributors to authoritative detail. The contributor guide remains human-readable and comprehensive. | Approved by requester in chat on 2026-10-07. |
+| Use six profiles mapped to existing specialist skills: product analyst, solution architect, implementer, test engineer, security/privacy reviewer, integration/evidence lead. | One general agent; three broader roles; duplicate prompts that restate complete skills. | Six profiles preserve the project's reviewed role boundaries; each profile points to the existing matching skill and stage instructions rather than duplicating those documents. | Approved by requester in chat on 2026-10-07. |
+| Use standalone TOML files at `.codex/agents/<name>.toml` with only required identity/instruction fields and role-appropriate `sandbox_mode`. | Global configuration, per-agent model/MCP overrides, more settings. | The official Codex docs identify this project-scope path and required keys. Omitting optional settings avoids pinning unavailable models, adding external services, or changing project-wide defaults. Read-only is the default for analysis/review; implementer profile uses `workspace-write`, subject to the live parent permission mode. | Approved by requester in chat on 2026-10-07. |
+| Treat existing skills as detailed operating procedures and agent TOMLs as identity, trigger, boundary, and default-sandbox configuration. | Copy skill content into each TOML; no cross-links. | One source of detailed instructions is easier to maintain. The profile should tell Codex which skill to read, while the skill remains authoritative for its stage/role. | Approved by requester in chat on 2026-10-07. |
 
 ## Interfaces and data flow
 
@@ -46,7 +46,7 @@ No product deployment or schema migration. Contributors receive the files throug
 - [ ] Interfaces and requirements agree with the issue and proposal.
 - [ ] Security, failure, migration, rollout and rollback impacts assessed.
 - Findings/owner/resolution: Pending independent review after implementation.
-- Human approval: Requester approved the bounded proposal/design/plan on 2026-10-06. Student owner name/assignment remains pending and must be recorded before student acceptance and PR submission.
+- Human approval: Requester approved the bounded proposal/design/plan on 2026-10-07. Student owner name/assignment remains pending and must be recorded before student acceptance and PR submission.
 
 ## Proposed profile inventory
 

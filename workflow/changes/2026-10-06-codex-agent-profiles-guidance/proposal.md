@@ -42,7 +42,7 @@ OpenAI's current Codex documentation places project custom-agent TOML files in `
 - Assumptions: Current OpenAI Codex docs describe the relevant custom-agent directory and TOML schema; contributors may need to restart/start a new Codex session for discovery. Confirm all local claims during implementation against official docs.
 - Dependencies: Issue #13 and its triage/student ownership decision; existing `.agents/skills/`, `workflow/AgentProcess.md`, templates and package scripts.
 - Risks: Instructions can drift from existing workflow; profiles may appear to grant authority or prove execution; broad agent permissions can cause unintended edits. Mitigation: link to canonical skills/process, explicitly deny human decision authority, default analysis/review profiles to read-only, and document that active parent permissions can override profile defaults.
-- Open decisions: Student owner assignment remains pending. The requester approved the six profiles, proposed boundaries, and workspace-write default for the implementer in chat on 2026-10-06; the requester's name and student role were not provided, so they are not inferred.
+- Open decisions: Student owner assignment remains pending. The requester approved the six profiles, proposed boundaries, and workspace-write default for the implementer in chat on 2026-10-07; the requester's name and student role were not provided, so they are not inferred.
 
 ## Acceptance evidence and artifacts
 
@@ -63,5 +63,5 @@ OpenAI's current Codex documentation places project custom-agent TOML files in `
 - [ ] Issue owner/triage, including student owner assignment, is complete; owner assignment remains pending.
 - [x] Requester approved this proposal, design, profile inventory/permissions, and plan before implementation.
 - Approver: User/requester; name and student role unavailable in the conversation
-- Decision/date/source: Approved 2026-10-06 in the user reply “Looks good, go ahead”; issue #13 remains intake, not approval.
+- Decision/date/source: Approved 2026-10-07 in the user reply “Looks good, go ahead”; issue #13 remains intake, not approval.
 - Conditions: Do not infer or record student ownership. Obtain the assigned student owner's name before recording student acceptance or opening the PR.
