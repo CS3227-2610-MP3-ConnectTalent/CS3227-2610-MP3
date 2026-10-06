@@ -1,6 +1,6 @@
-# Job Application Portal
+# Company Careers
 
-Scaffold for one company's text-only hiring portal with one published opening and two roles: Applicant and HR. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
+Scaffold for a reusable, Workday-style careers portal. Each deployment serves one employer: external Applicants browse that employer's categorized openings, and its HR staff review applications. The site supports one text-only application per applicant per job and does not require a fictional company name. The planned stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and the course-required SoC LLM. This scaffold provides configuration and a placeholder home page; job browsing, authentication, applications, row-level security policies, and AI endpoints are not implemented yet.
 
 ## Prerequisites
 
@@ -47,4 +47,4 @@ Vitest, Playwright, and Supabase database test runners are configured through `v
 
 Use separate staging and production Vercel projects, each connected to its own Supabase project. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in each Vercel environment. Set the SoC LLM settings as server-side secrets when AI endpoints are implemented. Apply reviewed database migrations before deploying features that depend on them. Do not use a service-role key in browser code or a `NEXT_PUBLIC_` variable. The team must manage deployment outside any Codex/Claude build-and-host environment.
 
-The remote has `develop` as its default branch and `master` as its release branch. Create feature branches from `develop` and merge them back through reviewed PRs. Promote tested releases from `develop` to `master` through a separate PR. The GitHub Pages workflow publishes the static website from `master` after GitHub Pages is enabled in repository settings. See `workflow/AgentProcess.md` for the full change flow.
+The remote has `develop` as its default branch and `master` as its release branch. Create feature branches from `develop` and merge them back through reviewed PRs. Promote tested releases from `develop` to `master` through a separate PR. The GitHub Pages workflow publishes the [static product website](https://cs3227-2610-mp3-connecttalent.github.io/CS3227-2610-MP3/) from `master`. See `workflow/AgentProcess.md` for the full change flow.
