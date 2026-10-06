@@ -135,17 +135,19 @@
 **Files:**
 - Modify: `docs/DeveloperGuide.md`
 - Modify: `README.md`
+- Modify: `workflow/templates/TasksTemplate.md` (correct the pre-PR ordering conflict found during Task 5 source review)
 
 **Interfaces:**
 - Consumes: the specifications, process rules, catalog, and logging policy from Tasks 1–4.
 - Produces: the authoritative developer-facing documentation and a concise project-layout pointer.
 
-- [ ] **Step 1: Replace the existing “Spec-driven and agent workflow” section in `docs/DeveloperGuide.md`** with a detailed file map and procedure covering GitHub issue forms and PR template; issue-first and PR-last sequencing; capability specs; all change artifacts/templates; Codex stage and specialist skills, including PR submission; role boundaries; gates/approvals; TDD/debugging; independent verification; task/evidence recording; Conventional Commits; branch/release integration; canonical sync/archive; and pre-PR session logs.
-- [ ] **Step 2: Explain Codex use precisely:** repository-root `.agents/skills/<name>/SKILL.md` is the supported project scope; Codex can select by description or explicit `$name`/`/skills`; a skill is an instruction pack rather than an agent; skills do not prove that multiple agents were used; restart Codex if a new skill does not appear.
-- [ ] **Step 3: Explain the current evidence state:** existing Browse Job Listings review/sign-off remains pending; existing summaries are historical summaries rather than complete transcripts; the team's student names/role assignments and verification remain to be supplied; no new agent run is claimed by creating skill files.
-- [ ] **Step 4: Add official OpenAI Codex skills guide and OpenSpec/Superpowers source links** near the claims they support. State that the project adopts selected concepts without toolkit installation or copied commands.
-- [ ] **Step 5: Update root `README.md` project layout** to distinguish `workflow/` policy/specs/templates/changes from `.agents/skills/` Codex-discovered instructions and `logs/` session summaries.
-- [ ] **Step 6: Search current source documents for old workflow/template/record links** and update active navigation. Verify the new skill paths during Task 8; keep old filenames mentioned inside historical logs as historical facts.
+- [x] **Step 1: Replace the existing “Spec-driven and agent workflow” section in `docs/DeveloperGuide.md`** with a detailed file map and procedure covering GitHub issue forms and PR template; issue-first and PR-last sequencing; capability specs; all change artifacts/templates; Codex stage and specialist skills, including PR submission; role boundaries; gates/approvals; TDD/debugging; independent verification; task/evidence recording; Conventional Commits; branch/release integration; canonical sync/archive; and pre-PR session logs.
+- [x] **Step 2: Explain Codex use precisely:** repository-root `.agents/skills/<name>/SKILL.md` is the supported project scope; Codex can select by description or explicit `$name`/`/skills`; a skill is an instruction pack rather than an agent; skills do not prove that multiple agents were used; restart Codex if a new skill does not appear.
+- [x] **Step 3: Explain the current evidence state:** existing Browse Job Listings review/sign-off remains pending; existing summaries are historical summaries rather than complete transcripts; the team's student names/role assignments and verification remain to be supplied; no new agent run is claimed by creating skill files.
+- [x] **Step 4: Add official OpenAI Codex skills guide and OpenSpec/Superpowers source links** near the claims they support. State that the project adopts selected concepts without toolkit installation or copied commands.
+- [x] **Step 5: Update root `README.md` project layout** to distinguish `workflow/` policy/specs/templates/changes from `.agents/skills/` Codex-discovered instructions and `logs/` session summaries.
+- [x] **Step 6: Search current source documents for old workflow/template/record links** and update active navigation. Verify the new skill paths during Task 8; keep old filenames mentioned inside historical logs as historical facts.
+- [x] **Step 7: Keep the active task template consistent with the approved lifecycle.** Move canonical spec sync and packet archive from `Post-submission` to the pre-PR task sequence, before session-summary completion and PR creation. Keep only later merge/release decisions under post-submission.
 
 ### Task 6: Create Codex skills for the workflow stages
 
