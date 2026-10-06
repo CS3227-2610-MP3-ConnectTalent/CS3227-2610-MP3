@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Company Careers",
-  description: "Careers site for one company's job openings and applications.",
+  title: "Careers | Open roles",
+  description: "Browse open roles by team and category.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
