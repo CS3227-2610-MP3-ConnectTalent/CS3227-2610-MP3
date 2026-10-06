@@ -186,8 +186,8 @@
 - Consumes: role policies in `workflow/AgentProcess.md`, the handoff template, and workflow skills from Task 6.
 - Produces: six Codex-discoverable specialist skills with distinct scopes and handoffs that guide work without pretending to create separate agent instances.
 
-- [ ] **Step 1: Define each specialist's bounded mission, minimum input context, prohibited decisions, expected artifact/handoff, and review independence.** The implementer follows approved tasks; reviewers return evidence-based findings and never self-approve.
-- [ ] **Step 2: Check names and descriptions against `workflow/skills/README.md`** and ensure the integration/evidence lead cannot approve a release on behalf of the students.
+- [x] **Step 1: Define each specialist's bounded mission, minimum input context, prohibited decisions, expected artifact/handoff, and review independence.** The implementer follows approved tasks; reviewers return evidence-based findings and never self-approve.
+- [x] **Step 2: Check names and descriptions against `workflow/skills/README.md`** and ensure the integration/evidence lead cannot approve a release on behalf of the students.
 
 **Access constraint for Tasks 6–7:** `.agents/` is marked read-only by the current workspace permission profile. Finish Tasks 1–5 before attempting the requested repository-scoped write. If the Task 6 access request is approved, use that same approved path for Task 7. If it is rejected, continue Task 8's review/log work, then report the exact rejected operation and ask for access; do not claim Codex discovery succeeded.
 
