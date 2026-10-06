@@ -10,6 +10,7 @@ Follow the [agent process](AgentProcess.md): issue → change packet → proposa
 | [Capability specifications](specs/README.md) | Canonical requirement IDs and behavior |
 | [Agent process](AgentProcess.md) | Human gates, roles, evidence and branch/release policy |
 | [Change templates](templates/ProposalTemplate.md) | Start a proposal; the [active-change guide](changes/README.md) lists all packet templates |
+| [Codex custom-agent catalog](agents/README.md) | Named project-scoped subagents, sandbox defaults, mapping to skills, and evidence boundaries |
 | [Codex skill catalog](skills/README.md) | Stage and specialist instructions, discovery and invocation |
 | [Active changes](changes/README.md) | Proposed and in-progress packets |
 | [Evidence records](records/README.md) | Preserved legacy and process records |

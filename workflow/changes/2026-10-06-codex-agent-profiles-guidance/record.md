@@ -11,7 +11,7 @@ Date: 2026-10-06
 
 - Change ID/classification: `2026-10-06-codex-agent-profiles-guidance`; documentation/process only
 - GitHub issue: [#13 — Add project Codex agents and contributor guidance](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/13); student owner assignment pending
-- Branch/commits/PR: `chore/setup-sdd`; packet/design commit `17b73ba`, root-guidance commit `cb673ff`; PR not opened
+- Branch/commits/PR: `chore/setup-sdd`; packet/design commit `17b73ba`, root-guidance commit `cb673ff`, profile commit `9eb1d1b`; navigation commit pending; PR not opened
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: None; no product delta
@@ -53,9 +53,9 @@ No independent implementation review has been performed yet. The current primary
 
 ## Implementation and tests
 
-Changed files: `AGENTS.md`, `CONTRIBUTING.md`, six `.codex/agents/*.toml` profiles, `workflow/agents/README.md`, and issue #13 packet files. Developer-guide and process navigation updates are in progress.
+Changed files: `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `docs/DeveloperGuide.md`, six `.codex/agents/*.toml` profiles, `workflow/agents/README.md`, `workflow/AgentProcess.md`, `workflow/README.md`, `workflow/skills/README.md`, and issue #13 packet files.
 
-Commands and results: Inspected current process/templates/package scripts and `.env.example`; verified documented setup/check command names. A PowerShell inline check resolved local Markdown links in `AGENTS.md` and `CONTRIBUTING.md`. Python's standard-library `tomllib` parsed all six TOML files, required keys, matching unique names, sandbox values, and 12 skill-file references. A Codex CLI delegation smoke check was attempted in read-only mode but the environment denied network socket access to the OpenAI Responses service; no subagent response was produced. Broader documentation links/content checks remain pending. Application checks are N/A because no product behavior changes.
+Commands and results: Inspected current process/templates/package scripts and `.env.example`; verified documented setup/check command names. A PowerShell link check resolved 150 local Markdown path targets across 13 changed/current documents; the `spec-driven-and-agent-workflow` Developer Guide heading anchor exists. Python's standard-library `tomllib` parsed all six TOML files, required keys, matching unique names, sandbox values, and 12 skill-file references. A Codex CLI delegation smoke check was attempted in read-only mode but the environment denied network socket access to the OpenAI Responses service; no subagent response was produced. Final independent review is pending. Application checks are N/A because no product behavior changes.
 
 Security/adversarial cases and results: No application security behavior changed. The six profiles now encode bounded missions and read-only defaults for analysis/review; static policy review is complete, while independent security/privacy review remains pending.
 
