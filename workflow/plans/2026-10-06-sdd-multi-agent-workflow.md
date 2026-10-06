@@ -196,6 +196,8 @@
 **Files:**
 - Review: all Task 1–7 files and `workflow/design/2026-10-06-sdd-multi-agent-workflow.md`
 - Update: `workflow/records/SDD-Multi-Agent-Workflow.md`
+- Update: `workflow/skills/README.md`, `README.md`, and `docs/DeveloperGuide.md` to reflect present manifests while keeping runtime discovery unverified
+- Update: `.github/pull_request_template.md` with a direct summary-template/path instruction
 - Create at final closeout: `logs/2026-10-06-sdd-agentic-workflow.md`
 
 **Interfaces:**
@@ -206,10 +208,10 @@
 - [ ] **Step 2: Run `git diff --check` on each staged unit before committing and run `git diff --check <starting-commit>...HEAD` at final review.** Resolve whitespace errors and inspect the complete commit range.
 - [ ] **Step 3: Attempt the bundled skill validator on every folder from Tasks 6–7 and manually inspect all skill links, frontmatter names, description scope, and approval boundaries.** If the validator cannot start because its environment lacks a parser dependency, record the exact failure without installing a global package; perform bounded static frontmatter/name/link checks on all 14 manifests and retain the general-validator limitation. Do not run the product's application test suites for this documentation-only change.
 - [ ] **Step 4: Review the original ProductSpec against the nine resulting modules** and check all original numbered release criteria, role permissions, and explicit non-goals are present.
-- [ ] **Step 5: Review `workflow/`, `.agents/skills/`, the active feature record, `docs/DeveloperGuide.md`, root `README.md`, and `logs/` together.** Resolve broken links, status contradictions, or claims without evidence.
+- [ ] **Step 5: Review `workflow/`, `.agents/skills/`, the active feature record, `docs/DeveloperGuide.md`, root `README.md`, and `logs/` together.** Update planned-manifest wording to confirm the 14 files are present at the documented paths while stating that live Codex discovery/selection was not exercised. Resolve broken links, status contradictions, or claims without evidence.
 - [ ] **Step 6: Record final human acceptance only if the owner has reviewed this exact implementation.** If final review has not yet happened, leave the workflow-setup record pending student review. If independent multi-agent review was not actually performed, state that plainly.
 - [ ] **Step 7: Update the process-setup record with actual review/check results and preserve any team/student verification items that remain pending.** Do not invent a product spec delta or completed independent agent review.
-- [ ] **Step 8: As the final closeout artifact before PR submission, create the dated interaction-summary log and link it from the setup record and PR template instructions.** Include only interactions and tool outcomes supported by the current conversation. Do not create a live issue or PR for this workflow-setup task; those GitHub templates and lifecycle rules govern future product changes.
+- [ ] **Step 8: As the final closeout artifact before PR submission, create the dated interaction-summary log and link it from the setup record and PR template instructions.** Point contributors to `logs/SessionSummaryTemplate.md` and the `logs/YYYY-MM-DD-topic.md` naming pattern. Include only interactions and tool outcomes supported by the current conversation. Do not create a live issue or PR for this workflow-setup task; those GitHub templates and lifecycle rules govern future product changes.
 
 ## Proposed contributor-flow boundary
 
