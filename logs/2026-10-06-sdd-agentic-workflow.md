@@ -33,6 +33,8 @@ Sequence numbers express order; exact timestamps are unavailable. Requests are s
 | 12 | Controller checks and rulings | Reconcile validator limits and planned wording after manifests exist. | Elevated python reached quick_validate but import yaml failed. PowerShell fallback covered 14 manifests/76 links; nine original release statements compared exactly. 5503086/5bb5be4 recorded plan updates. | No package installed; keep fallback/general-validator distinction and runtime limits. |
 | 13 | Controller → workflow_closeout | Implement Task 8 from approved brief, verify history against current docs/commits, reconcile record/navigation/template and create final summary; preserve dated logs, commit scoped docs, leave later reviews/acceptance pending. | Current execution read actual reports/ledger/tree/history, updated six approved files and performed bounded checks/self-review. | Exact model supplied by controller: gpt-6.1-sol; no run ID surfaced. No agents spawned by this execution. |
 | 14 | workflow_closeout → controller | Report progress and a checker retry; controller requested completion with precise evidence/limits. | One full-record delete/add patch was rejected before mutation for duplicate target operations; replaced with one update. Scratch checker initially used a wrong source-heading label, corrected to the actual heading. An intermediate link check observed the not-yet-created dated log; creation resolves that dependency. | Tooling/order retries, not product defects. Task 8 separate and whole-branch reviews remain pending at summary creation. |
+| 15 | Controller → task8_review → controller | Independently review the six-file Task 8 handoff at `8422c46`, including log/record claims and scope. | Separate reviewer returned PASS with no actionable findings; independently confirmed six-file scope, clean whitespace/status, chronology, fourteen manifest paths and six unchanged historic logs. | Reviewer was separately dispatched with `gpt-6.1-sol`; exact run ID was not surfaced. Broader counts/source comparisons remain controller or implementer evidence. |
+| 16 | Controller → whole_branch_review → controller | Independently review the complete setup against the user requirements and ProductSpec v0.6. | Whole-branch reviewer returned PASS with no actionable diff-visible findings after checking specs, templates, process, forms, guides, skills, logs, commit scope and source preservation. | Reviewer was separately dispatched with `gpt-6-astra`, high reasoning; exact run ID was not surfaced. Fresh bounded checks and remaining limits are detailed below. Student acceptance is separate. |
 
 ## Tool and agent executions
 
@@ -47,7 +49,7 @@ Each implementer/reviewer pair below was actually dispatched sequentially in sep
 | 5 / guide/navigation specialist | guide_navigation / task5_review | Final Task 1–4 map and focused ordering repair; e8fbe9f | PASS; no actionable findings. Reviewer independently checked targeted canonical policy, 56 paths/three anchors; did not rerun Git/app commands. |
 | 6 / stage-skill implementer | workflow_stage_skills / task6_review | Eight names/approved process and templates; c5a86c8 | PASS; no blocking/material usability findings. Reviewer checked static package names/contracts/38 references, not actual target existence or client behavior. |
 | 7 / role-skill implementer | specialist_role_skills / task7_review | Six roles/approved contracts and stage interfaces; a06b344 | PASS; no blocking content finding. Static package review; folder/link/check results implementer-reported; no general validator/live behavior. |
-| 8 / integration closeout implementer | workflow_closeout; separate reviewer pending | Task 8 brief/current reports/commits; commit containing this summary | Current documentation/static checks and self-review. Separate Task 8 review, final whole-branch independent review and student acceptance pending at creation. |
+| 8 / integration closeout implementer | workflow_closeout / `gpt-6.1-sol`; separately reviewed by task8_review / `gpt-6.1-sol` | Task 8 brief/current reports/commits; `8422c46` | Implementer checks/self-review plus separate PASS, no actionable findings. Reviewer confirmed scope/status/whitespace, commit chronology, manifest presence and historic-log Git diff. Full controller link/frontmatter/source counts were not all independently repeated in this task review. Student acceptance pending. |
 
 Controller/orchestrator: Codex `/root`; exact model/session ID not surfaced in the closeout evidence. It coordinated handoffs, approvals/constraints, plan progress and additional checks. Ignored execution scratch is navigation/support, not public transcript evidence.
 
@@ -126,13 +128,22 @@ Date/environment: 2026-10-06, Windows PowerShell, existing chore/setup-sdd check
 
 ## Open work, blockers and limitations
 
-- Task 8 commit/handoff completes this bounded implementer assignment; its separate reviewer and final whole-branch reviewer must assess the actual returned revision. Those future outcomes are pending at summary creation.
+- At summary creation, Task 8 had committed its bounded handoff but its separate reviewer and final whole-branch reviewer had not yet reported. The post-creation follow-up below records both later outcomes.
 - Bundled skill validation remains unavailable because yaml is missing; no environment/package repair was performed. Bounded PowerShell checks are narrower.
 - Student verifier, names/Applicant/HR ownership and final acceptance source/date remain pending. Initial design/plan approval does not replace final acceptance.
 - Tasks 1–7 separate verdicts are scoped above; most reviewed packages did not independently rerun every implementer command. Task 8 current checks/self-review do not supply full-branch independence.
 - Six prior dated logs retain original wording and verification/coverage limits. Earlier app-session prompts are unavailable and were not reconstructed; team review of those summaries remains a student responsibility.
 - No product delta/canonical behavior sync needed; sync N/A. No accepted packet archive, live issue/PR, push, merge, release or deployment. Future product work must follow distinct acceptance, sync/archive, summaries, PR and later integration/release gates.
-- Reviewer findings from returned Tasks 1–7: none requiring repair; ordering/count issues discovered by controller/source inspection were corrected in recorded commits. No Task 8 independent verdict or full-branch verdict is claimed.
+- Reviewer findings from returned Tasks 1–7: none requiring repair; ordering/count issues discovered by controller/source inspection were corrected in recorded commits. At summary creation, no Task 8 or full-branch independent verdict was claimed; the later outcomes are recorded below.
+
+## Post-creation review follow-up
+
+After the initial closeout summary was written and Task 8 committed as `8422c4605132e36e7cac219d7df0430bcda43465`, two separate read-only reviews returned:
+
+- `task8_review` (`gpt-6.1-sol`, run ID unavailable): PASS, no actionable findings. It independently checked the six-file Task 8 scope, commit chronology, clean status/whitespace, fourteen manifest paths and six historical dated logs unchanged in Git. Full link/frontmatter/source-comparison counts remain controller/implementer evidence, not all repeated by this focused reviewer.
+- `whole_branch_review` (`gpt-6-astra`, high reasoning, run ID unavailable): PASS, no actionable diff-visible findings for baseline `ae62fe1061567933fc20d558d4cbc381bee443b4` through `8422c4605132e36e7cac219d7df0430bcda43465`. It freshly confirmed 14 manifests/76 skill references, 34 docs/266 local links and anchors, nine modules/30 unique IDs, all nine original acceptance statements, six unchanged historical logs, 53 in-scope paths and whitespace. It inspected the original and split specifications plus workflow artifacts.
+
+Neither review ran application tests, a general YAML parser, GitHub rendering or Codex CLI/IDE behavior. The whole-branch verdict is technical review evidence; final student/team acceptance remains pending. No issue/PR was created, and no push, merge or release occurred.
 
 ## Student verification
 
