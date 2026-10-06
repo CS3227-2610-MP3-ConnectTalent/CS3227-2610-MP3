@@ -125,10 +125,10 @@
 - Consumes: user/agent interaction evidence available for the current session and the closeout rules from Task 3.
 - Produces: a repeatable dated summary format and an honest current-session record linked from the workflow setup feature record.
 
-- [ ] **Step 1: Update `logs/README.md`** to require one dated summary per substantive development session, a chronological summary of every substantive user prompt/follow-up and agent handoff, material tool actions/results, decisions, changed files, actual checks, open work, and student verification. State that logs are concise summaries, not transcripts or hidden reasoning.
-- [ ] **Step 2: Add privacy and truth rules:** never copy credentials, private applicant data, or sensitive full prompts; do not claim the log reconstructs unavailable historical prompts; distinguish a planned agent role from an actual agent/tool/model run; preserve existing summaries unless correcting a demonstrated factual error.
-- [ ] **Step 3: Add `SessionSummaryTemplate.md`** with session metadata, issue/PR/change-packet links, chronological interaction table, request summaries, tool/agent role and outcomes, decisions, files, verification status, blockers/limitations, and student verification status. The summary is a required pre-PR artifact, so the open PR can link it.
-- [ ] **Step 4: Defer the current session log until Task 8** so that it can report the final file, validator, review, and access outcomes accurately.
+- [x] **Step 1: Update `logs/README.md`** to require one dated summary per substantive development session, a chronological summary of every substantive user prompt/follow-up and agent handoff, material tool actions/results, decisions, changed files, actual checks, open work, and student verification. State that logs are concise summaries, not transcripts or hidden reasoning.
+- [x] **Step 2: Add privacy and truth rules:** never copy credentials, private applicant data, or sensitive full prompts; do not claim the log reconstructs unavailable historical prompts; distinguish a planned agent role from an actual agent/tool/model run; preserve existing summaries unless correcting a demonstrated factual error.
+- [x] **Step 3: Add `SessionSummaryTemplate.md`** with session metadata, issue/PR/change-packet links, chronological interaction table, request summaries, tool/agent role and outcomes, decisions, files, verification status, blockers/limitations, and student verification status. The summary is a required pre-PR artifact, so the open PR can link it.
+- [x] **Step 4: Defer the current session log until Task 8** so that it can report the final file, validator, review, and access outcomes accurately.
 
 ### Task 5: Update project-facing navigation and the developer guide
 
