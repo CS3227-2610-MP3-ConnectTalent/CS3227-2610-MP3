@@ -169,7 +169,7 @@
 - [ ] **Step 1: Create the eight lifecycle skills.** Define distinct triggers and outputs for change intake, proposal/spec, design/planning, TDD implementation, systematic debugging, independent verification, closeout/logging, and final PR submission. The PR skill checks for completed pre-PR evidence and uses the template but cannot authorize, review, or merge its own PR. Link to canonical workflow files instead of copying templates into the skill folders.
 - [ ] **Step 2: Write each `SKILL.md` with its trigger, inputs, task boundaries, ordered actions, output/handoff, quality check, and stop conditions.** Respect the already approved proposal/plan gates; no skill may authorize a release or claim a human decision.
 - [ ] **Step 3: Use Codex's documented repo-scope path** `.agents/skills/<name>/SKILL.md`, not the user-wide `~/.codex/skills` location. Preserve default implicit invocation and documented restart guidance.
-- [ ] **Step 4: Request the required sandbox write access for `.agents/skills/`** after Tasks 1–5 are complete. If approved, create the seven workflow-skill folders and proceed to Task 7 under the same authorized path. If rejected, record the decision, finish Task 8's unaffected review/log work, and report the exact access block; do not claim the skills are Codex-discoverable.
+- [ ] **Step 4: Request the required sandbox write access for `.agents/skills/`** after Tasks 1–5 are complete. If approved, create all eight workflow-skill folders and proceed to Task 7 under the same authorized path. If rejected, record the decision, finish Task 8's unaffected review/log work, and report the exact access block; do not claim the skills are Codex-discoverable.
 
 ### Task 7: Create Codex skills for the specialist-agent roles
 
