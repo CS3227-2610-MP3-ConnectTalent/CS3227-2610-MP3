@@ -38,10 +38,11 @@ Vitest, Playwright, and Supabase database test runners are configured through `v
 - `src/app`: Next.js pages and global styles
 - `src/components/ui`: generated shadcn/ui components
 - `supabase`: local Supabase config, future migrations, and database tests
-- `workflow`: product specification, agent handoff process, and review evidence
+- [workflow](workflow/README.md): canonical capability specs, process policy, packet templates, active changes, archive, evidence records, and skill catalog
+- `.agents/skills/<name>/SKILL.md`: planned repository-scoped Codex stage/specialist instructions; see the [catalog](workflow/skills/README.md) and [Developer Guide](docs/DeveloperGuide.md#spec-driven-and-agent-workflow)
 - `docs`: current user/developer guides, reflections, and the GitHub Pages website
-- `logs`: verified summaries of development interactions
-- `.github/workflows`: CI and GitHub Pages publication workflows
+- [logs](logs/README.md): dated development-session summaries, policy and template; historical summaries retain their stated team-verification limits
+- `.github`: issue intake forms, PR evidence template, CI and GitHub Pages publication workflows
 
 ## Deployment plan
 

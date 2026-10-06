@@ -21,6 +21,7 @@ Expand with test-first, documentation, security, migration, deployment or rollba
 
 - [ ] <task ID> — Independent reviewer <name/tool> checks the final diff, acceptance cases and risks; records independence, findings and their resolution. Depends on: <implementation IDs>. Evidence: <review artifact and commit range>.
 - [ ] <task ID> — Human owner <name> records acceptance or changes requested with date and limitations. Evidence: <actual decision in record.md>.
+- [ ] <task ID> — <owner> syncs accepted deltas to canonical specs before archive, verifies IDs/version/navigation, then preserves the entire packet under workflow/archive/<change-ID>/. Evidence: <sync commit, archive path, checks; docs-only: explicit no product delta>.
 - [ ] <task ID> — <owner> updates applicable guides/reflections and lists every session summary in record.md. Evidence: <paths and checks>.
 - [ ] <task ID> — <owner> completes pre-PR closeout: exact commands/outcomes, unresolved matters, session coverage and issue links. Evidence: <record.md and dated logs>.
 - [ ] <task ID> — <authorized contributor> opens the issue-linked PR as the last contributor action. Evidence: <PR URL and Closes #N; keep pending until created>.
@@ -28,4 +29,3 @@ Expand with test-first, documentation, security, migration, deployment or rollba
 ## Post-submission (separate decisions)
 
 - [ ] <task ID> — <human owner> records merge/release decision and actual verification as applicable. Evidence: <decision/commit/release or N/A reason>.
-- [ ] <task ID> — <owner> syncs accepted deltas to canonical specs before archive, verifies IDs/version/navigation, then preserves the entire packet under workflow/archive/<change-ID>/. Evidence: <sync commit, archive path, checks; docs-only: explicit no product delta>.
