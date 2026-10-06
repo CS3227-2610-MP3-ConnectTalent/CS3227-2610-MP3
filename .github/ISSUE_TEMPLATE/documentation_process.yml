@@ -1,0 +1,49 @@
+name: Documentation or process
+description: Propose a documentation or workflow change.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form records intake, not approval to implement. Human scope/design/plan approval is a later gate. Triage assigns configured labels and ownership. Do not include credentials or private applicant data.
+  - type: textarea
+    id: target
+    attributes:
+      label: Target docs or process
+      description: Identify the current files or workflow stage.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change
+      description: Describe the bounded change and exclusions.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Explain the problem and desired outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Affected artifacts
+      description: List docs, templates, skills, records and requirement IDs if relevant; state no product delta when applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Specify content, schema, link or other checks.
+    validations:
+      required: true
+  - type: textarea
+    id: owner
+    attributes:
+      label: Student owner
+      description: Name the proposed owner or state unassigned for triage.
+    validations:
+      required: true
