@@ -6,6 +6,8 @@ Closes #<!-- resolved issue number; repeat Closes #N for each resolved issue -->
 - Feature record:
 - Dated session summary links (complete before PR opening):
 
+<!-- Create each summary from logs/SessionSummaryTemplate.md as logs/YYYY-MM-DD-topic.md; use a distinct topic/suffix for separate sessions on one date. Link every contributing summary here and from the feature record before opening the PR. -->
+
 ## Summary and scope
 
 <!-- Describe the problem/result, goals/non-goals, components and requirement IDs. For process-only work explain no product delta. -->

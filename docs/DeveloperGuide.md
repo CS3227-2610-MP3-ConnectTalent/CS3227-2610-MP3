@@ -51,7 +51,7 @@ Paths in this map are relative to the repository root. Linked files are current 
 | [workflow/design/2026-10-06-sdd-multi-agent-workflow.md](../workflow/design/2026-10-06-sdd-multi-agent-workflow.md) | Approved setup design: rationale, alternatives, layout and process boundaries. |
 | [workflow/plans/2026-10-06-sdd-multi-agent-workflow.md](../workflow/plans/2026-10-06-sdd-multi-agent-workflow.md) | Approved setup task sequence and checks; task checkboxes record progress, not student acceptance. Future changes place their plan inside the packet. |
 | [workflow/skills/README.md](../workflow/skills/README.md) | Catalog of eight stage skills and six specialist skills, invocation and evidence boundaries. |
-| `.agents/skills/<name>/SKILL.md` | Planned Codex-discovered instruction manifests described below. The catalog is navigation; manifest creation and discovery checks are later setup tasks. |
+| `.agents/skills/<name>/SKILL.md` | Fourteen present instruction manifests at the exact paths below. Static checks cover their placement/names/local references; live Codex discovery, selection and restart were not tested. |
 | [logs/README.md](../logs/README.md) | Session coverage, privacy, preservation, truthful results and pre-PR timing policy. |
 | [logs/SessionSummaryTemplate.md](../logs/SessionSummaryTemplate.md) | Copy to `logs/YYYY-MM-DD-topic.md` for each substantive session; link all contributing summaries from the record and PR. |
 
@@ -91,9 +91,9 @@ A bug repair restoring an existing contract cites its current IDs; a change to e
 
 Shared project instructions belong at repository-root `.agents/skills/<name>/SKILL.md`, with matching folder/frontmatter `name` and a concise trigger `description`. Codex scans `.agents/skills` from its working directory up to the repository root. CLI/IDE users can invoke `$mp3-change-intake`, substitute any catalog name after `$`, or choose `/skills`; Codex may also select a skill whose description matches the request. It reads the full manifest when selected. Codex detects changes automatically; restart it if a new skill does not appear. These discovery and invocation details are documented in the [official OpenAI Codex skills guide](https://developers.openai.com/codex/skills/).
 
-The paths below are **planned** until setup Tasks 6–7 create them; Task 8 checks manifests and final paths. They are shown as code rather than links to files that do not yet exist. The [catalog](../workflow/skills/README.md) is the current source for their intended scopes.
+All fourteen manifests below are present, created by setup Tasks 6–7. The [catalog](../workflow/skills/README.md) describes their scopes. Bounded PowerShell checks confirmed matching folder/frontmatter names, two-field frontmatter, only `SKILL.md` per folder and 76 existing local Markdown targets across the fourteen manifests. The bundled validator started but failed before validation with `ModuleNotFoundError: No module named 'yaml'`; no package was installed. These checks are not a general YAML parse. Live Codex discovery, selection, restart and behavioral skill scenarios were not tested. See the [setup record](../workflow/records/SDD-Multi-Agent-Workflow.md) for actual evidence and pending review/acceptance.
 
-| Stage skill | Planned manifest path | Apply it to |
+| Stage skill | Present manifest path | Apply it to |
 | --- | --- | --- |
 | `mp3-change-intake` | `.agents/skills/mp3-change-intake/SKILL.md` | Issue creation/triage, risk classification and linked packet setup. |
 | `mp3-proposal-and-spec` | `.agents/skills/mp3-proposal-and-spec/SKILL.md` | Bounded proposal, testable acceptance criteria and capability deltas. |
@@ -106,7 +106,7 @@ The paths below are **planned** until setup Tasks 6–7 create them; Task 8 chec
 
 Stage instructions define the process step; specialist instructions define the bounded responsibility within it. Select the role relevant to the task and supply only the context needed for that assignment.
 
-| Specialist skill / planned manifest path | Assignment and returned handoff |
+| Specialist skill / present manifest path | Assignment and returned handoff |
 | --- | --- |
 | `mp3-product-analyst` — `.agents/skills/mp3-product-analyst/SKILL.md` | Clarify user/problem, Applicant/HR boundaries, IDs and scenarios; return unresolved product questions to the student owner. |
 | `mp3-solution-architect` — `.agents/skills/mp3-solution-architect/SKILL.md` | Compare designs and trace interfaces, access/data flow, failure, migration and rollback; return decisions needing approval. |
@@ -167,7 +167,7 @@ Preserve dated historical wording, including old file paths that described the r
 
 The [Browse Job Listings record](../workflow/records/BrowseJobListings.md) still reports implementation/automated checks complete, independent reviewer findings and human decision pending, and no deployment. It retains its historical Applicant owner, Paul Cheng; the [product overview](../workflow/specs/product-overview.md#unresolved-ownership-and-implementation-evidence) still requires the team to confirm names and Applicant/HR ownership rather than inferring team-wide assignments from that one record. The [historical browsing summary](../logs/2026-10-05-browse-job-listings.md) and other dated logs retain their stated verification limits; their existence does not establish transcript completeness or student verification.
 
-The team must supply actual role assignments/contributions, verify historical summaries, complete pending independent review and student acceptance, and provide release evidence. The current [workflow setup record](../workflow/records/SDD-Multi-Agent-Workflow.md) has approved design/plan while final acceptance and closeout remain pending. Creating specs, templates or skills completes no product release acceptance item and claims no additional agent run.
+The team must supply actual role assignments/contributions, verify historical summaries, complete pending independent review and student acceptance, and provide release evidence. The [workflow setup record](../workflow/records/SDD-Multi-Agent-Workflow.md) records Tasks 1–7 and their separate reviews; its [dated closeout summary](../logs/2026-10-06-sdd-agentic-workflow.md) covers the available setup interactions. Task 8 separate review, the complete-branch independent review and final student acceptance remain pending. Creating specs, templates or skills completes no product release acceptance item and claims no additional agent run.
 
 ## Deployment and submission tasks
 

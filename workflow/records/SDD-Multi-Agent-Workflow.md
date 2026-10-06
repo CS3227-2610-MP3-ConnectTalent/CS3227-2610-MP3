@@ -1,79 +1,108 @@
 # Feature record: SDD and Multi-Agent Workflow setup
 
-Status: in progress — approved design and implementation plan; process/documentation implementation and independent reviews progressing; final human acceptance pending.
+Status: Tasks 1–7 implemented, committed and separately reviewed; Task 8 closeout evidence prepared for its separate review. Complete-branch independent review and final student acceptance remain pending.
 
-Owner: repository workflow setup; student accountability/role assignments remain to be confirmed by the team.
+Owner: repository workflow setup; student names/accountability/Applicant and HR role assignments remain to be confirmed by the team.
 
 Spec version: [ProductSpec v0.6](../ProductSpec.md), 5 October 2026; documentation reorganization on 6 October 2026 retains product behavior.
 Date: 2026-10-06
 
 ## Metadata and artifact links
 
-- Change/classification: `2026-10-06-sdd-multi-agent-workflow`; documentation/process setup only.
-- Issues: none created for this setup, per the approved plan's exception. Future contributor changes begin with GitHub issue intake.
-- Branch: `chore/setup-sdd`, current checkout; no worktree. Incremental Conventional Commits; final commit range pending closeout.
-- PR: none created; this setup does not authorize push or PR creation.
-- Proposal/design: [approved workflow design](../design/2026-10-06-sdd-multi-agent-workflow.md), covering intent, alternatives, boundaries and decisions.
-- Plan/tasks: [approved implementation plan and checkbox tasks](../plans/2026-10-06-sdd-multi-agent-workflow.md).
-- Deltas: N/A. This setup changes development process/documentation, not product behavior, and has no product capability delta.
-- Canonical baseline: [spec conventions and v0.6 source trace](../specs/README.md).
-- Archive path: pending; this lightweight record remains under records/ while setup is active.
+- Classification: `2026-10-06-sdd-multi-agent-workflow`; documentation/process setup only, no product delta.
+- Issues: none created for this setup under its approved bounded exception. Future contributor changes begin with issue intake.
+- Branch: `chore/setup-sdd`, existing checkout; no worktree. User requested incremental Conventional Commits.
+- Git baseline: `ae62fe1061567933fc20d558d4cbc381bee443b4`. Task 8 began at `5bb5be4` with a clean worktree. The commit containing this closeout revision is the Task 8 handoff revision; its separate review is pending here.
+- PR/push/merge/release/deployment: none performed for this setup. Templates do not authorize external submission.
+- Proposal/design: [approved design](../design/2026-10-06-sdd-multi-agent-workflow.md).
+- Plan/tasks: [approved implementation plan](../plans/2026-10-06-sdd-multi-agent-workflow.md). Task progress is distinct from student acceptance.
+- Deltas/canonical behavior sync: N/A; this setup preserves v0.6 and changes process/documentation only.
+- Archive: no accepted product packet to sync/archive. This lightweight setup record remains under `records/`; no final acceptance or archive decision is inferred.
+- Session evidence: [6 October setup summary](../../logs/2026-10-06-sdd-agentic-workflow.md), using [SessionSummaryTemplate.md](../../logs/SessionSummaryTemplate.md).
 
 ## Approval checklist
 
-- [x] User approved design and implementation plan, including sequential specialist execution in the current checkout; source: linked design/plan and current session instructions.
-- [x] Setup exception to live issue/PR creation recorded in the plan.
-- [ ] All planned workflow documentation/skills implemented and checked; still progressing.
-- [ ] Independent review of the complete setup and findings disposition recorded.
-- [ ] Final human acceptance/student team verification recorded.
-- [ ] Applicable guide/reflection updates and every session summary indexed at closeout.
-- Canonical behavior sync: N/A, no product delta; preserve v0.6 and verify source trace as documentation evidence.
+- [x] User approved design and implementation plan on 2026-10-06, including sequential specialist execution; source: current session instructions summarized in the dated log and linked plan/design.
+- [x] Current branch/no-worktree and incremental Conventional Commit constraints followed.
+- [x] Setup exception to live issue/PR creation recorded.
+- [x] Tasks 1–7 implemented, committed and separately reviewed as recorded below.
+- [x] Present inventory and Task 8 static evidence reconciled; validator/live discovery limitations retained.
+- [x] Applicable guide/navigation/PR-template updates and current dated summary prepared; existing dated logs preserved.
+- [ ] Task 8 separate review and findings disposition recorded.
+- [ ] Independent review of the complete branch/setup and findings disposition recorded.
+- [ ] Final student acceptance/team verification recorded.
+- Canonical sync: N/A, no product delta. Spec preservation checks are documentation evidence, not product acceptance.
 
-## Requirement and acceptance criteria
+## Requirement and acceptance evidence
 
-Process acceptance IDs below identify this setup's evidence needs; they are not product capability IDs or passed product release criteria.
+These process IDs describe setup evidence, not product capability IDs or passed release criteria.
 
-| Exact acceptance ID | Approved design/plan requirement | Expected evidence | Current scope/status |
-| --- | --- | --- | --- |
-| SDD-SETUP-AC-01 | Modular canonical specs preserve v0.6 behavior and stable IDs | Source-to-destination trace and independent source review | Task 1 complete and independently reviewed; no runtime/release acceptance inferred |
-| SDD-SETUP-AC-02 | Repeatable packets, actionable templates and sync-before-archive rules | Template/content/link checks and legacy evidence comparison | Task 2 underway; commands and review evidence to be finalized at closeout |
-| SDD-SETUP-AC-03 | Issue-first, PR-last process with explicit human gates | Issue/PR forms and consistent workflow policy | Later plan tasks pending |
-| SDD-SETUP-AC-04 | Honest dated logs and linked session evidence | Logging rules and current session summary with coverage limits | Pending closeout; historical logs preserved |
-| SDD-SETUP-AC-05 | Discoverable project-owned skills and complete developer navigation | Skill manifest validation, catalog and link checks | Later plan tasks pending |
+| Exact acceptance ID | Approved requirement | Actual evidence/status |
+| --- | --- | --- |
+| SDD-SETUP-AC-01 | Modular specs preserve v0.6 behavior/stable IDs | Task 1 commit/review; nine modules, 30 unique IDs and nine original release statements retained. Controller comparison matched all nine exactly after trimming; Task 8 rechecked inventory/source trace. No runtime acceptance inferred. |
+| SDD-SETUP-AC-02 | Actionable packets/templates; sync before archive | Task 2 commit/review; seven templates, directory rules and legacy record preservation. Task 5 corrected sync/archive to precede summary/PR. |
+| SDD-SETUP-AC-03 | Issue-first, PR-last process with human gates | Task 3 forms/process/catalog/PR template and Task 5 guide, separately reviewed. No live issue/PR or GitHub UI rendering exercised. |
+| SDD-SETUP-AC-04 | Honest dated logs and linked evidence | Task 4 policy/template; Task 8 summary covers available setup interactions. Six prior dated summaries unchanged; historical coverage/team verification remain limited. |
+| SDD-SETUP-AC-05 | Repository skill manifests and navigation | Tasks 6–7 created all 14 files; Task 8 reconciles present paths. PowerShell structure/references passed; bundled validation failed before validation; live discovery/selection/restart not tested. |
 
-## Agent handoffs
+## Actual agent handoffs and separate task reviews
 
-| Role and tool | Input/context supplied | Output and assumptions | Human verification |
-| --- | --- | --- | --- |
-| Setup orchestrator (Codex) | User-approved design/plan and current branch constraints | Coordinates sequential bounded tasks and actual independent reviews | Final team acceptance pending |
-| Task 1 specification specialist and independent reviewer | v0.6 baseline, Task 1 brief, canonical split constraints | Canonical modules and source trace; independently reviewed per orchestration handoff | Student acceptance pending |
-| Task 2 change-template specialist (Codex) | Task 2 brief, approved design/plan, Task 1 canonical modules and Browse Job Listings record | Templates, directory rules and evidence record; preserves historical claims | Independent Task 2 review and final human acceptance pending |
-| Later planned roles | Not yet recorded here as completed runs | Pending; fill actual identities/context/evidence at closeout | Pending |
+Tasks 1–7 used sequential bounded implementer and separate reviewer executions through Codex collaboration tools, model `gpt-6.1-sol`. Run IDs were not surfaced. Ignored briefs/reports/ledger support these summaries; durable evidence is the committed files, this record and dated log. Skill creation alone is not an agent execution. Review passes do not grant student acceptance.
 
-Internal task briefs/reports are execution scratch, not durable public logs. Closeout must link durable session summaries and final Git evidence. Role skills alone do not demonstrate separate agent execution.
+| Task / scope | Actual implementer | Actual separate reviewer | Primary commit | Actual verdict and limits |
+| --- | --- | --- | --- | --- |
+| 1: canonical specs | `product_specs` | `task1_review` | `76f3986` | Spec compliance PASS; quality PASS; no findings. v0.6 source, 30 IDs, nine acceptance items and relative links reviewed. Static evidence only. |
+| 2: templates/records | `change_templates` | `task2_review` | `d2f0926` | Spec compliance PASS; quality PASS; no findings. Legacy record content/status preserved except relative ProductSpec link; link recheck deferred to integration. |
+| 3: intake/process/catalog | `workflow_policy` | `task3_review` | `991e28c` | Spec compliance PASS; quality PASS; no actionable findings. Packaged static review; parser/GitHub UI not run; 36 link results remain implementer evidence. |
+| 4: log policy/template | `session_log_policy` | `task4_review` | `37af06c` | PASS; no blocking/nonblocking defects. Package confirmed policy and historical files absent from diff; six hashes/five links remain implementer evidence. Summary deferred to Task 8. |
+| 5: guide/navigation | `guide_navigation` | `task5_review` | `e8fbe9f` | PASS; no actionable findings. Separate targeted policy comparison, 56 links/three anchors checked; Git/whitespace not independently rerun. Includes TasksTemplate ordering repair. |
+| 6: eight stages | `workflow_stage_skills` | `task6_review` | `c5a86c8` | PASS; no blocking/material usability findings. Static package/frontmatter/content review; target existence remained implementer evidence. Python launch failed; no live discovery/scenarios. |
+| 7: six specialists | `specialist_role_skills` | `task7_review` | `a06b344` | PASS; no blocking content findings. Static package contract review; inventory/38 links/whitespace remained implementer evidence. No live discovery/scenarios/general parser. |
+| 8: integrated closeout | `workflow_closeout` (`gpt-6.1-sol`, run ID unavailable) | Pending separate execution | Commit containing this revision | Documentation checks and implementer self-review only at creation. Task 8/full-branch independent reviews and student acceptance pending. |
 
-## Implementation and tests
+## Implementation inventory
 
-Changed files: Task 1 `workflow/ProductSpec.md` and `workflow/specs/`; Task 2 `workflow/templates/`, directory READMEs under `workflow/changes/`, `workflow/archive/`, `workflow/records/`, and the moved Browse Job Listings record. Remaining planned changes are pending and must be recorded from the actual final diff.
+Exact module/manifest paths and responsibilities are also mapped in the [Developer Guide](../../docs/DeveloperGuide.md) and [catalog](../skills/README.md).
 
-Commands and results: final exact document/link/manifest commands, outcomes and commit range pending closeout. This record does not assert checks that have not been recorded here. Task 1 source review is specification evidence; no app test suite is required for this documentation-only setup.
+- Entry/index: `workflow/ProductSpec.md`, `workflow/specs/README.md`; nine modules under `workflow/specs/`: `product-overview.md`, `accounts-and-roles.md`, `public-job-listings.md`, `job-management.md`, `applications-and-review.md`, `applicant-ai-draft.md`, `hr-ai-summary.md`, `security-and-privacy.md`, `deployment-and-operations.md`.
+- Seven files under `workflow/templates/`: `ProposalTemplate.md`, `DesignTemplate.md`, `SpecDeltaTemplate.md`, `ImplementationPlanTemplate.md`, `TasksTemplate.md`, `FeatureRecordTemplate.md`, `AgentHandoffTemplate.md`.
+- Policy/navigation: `workflow/README.md`, `workflow/AgentProcess.md`, `workflow/skills/README.md`, `workflow/changes/README.md`, `workflow/archive/README.md`, `workflow/records/README.md`.
+- Evidence/setup: `workflow/records/BrowseJobListings.md`, this record, `workflow/design/2026-10-06-sdd-multi-agent-workflow.md`, `workflow/plans/2026-10-06-sdd-multi-agent-workflow.md`. Browsing retains review/human-decision pending and no deployment; historical checks were not rerun.
+- GitHub: `.github/ISSUE_TEMPLATE/config.yml`, `.github/ISSUE_TEMPLATE/feature_request.yml`, `.github/ISSUE_TEMPLATE/bug_report.yml`, `.github/ISSUE_TEMPLATE/documentation_process.yml`, `.github/pull_request_template.md`. Label metadata omitted because actual repository labels were not established.
+- Eight stages at `.agents/skills/<name>/SKILL.md`: `mp3-change-intake`, `mp3-proposal-and-spec`, `mp3-design-and-planning`, `mp3-tdd-implementation`, `mp3-systematic-debugging`, `mp3-independent-verification`, `mp3-closeout-and-logging`, `mp3-pr-submission`.
+- Six specialists at `.agents/skills/<name>/SKILL.md`: `mp3-product-analyst`, `mp3-solution-architect`, `mp3-implementer`, `mp3-test-engineer`, `mp3-security-privacy-reviewer`, `mp3-integration-evidence-lead`. Each folder contains only `SKILL.md`.
+- Guides/logs: root `README.md`, `docs/DeveloperGuide.md`, `logs/README.md`, `logs/SessionSummaryTemplate.md`, `logs/2026-10-06-sdd-agentic-workflow.md`; six earlier dated summaries unchanged.
 
-Security/adversarial cases and results: product security testing N/A because no implementation is changed. Process review must confirm privacy-safe logs, accurate approvals, explicit role boundaries and preservation of pending reviews; final evidence pending.
+No product source, tests, Supabase migration, dependency or deployment code changed in this setup range. No toolkit/plugin/package was installed. Selected OpenSpec/Superpowers ideas are attributed through primary links in guide/design; this is a project-owned Markdown workflow.
 
-Known limitations: workflow instructions/checklists do not prove enforcement, product correctness, deployment or student acceptance. Student ownership and historical-summary team verification remain unresolved. This setup does not complete any product release acceptance criterion.
+## Checks and material tool outcomes
 
-## Review and decision
+The [dated summary](../../logs/2026-10-06-sdd-agentic-workflow.md) lists checks and chronological commits. Earlier task checks are historical/reported unless identified as rerun.
 
-Reviewer findings and fixes: Task 1 independently reviewed per handoff; full setup review pending. Record actual reviewer identities, independence, commit ranges, findings and fixes in durable closeout evidence before claiming overall independent review complete.
+| Check/action | Actual outcome | Boundary |
+| --- | --- | --- |
+| Task 1 v0.6 comparison and controller release-statement comparison | Nine release statements match after trimming; nine modules/30 unique normative IDs. Role permissions/non-goals trace retained. | Static preservation, no release criteria passed. |
+| Controller full-range `git diff --check ae62fe1061567933fc20d558d4cbc381bee443b4..HEAD` before Task 8 | Exit 0, no errors; clean worktree at `5bb5be4`. | Tracked whitespace/scope only; Task 8 performs fresh worktree/staged/range checks. |
+| Bundled `skill-creator/scripts/quick_validate.py`, reviewed elevated `python -B` launch | Failed on first folder before validation: `ModuleNotFoundError: No module named 'yaml'`. Earlier launch failed with `uv trampoline` permission denied. | No general-validator pass or PyYAML installation; remaining folders not validated by this tool. |
+| Controller bounded PowerShell fallback, repeated in Task 8 | All 14 matching folder/name/two-field manifests; only `SKILL.md` per folder; 76 existing local Markdown targets. | Structure/path checks, not general YAML or live selection. |
+| Task 8 docs/navigation/scope/preservation | Present inventories/concrete local links checked; six prior dated logs compared to baseline unchanged; whitespace/staged scope checked. | Implementer checks/self-review; separate review pending. Commands/counts in dated log/handoff. |
+| Product application suites/browser/database/RLS/AI/runtime/production/remote CI | Not run; application suites N/A for documentation-only scope. | No product correctness, deployment, CI or release claim. |
+| Live Codex discovery/selection/restart/behavioral scenarios; GitHub UI | Not run. | File placement/static schema is not live integration evidence. |
 
-Human decision and date: design and implementation plan approved on 2026-10-06; final setup acceptance pending. Product verification and student sign-off have not been completed by this setup.
+Reviewed escalations permitted bounded `.agents` writes and Git staging/commits after default access denied `.git/index.lock`; no automatic-review rejection or new user approval was requested. The `sdd-workspace` helper failed under WSL/Git Bash path translation; the ignored plan workspace was created with PowerShell. These were environment outcomes, not product changes.
 
-Guide/reflection/log updates: guide/navigation and current setup session summary are assigned later in the implementation plan. Historical logs unchanged; authorship boundaries and existing summary verification status retained.
+## Review, decision and remaining work
 
-## Session evidence index
+Tasks 1–7 have the separate verdicts above. Task 5 sync/archive ordering repair and the Task 6 seven/eight count correction are recorded in plan/history commits. No blocking finding remains from those returned reviews. This Task 8 reconciliation is implementer self-review; separate Task 8 and full-setup reviews must assess the final revision and limits.
 
-Current setup session summary: pending the planned logging/closeout task. No complete transcript coverage is claimed. Add a relative link to every actual setup session summary, dates, substantive work/decisions covered, verification status and any missing source evidence before closeout.
+Human decision/source/date: user approved design, plan and branch/commit constraints on 2026-10-06. Final assembled implementation/student verification/acceptance is **pending**; student verifier/date/acceptance source unavailable. Agents cannot grant it. Team names/ownership, historical-summary verification and product/release evidence remain student responsibilities.
 
-## Canonical sync and archive
+Guides/catalog now report present manifests with runtime limits; PR template names `logs/SessionSummaryTemplate.md` and `logs/YYYY-MM-DD-topic.md`. No reflection or prior dated log was edited. The setup summary is not a transcript and does not reconstruct unavailable earlier app-session prompts.
 
-Accepted product delta: none. Canonical behavior sync N/A; Task 1 preserves baseline v0.6 with a documented source trace. Whole setup completion, final evidence and any archival decision remain pending. Accepted future behavior changes require verified canonical spec sync before preserving their complete packet in archive/.
+## Session evidence index and canonical sync/archive
+
+| Summary | Coverage/status |
+| --- | --- |
+| [2026-10-06-sdd-agentic-workflow.md](../../logs/2026-10-06-sdd-agentic-workflow.md) | Available setup requests/decisions, actual Tasks 1–7 executions/reviews/commits, material tools, Task 8 draft/checks and remaining gates. Student verification and Task 8/full-branch separate reviews pending at creation. |
+
+Earlier product work is represented by existing dated summaries under [logs](../../logs/README.md), retaining original coverage/verification limits. Accepted product delta: none; canonical behavior sync N/A. No packet was archived as accepted by this task. Future behavior changes follow acceptance, verified canonical sync, complete archive and pre-PR closeout.

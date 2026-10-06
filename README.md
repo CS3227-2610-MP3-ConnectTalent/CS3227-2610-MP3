@@ -39,7 +39,7 @@ Vitest, Playwright, and Supabase database test runners are configured through `v
 - `src/components/ui`: generated shadcn/ui components
 - `supabase`: local Supabase config, future migrations, and database tests
 - [workflow](workflow/README.md): canonical capability specs, process policy, packet templates, active changes, archive, evidence records, and skill catalog
-- `.agents/skills/<name>/SKILL.md`: planned repository-scoped Codex stage/specialist instructions; see the [catalog](workflow/skills/README.md) and [Developer Guide](docs/DeveloperGuide.md#spec-driven-and-agent-workflow)
+- `.agents/skills/<name>/SKILL.md`: fourteen present repository-scoped Codex instruction manifests (eight stages, six specialists); see the [catalog](workflow/skills/README.md) for exact paths and the [Developer Guide](docs/DeveloperGuide.md#spec-driven-and-agent-workflow). Live Codex discovery, selection and restart were not tested.
 - `docs`: current user/developer guides, reflections, and the GitHub Pages website
 - [logs](logs/README.md): dated development-session summaries, policy and template; historical summaries retain their stated team-verification limits
 - `.github`: issue intake forms, PR evidence template, CI and GitHub Pages publication workflows
