@@ -4,7 +4,7 @@ Status: in progress — implementation and automated checks complete; independen
 
 Owner: Applicant role — Paul Cheng
 
-Spec version: 0.6 ([ProductSpec.md](ProductSpec.md))
+Spec version: 0.6 ([ProductSpec.md](../ProductSpec.md))
 Date: 2026-10-05
 
 ## Requirement and acceptance criteria

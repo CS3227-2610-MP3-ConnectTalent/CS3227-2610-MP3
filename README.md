@@ -35,13 +35,17 @@ Vitest, Playwright, and Supabase database test runners are configured through `v
 
 ## Project layout
 
+- [AGENTS.md](AGENTS.md): concise repository instructions read by Codex and contributors.
+- [CONTRIBUTING.md](CONTRIBUTING.md): setup, engineering practices, issue-first workflow, checks, commits, and PR requirements.
 - `src/app`: Next.js pages and global styles
 - `src/components/ui`: generated shadcn/ui components
 - `supabase`: local Supabase config, future migrations, and database tests
-- `workflow`: product specification, agent handoff process, and review evidence
+- [workflow](workflow/README.md): canonical capability specs, process policy, packet templates, active changes, archive, evidence records, and skill catalog
+- `.codex/agents/<name>.toml`: six project-scoped Codex subagent profiles; see the [agent catalog](workflow/agents/README.md) for role/skill mapping and permission limits. Static validity does not prove runtime Codex discovery.
+- `.agents/skills/<name>/SKILL.md`: fourteen present repository-scoped Codex instruction manifests (eight stages, six specialists); see the [catalog](workflow/skills/README.md) for exact paths and the [Developer Guide](docs/DeveloperGuide.md#spec-driven-and-agent-workflow). Live Codex discovery, selection and restart were not tested.
 - `docs`: current user/developer guides, reflections, and the GitHub Pages website
-- `logs`: verified summaries of development interactions
-- `.github/workflows`: CI and GitHub Pages publication workflows
+- [logs](logs/README.md): dated development-session summaries, policy and template; historical summaries retain their stated team-verification limits
+- `.github`: issue intake forms, PR evidence template, CI and GitHub Pages publication workflows
 
 ## Deployment plan
 
