@@ -1,5 +1,7 @@
 # Active change packets
 
+Current approved change: [2026-10-07 Applicant accounts and applications](2026-10-07-applicant-applications/proposal.md) for [issue #6](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/6). The user approved implementation, required email verification and a 5,000-character cover-letter limit on 2026-10-07; implementation evidence and acceptance remain pending.
+
 Start future contributor changes with a triaged GitHub issue, then create `workflow/changes/<YYYY-MM-DD-short-name>/`. Record all issue numbers/URLs, dependencies, student owner, issue-linked branch and risk classification. Issue creation is intake, not approval to implement product behavior.
 
 Copy and fill the [templates](../templates/ProposalTemplate.md):

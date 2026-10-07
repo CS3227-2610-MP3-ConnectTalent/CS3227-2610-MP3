@@ -21,7 +21,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <Link href="/" className="text-xl font-semibold tracking-tight focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4">
           Careers
         </Link>
-        <span className="text-sm text-muted-foreground">Open opportunities</span>
+        <nav className="flex gap-4 text-sm"><Link href="/applications" className="underline">My applications</Link><Link href="/auth/sign-in" className="underline">Sign in</Link></nav>
       </header>
 
       <section className="mb-12 max-w-3xl space-y-5">

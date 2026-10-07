@@ -8,11 +8,17 @@ The main trust boundary will be applicant-controlled notes and cover letters ent
 
 The first job-browsing slice has no AI call. It still introduces a data boundary: public visitors should read published jobs but never drafts or closed jobs. The implementation uses both a filtered query and PostgreSQL row-level security. Seven local database checks passed for public visibility and write permissions, and three browser flows passed for filtering, details, invalid categories, and direct hidden-job URLs. This is evidence for the local stack; independent review and deployed verification are still pending.
 
+The issue #6 Applicant implementation adds a useful pre-AI boundary: a saved cover letter is private even from HR until submission. The database grants no direct application write access to browser roles; three narrow functions check verified Applicant identity and the selected job's current state. A local pgTAP suite exercised other-user reads, HR draft denial, duplicate submission and edit denial after closure. The first submitted letter is stored separately from later edits so HR can compare versions. This is local authorization evidence, not a prompt-injection test; AI endpoints and independent review are still pending.
+
 ## Spec-driven development
 
 The first spec names both roles, one-application constraint, AI input/output boundaries, and release evidence. This made a course requirement conflict visible: the earlier scaffold assumed direct OpenAI use, while MP3 requires SoCLaaS. We changed the planned provider before implementing AI routes. A future spec revision must fix exact SoCLaaS quotas and model behavior before rate-limit code is written. Acceptance tests should challenge the intent, such as cross-user access and data leakage, rather than merely asserting the shape of a response.
 
 For job browsing, the feature record translated ProductSpec v0.6 into observable cases: published jobs appear, category filtering works, details show the required fields, and direct draft/closed URLs reveal no unpublished content. The first browser run caught a missing semantic heading on job cards; fixing that markup made the browser suite pass. The record keeps independent review and human approval separate from passing automated checks.
+
+For issue #6, the user decided that unfinished letters persist, submitted letters can be edited until job closure, the first submitted version stays available to HR, the limit is 5,000 characters, and signup requires email verification. Those choices were recorded in the proposal and deltas before coding. A focused validation test failed on a placeholder parser and passed after implementation. A separate browser test exposed an environment mismatch: the running Auth container still had confirmation disabled even though the config file was changed. Restarting the preserved local stack made the intended denial observable. The DB test did not have a captured red-first run, which remains a process evidence gap.
+
+After trying the site, the user requested a confirmation-password field and reported no Gmail message. The new browser test first failed because the field was absent, then passed after a server-side match check was added. The configured Supabase URL showed a local stack, so the expected message location was the local mail viewer. The UI and guide now state that directly. This example shows why user testing can reveal both missing input checks and confusing environment expectations even when the original automated flow passes.
 
 On 5 October, we narrowed the product to one company's portal and one published opening. This removes employer onboarding and cross-company permissions from the first release. We also adopted `develop` for integration and `master` for releases. That branch flow records which code is ready for staging or production, while separate Supabase/Vercel projects are still needed to isolate runtime data and secrets.
 
@@ -27,6 +33,8 @@ The first GitHub Pages run failed because the repository had no Pages site. Afte
 ## Basic multi-agent SE
 
 The proposed analyst → implementer → independent reviewer handoff records the spec version, assumptions, changed files, and test evidence. A malicious instruction can enter through repository text, applicant data, or an agent's summary. The human owner must verify source material and review sensitive changes. This process is defined in `../workflow/AgentProcess.md`; actual agent runs, disagreements, and decisions still need to be recorded.
+
+The issue #6 planning and implementation occurred in successive Codex turns, without a separate reviewer. The implementer handoff records exact local checks and open risks, but cannot count as an independent review. A separate reviewer should now challenge the SQL function privileges, RLS and stale-write handling against the approved scenarios; any findings and corrections need their own evidence before the student acceptance gate.
 
 ## Evidence to add before submission
 
