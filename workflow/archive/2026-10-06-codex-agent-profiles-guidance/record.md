@@ -11,7 +11,7 @@ Date: 2026-10-06
 
 - Change ID/classification: `2026-10-06-codex-agent-profiles-guidance`; documentation/process only
 - GitHub issue: [#13 — Add project Codex agents and contributor guidance](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/13); current assignee `Johnwz123`
-- Branch/commits/PR: `chore/setup-sdd`; implementation range `17b73ba..e8c6dc4`; root-guidance commit `cb673ff`, profile commit `9eb1d1b`, navigation commit `e8c6dc4`; archive commit will be recorded in Git history; PR is pending as the final contributor action
+- Branch/commits/PR: `chore/setup-sdd`; implementation range `17b73ba..e8c6dc4`; root-guidance commit `cb673ff`, profile commit `9eb1d1b`, navigation commit `e8c6dc4`, archive commit `bad25c8`; archive commit pushed to `origin/chore/setup-sdd`; PR is pending as the final contributor action
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: None; no product delta
@@ -97,4 +97,4 @@ Guide and navigation updates: `AGENTS.md`, `CONTRIBUTING.md`, Developer Guide, r
 - Sync verification: No product/spec files were changed; independent review confirmed the documentation-only scope. No canonical product spec sync is needed.
 - Archive decision/date/path: Accepted by requester on 2026-10-07 and moved intact to `workflow/archive/2026-10-06-codex-agent-profiles-guidance/`.
 - Navigation repairs after moving: Completed; current links checked after move; the prior dated session summary retains its original historical path as required by archive policy.
-- Outstanding work/limitations: Link the follow-up session summary, push the archived revision, and open the issue-linked PR as the final contributor action; then report its URL. Live Codex profile discovery remains unverified because the network smoke attempt was blocked. Requester name/student role are unavailable in chat; issue #13 is assigned to `Johnwz123`.
+- Outstanding work/limitations: Open the issue-linked PR to `develop` as the final contributor action, then report its URL. The archived revision is pushed at `bad25c8`; the follow-up session summary is linked, and post-archive Markdown link and whitespace checks passed. Live Codex profile discovery remains unverified because the network smoke attempt was blocked. Requester name/student role are unavailable in chat; issue #13 is assigned to `Johnwz123`.
