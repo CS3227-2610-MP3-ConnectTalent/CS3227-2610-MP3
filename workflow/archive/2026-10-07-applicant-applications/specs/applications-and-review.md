@@ -5,7 +5,7 @@
 - Baseline: ProductSpec v0.6 at commit `0200eb9`; [APP-001/APP-002](../../../specs/applications-and-review.md).
 - Proposed baseline: v0.7 **only if** this behavior clarification is approved and later accepted. Until then v0.6 remains canonical.
 - Cross-capability references: [AID-002](../../../specs/applicant-ai-draft.md) owns AI draft/submission separation; the [SEC-001 proposal](security-and-privacy.md) and canonical [SEC-002](../../../specs/security-and-privacy.md) own draft/current/original visibility and database enforcement.
-- Approval: user approved this delta for implementation in the 2026-10-07 chat. It is not canonical until accepted and synced.
+- Approval/disposition: user approved this delta for implementation, then accepted the local flow and instructed canonical sync/archive on 2026-10-07. APP-004 is canonical in v0.7; sync commit remains pending separate Git instruction.
 
 ## ADDED
 
@@ -29,6 +29,6 @@ None.
 
 - [x] User chose saved drafts and edits until job closure on 2026-10-07.
 - [x] User approved the complete delta with design and plan on 2026-10-07.
-- [ ] Independent review checks this clarification against APP-001, AID-002, and HR review needs.
-- [ ] After actual implementation and human acceptance, sync accepted text into the canonical spec, increment baseline as required, and verify IDs/links before archive.
-- Sync commit / decision evidence: **pending**.
+- [x] Independent read-only review checked APP-001, AID-002 and the HR visibility boundary; HR status implementation remains #9.
+- [x] Applicant owner accepted the local flow on 2026-10-07; APP-004 synced into canonical v0.7 and IDs/links checked before archive.
+- Sync commit / decision evidence: **uncommitted closeout; 2026-10-07 user acceptance in this conversation**.

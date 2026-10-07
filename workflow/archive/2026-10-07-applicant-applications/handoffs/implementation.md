@@ -27,3 +27,7 @@
 - Independence: **not yet achieved**. A separate reviewer or student review is required by the process.
 - Findings and resolutions: local Auth container initially allowed unverified sign-in because it still used the old config; data-preserving restart applied the new setting and the full flow passed. Four parallel Playwright workers timed out against the local stack; one worker passed the suite and is now configured. A user follow-up revealed missing password confirmation and confusion about local email delivery; the added browser test failed first, then passed after the server check and mail-viewer guidance. No unresolved code finding is claimed resolved without review.
 - Human decision: implementation approved 2026-10-07; feature acceptance, merge and release pending.
+
+## Later closeout update, 2026-10-07
+
+The original handoff above describes the state at implementation time. The user separately authorized commit `f7ddb94`, then said the local workflow works and instructed acceptance/sync/archive. A separate read-only reviewer assessed that commit and follow-up in [independent-review.md](independent-review.md). The implementer added owner-scoped retry reconciliation, 11 passing unit tests in total, and a three-case Docker concurrency check that observes actual PostgreSQL lock waits; the full local browser suite passed 5/5. These follow-up changes and closeout documents remain uncommitted pending a separate Git instruction. Teammate acceptance of the AI textarea interface is still unrecorded; HR/status and deployed checks remain later slices.

@@ -4,6 +4,7 @@
 - Canonical destination: [accounts-and-roles.md](../../../specs/accounts-and-roles.md), ACC-001.
 - Baseline: ProductSpec v0.6 at `0200eb9`; proposed v0.7 after human acceptance and sync.
 - Decision source: user approved required email verification and a 5,000-character letter limit earlier on 2026-10-07, then explicitly requested password confirmation for signup in a follow-up message. This delta records that correction; it does not claim feature acceptance.
+- Later disposition: Applicant owner accepted the local flow and instructed sync/archive on 2026-10-07. ACC-001 is canonical in v0.7; sync commit is pending separate Git instruction.
 
 ## ADDED
 
@@ -26,5 +27,5 @@ None.
 ## Review and sync
 
 - [x] User explicitly requested password confirmation and had approved email verification in the 2026-10-07 chat.
-- [ ] Independent review and human feature acceptance.
-- [ ] Sync accepted text into canonical ACC-001 with other accepted deltas, then verify IDs and links before archive.
+- [x] Independent read-only review completed; Applicant owner accepted the local flow on 2026-10-07 in this conversation.
+- [x] Accepted text synced into canonical ACC-001 under v0.7 and IDs/links checked before archive. Sync commit pending separate Git instruction.

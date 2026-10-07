@@ -31,7 +31,7 @@ corepack pnpm typecheck
 corepack pnpm build
 ```
 
-Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. The Applicant slice adds input, browser, and database permission tests. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, and `corepack pnpm test:db`. CI runs lint, typecheck, unit tests, and build; database and browser tests are local gates until CI has a Supabase stack.
+Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. The Applicant slice adds input, browser, database permission and concurrency tests. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, `corepack pnpm test:db`, and `corepack pnpm test:race`. The race check needs Docker and this project's local Supabase database container; it inserts and cleans up synthetic fixtures. CI runs lint, typecheck, unit tests, and build; database, race and browser tests are local gates until CI has a Supabase stack.
 
 ## Project layout
 

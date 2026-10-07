@@ -1,6 +1,6 @@
 # Active change packets
 
-Current approved change: [2026-10-07 Applicant accounts and applications](2026-10-07-applicant-applications/proposal.md) for [issue #6](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/6). The user approved implementation, required email verification and a 5,000-character cover-letter limit on 2026-10-07; implementation evidence and acceptance remain pending.
+The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. No active packet is listed here now. PR, merge and release remain pending.
 
 Start future contributor changes with a triaged GitHub issue, then create `workflow/changes/<YYYY-MM-DD-short-name>/`. Record all issue numbers/URLs, dependencies, student owner, issue-linked branch and risk classification. Issue creation is intake, not approval to implement product behavior.
 

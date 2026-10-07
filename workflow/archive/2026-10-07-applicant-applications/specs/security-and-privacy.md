@@ -5,7 +5,7 @@
 - Baseline: ProductSpec v0.6 at commit `0200eb9`; [SEC-001](../../../specs/security-and-privacy.md).
 - Proposed baseline: v0.7 only after human approval, implementation, acceptance and sync.
 - Cross-capability: [APP-004 proposal](applications-and-review.md) defines saved draft and letter revision behavior. SEC-001 remains the sole home for cross-role access.
-- Approval: user approved this delta for implementation in the 2026-10-07 chat; canonical sync remains pending.
+- Approval/disposition: user approved this delta for implementation, then accepted the local flow and instructed canonical sync/archive on 2026-10-07. SEC-001 is synced in v0.7; sync commit remains pending separate Git instruction.
 
 ## ADDED
 
@@ -36,6 +36,6 @@ None.
 ## Review and sync
 
 - [x] User approved this access clarification with the application delta, design and plan on 2026-10-07.
-- [ ] Independent reviewer verifies RLS and function permissions against the final matrix.
-- [ ] Sync accepted text into canonical SEC-001 only after human acceptance; update baseline/version and verify links/IDs before archive.
-- Sync commit / decision evidence: **pending**.
+- [x] Separate reviewer checked RLS, grants, function boundaries and owner reads against the final matrix; no confirmed bypass.
+- [x] Applicant owner accepted the local flow on 2026-10-07; SEC-001 text synced into canonical v0.7 and links/IDs checked before archive.
+- Sync commit / decision evidence: **uncommitted closeout; 2026-10-07 user acceptance in this conversation**.
