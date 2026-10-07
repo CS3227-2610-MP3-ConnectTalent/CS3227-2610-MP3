@@ -202,10 +202,24 @@ Choose a type that describes the change (`feat`, `fix`, `test`, `refactor`, `doc
 Commits do not grant approval. Keep unrelated work out of the staged change and link
 issue numbers in the packet and PR.
 
+### Pull request titles
+
+As a repository policy, use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format for PR titles:
+
+```text
+type[optional scope][!]: description
+```
+
+Examples: `fix(auth): resolve Vercel redirects` and
+`docs(workflow): require Conventional Commit PR titles`. The title summarizes the
+whole PR; individual commit subjects still follow the focused commit guidance above.
+Place `!` before the colon for a breaking change, as in `feat(auth)!: change callback behavior`.
+
 ## Pull request checklist
 
 Before opening a PR:
 
+- Check that the PR title follows `type[optional scope][!]: description`.
 - Confirm every issue is linked and use `Closes #N` for each issue resolved by the PR.
 - Link the approved packet, final record, complete archive path if applicable, and
   every dated session summary.

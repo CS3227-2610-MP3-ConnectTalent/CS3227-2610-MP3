@@ -33,6 +33,8 @@ assumptions in code or prompts.
   it does not prove an agent ran or grant student approval.
 - Keep commits focused and use Conventional Commits, such as
   `feat(jobs): add category filtering` or `docs(workflow): clarify review gates`.
+- Use the Conventional Commits format for PR titles too:
+  `type[optional scope][!]: description` (for example, `fix(auth): resolve Vercel redirects`).
 - Before PR creation, complete independent review, record the separate student
   acceptance decision, sync/archive as applicable, and add a dated summary under
   `logs/`. Open an issue-linked PR using `.github/pull_request_template.md` only after
