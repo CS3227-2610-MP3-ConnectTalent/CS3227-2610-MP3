@@ -1,10 +1,10 @@
 # Product specification
 
-Current baseline: **0.6**, dated **5 October 2026** (job listing detail).
+Current baseline: **0.7**, dated **7 October 2026** (Applicant signup and application lifecycle). The v0.6 job listing detail baseline was dated 5 October 2026.
 
 This product is a careers site for one employer per deployment, with external Applicant and company HR roles. The first release supports multiple job openings and one text-only application per applicant per job. AI drafting and summary features use the course-required SoC LLM and retain human control over submission and hiring status.
 
-The canonical requirements now live in the capability specifications below. This split on 6 October 2026 preserves v0.6 behavior, its nine release acceptance items, role boundaries, and non-goals. This filename remains the entry point for historical references. Specifications describe intended behavior, not evidence that implementation or release gates are complete.
+The canonical requirements now live in the capability specifications below. The split on 6 October 2026 preserved v0.6 behavior, its nine release acceptance items, role boundaries, and non-goals. The accepted 7 October 2026 change adds password confirmation and email verification, persistent private drafts, submitted-letter edits until job closure, and corresponding visibility rules. This filename remains the entry point for historical references. Specifications describe intended behavior, not evidence that implementation or release gates are complete.
 
 | Capability | Canonical specification | IDs |
 | --- | --- | --- |
@@ -18,4 +18,4 @@ The canonical requirements now live in the capability specifications below. This
 | Cross-cutting authorization, privacy and AI safeguards | [Security and privacy](specs/security-and-privacy.md) | SEC |
 | Environments, operations and release evidence | [Deployment and operations](specs/deployment-and-operations.md) | OPS |
 
-See [specification conventions and the v0.6 migration trace](specs/README.md) for ID rules, version policy and source-to-destination coverage. Student ownership assignments and SoC LLM quota thresholds remain unresolved.
+See [specification conventions and the v0.6 migration trace](specs/README.md) for ID rules, version policy and source-to-destination coverage. Applicant process ownership is Paul Cheng; HR process ownership and SoC LLM quota thresholds remain unresolved in this index.
