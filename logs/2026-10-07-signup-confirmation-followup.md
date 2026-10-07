@@ -1,0 +1,7 @@
+# Signup confirmation follow-up — 2026-10-07
+
+The user requested a password-confirmation field for account creation and reported that a verification message did not arrive in Gmail. Codex checked only the nonsecret Supabase URL in `.env.local`; it pointed to the local stack at `127.0.0.1`. Local Supabase uses the mail viewer at `http://127.0.0.1:54324`, so Gmail delivery was not expected. The user was told this during work, and the signup and check-email pages now state it with a link. Production email delivery remains an environment setup task.
+
+A focused Playwright test for mismatched passwords first timed out waiting for the absent Confirm password field. The form now requires it and the signup server action rejects a mismatch before calling Supabase Auth. The active packet records a proposed ACC-001 clarification and the current guides describe the behavior. No database migration was changed in this follow-up.
+
+After the change, the focused browser test passed, lint and typecheck passed, Vitest passed 6/6, the full Playwright suite passed 5/5 with one worker, and the production build passed. The previous 34/34 database result remains historical evidence because no database file changed and the DB suite was not rerun for this follow-up. Independent review, student acceptance, canonical spec sync, commit, push, PR and deployment remain pending. No private addresses, keys or letter content are included here.

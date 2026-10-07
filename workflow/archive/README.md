@@ -2,6 +2,12 @@
 
 Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Archiving preserves evidence; it does not grant implementation, merge, deployment or student acceptance approval.
 
+Archived packets:
+
+| Change | Disposition | Evidence |
+| --- | --- | --- |
+| [2026-10-07 Applicant accounts and applications](2026-10-07-applicant-applications/record.md) | Applicant owner accepted the local flow on 2026-10-07; ACC-001/APP-004/SEC-001 synced to v0.7 before archive. PR, merge and release pending. | [Independent review](2026-10-07-applicant-applications/handoffs/independent-review.md), [session summary](../../logs/2026-10-07-applicant-review-closeout.md) |
+
 ## Accepted change: sync, then archive
 
 1. Record the actual human acceptance decision, reviewer independence/findings, verification scope and outstanding limitations in record.md. Resolve blockers or explicitly record the decision and conditions; do not relabel pending gates as complete.

@@ -28,6 +28,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         <Badge variant="secondary">{categoryLabel(job.category)}</Badge>
         <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">{job.title}</h1>
         <p className="mt-3 text-lg text-muted-foreground">{job.team}</p>
+        <Link href={`/jobs/${job.id}/apply`} className="mt-7 inline-block rounded-lg bg-primary px-5 py-2.5 font-medium text-primary-foreground hover:opacity-90">Apply for this role</Link>
 
         <div className="mt-12 grid gap-10 border-t pt-10 sm:grid-cols-[12rem_1fr]">
           <h2 className="text-lg font-semibold">About the role</h2>

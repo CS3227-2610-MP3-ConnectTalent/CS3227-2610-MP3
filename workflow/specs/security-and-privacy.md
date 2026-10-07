@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v0.6, 5 October 2026. This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v0.7, 7 October 2026 (SEC-001 updated). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
 
 ## SEC-001: Access boundaries
 
@@ -11,14 +11,15 @@ Access MUST follow these boundaries:
 | This company's published jobs, categories and requirements | Read | Read/close |
 | Draft jobs | None | Read/write/publish |
 | Closed jobs | Title of a job on their existing application | Read |
-| Application and cover letter | Own record only | Read for review |
+| Saved draft application and cover letter | Own draft read/write while its job is published; own read after closure | None |
+| Submitted application, original and current cover letter | Own read; current-letter edit while its job is published | Read for review |
 | HR notes | None | Read/write by authorized HR |
 | Role assignment | Cannot set or change | Controlled administration only |
 | Audit events | None | Read as authorized |
 
-Creating jobs, editing drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application or AI draft. Anonymous users MUST NOT access protected records or AI endpoints. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
+Creating jobs, editing job drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT edit another Applicant's draft or submission, change the immutable original submitted letter, change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application or AI draft. Anonymous users MUST NOT access saved drafts, submissions, other protected records or AI endpoints. [APP-004](applications-and-review.md) owns save/submit/edit lifecycle and job-close behavior. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
 
-Scenario: Given anonymous access or an Applicant requesting another applicant's protected record, an HR-only operation, HR notes or an HR summary, when access is checked, then the unauthorized request is denied. Authorized HR can review submitted applications under the table's boundaries.
+Scenario: Given Applicant A's saved draft, when A returns, then A reads it, while HR and Applicant B cannot. Given A's submitted and later edited letter, when authorized HR reviews it, then both original and current text are available. Given anonymous access or an Applicant requesting another applicant's protected record, an HR-only operation, HR notes or an HR summary, when access is checked, then the unauthorized request is denied.
 
 ## SEC-002: Server and database enforcement
 

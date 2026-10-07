@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v0.6, 5 October 2026**. The split dated 6 October 2026 preserves that baseline's behavior; it does not certify implementation or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v0.7, 7 October 2026**. The split dated 6 October 2026 preserved the v0.6 baseline's behavior; the accepted Applicant application change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. Neither version nor the split certifies implementation or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## IDs and normative language
 
@@ -15,6 +15,18 @@ MUST and MUST NOT express required behavior and prohibitions. MAY expresses an o
 Give each rule one canonical home. Cross-cutting authorization, access tables, privacy and AI safeguards belong in [security-and-privacy.md](security-and-privacy.md); capability specs link there. Link using a relative file path and cite the stable ID in the link text or nearby prose. Optional heading anchors must match the target heading. Links and illustrative scenarios do not create another independently editable copy of a rule. Changes affecting several capabilities must identify every affected file and ID.
 
 An approved product behavior change increments the numeric minor baseline (for example, 0.6 to 0.7) and updates the version/date in ProductSpec and affected specs together. Pure wording, link repair or reorganization with no intended behavior change retains the version and records the documentation date separately. Use an approved change delta with ADDED, MODIFIED or REMOVED entries before syncing canonical specs. Modified requirements retain their IDs. Removed requirements record their IDs and retirement rationale in preserved change history; never reuse retired IDs. If a rule moves, retain its ID and record the old/new canonical location rather than silently assigning a replacement ID.
+
+## v0.7 accepted change trace
+
+On 7 October 2026, the Applicant owner accepted the local issue #6 flow. The complete [archived change packet](../archive/2026-10-07-applicant-applications/record.md) records the decision, independent review, verification and remaining release limits. Its accepted deltas were synced before archive:
+
+| Delta | Canonical destination | Change |
+| --- | --- | --- |
+| Modified ACC-001 | [Accounts and roles](accounts-and-roles.md) | Password confirmation and required email verification |
+| Added APP-004 | [Applications and review](applications-and-review.md) | Persistent private draft, immutable first submission and current-letter edits until closure |
+| Modified SEC-001 | [Security and privacy](security-and-privacy.md) | Separate draft/submitted access and original/current text boundaries |
+
+The original v0.6 migration and release trace below remains historical. Local feature acceptance does not complete the nine release acceptance items.
 
 ## v0.6 source-to-destination trace
 
@@ -80,4 +92,4 @@ The statements in this table are the original v0.6 release acceptance items. Eac
 
 ## Unresolved decisions retained
 
-Student names/role ownership and exact SoC LLM limits remain unresolved. Controlled HR administration is required but no mechanism is selected here. The v0.6 source does not specify detailed status values, additional job-state transitions, or a reopening/editing policy beyond its immutable published/closed content rule; this migration does not invent them. Multi-employer hosting remains outside this release and would require a new spec and authorization design.
+This historical v0.6 trace left student names/role ownership and exact SoC LLM limits unresolved. The later issue #6 packet records Paul Cheng as the Applicant process owner; HR ownership and exact SoC LLM limits remain unresolved in this index. Controlled HR administration is required but no mechanism is selected here. The v0.6 source did not specify detailed status values, additional job-state transitions, or a reopening/editing policy beyond its immutable published/closed content rule; the v0.7 Applicant change adds only the accepted letter-edit cutoff. Multi-employer hosting remains outside this release and would require a new spec and authorization design.
