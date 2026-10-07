@@ -10,9 +10,10 @@ the product contracts are the modular specifications indexed at
 
 This is a reusable careers portal with one employer per deployment. Read the product
 overview and the relevant capability requirements before changing behavior. The
-current application implements public job browsing; HR management, authentication,
-applications, and course-required AI features are future slices. Do not describe a
-planned feature as implemented or create requirements solely from a design idea.
+current application implements public job browsing, Applicant authentication, and
+Applicant applications. HR management and course-required AI features are future
+slices. Do not describe a planned feature as implemented or create requirements
+solely from a design idea.
 
 Applicant and HR users have different data and tasks. Keep their pages, navigation,
 actions, and states straightforward and distinct. Do not build a single role-switching
