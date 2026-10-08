@@ -1,6 +1,6 @@
 # Developer Guide
 
-Status: public browsing and issue #6 Applicant work are in `develop`. Issue #9 HR review was implemented, locally tested, independently reviewed and accepted locally with recorded limits on `feat/9-hr-application-review`. No #9 PR, shared database migration or release has occurred.
+Status: public browsing and issue #6 Applicant work are in `develop`. Issues #9 HR review and #20 signup password usability were implemented, locally tested, independently reviewed and accepted locally with recorded limits on `feat/9-hr-application-review`. No #9/#20 PR, shared database migration or release has occurred.
 
 ## Architecture
 
@@ -73,8 +73,8 @@ Paths in this map are relative to the repository root. Linked files are current 
 | [.github/ISSUE_TEMPLATE/documentation_process.yml](../.github/ISSUE_TEMPLATE/documentation_process.yml) | Documentation/process intake: target files/stage, bounded change, rationale, affected artifacts, acceptance checks and owner. |
 | [.github/pull_request_template.md](../.github/pull_request_template.md) | Final contributor submission: issue closure, packet/record/log links, scope/IDs, actual task and agent evidence, checks, approval/acceptance, findings, security, sync, docs, risks and rollback. |
 | [workflow/README.md](../workflow/README.md) | Entry point linking requirements, process, templates, skills, change history and logs. |
-| [workflow/ProductSpec.md](../workflow/ProductSpec.md) | Stable product boundary and index. Baseline v0.8 is dated 8 October 2026; earlier baselines remain historical. A requirement is intended behavior, not an observed pass. |
-| [workflow/specs/README.md](../workflow/specs/README.md) | Stable IDs, normative language, scenario format, version policy, cross-spec rules, v0.6 source migration trace, v0.7/v0.8 accepted-change traces and nine original release acceptance items. |
+| [workflow/ProductSpec.md](../workflow/ProductSpec.md) | Stable product boundary and index. Baseline v0.9 is dated 8 October 2026; earlier baselines remain historical. A requirement is intended behavior, not an observed pass. |
+| [workflow/specs/README.md](../workflow/specs/README.md) | Stable IDs, normative language, scenario format, version policy, cross-spec rules, v0.6 source migration trace, v0.7/v0.8/v0.9 accepted-change traces and nine original release acceptance items. |
 | [workflow/AgentProcess.md](../workflow/AgentProcess.md) | Authoritative lifecycle, accountable roles, approvals, review independence, evidence and branch/release policy. |
 | [workflow/agents/README.md](../workflow/agents/README.md) | Catalog of six project-scoped Codex custom-agent profiles, their matching skills, sandbox defaults and evidence boundaries. |
 | `.codex/agents/<name>.toml` | Six standalone project-scoped Codex custom-agent profiles. The profile name, not the filename, is Codex's identity; validation does not prove local runtime discovery. |
@@ -104,7 +104,7 @@ The nine canonical capability files have distinct responsibilities. Read the pro
 | [security-and-privacy.md / SEC](../workflow/specs/security-and-privacy.md) | Canonical access table, server authorization/RLS, untrusted text, validation, data minimization, limits, safe audit logging and synthetic fixtures. |
 | [deployment-and-operations.md / OPS](../workflow/specs/deployment-and-operations.md) | Separate app/database environments, operational safeguard evidence and consistent release documentation/verification. |
 
-Use stable IDs such as `JOB-001` throughout issues, deltas, acceptance rows, tasks, tests and reviews. Allocate new unused IDs; retain IDs for modified/moved rules and preserve retired IDs in history. `MUST`/`MUST NOT` are required rules; `MAY` is an option. Given/When/Then describes an observable scenario, including denial/failure cases where appropriate. Cross-cutting rules have one canonical home; link to them instead of creating competing copies. Under the [version policy](../workflow/specs/README.md), an accepted behavior change increments the numeric minor baseline and updates ProductSpec and affected module dates together; documentation-only wording or reorganization retains the current baseline (v0.8 after accepted issue #9 sync).
+Use stable IDs such as `JOB-001` throughout issues, deltas, acceptance rows, tasks, tests and reviews. Allocate new unused IDs; retain IDs for modified/moved rules and preserve retired IDs in history. `MUST`/`MUST NOT` are required rules; `MAY` is an option. Given/When/Then describes an observable scenario, including denial/failure cases where appropriate. Cross-cutting rules have one canonical home; link to them instead of creating competing copies. Under the [version policy](../workflow/specs/README.md), an accepted behavior change increments the numeric minor baseline and updates ProductSpec and affected module dates together; documentation-only wording or reorganization retains the current baseline (v0.9 after accepted issue #20 sync).
 
 ### Change packet and templates
 

@@ -1,6 +1,6 @@
 # Proposed ACC-001 delta for #20
 
-Status: proposed; do not sync into canonical specs until a distinct student acceptance decision.
+Status: accepted by Paul Cheng on 2026-10-08; synced to canonical ACC-001 v0.9 before packet archive. This proposed delta is retained as history.
 
 ## MODIFIED ACC-001: Public Applicant signup
 

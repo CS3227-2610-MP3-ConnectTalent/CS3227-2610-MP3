@@ -1,6 +1,6 @@
 # User Guide
 
-Status: job browsing and Applicant applications are implemented; issue #9 HR review was implemented, independently reviewed and accepted locally with recorded limits on `feat/9-hr-application-review`. HR job posting and AI features remain planned. This branch is not a deployed release.
+Status: job browsing and Applicant applications are implemented; issues #9 HR review and #20 signup password usability were independently reviewed and accepted locally with recorded limits on `feat/9-hr-application-review`. HR job posting and AI features remain planned. This branch is not a deployed release.
 
 ## Access
 
@@ -8,7 +8,7 @@ Follow the local Supabase and environment setup in the root `README.md`, then ru
 
 The home page shows published jobs. Use the category links to filter the list, then select a job card to see its title, team, description, and requirements. The local seed has published jobs in Engineering, Human Resources, and Sales, plus a draft Legal job and a closed Other job; the latter two are hidden from public browsing. No public app deployment or test accounts are available yet.
 
-To apply, select a published job and choose **Apply for this role**. Create an Applicant account with email, a password of at least eight characters, and the same password in **Confirm password**. A mismatch is rejected before signup. Open the verification email before signing in. With local Supabase, confirmation messages appear in the [local mail viewer](http://127.0.0.1:54324) and are **not sent to Gmail**. A signed-in Applicant can save one private cover-letter draft per job and return to it later. The **Submit application** button submits explicitly. Cover letters have a 5,000-character limit. A submitted letter can be edited while its job stays published; the original submission remains visible on the application page. When the job closes, the application remains readable and editing stops. **My applications** lists the signed-in Applicant's own drafts and submissions.
+To apply, select a published job and choose **Apply for this role**. Create an Applicant account with email, a password of at least eight characters, and the same password in **Confirm password**. A mismatch is rejected before signup, shows an error and keeps the entered email for correction. The eye controls on signup and sign-in reveal or hide passwords without submitting the form. Open the verification email before signing in. With local Supabase, confirmation messages appear in the [local mail viewer](http://127.0.0.1:54324) and are **not sent to Gmail**. A signed-in Applicant can save one private cover-letter draft per job and return to it later. The **Submit application** button submits explicitly. Cover letters have a 5,000-character limit. A submitted letter can be edited while its job stays published; the original submission remains visible on the application page. When the job closes, the application remains readable and editing stops. **My applications** lists the signed-in Applicant's own drafts and submissions.
 
 The local stack must have `auth.email.enable_confirmations = true` in `supabase/config.toml`; restart Supabase after changing it. No public app deployment or shared peer-test account is available yet.
 

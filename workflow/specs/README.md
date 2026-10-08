@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v0.8, 8 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v0.9, 8 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## IDs and normative language
 
@@ -15,6 +15,16 @@ MUST and MUST NOT express required behavior and prohibitions. MAY expresses an o
 Give each rule one canonical home. Cross-cutting authorization, access tables, privacy and AI safeguards belong in [security-and-privacy.md](security-and-privacy.md); capability specs link there. Link using a relative file path and cite the stable ID in the link text or nearby prose. Optional heading anchors must match the target heading. Links and illustrative scenarios do not create another independently editable copy of a rule. Changes affecting several capabilities must identify every affected file and ID.
 
 An approved product behavior change increments the numeric minor baseline (for example, 0.6 to 0.7) and updates the version/date in ProductSpec and affected specs together. Pure wording, link repair or reorganization with no intended behavior change retains the version and records the documentation date separately. Use an approved change delta with ADDED, MODIFIED or REMOVED entries before syncing canonical specs. Modified requirements retain their IDs. Removed requirements record their IDs and retirement rationale in preserved change history; never reuse retired IDs. If a rule moves, retain its ID and record the old/new canonical location rather than silently assigning a replacement ID.
+
+## v0.9 accepted change trace
+
+On 8 October 2026, Paul Cheng accepted the local issue #20 signup password usability fix in this conversation. The [archived change packet](../archive/2026-10-08-signup-password-ux/record.md) records the retrospective issue/packet sequence, independent review, local checks and distinct acceptance. Its accepted delta was synced before archive:
+
+| Delta | Canonical destination | Change |
+| --- | --- | --- |
+| Modified ACC-001 | [Accounts and roles](accounts-and-roles.md) | Retain signup email on mismatch with or without JavaScript; accessible non-submitting password visibility controls; no password in server action error state |
+
+The missing pre-implementation packet approval cannot be recreated. This local acceptance does not certify PR, merge, hosted validation or release.
 
 ## v0.8 accepted change trace
 

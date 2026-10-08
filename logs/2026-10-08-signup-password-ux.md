@@ -5,7 +5,7 @@
 - Date/time zone: 8 October 2026, Asia/Singapore; exact start time unavailable.
 - Student owner: Paul Cheng, Applicant workflow. Primary Codex execution implemented the local change; separate final-diff review was requested later in this session.
 - Branch: `feat/9-hr-application-review` from `develop` commit `551da67`. Issue creation, commit, PR, merge and deployment are pending at the time of this summary.
-- Issue: [#20](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/20); [packet and record](../workflow/changes/2026-10-08-signup-password-ux/record.md). The issue was created after implementation because sandboxed GitHub CLI authentication appeared invalid; an outside-sandbox check worked. This request came after #9 local acceptance and did not follow the repository's issue-first ordering; the gap remains visible in the issue and packet.
+- Issue: [#20](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/20); [packet and record](../workflow/archive/2026-10-08-signup-password-ux/record.md) (link corrected after archive; the following statements preserve this session's earlier state). The issue was created after implementation because sandboxed GitHub CLI authentication appeared invalid; an outside-sandbox check worked. This request came after #9 local acceptance and did not follow the repository's issue-first ordering; the gap remains visible in the issue and packet.
 - Student verification of this generated summary: pending.
 
 ## Chronology and decisions
