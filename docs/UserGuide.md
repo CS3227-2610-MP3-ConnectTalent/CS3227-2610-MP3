@@ -1,6 +1,6 @@
 # User Guide
 
-Status: job browsing, Applicant applications, HR review and signup password usability are merged into `develop` through PR #22. HR job posting and AI features remain planned. Shared Development Supabase migration and hosted validation are still pending; this is not a deployed release guide.
+Status: job browsing, Applicant applications, HR review and signup password usability are merged into `develop`. Password recovery is locally accepted after independent review on `feat/27-password-reset`; hosted validation remains pending. HR job posting and AI features remain planned. This branch is not a deployed release.
 
 ## Access
 
@@ -12,6 +12,10 @@ To apply, select a published job and choose **Apply for this role**. Create an A
 
 The local stack must have `auth.email.enable_confirmations = true` in `supabase/config.toml`; restart Supabase after changing it. No public app deployment or shared peer-test account is available yet.
 
+## Forgot password
+
+From **Sign in**, choose **Forgot password?** and enter your account email. The page gives the same acknowledgement whether an account exists or not. In local development, open the reset message at <http://127.0.0.1:54324> and follow its link in the same browser. Enter and confirm a new password of 8 to 72 characters. After the update, sign in with the new password. An invalid or expired link sends you back to request another. This works for Applicant and HR accounts and does not change their roles. Hosted recovery depends on configured email delivery and the recovery callback URL in Supabase Auth.
+
 ## HR review in `develop`
 
 After an administrator promotes a verified, dedicated account to HR, sign in through the same **Sign in** page. The HR account opens **Application review** at `/hr/applications`. The list contains submitted applications only. Open an application to compare original and current cover letters, read private HR notes and status history, add a note of at most 2,000 characters, or change status through the separate **Update status** action. Status starts at **Submitted**; HR may select **In review**, **Shortlisted** or **Rejected** and change among those three later. A stale status form asks you to reload. Submitted applications remain reviewable after job closure. Applicants see their own current status under **My applications**, without HR notes or status history.
@@ -21,6 +25,6 @@ Public signup always creates an Applicant. There is no HR signup or role-switchi
 ## Planned roles
 
 - **Applicant:** browse published openings, verify an account, save a private text draft, submit and view an application, and edit the letter until the job closes. SoCLaaS cover-letter drafting is planned.
-- **HR:** review submitted applications, write private notes and change status in `develop`. Job listing management and a SoCLaaS summary remain planned.
+- **HR:** review submitted applications, write private notes and change status. Job listing management and a SoCLaaS summary remain planned.
 
 Both AI features are advisory. Applicants submit their own final text; HR makes every hiring decision.

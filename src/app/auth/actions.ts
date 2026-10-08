@@ -47,3 +47,52 @@ export async function signOut() {
   await client.auth.signOut();
   redirect("/");
 }
+
+export async function requestPasswordReset(formData: FormData) {
+  const parsed = z.email().max(254).safeParse(formData.get("email"));
+  if (!parsed.success) redirect("/auth/forgot-password?error=invalid");
+
+  const client = await createSupabaseServerClient();
+  // Both a provider error and an unknown address get the same neutral retry page.
+  try {
+    await client.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: new URL("/auth/callback?flow=recovery", getAppSiteOrigin()).toString(),
+    });
+  } catch {
+    // A transport failure must not expose account existence or turn into a server error.
+  }
+  redirect("/auth/reset-requested");
+}
+
+export type ResetPasswordState = { error: string };
+
+export async function updatePassword(_previousState: ResetPasswordState, formData: FormData): Promise<ResetPasswordState> {
+  const client = await createSupabaseServerClient();
+  const { data: { user }, error: userError } = await client.auth.getUser();
+  if (userError || !user?.email_confirmed_at) redirect("/auth/forgot-password?error=link");
+
+  const parsed = z.string().min(8).max(72).safeParse(formData.get("password"));
+  if (!parsed.success) return { error: "Use a password with 8 to 72 characters." };
+  if (parsed.data !== formData.get("confirmPassword")) {
+    return { error: "Passwords do not match. Please try again." };
+  }
+
+  try {
+    const { error } = await client.auth.updateUser({ password: parsed.data });
+    if (error) return { error: "Could not update your password. Please try again or request a new link." };
+  } catch {
+    return { error: "Could not update your password. Please try again or request a new link." };
+  }
+
+  let signOutFailed = false;
+  try {
+    const { error } = await client.auth.signOut();
+    signOutFailed = Boolean(error);
+  } catch {
+    signOutFailed = true;
+  }
+  if (signOutFailed) {
+    return { error: "Password updated, but automatic sign-out failed. Close this browser before using a shared device." };
+  }
+  redirect("/auth/sign-in?reset=success");
+}
