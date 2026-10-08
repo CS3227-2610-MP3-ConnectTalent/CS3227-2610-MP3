@@ -8,7 +8,7 @@
 - Evidence available and missing coverage: Local Git state and history, GitHub PR details for #26, #19 and #22, repository records and visible user request. Exact interaction timestamps and a student verification decision are unavailable.
 - GitHub issues: [#16](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/16), [#23](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/23), and [#11](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/11). PR #26 closes #16 and #23 on merge and references #11.
 - Change packets and records: [framework/Supabase structure](../workflow/archive/2026-10-07-framework-supabase-structure/record.md), [local Supabase CI](../workflow/archive/2026-10-07-local-supabase-ci/record.md), and [skills/registry](../workflow/archive/2026-10-08-supabase-agent-skills-registry/record.md).
-- Branch and commits: `chore/setup-deployment`; PR head before base update `362622574deb892b8e6d493c5da1e7f463544af8`; updated `develop` base `644bda64cff6d4b96113cf6c4876f8f91c27d9a3`.
+- Branch and commits: `chore/setup-deployment`; PR head before base update `362622574deb892b8e6d493c5da1e7f463544af8`; updated `develop` base `644bda64cff6d4b96113cf6c4876f8f91c27d9a3`; pushed merge commit `1d75ea3a62e957b0eb981fe7592323f4642b1b69`.
 - PR: [#26](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/26), base `develop`, head `chore/setup-deployment`.
 - Related session summary: [2026-10-08 branch review and closeout](2026-10-08-supabase-branch-review-closeout.md).
 
@@ -19,12 +19,13 @@
 | 1 / time unknown | User → coordinator | Asked for help resolving PR merge conflicts and requested to be told if a decision was needed. | GitHub reported PR #26 as conflicting; the local branch was clean before base update. | Proceed with source-backed documentation reconciliation; pause only for a product/scope choice. |
 | 2 / time unknown | Coordinator → GitHub CLI | Read PR #26 and merged PR state for #19 and #22. | PR #26 head/base were identified; #19 and #22 are merged to `develop`. | Use merged PR and packet evidence to update current repository-status wording. |
 | 3 / time unknown | Coordinator → Git | Fetched and merged `origin/develop` at `644bda6` into the PR branch. | Git reported conflicts in `CONTRIBUTING.md`, `workflow/archive/README.md`, and `workflow/changes/README.md`; other base changes merged automatically. | Keep both branches' archive history and reflect current `develop` behavior. |
+| 4 / time unknown | Coordinator → GitHub | Commit and push the resolved merge to the existing PR branch. | Pushed merge commit `1d75ea3`; GitHub now reports PR #26 `MERGEABLE`. | Required checks and Vercel preview are still running; PR remains open. |
 
 ## Tool and agent executions
 
 | Role / assignment state | Actual agent, tool, model / run identifier | Inputs and scope | Material actions, output and outcome | Evidence / independence / limits |
 | --- | --- | --- | --- | --- |
-| Coordinator; completed | Git and GitHub CLI; model/run ID not applicable | PR #26, current `develop`, packet/index records and merged PR state. | Fetched the base, merged it into the clean branch, resolved three documentation conflicts, and updated archive/status links. | No subagent or independent reviewer was assigned to this follow-up. The previous PR review remains linked in the framework packet. |
+| Coordinator; completed | Git and GitHub CLI; model/run ID not applicable | PR #26, current `develop`, packet/index records and merged PR state. | Fetched the base, merged it into the clean branch, resolved three documentation conflicts, updated archive/status links, committed and pushed the merge. | No subagent or independent reviewer was assigned to this follow-up. The previous PR review remains linked in the framework packet. |
 
 ## Decisions and changed files
 
@@ -51,12 +52,14 @@
 | 2026-10-08 / local checkout | `git diff --name-only --diff-filter=U`; `rg -n '^(<<<<<<<|=======|>>>>>>>)'` on the three resolved files | Passed; no unmerged paths or conflict markers remain. `rg` returned no matches. | Resolved files and Git index. | Confirms conflict cleanup only. |
 | 2026-10-08 / local checkout | `git diff --cached --check` | First check found an extra blank line at the end of this summary; removed it and reran the check successfully with no output. | Staged merge result. | Whitespace only; no application behavior tested. |
 | 2026-10-08 / local checkout | PowerShell relative Markdown link check over the updated indexes, records, `CONTRIBUTING.md`, and this summary | Passed; every checked relative link resolves to an existing path. | Updated archive/index records and this summary. | Documentation link check only; no application tests were run in this follow-up. |
+| 2026-10-08 / GitHub after push | `gh pr view 26 --json number,state,baseRefName,baseRefOid,headRefName,headRefOid,mergeable,mergeStateStatus,url` | Passed; PR #26 is open and `MERGEABLE`; merge state is `UNSTABLE` while checks run. | GitHub PR #26 at head `1d75ea3`. | Conflicts are resolved; this does not mean required checks passed or the PR is ready to merge. |
+| 2026-10-08 / GitHub after push | `gh pr checks 26` | App and Database checks pending; Vercel preview pending deployment; preview comments passed; Supabase Preview skipped. | GitHub PR #26 checks. | Checks are ongoing; no application/database CI result is claimed. |
 
 ## Open work, blockers and limitations
 
-- PR #26 still needs GitHub review and the temporary local Supabase database workflow result.
+- PR #26 is mergeable but its merge state is unstable while app/database checks and Vercel preview are pending; GitHub review and the temporary local Supabase database result remain outstanding.
 - No application source was manually changed while resolving conflicts. Application tests were not rerun for this documentation reconciliation.
-- No shared database migration, merge of PR #26, deployment or release occurred.
+- No shared database migration, merge of PR #26 or release occurred. The Vercel preview is still deploying; no completed preview validation is claimed.
 - Student verification remains pending; the requesting user did not supply a name or student role. The documentation reconciliation did not require a product decision.
 - Historical interaction coverage: exact times and a full tool transcript are unavailable; this summary records the material request, decisions and observed results.
 
