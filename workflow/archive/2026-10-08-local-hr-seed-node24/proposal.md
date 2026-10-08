@@ -1,7 +1,7 @@
 # Proposal: local HR seed and Node 24 setup (#24, #25)
 
 - Change ID: `2026-10-08-local-hr-seed-node24`
-- Issues: [#24 local HR seed](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/24), [#25 Node 24 docs](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/25); [#21 separate demo](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/21) was closed at Paul's request.
+- Issues at approval: [#24 local HR seed](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/24), [#25 Node 24 docs](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/25); [#21 separate demo](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/21) was closed at Paul's request. Original #24 was later deleted; [#28](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/28) is the live replacement for its same approved scope. This post-approval link repair does not claim a new pre-implementation issue.
 - Owner: Paul Cheng, Applicant/application workflow, with teammate local setup benefit.
 - Status: approved for implementation by Paul Cheng on 8 October 2026.
 - Baseline: [ProductSpec v0.9](../../ProductSpec.md), `develop` at `644bda6`; branch `chore/24-25-local-hr-seed-node24`.
