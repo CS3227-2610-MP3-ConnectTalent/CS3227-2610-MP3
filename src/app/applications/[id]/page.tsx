@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ApplicationForm } from "@/components/application-form";
 import { getOwnApplication } from "@/lib/applications";
 import { getPublishedJob } from "@/lib/jobs";
+import { reviewStatusLabel } from "@/lib/hr-input";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ export default async function ApplicationDetail({
     {notice === "already-submitted" && <p role="status" className="rounded-lg border p-3">This application was already submitted. Review the saved letter below; it may differ from the text you just tried to send.</p>}
     {notice === "saved" && <p role="status" className="rounded-lg border p-3">Your change was already saved. Review the current letter below.</p>}
     <p>{application.submission_state === "draft" ? "Saved draft" : "Submitted application"}</p>
+    {application.submission_state === "submitted" && application.review_status &&
+      <p>Review status: <strong>{reviewStatusLabel(application.review_status)}</strong></p>}
     {!job && <p className="rounded-lg border p-3">This job is no longer open. Your application remains available to read, but cannot be changed.</p>}
     {application.submission_state === "submitted" && <section className="space-y-2">
       <h2 className="text-xl font-semibold">Original submission</h2>

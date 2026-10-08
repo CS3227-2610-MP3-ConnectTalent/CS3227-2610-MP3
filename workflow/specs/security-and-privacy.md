@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v0.7, 7 October 2026 (SEC-001 updated). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v0.8, 8 October 2026 (SEC-001 updated). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
 
 ## SEC-001: Access boundaries
 
@@ -12,14 +12,16 @@ Access MUST follow these boundaries:
 | Draft jobs | None | Read/write/publish |
 | Closed jobs | Title of a job on their existing application | Read |
 | Saved draft application and cover letter | Own draft read/write while its job is published; own read after closure | None |
-| Submitted application, original and current cover letter | Own read; current-letter edit while its job is published | Read for review |
-| HR notes | None | Read/write by authorized HR |
+| Submitted application, original/current letter and current review status | Own read; current-letter edit while its job is published; no status write | Read for review; status write through a separate authorized human action |
+| HR notes and status-change history | None | Read; append notes and status events through authorized actions |
 | Role assignment | Cannot set or change | Controlled administration only |
 | Audit events | None | Read as authorized |
 
-Creating jobs, editing job drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT edit another Applicant's draft or submission, change the immutable original submitted letter, change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application or AI draft. Anonymous users MUST NOT access saved drafts, submissions, other protected records or AI endpoints. [APP-004](applications-and-review.md) owns save/submit/edit lifecycle and job-close behavior. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
+Creating jobs, editing job drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT edit another Applicant's draft or submission, change the immutable original submitted letter, change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application, status or AI draft, or see HR notes/history. Anonymous users MUST NOT read any protected application, note or status event or access AI endpoints. HR MUST NOT read unsubmitted drafts, including a draft owned before an account's controlled promotion from Applicant to HR. HR write actions MUST check a verified user's current HR role on the server and in the database. Status events and logs MUST exclude letter and note text. Closing a job MUST NOT broaden or revoke these existing-record read boundaries. [APP-004](applications-and-review.md) owns save/submit/edit lifecycle and job-close behavior. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
 
-Scenario: Given Applicant A's saved draft, when A returns, then A reads it, while HR and Applicant B cannot. Given A's submitted and later edited letter, when authorized HR reviews it, then both original and current text are available. Given anonymous access or an Applicant requesting another applicant's protected record, an HR-only operation, HR notes or an HR summary, when access is checked, then the unauthorized request is denied.
+Scenario: Given a submitted application, when its owner and authorized HR open it, then each sees their permitted fields; the owner sees current status but not notes/history.
+
+Denial scenario: Given anonymous access, another Applicant or an HR user requesting a saved draft, when the record is fetched by direct ID, then server checks and RLS return no protected data. Given an Applicant sending an HR write request, when authorization runs, then the operation is denied.
 
 ## SEC-002: Server and database enforcement
 

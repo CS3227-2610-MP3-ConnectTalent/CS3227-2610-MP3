@@ -10,8 +10,8 @@ the product contracts are the modular specifications indexed at
 
 This is a reusable careers portal with one employer per deployment. Read the product
 overview and the relevant capability requirements before changing behavior. The
-current application implements public job browsing; HR management, authentication,
-applications, and course-required AI features are future slices. Do not describe a
+current application implements public job browsing and Applicant accounts/applications.
+The issue #9 branch adds locally accepted HR review; HR job management and course-required AI features are future slices. Do not describe a
 planned feature as implemented or create requirements solely from a design idea.
 
 Applicant and HR users have different data and tasks. Keep their pages, navigation,
@@ -69,7 +69,9 @@ Start the Next.js development server with:
 corepack pnpm dev
 ```
 
-The local Supabase database uses synthetic seed data. `corepack pnpm db:reset`
+The local Supabase database uses synthetic seed data. Apply pending migrations to an
+existing local stack with `corepack pnpm exec supabase migration up --local`.
+`corepack pnpm db:reset`
 rebuilds the local database and can discard local data; use it only when that reset
 is intended. Stop the local Supabase stack when finished:
 

@@ -32,6 +32,19 @@ afterEach(() => {
 });
 
 describe("Supabase Auth redirect origins", () => {
+  it("returns the email without creating an account when signup passwords differ", async () => {
+    const formData = new FormData();
+    formData.set("email", "applicant@example.test");
+    formData.set("password", "correct-horse-battery-staple");
+    formData.set("confirmPassword", "different-horse-battery-staple");
+
+    await expect(signUp({ email: "", error: "" }, formData)).resolves.toEqual({
+      email: "applicant@example.test",
+      error: "Passwords do not match. Please try again.",
+    });
+    expect(mocks.createSupabaseServerClient).not.toHaveBeenCalled();
+  });
+
   it("sends signup confirmation to the current preview callback", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     vi.stubEnv("VERCEL_URL", "feature-123.vercel.app");
@@ -43,7 +56,7 @@ describe("Supabase Auth redirect origins", () => {
     formData.set("password", "correct-horse-battery-staple");
     formData.set("confirmPassword", "correct-horse-battery-staple");
 
-    await expect(signUp(formData)).rejects.toThrow("REDIRECT:/auth/check-email");
+    await expect(signUp({ email: "", error: "" }, formData)).rejects.toThrow("REDIRECT:/auth/check-email");
     expect(signUpWithSupabase).toHaveBeenCalledWith({
       email: "applicant@example.test",
       password: "correct-horse-battery-staple",
@@ -63,7 +76,7 @@ describe("Supabase Auth redirect origins", () => {
     formData.set("password", "correct-horse-battery-staple");
     formData.set("confirmPassword", "correct-horse-battery-staple");
 
-    await expect(signUp(formData)).rejects.toThrow("REDIRECT:/auth/check-email");
+    await expect(signUp({ email: "", error: "" }, formData)).rejects.toThrow("REDIRECT:/auth/check-email");
     expect(signUpWithSupabase).toHaveBeenCalledWith({
       email: "applicant@example.test",
       password: "correct-horse-battery-staple",
