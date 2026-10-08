@@ -29,6 +29,12 @@ export async function signIn(formData: FormData) {
   const client = await createSupabaseServerClient();
   const { error } = await client.auth.signInWithPassword(parsed.data);
   if (error) redirect("/auth/sign-in?error=credentials");
+  const { data: { user }, error: userError } = await client.auth.getUser();
+  if (userError || !user?.email_confirmed_at) redirect("/auth/sign-in?error=credentials");
+  const { data: profile, error: profileError } = await client.from("profiles")
+    .select("role").eq("user_id", user.id).maybeSingle();
+  if (profileError || !profile) redirect("/auth/sign-in?error=credentials");
+  if (profile.role === "hr") redirect("/hr/applications");
   redirect("/applications");
 }
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { signOut } from "@/app/auth/actions";
 import { listOwnApplications } from "@/lib/applications";
+import { reviewStatusLabel } from "@/lib/hr-input";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
       <ul className="space-y-3">{applications.map((application) => <li key={application.id}>
         <Link href={`/applications/${application.id}`} className="block rounded-lg border p-5 hover:bg-muted/40">
           <span className="font-semibold">{application.job_title}</span>
-          <span className="ml-3 text-sm text-muted-foreground">{application.submission_state === "draft" ? "Saved draft" : "Submitted"}</span>
+          <span className="ml-3 text-sm text-muted-foreground">{application.submission_state === "draft" ? "Saved draft" : application.review_status ? reviewStatusLabel(application.review_status) : "Submitted"}</span>
         </Link>
       </li>)}</ul>}
   </main>;

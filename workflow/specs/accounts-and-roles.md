@@ -1,6 +1,6 @@
 # Accounts and roles
 
-Baseline: ProductSpec v0.7, 7 October 2026 (ACC-001 updated).
+Baseline: ProductSpec v0.8, 8 October 2026 (ACC-002 updated).
 
 ## ACC-001: Public Applicant signup
 
@@ -12,9 +12,11 @@ Denial scenario: Given different password and confirmation values, when signup i
 
 ## ACC-002: Controlled HR assignment
 
-Company HR accounts MUST be assigned only through a controlled administrative step. The access boundary for role assignment is canonical in [SEC-001](security-and-privacy.md); public signup does not grant HR authority. The source baseline does not select a particular administrative mechanism.
+Under ACC-001, public signup creates only an Applicant account. For this release, only a verified account with no existing Applicant applications MAY be assigned the HR role, by a designated administrator through a privileged, recorded manual operation outside the public app. Neither self-service profile writes, signup metadata, nor an Applicant request may grant HR access. The app MUST check the current verified user's database role for each HR page and write action; role-aware sign-in MUST send authorized HR to the HR interface and Applicants to their own interface. The access boundary for role assignment is canonical in [SEC-001](security-and-privacy.md).
 
-Scenario: Given public signup, when a user requests an HR role, then that request cannot confer HR access; assigning HR requires controlled administration.
+Scenario: Given a verified account and an authorized administrator, when the administrator assigns HR through the controlled operation, then the user can sign in and use HR routes.
+
+Denial scenario: Given an Applicant who alters signup data or sends an HR route/action request, when the server and database check their role, then the request cannot confer HR access.
 
 ## ACC-003: Distinct role interfaces and human control
 

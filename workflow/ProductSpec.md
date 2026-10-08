@@ -1,10 +1,10 @@
 # Product specification
 
-Current baseline: **0.7**, dated **7 October 2026** (Applicant signup and application lifecycle). The v0.6 job listing detail baseline was dated 5 October 2026.
+Current baseline: **0.8**, dated **8 October 2026** (HR review, notes, status and environment mapping). The v0.7 Applicant lifecycle baseline was dated 7 October 2026.
 
 This product is a careers site for one employer per deployment, with external Applicant and company HR roles. The first release supports multiple job openings and one text-only application per applicant per job. AI drafting and summary features use the course-required SoC LLM and retain human control over submission and hiring status.
 
-The canonical requirements now live in the capability specifications below. The split on 6 October 2026 preserved v0.6 behavior, its nine release acceptance items, role boundaries, and non-goals. The accepted 7 October 2026 change adds password confirmation and email verification, persistent private drafts, submitted-letter edits until job closure, and corresponding visibility rules. This filename remains the entry point for historical references. Specifications describe intended behavior, not evidence that implementation or release gates are complete.
+The canonical requirements now live in the capability specifications below. The split on 6 October 2026 preserved v0.6 behavior, its nine release acceptance items, role boundaries, and non-goals. The accepted 7 October 2026 change added password confirmation and email verification, persistent private drafts, submitted-letter edits until job closure, and corresponding visibility rules. The locally accepted 8 October 2026 change defines controlled HR assignment, submitted-only review, private append-only notes, human status actions and the team's Vercel/Supabase environment mapping. This filename remains the entry point for historical references. Specifications describe intended behavior, not evidence that hosted migration or release gates are complete.
 
 | Capability | Canonical specification | IDs |
 | --- | --- | --- |
