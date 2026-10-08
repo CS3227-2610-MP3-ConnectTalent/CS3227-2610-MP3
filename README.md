@@ -1,6 +1,6 @@
 # Company Careers
 
-Reusable careers portal for one employer per deployment. Applicants can browse published jobs and use the sign-up/application flow. The issue #9 branch adds local HR review of submitted applications, private notes and explicit status actions; independent review is recorded, while student acceptance and merge remain pending. Supabase Auth requires email verification; RLS protects private drafts and submitted applications. HR job management and the course-required SoC LLM features are still planned. The stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and SoCLaaS.
+Reusable careers portal for one employer per deployment. Applicants can browse published jobs and use the sign-up/application flow. HR review of submitted applications, private notes and explicit status actions is merged into `develop`. Issue #27 adds a locally accepted password-recovery flow on this branch; hosted validation remains separate. Supabase Auth requires email verification; RLS protects private drafts and submitted applications. HR job management and the course-required SoC LLM features are still planned. The stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and SoCLaaS.
 
 ## Prerequisites
 
@@ -23,6 +23,8 @@ corepack pnpm dev
 
 Visit <http://localhost:3000> to browse published jobs. Select a category or open a job card to read its details. The sample draft and closed postings must not appear. For Applicant flows, sign up with a matching confirmation password and verify using the local mail viewer at <http://127.0.0.1:54324>, then sign in, save/submit a cover letter, and visit **My applications**. The local mail viewer captures verification messages; they do not arrive in Gmail. Use `localhost` for the app throughout the confirmation flow.
 
+To test password recovery locally, use **Forgot password?** on the sign-in page, enter a synthetic Applicant or HR email, and open the reset message in the same browser through the local mail viewer. Enter and confirm a new password, then sign in again. The local Supabase Auth allowlist includes the exact `/auth/callback?flow=recovery` URL; restart the local stack after changing `supabase/config.toml`. For hosted testing, allowlist that exact callback URL in each Supabase project and configure email delivery before testing. The request page gives the same acknowledgement whether the account exists or not.
+
 ## Checks
 
 ```sh
@@ -31,7 +33,7 @@ corepack pnpm typecheck
 corepack pnpm build
 ```
 
-Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, `corepack pnpm test:db`, and `corepack pnpm test:race`. The HR browser test requires `TEST_SUPABASE_SERVICE_ROLE_KEY` from the **local** Supabase stack; without it, that case is skipped. It creates synthetic users/jobs and must never run with a hosted project key. The race check needs Docker and this project's local Supabase database container. CI runs lint, typecheck, unit tests, and build; database, race and browser tests are local gates until CI has a Supabase stack.
+Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, `corepack pnpm test:db`, and `corepack pnpm test:race`. The HR and password-recovery browser tests require `TEST_SUPABASE_SERVICE_ROLE_KEY` from the **local** Supabase stack; without it, those cases are skipped. They create synthetic users/jobs and must never run with a hosted project key. The race check needs Docker and this project's local Supabase database container. CI runs lint, typecheck, unit tests, and build; database, race and browser tests are local gates until CI has a Supabase stack.
 
 ## Project layout
 
