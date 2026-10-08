@@ -30,4 +30,4 @@ None.
 - [x] Complete packet approved by the Applicant workflow owner for implementation on 2026-10-08.
 - [x] Separate read-only review checked role assignment and HR authorization; no confirmed bypass.
 - [x] Accepted text synced to canonical ACC-002 in v0.8 before archive.
-- Sync commit: pending separate user instruction. Human decision: 2026-10-08 conversation acceptance with recorded limits; see [record](../record.md).
+- Sync commit: `47c4a3f`. Human decision: 2026-10-08 conversation acceptance with recorded limits; see [record](../record.md).

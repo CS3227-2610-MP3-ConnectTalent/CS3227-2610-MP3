@@ -30,4 +30,4 @@ None.
 - [x] Complete packet approved by student owner for implementation on 2026-10-08.
 - [x] Separate read-only review checked environment/migration plan; hosted compatibility and preview smoke remain pending under the accepted limit.
 - [x] Accepted OPS-001 text synced to canonical v0.8 before archive.
-- Sync commit: pending separate user instruction. Human decision: 2026-10-08 conversation acceptance with recorded limits; see [record](../record.md).
+- Sync commit: `47c4a3f`. Human decision: 2026-10-08 conversation acceptance with recorded limits; see [record](../record.md).

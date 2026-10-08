@@ -38,4 +38,4 @@ None.
 - [x] Complete packet and status transition policy approved by student owner for implementation on 2026-10-08.
 - [x] Separate read-only review checked Applicant/HR visibility and status semantics; its privacy-test evidence finding was corrected and rechecked.
 - [x] Accepted APP-002/003 text synced to canonical v0.8 before archive.
-- Sync commit: pending separate user instruction. Human decision: 2026-10-08 conversation acceptance with recorded limits; see [record](../record.md).
+- Sync commit: `47c4a3f`. Human decision: 2026-10-08 conversation acceptance with recorded limits; see [record](../record.md).
