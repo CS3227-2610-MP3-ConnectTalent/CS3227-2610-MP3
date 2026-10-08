@@ -8,7 +8,9 @@ The issue [#20](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3
 
 The Vercel-aware Supabase Auth redirect and Conventional Commit PR-title packets are archived in [workflow/archive](../archive/README.md); PR #19 is merged to `develop`.
 
-The Supabase setup packets for PR #26 are archived in [workflow/archive](../archive/README.md). PR #26 remains open; its temporary local Supabase database check is pending. No product-spec sync was needed for PR #26's configuration and contributor-workflow changes. No active change packet is listed here now.
+The Supabase setup packets for PR #26 are archived in [workflow/archive](../archive/README.md). PR #26 merged into `develop` at `eeebb75`; its archived record retains the checks and limits observed before merge. No product-spec sync was needed for its configuration and contributor-workflow changes.
+
+[Issue #27](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/27) was accepted locally with recorded limits on 8 October 2026. Its [complete password-recovery packet](../archive/2026-10-08-password-recovery/record.md) was archived after ACC-004 synced to canonical v1.0. Commit, PR, hosted validation and release remain pending; the #27 branch is separate from uncommitted #24/#25 local HR seed work.
 
 Start future contributor changes with a triaged GitHub issue, then create `workflow/changes/<YYYY-MM-DD-short-name>/`. Record all issue numbers/URLs, dependencies, student owner, issue-linked branch and risk classification. Issue creation is intake, not approval to implement product behavior.
 

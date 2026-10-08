@@ -1,6 +1,6 @@
 # Accounts and roles
 
-Baseline: ProductSpec v0.9, 8 October 2026 (ACC-001 updated; ACC-002 updated in v0.8).
+Baseline: ProductSpec v1.0, 8 October 2026 (ACC-004 added; ACC-001 updated in v0.9; ACC-002 updated in v0.8).
 
 ## ACC-001: Public Applicant signup
 
@@ -27,3 +27,11 @@ Denial scenario: Given an Applicant who alters signup data or sends an HR route/
 Browser flows MUST demonstrate distinct Applicant and HR interfaces with human-controlled submission and status changes. See [APP-001 / APP-003](applications-and-review.md) and [AID-002](applicant-ai-draft.md). Protected-record and AI endpoint authorization follow [SEC-001 / SEC-002](security-and-privacy.md).
 
 Scenario: Given each role's browser flow, when an Applicant submits final text or HR updates status, then the respective human performs the explicit action in that role's interface.
+
+## ACC-004: Email password recovery
+
+An Applicant or HR user MUST be able to request a password reset link to their account email from sign-in. The app MUST give the same visible acknowledgement whether the email belongs to an account. A valid unused Supabase recovery link MUST establish the matching user's session through the trusted callback, after which the user MAY set a new password that passes server validation and matches a confirmation field. Password input MUST NOT appear in returned action state or logs. Invalid, expired, reused and absent links MUST NOT establish a recovery session; an unauthenticated user MUST NOT change a password and MUST have a new-request path. Recovery MUST NOT create an account, change its role, or bypass existing access checks. The reset action MUST verify the current authenticated user before updating that user's password. These rules apply to both roles; SEC-001/002 boundaries remain authoritative.
+
+Scenario: Given a verified Applicant or HR account, when its user follows a valid reset link and submits matching valid passwords, then only that account's password changes and normal sign-in reaches its existing role interface.
+
+Denial/failure: Given an unknown address, when reset is requested, then the public response does not reveal account existence. Given a missing, invalid, expired or reused link and no preexisting session, when update is attempted, then no password changes and a retry path is shown. Given mismatched passwords, when update is attempted, then no password changes. Given an Applicant, when recovery completes, then HR access remains denied.
