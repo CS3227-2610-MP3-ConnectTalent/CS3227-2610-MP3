@@ -1,6 +1,6 @@
 # Feature record: Supabase agent skills and shadcn registry
 
-Status: Implemented; independent review, requester acceptance, and archive complete; PR submission pending
+Status: Implemented; independent review, requester acceptance, and archive complete; PR #26 open
 
 Owner: Issue #23 unassigned; requesting user identity/student role not recorded
 
@@ -11,7 +11,7 @@ Date: 2026-10-08
 
 - Change ID/classification: `2026-10-08-supabase-agent-skills-registry`; contributor guidance and UI registry configuration, no runtime behavior.
 - GitHub issue: [#23](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/23), created after implementation to repair traceability.
-- Branch/commits/PR: `chore/setup-deployment`; baseline `2fad6ed`; original setup commit `c0dd8a5`; PR pending.
+- Branch/commits/PR: `chore/setup-deployment`; initial base `2fad6ed`; original setup commit `c0dd8a5`; PR #26 open; current `develop` base `644bda6` merged during the conflict-resolution follow-up.
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: None; no product behavior change.
@@ -28,7 +28,7 @@ Date: 2026-10-08
 - [x] Final independent recheck found no functional defect or evidence misstatement.
 - [x] Requesting user explicitly accepted the reviewed work and recorded limitations on 2026-10-08. User name/student role was not supplied and is not inferred.
 - [x] Archived packet and verified navigation links/indexes on 2026-10-08.
-- [ ] PR opening remains the final contributor action.
+- [x] PR #26 opened; requested conflict resolution is recorded in the follow-up summary.
 - [x] Canonical product sync is N/A; no product behavior changes.
 
 The user explicitly authorized archive/PR and accepted the reviewed work and recorded limitations on 2026-10-08. Requester name/role was not provided; no student identity is inferred.
@@ -75,6 +75,7 @@ No `.env.local` values, secrets, database files, applicant data, or hosted Supab
 | Date / session | Summary log | Scope / limits |
 | --- | --- | --- |
 | 2026-10-08 / branch review and closeout | [Session summary](../../../logs/2026-10-08-supabase-branch-review-closeout.md) | Branch review, issue #23, current checks, archive and PR; Actions run still pending. |
+| 2026-10-08 / PR #26 conflict resolution | [Session summary](../../../logs/2026-10-08-pr-26-conflict-resolution.md) | Merged current `develop` and reconciled repository-status documentation in three files; Actions run remains pending. |
 
 ## Canonical sync and archive
 
@@ -82,4 +83,4 @@ No `.env.local` values, secrets, database files, applicant data, or hosted Supab
 - Canonical sync commit/files/version/date: N/A.
 - Archive decision/date/path: User explicitly authorized archive on 2026-10-08 and accepted the reviewed work/limitations; archived 2026-10-08; navigation verified.
 - Navigation repairs after moving: Completed 2026-10-08; relative links and archive indexes verified.
-- Outstanding work: Open issue-linked PR as the final contributor action. GitHub Actions database workflow will run on the PR. Do not close #11; it includes other CI/CD work.
+- Outstanding work: PR #26 review and its GitHub Actions database run remain pending. Do not close #11; it includes other CI/CD work.

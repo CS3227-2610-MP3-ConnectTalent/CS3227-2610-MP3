@@ -1,6 +1,6 @@
 # Company Careers
 
-Reusable careers portal for one employer per deployment. Applicants can browse published jobs and use the local sign-up/application flow. Supabase Auth requires email verification; RLS protects private drafts and submitted applications. HR management and the course-required SoC LLM features are still planned. The stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and SoCLaaS.
+Reusable careers portal for one employer per deployment. Applicants can browse published jobs and use the sign-up/application flow. The issue #9 branch adds local HR review of submitted applications, private notes and explicit status actions; independent review is recorded, while student acceptance and merge remain pending. Supabase Auth requires email verification; RLS protects private drafts and submitted applications. HR job management and the course-required SoC LLM features are still planned. The stack is Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/PostgreSQL, Zod, and SoCLaaS.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ corepack pnpm install
 corepack pnpm db:start
 ```
 
-For a fresh local Supabase stack, `db:start` applies the jobs and Applicant migrations plus synthetic seed postings. For an existing local stack, use `corepack pnpm supabase migration up --local` to apply pending migrations without resetting data; restart the stack to apply email-confirmation config. Copy `.env.example` to `.env.local`. Run `corepack pnpm supabase status` and set the local Supabase URL and publishable key. Set `APP_SITE_URL` to `http://localhost:3000` locally, and to the correct HTTPS origin in each deployed environment. Fill in the SoC LLM values from the course guide when AI endpoints are implemented, and keep the key in server code only. Then start the app:
+For a fresh local Supabase stack, `db:start` applies the jobs, Applicant and HR review migrations plus synthetic seed postings. For an existing local stack, use `corepack pnpm exec supabase migration up --local` to apply pending migrations without resetting data; restart the stack to apply email-confirmation config. Copy `.env.example` to `.env.local`. Run `corepack pnpm exec supabase status` and set the local Supabase URL and publishable key. `APP_SITE_URL` is optional; local development defaults to `http://localhost:3000`. If set, it must be a site origin without a path. Vercel deployments resolve their callback origin from Vercel's system environment variables. Fill in the SoC LLM values from the course guide when AI endpoints are implemented, and keep the key in server code only. Then start the app:
 
 ```sh
 corepack pnpm dev
@@ -31,7 +31,7 @@ corepack pnpm typecheck
 corepack pnpm build
 ```
 
-Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. The Applicant slice adds input, browser, database permission and concurrency tests. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, `corepack pnpm test:db`, and `corepack pnpm test:race`. The race check needs Docker and this project's local Supabase database container; it inserts and cleans up synthetic fixtures. CI runs lint, typecheck, unit tests, and build; database, race and browser tests are local gates until CI has a Supabase stack.
+Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. With local Supabase running and seeded, run `corepack pnpm test:unit`, `corepack pnpm test:e2e`, `corepack pnpm test:db`, and `corepack pnpm test:race`. The HR browser test requires `TEST_SUPABASE_SERVICE_ROLE_KEY` from the **local** Supabase stack; without it, that case is skipped. It creates synthetic users/jobs and must never run with a hosted project key. The race check needs Docker and this project's local Supabase database container. CI runs lint, typecheck, unit tests, and build; database, race and browser tests are local gates until CI has a Supabase stack.
 
 ## Project layout
 
@@ -49,6 +49,6 @@ Vitest, Playwright, and Supabase database test runners are configured through `v
 
 ## Deployment plan
 
-Use separate staging and production Vercel projects, each connected to its own Supabase project. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only `APP_SITE_URL` in each environment. Enable Supabase email confirmation and allow each environment's exact `/auth/callback` URL; configure an email sender before public deployment. Set SoCLaaS settings as server-side secrets when AI endpoints are implemented. Apply reviewed database migrations before deploying features that depend on them. Do not use a service-role key in browser code or a `NEXT_PUBLIC_` variable. The team must manage deployment outside any Codex/Claude build-and-host environment.
+The team maps Vercel production from `master` to Production Supabase and every non-`master` preview, including `develop`, to Development Supabase. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for each environment. Vercel supplies `VERCEL_PROJECT_PRODUCTION_URL` and `VERCEL_URL` for callback origins; `APP_SITE_URL` is optional for local or non-Vercel deployments. In Supabase Auth URL Configuration, allow the relevant callback origins. Preview access controls can block external Applicant confirmation. Configure an email sender before public deployment. Set SoCLaaS settings as server-side secrets when AI endpoints are implemented. A PR preview depending on the HR schema requires a reviewed Development Supabase migration first; Production Supabase is a separate release operation. Do not use a service-role key in browser code or a `NEXT_PUBLIC_` variable. The team must manage deployment outside any Codex/Claude build-and-host environment.
 
 The remote has `develop` as its default branch and `master` as its release branch. Create feature branches from `develop` and merge them back through reviewed PRs. Promote tested releases from `develop` to `master` through a separate PR. The GitHub Pages workflow publishes the [static product website](https://cs3227-2610-mp3-connecttalent.github.io/CS3227-2610-MP3/) from `master`. See `workflow/AgentProcess.md` for the full change flow.

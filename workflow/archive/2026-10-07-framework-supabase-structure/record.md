@@ -1,6 +1,6 @@
 # Feature record: Framework and Supabase integration structure cleanup
 
-Status: Implemented; local application checks and independent review complete; requester acceptance recorded; Actions execution pending
+Status: Implemented; local application checks and independent review complete; requester acceptance recorded; PR #26 open; Supabase Actions execution pending
 
 Owner: Unassigned for issue triage; requesting user identity and student role not stated
 
@@ -11,7 +11,7 @@ Date: 2026-10-07
 
 - Change ID/classification: `2026-10-07-framework-supabase-structure`; behavior-preserving refactor / CI config / contributor docs.
 - GitHub issue: [#16](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/16); issue owner assignment pending.
-- Branch/commits/PR: `chore/setup-deployment`; base `2fad6ed`; branch HEAD before closeout `7cf9f68`; PR pending.
+- Branch/commits/PR: `chore/setup-deployment`; initial base `2fad6ed`; PR #26 open; current `develop` base `644bda6` merged during the conflict-resolution follow-up.
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: None; no product behavior change.
@@ -33,7 +33,7 @@ Date: 2026-10-07
 - [x] Session summary linked; canonical sync is N/A because there is no product behavior change.
 - [x] Final independent artifact recheck completed with no functional findings.
 - [x] Requester acceptance is recorded; student role is not inferred.
-- [x] Archived packet and verified navigation links/indexes. PR opening remains the final contributor action.
+- [x] Archived packet and verified navigation links/indexes; PR #26 opened and its requested conflict resolution is recorded in the follow-up summary.
 
 ## Requirement and acceptance criteria
 
@@ -85,6 +85,7 @@ Known limitations: GitHub issue #16 has no assigned owner. The requesting user a
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
 | 2026-10-08 / branch review and closeout | [Session summary](../../../logs/2026-10-08-supabase-branch-review-closeout.md) | Current branch review, findings, app checks, generated `next-env.d.ts` verification, and closeout. | App checks and final artifact review passed; requester acceptance recorded; GitHub Actions execution pending. |
+| 2026-10-08 / PR #26 conflict resolution | [Session summary](../../../logs/2026-10-08-pr-26-conflict-resolution.md) | Merged current `develop` and reconciled repository-status documentation in three files. | Documentation conflicts resolved; relative links and whitespace checked; no product source changes or application tests in this follow-up. |
 | 2026-10-07 / implementation | Earlier evidence and approved scope in this packet | Supabase structure, Next.js generated-file handling, contributor guidance, and issue #16. | Historical tool limitations retained above; 2026-10-08 checks supersede old pending app-check status. |
 
 ## Canonical sync and archive
@@ -94,4 +95,4 @@ Known limitations: GitHub issue #16 has no assigned owner. The requesting user a
 - Sync verification: N/A; no product spec delta.
 - Archive decision/date/path: User authorized archive on 2026-10-08; archived to `workflow/archive/2026-10-07-framework-supabase-structure/` on 2026-10-08 after archive/index checks.
 - Navigation repairs after moving: Completed 2026-10-08; relative links and archive indexes verified.
-- Outstanding work/limitations: PR creation as final contributor action; GitHub Actions run after PR. Issue #16 remains unassigned for triage.
+- Outstanding work/limitations: PR #26 review and Supabase Actions run remain pending. Issue #16 remains unassigned for triage.

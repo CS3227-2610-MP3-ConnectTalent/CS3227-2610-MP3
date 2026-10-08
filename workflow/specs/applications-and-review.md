@@ -1,6 +1,6 @@
 # Applications and review
 
-Baseline: ProductSpec v0.7, 7 October 2026 (APP-004 added; APP-001 through APP-003 retain their IDs and behavior).
+Baseline: ProductSpec v0.8, 8 October 2026 (APP-002/003 clarified; APP-004 retained).
 
 Canonical ownership, notes and status permissions are in [SEC-001 / SEC-002](security-and-privacy.md).
 
@@ -12,15 +12,19 @@ Scenario: Given a published job, when an Applicant explicitly submits final text
 
 ## APP-002: Applicant reading
 
-An Applicant MUST be able to read their own application. Reading another applicant's application or changing HR status is denied by [SEC-001](security-and-privacy.md). Closing a job preserves existing applications under [JMG-003](job-management.md).
+An Applicant MUST be able to read their own draft or submitted application and, after submission, the current HR review status. They MUST NOT read another Applicant's application, any HR note or status history, or perform an HR status action. Existing application reads remain available after job closure under [JMG-003](job-management.md) and [SEC-001](security-and-privacy.md).
 
-Scenario: Given Applicant A's submitted application, when A opens it, then A can read it; when Applicant B requests it, then access is denied.
+Scenario: Given Applicant A's submitted application, when A opens it after HR changes status, then A sees the current status and their letter, including after job closure.
+
+Denial scenario: Given Applicant B or an anonymous visitor, when they request A's application, status or notes, then no protected data is returned.
 
 ## APP-003: HR review, notes and separate status action
 
-HR MUST be able to read submitted applications and their original cover letters, write HR-only notes and update application status through a separate authorized action. HR retains the decision on status. [SEC-001](security-and-privacy.md) defines notes visibility and authorization; [AIS-002](hr-ai-summary.md) excludes AI status decisions.
+Authorized HR MUST be able to list and read only submitted applications for this portal, showing selected job, original submitted cover letter, current cover letter and current review status. HR MUST NOT see unsubmitted drafts. HR notes MUST be append-only records with author and creation time, readable only by authorized HR. The initial review status MUST be `Submitted` on explicit Applicant submission. Authorized HR MAY set `In review`, `Shortlisted` or `Rejected` through a separate explicit human action and MAY move among those three to correct a decision; HR MUST NOT set a submitted application back to `Submitted`. Every status action MUST preserve the application and record actor/time without exposing letter or note text in status events. AI text or output MUST NOT trigger notes or status actions. Submitted applications, notes and status remain available to HR after job closure, subject to [SEC-001](security-and-privacy.md). [AIS-002](hr-ai-summary.md) excludes AI status decisions.
 
-Scenario: Given authorized HR reviewing a submitted application, when HR reads the original letter, writes a note and separately updates status, then those actions are available to HR under their permissions and the note remains inaccessible to Applicants.
+Scenario: Given an authorized HR user and a submitted application, when HR opens its detail, adds a note and separately selects `In review`, then HR sees the authored note and new status while the Applicant sees only their own current status.
+
+Denial/failure scenario: Given an unsubmitted draft, when HR requests its ID, then no draft is returned. Given an Applicant, anonymous visitor or stale/invalid status request, when the status action is attempted, then the write is denied without changing status or exposing notes.
 
 ## APP-004: Saved draft and revision boundary
 

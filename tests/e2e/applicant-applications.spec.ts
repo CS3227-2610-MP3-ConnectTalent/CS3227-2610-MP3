@@ -3,12 +3,34 @@ import { expect, test } from "@playwright/test";
 test("signup rejects different passwords before creating an account", async ({ page }) => {
   await page.goto("/auth/sign-up");
   await expect(page.getByText(/not sent to Gmail/)).toBeVisible();
-  await page.getByLabel("Email").fill(`mismatch-${Date.now()}@example.test`);
+  const email = `mismatch-${Date.now()}@example.test`;
+  await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill("CorrectHorseBattery9!");
-  await page.getByLabel("Confirm password").fill("DifferentHorseBattery9!");
+  await page.getByLabel("Confirm password", { exact: true }).fill("DifferentHorseBattery9!");
+  await page.getByRole("button", { name: "Show password", exact: true }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute("type", "text");
+  await page.getByRole("button", { name: "Hide password", exact: true }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute("type", "password");
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.locator("p[role=alert]")).toContainText("Passwords do not match");
-  await expect(page).toHaveURL(/\/auth\/sign-up\?error=password-mismatch$/);
+  await expect(page.getByLabel("Email")).toHaveValue(email);
+  await expect(page).toHaveURL(/\/auth\/sign-up$/);
+});
+
+test("signup retains the email after a server-side mismatch without JavaScript", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  const email = `server-mismatch-${Date.now()}@example.test`;
+
+  await page.goto("http://localhost:3000/auth/sign-up");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill("CorrectHorseBattery9!");
+  await page.getByLabel("Confirm password", { exact: true }).fill("DifferentHorseBattery9!");
+  await page.getByRole("button", { name: "Create account" }).click();
+
+  await expect(page.locator("p[role=alert]")).toContainText("Passwords do not match");
+  await expect(page.getByLabel("Email")).toHaveValue(email);
+  await context.close();
 });
 
 test("verified Applicant saves, submits, and edits one application", async ({ page, request }) => {
@@ -18,14 +40,14 @@ test("verified Applicant saves, submits, and edits one application", async ({ pa
   await page.goto("/auth/sign-up");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByLabel("Confirm password").fill(password);
+  await page.getByLabel("Confirm password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
   await expect(page.getByRole("link", { name: "local mail viewer" })).toHaveAttribute("href", "http://127.0.0.1:54324");
 
   await page.goto("/auth/sign-in");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/auth\/sign-in\?error=credentials$/);
   await expect(page.locator("p[role=alert]")).toContainText("verify your email");
@@ -74,7 +96,7 @@ test("verified Applicant saves, submits, and edits one application", async ({ pa
   await page.goto("/auth/sign-up");
   await page.getByLabel("Email").fill(secondEmail);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByLabel("Confirm password").fill(password);
+  await page.getByLabel("Confirm password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
   let secondMessageId: string | undefined;

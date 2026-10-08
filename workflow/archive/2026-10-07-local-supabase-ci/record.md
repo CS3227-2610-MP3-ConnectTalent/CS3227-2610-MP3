@@ -1,6 +1,6 @@
 # Feature record: Local Supabase database checks in CI
 
-Status: Implemented; source and application checks reviewed; GitHub Actions database execution pending
+Status: Implemented; source and application checks reviewed; PR #26 open; GitHub Actions database execution pending
 
 Owner: Pending assignment in issue #11; requester identity/role not supplied
 
@@ -11,7 +11,7 @@ Date: 2026-10-07
 
 - Change ID/classification: `2026-10-07-local-supabase-ci`; CI configuration / process-only.
 - GitHub issues: [#11](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/11), existing pgTAP CI acceptance; issue owner unassigned.
-- Branch/commits/PR: `chore/setup-deployment`; base `2fad6ed`; branch HEAD before closeout `7cf9f68`; PR pending.
+- Branch/commits/PR: `chore/setup-deployment`; initial base `2fad6ed`; PR #26 open; current `develop` base `644bda6` merged during the conflict-resolution follow-up.
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: None; no product behavior change.
@@ -32,7 +32,7 @@ Date: 2026-10-07
 - [x] Session summary linked; no product-spec sync is needed.
 - [x] Final independent artifact recheck completed with no functional findings.
 - [x] Requester acceptance is recorded; student role is not inferred.
-- [x] Archived packet and verified navigation links/indexes. PR opening remains the final contributor action.
+- [x] Archived packet and verified navigation links/indexes; PR #26 opened and its requested conflict resolution is recorded in the follow-up summary.
 
 ## Requirement and acceptance criteria
 
@@ -82,6 +82,7 @@ Known limitations: GitHub Actions execution cannot be claimed until the workflow
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
 | 2026-10-08 / branch review and closeout | [Session summary](../../../logs/2026-10-08-supabase-branch-review-closeout.md) | Review findings, issue #23 traceability repair, verification runs, archive/PR decision. | App checks and final artifact review passed; requester acceptance recorded; Actions execution pending. |
+| 2026-10-08 / PR #26 conflict resolution | [Session summary](../../../logs/2026-10-08-pr-26-conflict-resolution.md) | Merged current `develop` and reconciled repository-status documentation in three files. | Documentation conflicts resolved; relative links and whitespace checked; no product source changes or application tests in this follow-up. |
 | 2026-10-07 / implementation | Earlier evidence in this record and packet history | Local Supabase CI request and implementation. | Interaction transcript/timestamps are not available in this session; historical implementation checks are retained above. |
 
 ## Canonical sync and archive
@@ -91,4 +92,4 @@ Known limitations: GitHub Actions execution cannot be claimed until the workflow
 - Sync verification: N/A; no spec delta.
 - Archive decision/date/path: User authorized archive on 2026-10-08; archived to `workflow/archive/2026-10-07-local-supabase-ci/` on 2026-10-08 after archive/index checks.
 - Navigation repairs after moving: Completed 2026-10-08; relative links and archive indexes verified.
-- Outstanding work/limitations: PR creation as final contributor action; actual PR Actions run. Issue #11 remains open for its broader staging/production and other CI work. Issue owner assignment remains a triage matter.
+- Outstanding work/limitations: PR #26 review and actual Supabase Actions run remain pending. Issue #11 remains open for its broader staging/production and other CI work. Issue owner assignment remains a triage matter.
