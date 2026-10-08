@@ -2,7 +2,9 @@
 
 The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. PR #15 is present in `develop` as `2fad6ed`; release remains separate.
 
-The issue #9 HR application review packet was accepted locally with recorded limits and [archived](../archive/2026-10-08-hr-application-review/record.md) on 2026-10-08 after canonical v0.8 sync. Commit, PR, shared Development Supabase migration, preview smoke and release remain separate actions.
+The issue #9 HR application review packet was accepted locally with recorded limits and [archived](../archive/2026-10-08-hr-application-review/record.md) on 2026-10-08 after canonical v0.8 sync. Local commit `47c4a3f` exists; push, PR, shared Development Supabase migration, preview smoke and release remain separate actions.
+
+The issue [#20](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/20) [signup password UX packet](2026-10-08-signup-password-ux/record.md) records a follow-up implemented before issue creation. Its proposal/delta are retrospective, independent review is recorded, and separate student acceptance plus canonical sync/archive remain pending.
 
 Start future contributor changes with a triaged GitHub issue, then create `workflow/changes/<YYYY-MM-DD-short-name>/`. Record all issue numbers/URLs, dependencies, student owner, issue-linked branch and risk classification. Issue creation is intake, not approval to implement product behavior.
 
