@@ -7,6 +7,9 @@ Archived packets:
 | Change | Disposition | Evidence |
 | --- | --- | --- |
 | [2026-10-07 Applicant accounts and applications](2026-10-07-applicant-applications/record.md) | Applicant owner accepted the local flow on 2026-10-07; ACC-001/APP-004/SEC-001 synced to v0.7 before archive. PR, merge and release pending. | [Independent review](2026-10-07-applicant-applications/handoffs/independent-review.md), [session summary](../../logs/2026-10-07-applicant-review-closeout.md) |
+| [2026-10-07 framework and Supabase structure](2026-10-07-framework-supabase-structure/record.md) | Requesting user accepted the reviewed work and recorded limitations on 2026-10-08; name/role not recorded. No product delta. PR creation is the final contributor action; PR checks and merge are tracked there. | [Independent review](2026-10-07-framework-supabase-structure/handoffs/independent-review.md), [session summary](../../logs/2026-10-08-supabase-branch-review-closeout.md) |
+| [2026-10-07 local Supabase CI](2026-10-07-local-supabase-ci/record.md) | Requesting user accepted the reviewed work and recorded limitations on 2026-10-08; name/role not recorded. Local-only workflow slice of #11; CI result is tracked on the PR. | [Feature record](2026-10-07-local-supabase-ci/record.md), [session summary](../../logs/2026-10-08-supabase-branch-review-closeout.md) |
+| [2026-10-08 Supabase skills and shadcn registry](2026-10-08-supabase-agent-skills-registry/record.md) | Retrospective packet for previously authorized setup; requester accepted reviewed work/limitations on 2026-10-08; no product delta. PR creation is the final contributor action; merge is tracked on the PR. | [Feature record](2026-10-08-supabase-agent-skills-registry/record.md), [session summary](../../logs/2026-10-08-supabase-branch-review-closeout.md) |
 
 ## Accepted change: sync, then archive
 
@@ -20,7 +23,7 @@ Rejected, withdrawn or superseded packets may be archived with their actual disp
 
 ## Archive checklist
 
-- [ ] Disposition and real decision source/date recorded; deployment/release state explicit.
-- [ ] Accepted product deltas synced and verified before archive, or documented no-product-delta / rejected disposition.
-- [ ] Complete packet and historical evidence preserved without fabricated approvals or results.
-- [ ] Archive path, current indexes and relative links checked; every session log remains linked.
+- [x] Disposition and real decision source/date recorded; deployment/release state explicit.
+- [x] Accepted product deltas synced and verified before archive, or documented no-product-delta / rejected disposition.
+- [x] Complete packet and historical evidence preserved without fabricated approvals or results.
+- [x] Archive path, current indexes and relative links checked; every session log remains linked.

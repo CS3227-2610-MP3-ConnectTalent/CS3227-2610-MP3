@@ -21,6 +21,6 @@ No parallel implementation. Existing `ci.yml` continues to run application check
 
 - [x] User supplied the workflow design and requested implementation on 2026-10-07; branch mapping and local flags are recorded in `design.md`.
 - [x] `tasks.md` maps the CI change to acceptance IDs.
-- [ ] Independent review, student acceptance, closeout summary, packet archive, and PR remain separate later gates.
+- [x] Independent review and closeout summary are recorded. Student acceptance, packet archive, and PR remain separate pending gates.
 - Approval/date/source: Direct user request and supplied Supabase workflow, 2026-10-07; requester name/role not provided.
 - Changes to this plan: None.

@@ -4,7 +4,7 @@
 - Owner/status/date: Requesting contributor; approved / in progress / 2026-10-07. Student owner assignment remains pending.
 - Approved inputs: `proposal.md`, `design.md`, no product delta.
 - Baseline and affected IDs: ProductSpec v0.7; OPS-003 is operational context only; acceptance IDs in proposal.
-- Constraints: Preserve user edits in `next-env.d.ts` on disk; do not alter runtime auth semantics, product behavior, database files, or secrets. Do not run application tests for this config/documentation and behavior-preserving cleanup.
+- Constraints: Preserve user edits in `next-env.d.ts` on disk; do not alter runtime auth semantics, product behavior, database files, or secrets. Verify static application checks; no dedicated session behavior change or behavior-specific test was planned.
 
 ## Dependency-ordered work
 
@@ -24,7 +24,7 @@ No parallel implementation. Preserve the exact existing cookie/session behavior 
 
 - [x] Requesting user approved the reviewed Supabase cleanup and Next.js generated-file handling before implementation.
 - [x] `tasks.md` maps the implementation to the acceptance criteria.
-- [ ] Independent review and human acceptance remain separate later gates.
-- [ ] Dated session summary and archive/PR closeout remain pending; no PR is being opened in this task.
+- [x] Initial independent review and user's archive/PR authorization are recorded separately from implementation.
+- [ ] Final independent artifact recheck, dated closeout and archive remain pending; PR is the final contributor action.
 - Approval/date/source: Direct user requests in this conversation, 2026-10-07; approver's name and student role not supplied.
 - Changes to this plan: None.

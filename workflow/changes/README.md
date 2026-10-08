@@ -1,6 +1,8 @@
 # Active change packets
 
-The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. No active packet is listed here now. PR, merge and release remain pending.
+The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. The Supabase setup packets for this branch have been archived; their records remain in [workflow/archive](../archive/README.md). No active change packet is listed here now.
+
+No product-spec sync was needed for those configuration and contributor-workflow changes. PR creation is the final contributor action; checks, merge and release are tracked separately.
 
 Start future contributor changes with a triaged GitHub issue, then create `workflow/changes/<YYYY-MM-DD-short-name>/`. Record all issue numbers/URLs, dependencies, student owner, issue-linked branch and risk classification. Issue creation is intake, not approval to implement product behavior.
 
