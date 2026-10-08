@@ -1,0 +1,26 @@
+name: Supabase CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  database-checks:
+    name: Database checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start
+      - name: Replay migrations from scratch
+        run: supabase db reset --local
+      - name: Run database tests
+        run: supabase test db --local
