@@ -4,7 +4,8 @@ Reusable careers portal for one employer per deployment. Applicants can browse p
 
 ## Prerequisites
 
-- Node.js 20.9 or newer and Corepack/pnpm 12.8.1
+- Node.js 24 LTS (Next.js 16 technically supports 20.9+, but Node 20 is end of life)
+- pnpm 12.8.1, pinned in `package.json`; Corepack selects that version, or you can install the same pnpm version directly
 - Docker Desktop (or a compatible container runtime) for local Supabase
 - A Supabase project and SoC LLM access when those integrations are implemented
 
@@ -20,6 +21,8 @@ For a fresh local Supabase stack, `db:start` applies the jobs, Applicant and HR 
 ```sh
 corepack pnpm dev
 ```
+
+For a repeatable **local-only** HR login, add `TEST_SUPABASE_SERVICE_ROLE_KEY` from `corepack pnpm exec supabase status` and a developer-chosen `LOCAL_HR_SEED_PASSWORD` (8–72 characters) to ignored `.env.local`, then run `corepack pnpm seed:local-hr`. Sign in as `local-hr@example.test` using that password. The command creates or reuses only this synthetic verified account, checks that it has no Applicant applications, and refuses any Supabase URL other than the local port 54321. It does not auto-login or provision a shared/hosted account. Keep the local admin key and password out of Git and chat. `supabase/seed.sql` continues to seed jobs; a database reset removes local Auth accounts, so rerun the command afterward.
 
 Visit <http://localhost:3000> to browse published jobs. Select a category or open a job card to read its details. The sample draft and closed postings must not appear. For Applicant flows, sign up with a matching confirmation password and verify using the local mail viewer at <http://127.0.0.1:54324>, then sign in, save/submit a cover letter, and visit **My applications**. The local mail viewer captures verification messages; they do not arrive in Gmail. Use `localhost` for the app throughout the confirmation flow.
 

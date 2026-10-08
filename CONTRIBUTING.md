@@ -10,10 +10,10 @@ the product contracts are the modular specifications indexed at
 
 This is a reusable careers portal with one employer per deployment. Read the product
 overview and the relevant capability requirements before changing behavior. The
-repository currently includes public job browsing, Applicant accounts and applications,
-locally accepted HR review of submitted applications, and signup password usability.
-HR job management and course-required AI features remain future slices. Do not describe
-a planned feature as implemented or create requirements solely from a design idea.
+repository includes public job browsing, Applicant accounts and applications, HR review
+of submitted applications, and signup password usability in `develop`. HR job management
+and course-required AI features remain future slices. Do not describe a planned feature
+as implemented or create requirements solely from a design idea.
 
 Applicant and HR users have different data and tasks. Keep their pages, navigation,
 actions, and states straightforward and distinct. Do not build a single role-switching
@@ -43,8 +43,8 @@ and demonstrations.
 
 ### Requirements
 
-- Node.js 20.9 or newer.
-- Corepack and pnpm 12.8.1, as declared in `package.json`.
+- Node.js 24 LTS. Next.js 16's minimum is 20.9, but Node 20 is end of life.
+- pnpm 12.8.1, as declared in `package.json`. Corepack selects the pinned version; a directly installed matching pnpm also works.
 - Docker Desktop or a compatible container runtime for local Supabase.
 - Supabase/SoCLaaS access only for work that uses those services. Do not put private
   applicant data or credentials into prompts or test fixtures.
@@ -72,6 +72,12 @@ corepack pnpm dev
 
 The local Supabase database uses synthetic seed data. Apply pending migrations to an
 existing local stack with `corepack pnpm exec supabase migration up --local`.
+To create a local-only synthetic HR login, add `TEST_SUPABASE_SERVICE_ROLE_KEY`
+from the local `supabase status` output and a chosen `LOCAL_HR_SEED_PASSWORD`
+(8–72 characters) to ignored `.env.local`, then run `corepack pnpm seed:local-hr`.
+Sign in as `local-hr@example.test` with that password. The command refuses hosted
+Supabase URLs, checks the account has no Applicant applications, and does not
+auto-login or create a shared grader account. Never commit or send the key/password.
 `corepack pnpm db:reset`
 rebuilds the local database and can discard local data; use it only when that reset
 is intended. Stop the local Supabase stack when finished:
