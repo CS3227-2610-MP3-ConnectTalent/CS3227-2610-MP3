@@ -14,7 +14,8 @@
     "test:race": "node tests/integration/application-races.mjs",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "seed:local-hr": "node --env-file=.env.local scripts/seed-local-hr.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
