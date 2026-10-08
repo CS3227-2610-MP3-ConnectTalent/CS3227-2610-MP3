@@ -1,10 +1,10 @@
 # Developer Guide
 
-Status: public browsing and issue #6 Applicant work are in `develop`. Issues #9 HR review and #20 signup password usability were implemented, locally tested, independently reviewed and accepted locally with recorded limits on `feat/9-hr-application-review`. No #9/#20 PR, shared database migration or release has occurred.
+Status: public browsing, Applicant applications, HR review and signup password usability are merged into `develop` through PR #22. Shared Development Supabase migration, preview validation and release remain separate.
 
 ## Architecture
 
-The project is a reusable careers portal for one employer per deployment. It needs no employer name or employer selector; all job records in a deployment belong to the same employer. The Next.js home page and job detail route read jobs server-side through a Supabase publishable key. Queries explicitly require `published` status, while PostgreSQL row-level security independently limits public reads to published rows. Supabase Auth identifies verified Applicants and manually promoted HR accounts; the HR review interface is on the issue #9 branch. The SoCLaaS API will later be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod validates job and application data; AI input/output validation is still planned.
+The project is a reusable careers portal for one employer per deployment. It needs no employer name or employer selector; all job records in a deployment belong to the same employer. The Next.js home page and job detail route read jobs server-side through a Supabase publishable key. Queries explicitly require `published` status, while PostgreSQL row-level security independently limits public reads to published rows. Supabase Auth identifies verified Applicants and manually promoted HR accounts; the HR review interface is in `develop`. The SoCLaaS API will later be called only from server code through an OpenAI-compatible client configured with the SoCLaaS base URL. Zod validates job and application data; AI input/output validation is still planned.
 
 ```text
 Applicant/HR browser → Next.js pages and server routes
@@ -40,6 +40,8 @@ returning p.user_id, p.role;
 ```
 
 Require exactly one returned row; zero means no promotion occurred. Record the authorized administrator, target and time in the team's private operation log. The app has no promotion endpoint or service-role key. For the local HR Playwright test, provide `TEST_SUPABASE_SERVICE_ROLE_KEY` from the **local** stack only; it creates synthetic users/jobs. Never use a hosted service-role key for that test.
+
+For teammate development, `corepack pnpm seed:local-hr` provisions the fixed synthetic `local-hr@example.test` account **only on the loopback Supabase endpoint**. Put the local `TEST_SUPABASE_SERVICE_ROLE_KEY` and a chosen `LOCAL_HR_SEED_PASSWORD` in ignored `.env.local`; see the root README. The script uses the Auth admin API, verifies the user and absence of Applicant applications, and updates only the account's local profile. A second run reuses the marked synthetic account and reconciles its password. It refuses an unmarked account at that address and any non-local URL. `supabase/seed.sql` remains for job rows; SQL Auth placeholders would not give a login-capable account. This development helper does not create a hosted HR account, public HR signup, automatic login or grader credentials. The earlier separate hosted demo plan was retired in issue #21.
 
 ### Shared Development Supabase gate
 

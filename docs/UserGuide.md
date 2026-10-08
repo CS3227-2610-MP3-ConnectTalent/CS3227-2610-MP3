@@ -1,6 +1,6 @@
 # User Guide
 
-Status: job browsing and Applicant applications are implemented; issues #9 HR review and #20 signup password usability were independently reviewed and accepted locally with recorded limits on `feat/9-hr-application-review`. HR job posting and AI features remain planned. This branch is not a deployed release.
+Status: job browsing, Applicant applications, HR review and signup password usability are merged into `develop` through PR #22. HR job posting and AI features remain planned. Shared Development Supabase migration and hosted validation are still pending; this is not a deployed release guide.
 
 ## Access
 
@@ -12,15 +12,15 @@ To apply, select a published job and choose **Apply for this role**. Create an A
 
 The local stack must have `auth.email.enable_confirmations = true` in `supabase/config.toml`; restart Supabase after changing it. No public app deployment or shared peer-test account is available yet.
 
-## HR review on the issue #9 branch
+## HR review in `develop`
 
 After an administrator promotes a verified, dedicated account to HR, sign in through the same **Sign in** page. The HR account opens **Application review** at `/hr/applications`. The list contains submitted applications only. Open an application to compare original and current cover letters, read private HR notes and status history, add a note of at most 2,000 characters, or change status through the separate **Update status** action. Status starts at **Submitted**; HR may select **In review**, **Shortlisted** or **Rejected** and change among those three later. A stale status form asks you to reload. Submitted applications remain reviewable after job closure. Applicants see their own current status under **My applications**, without HR notes or status history.
 
-Public signup always creates an Applicant. There is no HR signup or role-switching control. A team administrator must provision HR as described in the Developer Guide. Use synthetic accounts for local testing. The HR review pages require the issue #9 database migration; a PR preview using the shared Development Supabase project may be unavailable until the team applies that reviewed migration. HR AI summaries and HR job management remain separate features.
+Public signup always creates an Applicant. There is no HR signup or role-switching control. A team administrator must provision hosted HR as described in the Developer Guide. For local teammate testing, the README describes a local-only synthetic HR seed command; it does not auto-login or provide a shared grader account. The HR review pages require the issue #9 database migration; a preview using the shared Development Supabase project may be unavailable until the team applies that reviewed migration. HR AI summaries and HR job management remain separate features.
 
 ## Planned roles
 
 - **Applicant:** browse published openings, verify an account, save a private text draft, submit and view an application, and edit the letter until the job closes. SoCLaaS cover-letter drafting is planned.
-- **HR:** review submitted applications, write private notes and change status on the issue #9 branch. Job listing management and a SoCLaaS summary remain planned.
+- **HR:** review submitted applications, write private notes and change status in `develop`. Job listing management and a SoCLaaS summary remain planned.
 
 Both AI features are advisory. Applicants submit their own final text; HR makes every hiring decision.

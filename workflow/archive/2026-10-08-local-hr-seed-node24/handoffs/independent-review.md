@@ -1,0 +1,11 @@
+# Independent review: #24/#25 local HR seed and setup
+
+Date: 8 October 2026. Reviewer: separate read-only Codex security/privacy agent `/root/local_seed_review`. Scope: the local seed implementation, tests, setup documentation, account cleanup, and packet evidence. This was an independent diff review; the reviewer did not implement the change or independently run the local sign-in flow.
+
+## Findings and disposition
+
+1. **Low, fixed:** the first version created the account with its chosen password before checking applications and promoting it to HR. A local Applicant could have signed in and submitted in that interval. The implementation now creates a verified marked account with an unknown random temporary password, checks its profile/application count, promotes it, and only then sets the chosen password. Focused tests cover the temporary-password order and refusal to re-promote an existing marked Applicant account. The reviewer rechecked this fix.
+2. **Evidence mismatch, fixed:** the initial packet described deleting the earlier manually created HR account, while the student's later decision was to revoke its HR role and retain its note/status event. Proposal, design, plan, record, and local readback now reflect revocation and retention. The reviewer rechecked the wording.
+3. **Approval wording, fixed:** packet index and design previously called approval pending/draft after Paul had explicitly approved the proposal/design/plan. These now record the 8 October approval. This is separate from final feature acceptance, which remains pending.
+
+The reviewer found no remaining blocking issue in the final diff. The script's fixed loopback URL guard, admin-only ownership marker, refusal of unmarked/existing Applicant accounts, and absence of tracked credentials are within the approved local-only scope. A new account may remain as a marked Applicant with an unknown password if promotion fails; if password reconciliation fails after promotion, rerun the command. The design records both recovery paths. The reviewer could not run Vitest in its sandbox (`spawn EPERM`); the implementer's outside-sandbox unit run passed 9 files/37 tests, and local sign-in was tested separately. No hosted project, deployment, or grader account was reviewed or changed.

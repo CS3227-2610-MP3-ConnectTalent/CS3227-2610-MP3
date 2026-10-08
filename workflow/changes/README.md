@@ -8,7 +8,9 @@ The issue [#20](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3
 
 The Vercel-aware Supabase Auth redirect and Conventional Commit PR-title packets are archived in [workflow/archive](../archive/README.md); PR #19 is merged to `develop`.
 
-The Supabase setup packets for PR #26 are archived in [workflow/archive](../archive/README.md). PR #26 remains open; its temporary local Supabase database check is pending. No product-spec sync was needed for PR #26's configuration and contributor-workflow changes. No active change packet is listed here now.
+The Supabase setup packets for PR #26 are archived in [workflow/archive](../archive/README.md). PR #26 merged into `develop` at `eeebb75`; its archived record retains the checks and limits observed before merge. No product-spec sync was needed for its configuration and contributor-workflow changes.
+
+Issues [#24](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/24) and [#25](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/25) share the [archived local HR seed and Node 24 setup packet](../archive/2026-10-08-local-hr-seed-node24/record.md). Paul separately accepted the local work with recorded limits after [independent review](../archive/2026-10-08-local-hr-seed-node24/handoffs/independent-review.md). There is no product-spec delta. The separate hosted demo account issue #21 was closed at the student's request; local teammate setup does not supply hosted grader access.
 
 Start future contributor changes with a triaged GitHub issue, then create `workflow/changes/<YYYY-MM-DD-short-name>/`. Record all issue numbers/URLs, dependencies, student owner, issue-linked branch and risk classification. Issue creation is intake, not approval to implement product behavior.
 
