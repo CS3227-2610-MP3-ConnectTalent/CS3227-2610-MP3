@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAppSiteOrigin } from "@/lib/supabase/site-url";
 
 const credentialsSchema = z.object({ email: z.email().max(254), password: z.string().min(8).max(72) });
 
@@ -13,11 +14,10 @@ export async function signUp(formData: FormData) {
   if (parsed.data.password !== formData.get("confirmPassword")) {
     redirect("/auth/sign-up?error=password-mismatch");
   }
-  const siteUrl = process.env.APP_SITE_URL ?? "http://localhost:3000";
   const client = await createSupabaseServerClient();
   const { error } = await client.auth.signUp({
     ...parsed.data,
-    options: { emailRedirectTo: new URL("/auth/callback", siteUrl).toString() },
+    options: { emailRedirectTo: new URL("/auth/callback", getAppSiteOrigin()).toString() },
   });
   if (error) redirect("/auth/sign-up?error=signup");
   redirect("/auth/check-email");

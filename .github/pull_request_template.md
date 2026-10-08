@@ -1,3 +1,5 @@
+<!-- PR title policy: use Conventional Commits format `type[optional scope][!]: description`, for example `fix(auth): resolve Vercel redirects`. -->
+
 ## Issues and evidence
 
 Closes #<!-- resolved issue number; repeat Closes #N for each resolved issue -->

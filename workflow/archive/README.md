@@ -7,6 +7,8 @@ Archived packets:
 | Change | Disposition | Evidence |
 | --- | --- | --- |
 | [2026-10-07 Applicant accounts and applications](2026-10-07-applicant-applications/record.md) | Applicant owner accepted the local flow on 2026-10-07; ACC-001/APP-004/SEC-001 synced to v0.7 before archive. PR, merge and release pending. | [Independent review](2026-10-07-applicant-applications/handoffs/independent-review.md), [session summary](../../logs/2026-10-07-applicant-review-closeout.md) |
+| [2026-10-07 Vercel-aware Supabase Auth redirects](2026-10-07-vercel-auth-redirects/record.md) | Requester accepted the scoped changes on 2026-10-08; no product delta. PR pending. Student role and issue triage are not independently confirmed. | [Independent review](2026-10-08-conventional-pr-titles/handoffs/independent-review.md), [session summary](../../logs/2026-10-08-supabase-auth-and-pr-title-closeout.md) |
+| [2026-10-08 Conventional Commit PR titles](2026-10-08-conventional-pr-titles/record.md) | Requester accepted the process policy on 2026-10-08; no product delta. PR pending. Student role and issue triage are not independently confirmed. | [Independent review](2026-10-08-conventional-pr-titles/handoffs/independent-review.md), [session summary](../../logs/2026-10-08-supabase-auth-and-pr-title-closeout.md) |
 
 ## Accepted change: sync, then archive
 

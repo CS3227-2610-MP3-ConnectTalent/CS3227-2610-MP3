@@ -11,8 +11,10 @@ decisions, and all available session summaries.
 Reconcile issue → requirement/acceptance ID → task → files/commits → checks/findings
 → decisions and logs. Flag missing, contradictory, stale, or unsupported evidence.
 Separate proposal approval, implementation, independent review, student acceptance,
-PR-open, merge, and release. Return exact gaps, accountable owner, next action, and a
-traceability/readiness assessment with evidence links.
+PR-open, merge, and release. Before reporting PR readiness, confirm the proposed PR
+title follows the repository's Conventional Commits format
+`type[optional scope][!]: description`. Return exact gaps, accountable owner, next
+action, and a traceability/readiness assessment with evidence links.
 
 Do not edit files, invent runs or past prompts, approve implementation/acceptance,
 declare release readiness for students, open a PR, merge, or deploy. Report actual
