@@ -62,7 +62,7 @@ select is((select count(*) from public.jobs where id = current_setting('job8.dra
 select is((select count(*) from public.applications where job_id = current_setting('job8.draft_id')::uuid and submission_state = 'submitted'), 1::bigint, 'HR still reads submitted application after closure');
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a01', true);
 select is((select count(*) from public.applications where job_id = current_setting('job8.draft_id')::uuid), 1::bigint, 'Applicant still reads own application after closure');
-select throws_ok($$select public.edit_submitted_letter(current_setting('job8.draft_id')::uuid, 'Late edit', 1)$$, 'P0001', 'Job is not open for edits', 'closed job rejects submitted-letter edits');
+select throws_ok($$select public.edit_submitted_letter(current_setting('job8.draft_id')::uuid, 'Late edit', 1)$$, '42501', 'permission denied for function edit_submitted_letter', 'Applicants cannot call the submitted-letter edit RPC after the freeze is enabled');
 set local role anon;
 select is((select count(*) from public.jobs where id = current_setting('job8.draft_id')::uuid), 0::bigint, 'closed job is hidden from public reads');
 

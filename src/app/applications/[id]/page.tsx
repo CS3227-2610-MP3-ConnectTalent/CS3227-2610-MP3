@@ -25,13 +25,14 @@ export default async function ApplicationDetail({
     {application.submission_state === "submitted" && application.review_status &&
       <p>Review status: <strong>{reviewStatusLabel(application.review_status)}</strong></p>}
     {!job && <p className="rounded-lg border p-3">This job is no longer open. Your application remains available to read, but cannot be changed.</p>}
-    {application.submission_state === "submitted" && <section className="space-y-2">
+    {application.submission_state === "submitted" ? <section className="space-y-2">
       <h2 className="text-xl font-semibold">Original submission</h2>
       <p className="whitespace-pre-wrap rounded-lg border p-4">{application.original_submitted_letter}</p>
-    </section>}
-    {job ? <ApplicationForm jobId={application.job_id} value={application.cover_letter}
-      revision={application.revision} submitted={application.submission_state === "submitted"} /> :
-      <section className="space-y-2"><h2 className="text-xl font-semibold">{application.submission_state === "draft" ? "Saved letter" : "Current letter"}</h2>
-        <p className="whitespace-pre-wrap rounded-lg border p-4">{application.cover_letter || "(empty draft)"}</p></section>}
+      <p className="text-sm text-muted-foreground">Submitted applications are locked. Contact HR if you need to request a correction.</p>
+    </section> : job ? <ApplicationForm jobId={application.job_id} value={application.cover_letter}
+      revision={application.revision} submitted={false} /> :
+      <section className="space-y-2"><h2 className="text-xl font-semibold">Saved letter</h2>
+        <p className="whitespace-pre-wrap rounded-lg border p-4">{application.cover_letter || "(empty draft)"}</p>
+      </section>}
   </main>;
 }

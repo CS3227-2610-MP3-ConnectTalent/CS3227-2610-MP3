@@ -1,6 +1,6 @@
 # Active change packets
 
-The packet for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) is [2026-10-09-soclaas-ai](2026-10-09-soclaas-ai/proposal.md). John is the accountable student for this feature, assigned in chat on 2026-10-09. John approved the written proposal, deltas, design and plan and reported coordinating with Paul on 2026-10-09; implementation is in progress.
+The packet for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) is [2026-10-09-soclaas-ai](2026-10-09-soclaas-ai/proposal.md). John is the accountable student for this feature, assigned in chat on 2026-10-09. John approved the written proposal, deltas, design and plan, reported coordinating with Paul, and approved the 24/minute quota and server-only quota/audit RPC amendment on 2026-10-09. Local implementation checks are complete; independent recheck and post-review student acceptance remain pending.
 
 The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. PR #15 is present in `develop` as `2fad6ed`; release remains separate.
 

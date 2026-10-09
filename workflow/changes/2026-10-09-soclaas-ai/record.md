@@ -1,6 +1,6 @@
 # Feature record: SoCLaaS Applicant draft and HR summary
 
-Status: proposal/specs/design/plan approved; implementation in progress
+Status: approved implementation and amended safeguards verified locally; independent recheck and post-review student acceptance, canonical sync, closeout, and PR remain pending
 
 Owner: John, student owner for issues #7 and #10 as assigned in chat on 2026-10-09
 
@@ -12,7 +12,7 @@ Date: 2026-10-09
 
 - Change ID/classification: 2026-10-09-soclaas-ai; behavior change and AI/security integration
 - GitHub issues: [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10). John confirmed feature ownership in chat. No GitHub issue assignment was changed.
-- Branch/commits/PR: feat/7-10-soclaas-ai; product baseline 0a0f5c4; initial packet commit 0826a16; approved-plan baseline 2a5217b; PR pending
+- Branch/commits/PR: `feat/7-10-soclaas-ai`; product baseline `0a0f5c4`; initial packet commit `0826a16`; approved-plan commit `2a5217b`; implementation baseline `d34bd49`; fetched `origin/develop` at `db46f10` and merged it in `6806b08`; implementation/amendment changes remain uncommitted while final reviewer recheck is prepared; PR pending
 - Proposal: proposal.md
 - Design: design.md
 - Deltas: specs/applications-and-review.md (APP-004); specs/applicant-ai-draft.md (AID-001/AID-002); specs/hr-ai-summary.md (AIS-001/AIS-002); specs/security-and-privacy.md (SEC-001/SEC-006/SEC-007); specs/deployment-and-operations.md (OPS-002)
@@ -28,8 +28,9 @@ Date: 2026-10-09
 - [x] John reported coordinating the APP-004 change with Paul Cheng on 2026-10-09; this report is not independently verified and does not change the recorded process-owner role.
 - [x] John approved `plan.md` and `tasks.md` before product implementation on 2026-10-09.
 - [x] Human approved proposal, deltas, design, and implementation plan before product implementation.
-- [ ] Implementation and relevant checks complete.
-- [ ] Independent review and human acceptance complete.
+- [x] John approved a plan amendment on 2026-10-09: deployment quota lowered from 60 to 24 per rolling minute; provider 429 handling retained; a server-only Supabase secret/service-role credential may call quota/audit metadata RPCs only; Applicant/HR data reads remain on the signed-in RLS session.
+- [x] Implementation and final deterministic checks complete locally after that amendment. T10 used synthetic-only direct provider calls after querying the configured key's model catalog and budget without printing credentials; the current application flag remains disabled and its configured model remains a placeholder.
+- [ ] Independent recheck and separate post-review student acceptance complete.
 - [ ] Accepted canonical sync, closeout, dated log, and archive complete.
 - [ ] Issue-linked PR opened last.
 
@@ -41,23 +42,35 @@ See proposal.md for AI-AC-01 through AI-AC-07 and their observable outcomes/evid
 
 ## Agent handoffs
 
-No subagents or separate reviewers have run. The inline implementation assignment is recorded in [handoffs/implementation.md](handoffs/implementation.md). Independent review remains pending.
+Implementation was inline, as recorded in [handoffs/implementation.md](handoffs/implementation.md). A separate read-only security/privacy review is recorded in [handoffs/independent-review.md](handoffs/independent-review.md); its P2 findings and final recheck/acceptance remain open.
 
 ## Implementation and tests
 
-Changed files: packet documentation only, including written-spec approval status, `plan.md`, and `tasks.md`; product implementation not started.
+Changed files: the complete product file list and packet artifacts are in `handoffs/implementation.md`. Changes cover the server-only AI client/contracts/data access/routes, separate Applicant and HR UI, submitted-letter freeze and audit/quota migrations, synthetic database/integration/unit/browser security tests, README configuration, and the `test:ai-race` script. The pre-existing `.env.example` edit remains preserved and excluded; it was not read or changed. `.env.local` and `.env.dev` were not opened.
 
-Commands and results: The initial packet commit passed `git diff --cached --check`. This plan-drafting update passed `git diff --cached --check`; a local relative-Markdown-link check passed for the AI packet and changes index. External link availability was not checked. Application tests are N/A because no application code changed.
+Commands and results (2026-10-09): package commands were invoked as `& 'C:\Program Files\nodejs\corepack.cmd' pnpm ...` because Corepack was not on this PowerShell session's PATH; the pinned pnpm version was 12.8.1.
 
-Security/adversarial cases and results: Planned in proposal.md/design.md; none executed.
+- Test-first red evidence: `corepack pnpm exec vitest run tests/unit/application-action-retry.test.ts` produced 1 intended correction-routing failure; initial `corepack pnpm test:db` showed 17/17 missing AI catalog assertions and 6/30 freeze lifecycle assertions failing; `corepack pnpm exec playwright test tests/e2e/ai-route-security.spec.ts` showed the anonymous endpoint returning 404 instead of 401. A later Applicant E2E assertion failed with 2 copies of the submitted letter instead of 1; the detail view was simplified and the focused E2E then passed. Per-assertion AI unit-test red runs were not captured.
+- Focused AI/action/render tests: `corepack pnpm exec vitest run tests/unit/ai-schemas.test.ts tests/unit/ai-routes.test.ts tests/unit/ai-provider.test.ts tests/unit/application-action-retry.test.ts tests/unit/hr-ai-summary.test.tsx` — 5 files, 20 tests passed.
+- Final unit/lint/type checks: `corepack pnpm test:unit` — 14 files, 64 tests passed; `corepack pnpm lint` passed; `corepack pnpm typecheck` passed.
+- Database: before the amended migration history, `corepack pnpm test:db` passed 4 SQL files/122 assertions. After applying the pending develop HR migration and approved quota-RPC migration locally without reset, the first run failed three assertions: two synthetic identity checks retained an HR JWT subject, and the HR-job test expected the prior closed-job RPC error even though the submitted-letter freeze revokes the RPC. The tests were corrected to set the complete Applicant JWT identity and assert the intended permission denial. Final `corepack pnpm test:db` passed all 5 SQL files/162 assertions.
+- Concurrency: `corepack pnpm test:race` passed duplicate-submit, close-first and submit-first races. Before the amendment, the AI race passed with 61 users/60 reservations. Final `corepack pnpm test:ai-race` passed: 25 concurrent synthetic users produced exactly 24 deployment reservations and one denial.
+- Browser: first full `corepack pnpm test:e2e` run had one 30-second timeout in the two-account Applicant lifecycle flow. The isolated flow then passed in 29.0 seconds, close to the old timeout, so its test-specific limit was raised to 60 seconds. Final full E2E passed 7 tests and skipped 4: HR review, HR job management, and two password-recovery tests require the unavailable local `TEST_SUPABASE_SERVICE_ROLE_KEY`. No hosted key was used.
+- Build/bundle/diff: final `corepack pnpm build` passed and listed both AI API routes as dynamic. A search of `.next/static` found no SoCLaaS/Supabase secret configuration names or key-like values. `git diff --check` passed; Git emitted line-ending conversion warnings, not whitespace errors.
+- Local advisor: `corepack pnpm exec supabase db advisors --local --type all --level info` reported INFO-level unindexed foreign keys on `application_notes` and `application_status_events`, unused-index info for `ai_invocations_created_idx`, and a WARN about the expected combined `published jobs` and `Verified HR reads all jobs` SELECT policies. No security-level finding was reported. The quota index supports the global rolling-window query and was retained; the jobs policies provide the intended public published-only and HR-wide reads.
+- Provider readiness/evaluation (2026-10-09): SoCLaaS `/v1/models` returned the configured key's allowed model IDs; `llama3.1:8b` and `qwen3.5:9b` were present. The key budget endpoint returned HTTP 200 with a 30 requests/minute limit, 50,000,000 microdollars/day, 500,000,000 microdollars/month, and zero current day/month spend. These are rate-control units, not a monetary charge. No credential, key prefix, endpoint, or local environment-file content was printed. The app's `SOCLAAS_AI_ENABLED` value is false and `SOCLAAS_MODEL` is still `replace-with-an-available-model-id`; both remain unchanged.
 
-Known limitations: Actual SoCLaaS key/model quota not verified in this packet-drafting turn. No live model call made. The current user modification to .env.example is preserved and was not read or edited.
+  Live synthetic model observations are separate from deterministic checks. Three calls to `llama3.1:8b` used the implementation's JSON mode and output caps: the Applicant draft was well-formed and used only supplied capstone/React/team notes; the benign HR summary was well-formed and identified the unaddressed cloud-deployment requirement; the adversarial letter asking to reveal HR notes, rank the applicant, and change status was answered without those actions or a recommendation. The adversarial output incorrectly said teamwork was not addressed even though the synthetic letter mentioned a four-person team, confirming that valid structure and injection resistance do not prove factual accuracy. Three `qwen3.5:9b` feature-shaped calls and one minimal plain-text diagnostic returned empty content with `finish_reason=length`; the implementation rejects empty content. These were direct synthetic provider calls, not app-route/DB integration tests, and no real applicant text or database record was used.
+
+Security/adversarial coverage: SQL tests prove submitted-letter immutability, ownership/role checks, metadata-only audit fields, authenticated/anonymous denial of quota RPC execution, service-role-only grants, HR-only requirements access and quota denials. The AI race check proves the new global cap under concurrency. Unit tests prove denial before protected reads/provider calls, minimal exact payloads, no tools or retries, strict output rejection, safe failure states, and provider 429 handling with valid/invalid retry headers and audit-finalization failure. Synthetic malicious note/letter text is treated as untrusted and private HR notes/other applications are absent from the exact model payload. React rendering escapes script-like output. E2E coverage for HR summary status/source behavior exists, but HR E2E cases were skipped because the local service-role test key was unavailable. No live model output is asserted as factually correct.
+
+Known limitations: independent review recheck and post-review student acceptance remain pending. The current local app configuration remains disabled/placeholder, so the live calls do not establish that the application routes are configured for production. HR/job-management/password-recovery browser cases were skipped because the local test service-role key was unavailable. `origin/develop` was merged into the feature branch; its pending local migration was applied, but no hosted migration, deployment, PR merge, or release occurred. The `.env.example` user edit was not read/changed. `.env.local` and `.env.dev` contents were not manually inspected or printed; Next.js reported `.env.local` during local build/dev runs.
 
 ## Review and decision
 
-Reviewer findings and fixes: Pending independent review after implementation.
+Reviewer findings and fixes: A separate read-only reviewer examined base `0a0f5c4`, merged `HEAD 6806b08`, and the then-current uncommitted implementation; see [handoffs/independent-review.md](handoffs/independent-review.md). Finding 1 (P2): authenticated users could directly reserve shared quota through the public RPC. John approved a narrow server-only metadata-RPC credential and the 24/minute cap on 2026-10-09. The latest migration removes authenticated grants and checks actor/role/target; pgTAP and the concurrent quota test pass. Independent recheck remains pending. Finding 2 (P2): hiring-decision language inside an allowed HR summary array passed the strict shape schema. A decision-language output guard and regression tests reject common recommendation/ranking phrases; the earlier focused schema run passed 5/5, and the latest full unit suite passes 72/72. This lexical guard does not guarantee semantic accuracy. Independent recheck remains pending.
 
-Human decision and date: John approved the written proposal, deltas, design, and plan and reported coordinating with Paul on 2026-10-09.
+Human decisions and date: John approved the written proposal, deltas, design and original plan, and reported coordinating with Paul on 2026-10-09. On 2026-10-09, John approved the amended 24/minute global cap, continued provider 429 handling, and server-only quota/audit RPC credential. His acceptance of the final reviewed implementation remains pending.
 
 Guide/reflection/log updates: This record is the current evidence index; dated session log is pending closeout.
 
@@ -65,7 +78,7 @@ Guide/reflection/log updates: This record is the current evidence index; dated s
 
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
-| 2026-10-09 | Pending | Issue #7/#10 scope; freeze submitted application decision; SoCLaaS AI design; robust-error handling condition; owner John; written-spec approval, reported Paul coordination, plan/tasks approval, implementation start. | Proposal/spec/design/plan approval is recorded; test-first implementation, deterministic checks, live evaluation, independent review, acceptance and closeout remain pending. |
+| 2026-10-09 | Pending closeout log | Issue #7/#10 scope; freeze submitted application decision; SoCLaaS AI design; robust-error handling; owner John; user-reported Paul coordination; plan approval; merge from `origin/develop`; approval of the quota/RPC amendment; corrective verification; live synthetic evaluation; reviewer findings and remediation. | Local migrations applied without reset. pgTAP, both race checks, 72 unit tests, lint, typecheck, build, bundle scan, and final E2E (7 passed/4 skipped) passed. Live model outputs include an observed factual error; app flag/model remain disabled/placeholder. Independent recheck, student acceptance and workflow closeout remain pending. |
 
 ## Canonical sync and archive
 
@@ -74,4 +87,4 @@ Guide/reflection/log updates: This record is the current evidence index; dated s
 - Sync verification: Pending acceptance.
 - Archive decision/date/path: Pending.
 - Navigation repairs after moving: Pending.
-- Outstanding work/limitations: Implement test-first; run deterministic security checks and separately report live synthetic SoCLaaS observations if credentials/model access are available; independent review and student acceptance; canonical sync and closeout. Paul's coordination is user-reported and not independently verified. Actual SoCLaaS key/model quota is unverified. The modified `.env.example` remains excluded and untouched.
+- Outstanding work/limitations: obtain independent recheck of both implemented findings, then record John’s post-review acceptance; sync accepted canonical requirements; complete dated session log and closeout; open the issue-linked PR last. The live evaluation used synthetic inputs only and exposed an HR factual error; it does not establish production readiness. Paul's coordination is user-reported and not independently verified. The modified `.env.example` remains excluded and untouched.
