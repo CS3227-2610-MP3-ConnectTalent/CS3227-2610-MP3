@@ -28,7 +28,7 @@
 
 ## Review independence and decision
 
-- Implementer identity/range: Codex inline execution; baseline `d34bd49`; initial implementation commit `70c34cf` on top of merge commit `6806b08`; T10a extractive-output refinement is prepared for a focused follow-up commit. Final reviewer recheck is pending.
+- Implementer identity/range: Codex inline execution; baseline `d34bd49`; initial implementation commit `70c34cf` on top of merge commit `6806b08`; T10a extractive-output refinement committed as `131ef15`. Final reviewer recheck is pending.
 - Reviewer identity/context: Separate delegated read-only security/privacy reviewer; see `independent-review.md`. The reviewer did not implement changes or rerun tests.
 - Independence: Separate execution from the inline implementation; no implementation subagent ran.
 - Findings and resolutions: The reviewer rechecked the P2 quota-RPC fix in `70c34cf`: service-role-only metadata functions, the approved 24/minute cap, actor/role/target checks, and session/RLS content reads. The reviewer also demonstrated recommendation paraphrases passing the lexical guard and ordinary factual language being rejected. John approved the T10a source-ID-only output design on 2026-10-09. Implementation now returns no model-authored strings: strict ID schema, dynamic source-range checks, server-mapped excerpts and deterministic follow-ups. Recheck against the follow-up commit is pending. Test-scope, JWT fixture, closed-job assertion, and Applicant test-timeout issues were corrected; regression checks passed.
