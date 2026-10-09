@@ -50,3 +50,7 @@ Both AI features are advisory. Applicants submit their own final text; HR makes 
 ## Role navigation and signup guidance (#40 integration)
 
 The careers header shows Sign in/Create account to guests. Signed-in Applicants see My applications and Sign out; HR sees Application review, Manage jobs and Sign out. A failed sign-out displays retry feedback. Signup keeps neutral email-verification guidance; local Mailpit instructions remain in the development guide, outside the signup screen. The [integration record](../workflow/archive/2026-10-09-signup-notice-navigation/record.md) records local verification and remaining hosted limits.
+
+## Refreshed interface (#42 branch)
+
+The careers page groups existing category links in a sidebar on desktop and a wrapping panel on mobile. Job cards show the actual category, team, title and description; View role opens the existing detail page. The dark account header retains role-specific links and Sign out. Sign-in and signup place the Careers link above a lavender information panel and form; these panels stack on mobile. Auth, application and HR pages use consistent panels and feedback styling; actions and permission rules are unchanged. This describes the locally tested UI branch, not a deployed release.

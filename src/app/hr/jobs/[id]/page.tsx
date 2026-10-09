@@ -17,13 +17,13 @@ export default async function HRJobDetail({ params, searchParams }: {
   const { id } = await params;
   let job;
   try { job = await getHRJob(id); } catch {
-    return <main className="mx-auto max-w-3xl px-5 py-10"><h1 className="text-3xl font-semibold">Manage jobs</h1>
+    return <main className="page-shell mx-auto max-w-3xl px-5 py-10"><h1 className="text-3xl font-semibold">Manage jobs</h1>
       <p role="alert" className="mt-5">Job is temporarily unavailable. Try again later.</p></main>;
   }
   if (!job) notFound();
   const { error, notice } = await searchParams;
   const statusLabel = job.status === "draft" ? "Draft" : job.status === "published" ? "Published" : "Closed";
-  return <main className="mx-auto max-w-3xl space-y-7 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-3xl space-y-7 px-5 py-10">
     <Link href="/hr/jobs" className="underline">← Manage jobs</Link>
     <header className="space-y-2"><p className="text-sm text-muted-foreground">{categoryLabel(job.category)} · {job.team}</p>
       <h1 className="text-3xl font-semibold">{job.title}</h1><p>{statusLabel}</p></header>
