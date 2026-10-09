@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 // Local-only integration check. Requires this project's running Supabase Docker stack.
 const container = "supabase_db_CS3227-2610-MP3";
 const userId = randomUUID();
+const hrId = randomUUID();
 const jobs = [randomUUID(), randomUUID(), randomUUID()];
 const email = `race-${userId}@example.test`;
 
@@ -62,15 +63,27 @@ function applicantSql(statement, marker) {
     commit;`;
 }
 
+function hrSql(statement, marker) {
+  return `begin;
+    set local role authenticated;
+    select set_config('request.jwt.claim.sub', '${hrId}', true);
+    ${statement};
+    select '${marker}';
+    select pg_sleep(5);
+    commit;`;
+}
+
 const insertFixtures = `
   insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at)
-    values ('${userId}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '${email}', '', now());
+    values ('${userId}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '${email}', '', now()),
+      ('${hrId}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'race-hr-${hrId}@example.test', '', now());
+  update public.profiles set role = 'hr' where user_id = '${hrId}';
   insert into public.jobs (id, title, team, category, description, requirements, status, published_at)
     values ${jobs.map((id, index) => `('${id}', 'Race job ${index + 1}', 'Engineering', 'engineering', 'Synthetic description', 'Synthetic requirements', 'published', now())`).join(",\n")};`;
 const cleanup = `
   delete from public.applications where job_id in (${jobs.map((id) => `'${id}'`).join(",")});
   delete from public.jobs where id in (${jobs.map((id) => `'${id}'`).join(",")});
-  delete from auth.users where id = '${userId}';`;
+  delete from auth.users where id in ('${userId}', '${hrId}');`;
 
 let fixturesCreated = false;
 try {
@@ -92,7 +105,7 @@ try {
   if (duplicateCount.output.trim() !== "1") throw new Error("Concurrent submissions created more than one row");
 
   // Closure wins the job lock: the waiting submit must be rejected.
-  const closing = startSql(`begin; update public.jobs set status = 'closed' where id = '${jobs[1]}'; select 'CLOSE_LOCK_HELD'; select pg_sleep(5); commit;`);
+  const closing = startSql(hrSql(`select public.close_hr_job('${jobs[1]}')`, "CLOSE_LOCK_HELD"));
   await waitForMarker(closing, "CLOSE_LOCK_HELD");
   const lateAppName = `race-too-late-${userId}`;
   const tooLate = startSql(applicantSql(`select public.submit_application('${jobs[1]}', 'Too late', null)`, "TOO_LATE"), lateAppName);
@@ -109,7 +122,7 @@ try {
   const beforeClose = startSql(applicantSql(`select public.submit_application('${jobs[2]}', 'Before close', null)`, "SUBMIT_LOCK_HELD"));
   await waitForMarker(beforeClose, "SUBMIT_LOCK_HELD");
   const closeAppName = `race-close-after-${userId}`;
-  const closeAfter = startSql(`update public.jobs set status = 'closed' where id = '${jobs[2]}'`, closeAppName);
+  const closeAfter = startSql(hrSql(`select public.close_hr_job('${jobs[2]}')`, "CLOSED_AFTER_SUBMIT"), closeAppName);
   await assertLockWait(closeAppName);
   const submitResult = await beforeClose.done;
   const closeAfterResult = await closeAfter.done;

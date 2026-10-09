@@ -21,7 +21,7 @@ export default async function HRApplicationsPage() {
 
   return <main className="mx-auto max-w-4xl space-y-8 px-5 py-10">
     <header className="flex items-center justify-between gap-4">
-      <Link href="/" className="underline">← Careers</Link>
+      <nav className="flex gap-4"><Link href="/" className="underline">← Careers</Link><Link href="/hr/jobs" className="underline">Manage jobs</Link></nav>
       <form action={signOut}><button className="underline">Sign out</button></form>
     </header>
     <h1 className="text-3xl font-semibold">Application review</h1>
