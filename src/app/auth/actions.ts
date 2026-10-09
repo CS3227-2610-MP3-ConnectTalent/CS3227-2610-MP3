@@ -43,9 +43,15 @@ export async function signIn(formData: FormData) {
 }
 
 export async function signOut() {
-  const client = await createSupabaseServerClient();
-  await client.auth.signOut();
-  redirect("/");
+  let failed = false;
+  try {
+    const client = await createSupabaseServerClient();
+    const { error } = await client.auth.signOut();
+    failed = Boolean(error);
+  } catch {
+    failed = true;
+  }
+  redirect(failed ? "/?authError=sign-out" : "/");
 }
 
 export async function requestPasswordReset(formData: FormData) {
