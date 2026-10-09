@@ -1,5 +1,7 @@
 # Active change packets
 
+The draft packet for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) is [2026-10-09-soclaas-ai](2026-10-09-soclaas-ai/proposal.md). John is the accountable student for this feature, assigned in chat on 2026-10-09. The proposal, deltas and design await his written-spec review; the plan and implementation approval remain pending.
+
 The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. PR #15 is present in `develop` as `2fad6ed`; release remains separate.
 
 The issue #9 HR application review packet was accepted locally with recorded limits and [archived](../archive/2026-10-08-hr-application-review/record.md) on 2026-10-08 after canonical v0.8 sync. PR #22 is merged to `develop`; the shared Development Supabase migration, preview smoke and release remain separate actions.
