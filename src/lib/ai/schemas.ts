@@ -13,12 +13,18 @@ export const hrSummaryRequestSchema = z.object({
   applicationId: z.uuid(),
 }).strict();
 
-const hiringDecisionLanguage = /\b(?:hire(?:d|s|ing)?|reject(?:ed|ion)?|rank(?:ed|ing)?|recommend(?:ed|ation)?|shortlist(?:ed)?|scor(?:e|ed|ing)|top candidate|best candidate|best fit|advance(?:d)? (?:the applicant|this candidate|to (?:the )?(?:next|final) (?:round|stage))|move forward with|select(?:ed|ion)?)\b/i;
+const summaryItemsSchema = z.array(z.string().trim().min(1).max(240)).max(5);
 
-const summaryItemsSchema = z.array(z.string().trim().min(1).max(240).refine(
-  (item) => !hiringDecisionLanguage.test(item),
-  "Summary text must not recommend or rank applicants.",
-)).max(5);
+const sentenceIdsSchema = z.array(z.number().int().min(0)).max(5).superRefine((ids, context) => {
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({ code: "custom", message: "Sentence IDs must be distinct." });
+  }
+});
+
+export const hrSummarySelectionSchema = z.object({
+  evidence_sentence_ids: sentenceIdsSchema,
+  requirements_not_addressed_ids: sentenceIdsSchema,
+}).strict();
 
 export const hrSummaryResponseSchema = z.object({
   evidence_mentioned: summaryItemsSchema,
@@ -29,4 +35,5 @@ export const hrSummaryResponseSchema = z.object({
 export type ApplicantDraftRequest = z.infer<typeof applicantDraftRequestSchema>;
 export type ApplicantDraftResponse = z.infer<typeof applicantDraftResponseSchema>;
 export type HrSummaryRequest = z.infer<typeof hrSummaryRequestSchema>;
+export type HrSummarySelection = z.infer<typeof hrSummarySelectionSchema>;
 export type HrSummaryResponse = z.infer<typeof hrSummaryResponseSchema>;

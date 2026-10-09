@@ -39,6 +39,6 @@
 ## Delta review and sync evidence
 
 - [x] John approved the original written deltas on 2026-10-09 and explicitly approved the amended global cap and server-only quota/audit RPC boundary in chat on 2026-10-09.
-- [ ] Check quota behavior against the configured key’s actual SoCLaaS policy before live calls.
+- [x] Check quota behavior against the configured key’s actual SoCLaaS policy before live calls; T10 records the observed 30 RPM key cap and the application’s 24 RPM cap.
 - [ ] Do not sync to the canonical specification until post-implementation acceptance.
 - Sync commit/paths/decision evidence: Pending; no canonical file changed.

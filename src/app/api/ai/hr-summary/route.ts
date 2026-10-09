@@ -1,5 +1,6 @@
 import { getHrContext, getSubmittedApplication } from "@/lib/ai/application-data";
-import { hrSummaryRequestSchema, hrSummaryResponseSchema } from "@/lib/ai/schemas";
+import { hrSummaryRequestSchema } from "@/lib/ai/schemas";
+import { buildHrSummaryResponse, splitHrSummarySource } from "@/lib/ai/hr-summary";
 import { finalizeAiInvocation, reserveAiInvocation } from "@/lib/ai/quota-audit";
 import { getProviderRateLimit } from "@/lib/ai/provider-errors";
 import { generateHrSummary, isSoCLaaSReady } from "@/lib/ai/soclaas-client";
@@ -74,6 +75,12 @@ export async function POST(request: Request) {
     const application = await getSubmittedApplication(context.client, parsed.data.applicationId);
     if (!application) return json({ error: "This submitted application is unavailable." }, 404);
 
+    const letterSentences = splitHrSummarySource(application.coverLetter);
+    const requirementSentences = splitHrSummarySource(application.requirements);
+    if (letterSentences.length === 0 || requirementSentences.length === 0) {
+      return json({ error: "AI summaries are temporarily unavailable." }, 503);
+    }
+
     const reservation = await reserveAiInvocation(context.user.id, "hr_summary", application.id);
     if (!reservation.ok) {
       if (reservation.retryAfterSeconds) {
@@ -84,11 +91,11 @@ export async function POST(request: Request) {
 
     try {
       const output = await generateHrSummary({
-        coverLetter: application.coverLetter,
-        requirements: application.requirements,
+        letterSentences,
+        requirementSentences,
       });
-      const validated = hrSummaryResponseSchema.safeParse(output);
-      if (!validated.success) {
+      const response = buildHrSummaryResponse(output, letterSentences, requirementSentences);
+      if (!response) {
         const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "failure");
         return finalized
           ? json({ error: "The generated summary could not be validated. Try again." }, 502)
@@ -97,7 +104,7 @@ export async function POST(request: Request) {
 
       const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "success");
       return finalized
-        ? json(validated.data, 200)
+        ? json(response, 200)
         : json({ error: "AI summaries are temporarily unavailable." }, 503);
     } catch (error) {
       const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "failure");

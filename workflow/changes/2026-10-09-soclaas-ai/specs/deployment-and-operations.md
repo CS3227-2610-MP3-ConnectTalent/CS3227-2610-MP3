@@ -20,6 +20,6 @@
 ## Delta review and sync evidence
 
 - [x] John approved the original written delta on 2026-10-09 and explicitly approved the 24/minute cap, continued provider 429 handling, and metadata-only server credential amendment in chat on 2026-10-09.
-- [ ] Verify actual key-specific limit and configured model through SoCLaaS before live evaluation.
+- [x] Verify the model catalog and actual key-specific limit through SoCLaaS before live evaluation; T10 records allowed models and the observed 30 RPM cap.
 - [ ] Do not sync to the canonical specification until post-implementation acceptance.
 - Sync commit/paths/decision evidence: Pending; no canonical file changed.

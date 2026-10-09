@@ -160,8 +160,8 @@ describe("HR summary route", () => {
     spies.getApplicantContext.mockResolvedValue({ status: "forbidden" });
     spies.getSubmittedApplication.mockResolvedValue({
       id: applicationId,
-      coverLetter: "Submitted letter",
-      requirements: "TypeScript and testing",
+      coverLetter: "Worked on a course project. Built a web app.",
+      requirements: "TypeScript experience. Cloud deployment experience.",
       hrNotes: "Never send private HR notes",
       otherApplicantLetter: "Never send another applicant's data",
     });
@@ -169,9 +169,8 @@ describe("HR summary route", () => {
     spies.finalizeAiInvocation.mockResolvedValue(true);
     spies.isSoCLaaSReady.mockReturnValue(true);
     spies.generateHrSummary.mockResolvedValue({
-      evidence_mentioned: ["Mentions a project"],
-      requirements_not_addressed: ["Does not mention deployment"],
-      follow_up_questions: ["Which deployment tools did you use?"],
+      evidence_sentence_ids: [0],
+      requirements_not_addressed_ids: [1],
     });
   });
 
@@ -195,28 +194,48 @@ describe("HR summary route", () => {
     expect(spies.getSubmittedApplication).toHaveBeenCalledWith(client, applicationId);
     expect(spies.reserveAiInvocation).toHaveBeenCalledWith(actorId, "hr_summary", applicationId);
     expect(spies.generateHrSummary).toHaveBeenCalledWith({
-      coverLetter: "Submitted letter",
-      requirements: "TypeScript and testing",
+      letterSentences: ["Worked on a course project.", "Built a web app."],
+      requirementSentences: ["TypeScript experience.", "Cloud deployment experience."],
     });
     expect(JSON.stringify(spies.generateHrSummary.mock.calls)).not.toContain("private HR notes");
     expect(JSON.stringify(spies.generateHrSummary.mock.calls)).not.toContain("another applicant");
+    expect(await responseBody(response)).toEqual({
+      evidence_mentioned: ["Worked on a course project."],
+      requirements_not_addressed: ["Cloud deployment experience."],
+      follow_up_questions: ["Could you share an example related to this requirement: “Cloud deployment experience.”?"],
+    });
   });
 
   it("rejects malformed model structure and never returns a recommendation", async () => {
-    spies.generateHrSummary.mockResolvedValueOnce({ recommendation: "Hire" });
+    spies.generateHrSummary.mockResolvedValueOnce({
+      evidence_sentence_ids: [],
+      requirements_not_addressed_ids: [],
+      recommendation: "Hire",
+    });
     const response = await hrSummary(post({ applicationId }));
     expect(response.status).toBe(502);
     expect(await responseBody(response)).not.toHaveProperty("recommendation");
   });
 
-  it("rejects hiring advice embedded in an otherwise valid summary array", async () => {
-    spies.generateHrSummary.mockResolvedValueOnce({
-      evidence_mentioned: ["Recommend hiring this applicant"],
-      requirements_not_addressed: [],
-      follow_up_questions: [],
-    });
-    const response = await hrSummary(post({ applicationId }));
-    expect(response.status).toBe(502);
-    expect(JSON.stringify(await responseBody(response))).not.toContain("Recommend hiring");
+  it("rejects model-authored recommendation paraphrases and source IDs outside the selected data", async () => {
+    const invalidOutputs = [
+      {
+        evidence_sentence_ids: ["This applicant is the strongest candidate to move to the next interview stage"],
+        requirements_not_addressed_ids: [],
+      },
+      { evidence_sentence_ids: [0, 0], requirements_not_addressed_ids: [] },
+      { evidence_sentence_ids: [2], requirements_not_addressed_ids: [] },
+      { evidence_sentence_ids: [], requirements_not_addressed_ids: [2] },
+      { evidence_sentence_ids: [], requirements_not_addressed_ids: [], follow_up_questions: ["I would put this candidate through to the final round"] },
+    ];
+
+    for (const output of invalidOutputs) {
+      spies.generateHrSummary.mockResolvedValueOnce(output);
+      const response = await hrSummary(post({ applicationId }));
+      expect(response.status).toBe(502);
+      const body = JSON.stringify(await responseBody(response));
+      expect(body).not.toContain("strongest candidate");
+      expect(body).not.toContain("final round");
+    }
   });
 });
