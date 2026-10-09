@@ -31,3 +31,5 @@ Final staged scope, whitespace, local Markdown targets and credential-pattern ch
 Open the authorized PR into develop after the final commit/push and report its actual URL. PR opening ends contributor work. Reviewer/merge/staging/release decisions follow separately. AI-generated summary awaits student verification.
 
 Observed final static check: 46 staged files; 198 local Markdown targets resolved; no credential-pattern matches, and .env.local excluded. Staged whitespace caught an extra EOF blank line; removed before final recheck. These checks are primary verification, not a new independent review.
+
+Commit 342c8a1 contains the accepted UI/reflection work. Sync merge d4de151 joins develop ee79065: eight ancestry conflicts occurred after prior squash merge. Automatic approval review rejected blanket restoration; primary then proved both baseline trees equal bd10cc8c1962c696c2cb68c50e7a4e2998a76934, inspected each affected delta and restored the eight reviewed UI versions. Final merge tree is identical to 342c8a1 (no source changes); whitespace passed.
