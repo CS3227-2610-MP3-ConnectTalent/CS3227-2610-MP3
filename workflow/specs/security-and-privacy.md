@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v1.1, 9 October 2026 (SEC-001/SEC-006/SEC-007 updated). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v1.2, 9 October 2026 (SEC-005/SEC-007 contact privacy clarified). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
 
 ## SEC-001: Access boundaries
 
@@ -43,7 +43,7 @@ Scenario: Given malformed structured output, when it is validated, then it is sa
 
 ## SEC-005: Job scoping and data minimization
 
-AI requests MUST load only the selected application's job details and requirements (for drafting, the selected published job under [AID-001](applicant-ai-draft.md)). Model requests MUST exclude HR notes, other applications, secrets and unrelated personal data. [AID-001](applicant-ai-draft.md) and [AIS-001](hr-ai-summary.md) define the narrower allowed input sets for each feature.
+AI requests MUST load only the selected application's job details and requirements (for drafting, the selected published job under [AID-001](applicant-ai-draft.md)). Model requests MUST exclude HR notes, other applications, secrets and unrelated personal data. Structured application full name, verified email, phone and portfolio fields MUST NOT be selected for AI payload assembly or appended to prompts. This exclusion does not claim to redact personal information an Applicant independently types into allowed notes/letter text. [AID-001](applicant-ai-draft.md) and [AIS-001](hr-ai-summary.md) define the narrower allowed input sets for each feature.
 
 Scenario: Given a selected application/job, when an AI request is assembled, then unrelated job data and excluded data are absent. A summary contains only the selected letter and that job's published requirements; adversarial text cannot expose HR notes.
 
@@ -57,9 +57,11 @@ Scenario: Given oversized input, user/global quota exhaustion or an invalid role
 
 ## SEC-007: Privacy-preserving audit logging
 
-Metadata-only audit events MUST record application submission, each HR status change and each provider invocation's actor, operation, target, timestamp and outcome. Application submission metadata MUST be written in the same database transaction as submission. Existing application_status_events remain the record of HR status changes. An AI invocation MUST have a metadata-only start record before the external call and a terminal outcome after it. If start/reservation cannot be recorded, no provider call may occur. If terminal recording fails, the output MUST be withheld and any fallback server log MUST contain metadata only. Logs MUST NOT contain Applicant notes, letter text, prompts, model output, authentication tokens or provider keys. HR read access follows SEC-001; Applicants cannot read audit events. See [OPS-002](deployment-and-operations.md) for operational evidence.
+Metadata-only audit events MUST record application submission, each HR status change and each provider invocation's actor, operation, target, timestamp and outcome. Application submission metadata MUST be written in the same database transaction as submission. Existing application_status_events remain the record of HR status changes. An AI invocation MUST have a metadata-only start record before the external call and a terminal outcome after it. If start/reservation cannot be recorded, no provider call may occur. If terminal recording fails, the output MUST be withheld and any fallback server log MUST contain metadata only. Logs MUST NOT contain Applicant notes, letter text, prompts, model output, authentication tokens or provider keys. HR read access follows SEC-001; Applicants cannot read audit events. Audit events and server logs MUST NOT include structured application full name, verified email, phone or portfolio values. Validation feedback MAY name the invalid field without logging or echoing sensitive values into URLs. Submitted contact snapshots remain protected application data, not audit metadata. See [OPS-002](deployment-and-operations.md) for operational evidence.
 
 Scenario: Given a successful or failed provider invocation, when authorized audit evidence is inspected, then actor, operation, target, time and outcome are present without notes, letter text, prompt, output or key. Given audit storage is unavailable before invocation, the model is not called; if terminal audit finalization fails, the response is withheld.
+
+Contact privacy scenario (form39-AC-08): Given stored contact fields, submissions or invalid/retried writes, when AI payloads and audit/log output are inspected, then structured contact values are absent and required actor/operation/target/time/outcome metadata remains.
 
 ## SEC-008: Synthetic development and test records
 

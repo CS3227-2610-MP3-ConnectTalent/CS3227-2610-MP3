@@ -14,7 +14,7 @@ export default async function ApplyPage({
   const { id } = await params;
   const job = await getPublishedJob(id);
   if (!job) notFound();
-  await requireApplicant();
+  const { user } = await requireApplicant();
   const application = await getOwnApplicationForJob(id);
   const { error } = await searchParams;
 
@@ -24,7 +24,8 @@ export default async function ApplyPage({
     <p className="text-muted-foreground">{job.team}</p>
     {error && <p role="alert" className="rounded-lg border border-destructive p-3 text-destructive">We could not save your change. Check the letter and job status, reload for the latest version, then try again.</p>}
     <ApplicationForm jobId={id} value={application?.cover_letter ?? ""}
-      revision={application?.revision ?? null} submitted={application?.submission_state === "submitted"} />
+      revision={application?.revision ?? null} submitted={application?.submission_state === "submitted"}
+      email={user.email ?? ""} details={application ?? { full_name: null, phone: null, portfolio_url: null, submitted_email: null }} />
     <Link href="/applications" className="inline-block underline">My applications</Link>
   </main>;
 }

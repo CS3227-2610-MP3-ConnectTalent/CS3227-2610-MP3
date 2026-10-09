@@ -12,6 +12,14 @@ To apply, select a published job and choose **Apply for this role**. Create an A
 
 The local stack must have `auth.email.enable_confirmations = true` in `supabase/config.toml`; restart Supabase after changing it. No public app deployment or shared peer-test account is available yet.
 
+## Application details on the #39 branch
+
+The application form includes **Full name**, read-only **Verified email**, **Phone (optional)** and **Portfolio URL (optional)** alongside the cover letter. Full name is required to submit, with a 120-character limit. Phone allows up to 40 characters; portfolio allows up to 2,048 characters and must be an HTTP(S) address without embedded credentials. Empty optional fields are allowed. **Save draft** keeps incomplete details private and lets you resume them later while the job remains open. Validation errors keep your typed values so you can correct them.
+
+**Submit application** shares the details and letter with HR and locks them. The recorded email comes from your verified account. Your application detail shows the submitted information, including after job closure. HR can see contact details only for submitted applications; it cannot edit them. Older submissions without these fields show **Not provided**. AI assistance uses the existing notes/letter and job requirements; it does not automatically receive these structured contact fields. Information you choose to type into notes or the letter remains part of that allowed AI input.
+
+This feature is implemented and independently reviewed locally on `feat/application-form-details`; local acceptance with recorded limits and pending hosted rollout are recorded in the [#39 packet](../workflow/archive/2026-10-09-application-form-details/record.md). Hosted migration needs a coordinated cutover; local availability does not imply a deployed release.
+
 ## Forgot password
 
 From **Sign in**, choose **Forgot password?** and enter your account email. The page gives the same acknowledgement whether an account exists or not. In local development, open the reset message at <http://127.0.0.1:54324> and follow its link in the same browser. Enter and confirm a new password of 8 to 72 characters. After the update, sign in with the new password. An invalid or expired link sends you back to request another. This works for Applicant and HR accounts and does not change their roles. Hosted recovery depends on configured email delivery and the recovery callback URL in Supabase Auth.

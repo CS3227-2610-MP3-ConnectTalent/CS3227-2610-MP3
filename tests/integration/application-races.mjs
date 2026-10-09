@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 const container = "supabase_db_CS3227-2610-MP3";
 const userId = randomUUID();
 const hrId = randomUUID();
-const jobs = [randomUUID(), randomUUID(), randomUUID()];
+const jobs = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
 const email = `race-${userId}@example.test`;
 
 function startSql(sql, appName = "") {
@@ -91,10 +91,10 @@ try {
   fixturesCreated = true;
 
   // One transaction holds the first submission and its job/advisory locks.
-  const first = startSql(applicantSql(`select public.submit_application('${jobs[0]}', 'First synthetic letter', null)`, "FIRST_SUBMITTED"));
+  const first = startSql(applicantSql(`select public.submit_application_details_v2('${jobs[0]}', 'First synthetic letter','Synthetic Applicant',null,null, null)`, "FIRST_SUBMITTED"));
   await waitForMarker(first, "FIRST_SUBMITTED");
   const duplicateAppName = `race-duplicate-${userId}`;
-  const duplicate = startSql(applicantSql(`select public.submit_application('${jobs[0]}', 'Second synthetic letter', null)`, "SECOND_SUBMITTED"), duplicateAppName);
+  const duplicate = startSql(applicantSql(`select public.submit_application_details_v2('${jobs[0]}', 'Second synthetic letter','Synthetic Applicant',null,null, null)`, "SECOND_SUBMITTED"), duplicateAppName);
   await assertLockWait(duplicateAppName);
   const firstResult = await first.done;
   const duplicateResult = await duplicate.done;
@@ -108,7 +108,7 @@ try {
   const closing = startSql(hrSql(`select public.close_hr_job('${jobs[1]}')`, "CLOSE_LOCK_HELD"));
   await waitForMarker(closing, "CLOSE_LOCK_HELD");
   const lateAppName = `race-too-late-${userId}`;
-  const tooLate = startSql(applicantSql(`select public.submit_application('${jobs[1]}', 'Too late', null)`, "TOO_LATE"), lateAppName);
+  const tooLate = startSql(applicantSql(`select public.submit_application_details_v2('${jobs[1]}', 'Too late','Synthetic Applicant',null,null, null)`, "TOO_LATE"), lateAppName);
   await assertLockWait(lateAppName);
   const closingResult = await closing.done;
   const tooLateResult = await tooLate.done;
@@ -119,7 +119,7 @@ try {
   if (closedCount.output.trim() !== "0") throw new Error("Submission was recorded after closure won the lock");
 
   // Submission wins the lock: close waits, then preserves the submitted row.
-  const beforeClose = startSql(applicantSql(`select public.submit_application('${jobs[2]}', 'Before close', null)`, "SUBMIT_LOCK_HELD"));
+  const beforeClose = startSql(applicantSql(`select public.submit_application_details_v2('${jobs[2]}', 'Before close','Synthetic Applicant',null,null, null)`, "SUBMIT_LOCK_HELD"));
   await waitForMarker(beforeClose, "SUBMIT_LOCK_HELD");
   const closeAppName = `race-close-after-${userId}`;
   const closeAfter = startSql(hrSql(`select public.close_hr_job('${jobs[2]}')`, "CLOSED_AFTER_SUBMIT"), closeAppName);
@@ -132,7 +132,23 @@ try {
   const finalState = await runSql(`select j.status || ':' || count(a.id) from public.jobs j left join public.applications a on a.job_id = j.id where j.id = '${jobs[2]}' group by j.status`);
   if (finalState.output.trim() !== "closed:1") throw new Error("Close did not preserve the preceding application");
 
-  process.stdout.write("PASS: concurrent duplicate submit, close-first, and submit-first races.\n");
+  // Competing revisions cannot save a letter from one request and contacts from another.
+  await runSql(`begin; set local role authenticated; select set_config('request.jwt.claim.sub', '${userId}', true);
+    select public.save_application_details_v2('${jobs[3]}', 'Initial', 'Initial Name', null, null, null); commit;`);
+  const saving = startSql(applicantSql(`select public.save_application_details_v2('${jobs[3]}', 'Winning letter', 'Winning Name', '+65 1111', 'https://example.test/winner', 1)`, "SAVE_LOCK_HELD"));
+  await waitForMarker(saving, "SAVE_LOCK_HELD");
+  const staleAppName = `race-stale-details-${userId}`;
+  const stale = startSql(applicantSql(`select public.save_application_details_v2('${jobs[3]}', 'Losing letter', 'Losing Name', '+65 2222', null, 1)`, "STALE_SAVED"), staleAppName);
+  await assertLockWait(staleAppName);
+  const savingResult = await saving.done; const staleResult = await stale.done;
+  if (savingResult.code !== 0 || staleResult.code === 0 || !staleResult.errors.includes("Application changed; reload before saving")) {
+    throw new Error("Concurrent complete-field draft revision did not reject the stale writer");
+  }
+  const savedDetails = await runSql(`select cover_letter || ':' || full_name || ':' || phone || ':' || portfolio_url || ':' || revision from public.applications where job_id='${jobs[3]}'`);
+  if (savedDetails.output.trim() !== "Winning letter:Winning Name:+65 1111:https://example.test/winner:2") {
+    throw new Error("Concurrent writes mixed field sets or advanced the wrong revision");
+  }
+  process.stdout.write("PASS: duplicate submit, close-first, submit-first and complete-field stale-draft races.\n");
 } finally {
   if (fixturesCreated) await runSql(cleanup);
 }

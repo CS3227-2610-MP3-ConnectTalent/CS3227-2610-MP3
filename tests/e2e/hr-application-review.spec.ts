@@ -59,6 +59,7 @@ test("HR reviews only submitted applications and Applicant sees status without p
 
   await page.goto(`/jobs/${submittedJobId}/apply`);
   await page.getByLabel("Cover letter").fill("Original synthetic letter");
+  await page.getByLabel("Full name").fill("Synthetic Applicant");
   await page.getByRole("button", { name: "Submit application" }).click();
   await expect(page.getByText("Submitted application", { exact: true })).toBeVisible();
   const applicantUrl = page.url();

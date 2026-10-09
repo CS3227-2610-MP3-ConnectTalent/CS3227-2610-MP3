@@ -1,32 +1,20 @@
 import { describe, expect, it } from "vitest";
-
 import { reconcileApplicationWrite } from "../../src/lib/application-retry";
-
-const id = "00000000-0000-4000-8000-000000000a11";
-
-describe("uncertain application write reconciliation", () => {
-  it("shows the existing submitted application after a repeated submit", () => {
-    expect(reconcileApplicationWrite("submit", "Attempted text", {
-      id, submission_state: "submitted", cover_letter: "Already submitted text",
-    })).toBe(id);
+const attempted = { full_name: "Synthetic Applicant", phone: null, portfolio_url: null, cover_letter: "Draft" };
+const existing = { ...attempted, id: "00000000-0000-4000-8000-000000000a11", submission_state: "draft" as const, revision: 2 };
+describe("complete-field uncertain write reconciliation", () => {
+  it("recognizes exactly the expected saved field set and revision", () => {
+    expect(reconcileApplicationWrite("save", attempted, 1, existing)).toBe(existing.id);
   });
-
-  it("treats a matching saved draft or edited letter as completed", () => {
-    expect(reconcileApplicationWrite("save", "Draft", {
-      id, submission_state: "draft", cover_letter: "Draft",
-    })).toBe(id);
-    expect(reconcileApplicationWrite("edit", "Revision", {
-      id, submission_state: "submitted", cover_letter: "Revision",
-    })).toBe(id);
+  it.each([{ full_name: "Other" }, { phone: "+65 1234" }, { portfolio_url: "https://example.test" }, { cover_letter: "Other" }, { revision: 3 }])(
+    "does not falsely report a mismatched save %j", (change) => {
+      expect(reconcileApplicationWrite("save", attempted, 1, { ...existing, ...change })).toBeNull();
+    });
+  it("shows an existing frozen submission without claiming the attempted fields were saved", () => {
+    expect(reconcileApplicationWrite("submit", attempted, 1, { ...existing, full_name: "Original", submission_state: "submitted" })).toBe(existing.id);
   });
-
-  it("does not claim an unresolved or conflicting write succeeded", () => {
-    expect(reconcileApplicationWrite("submit", "Letter", null)).toBeNull();
-    expect(reconcileApplicationWrite("save", "New", {
-      id, submission_state: "draft", cover_letter: "Other",
-    })).toBeNull();
-    expect(reconcileApplicationWrite("edit", "New", {
-      id, submission_state: "submitted", cover_letter: "Other",
-    })).toBeNull();
+  it("does not mistake a draft or failed read for submission", () => {
+    expect(reconcileApplicationWrite("submit", attempted, 1, existing)).toBeNull();
+    expect(reconcileApplicationWrite("save", attempted, 1, null)).toBeNull();
   });
 });
