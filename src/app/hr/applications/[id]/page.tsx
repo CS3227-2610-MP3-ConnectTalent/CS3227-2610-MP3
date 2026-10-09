@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { addHRNote, changeHRStatus } from "@/app/hr/applications/actions";
+import { ApplicationContactDetails } from "@/components/application-contact-details";
 import { HrAiSummary } from "@/components/hr-ai-summary";
 import { getSubmittedApplication, listHRNotes, listHRStatusEvents } from "@/lib/hr-applications";
 import { requireHR } from "@/lib/hr-auth";
@@ -40,6 +41,7 @@ export default async function HRApplicationDetail({
     {error && <p role="alert" className="rounded-lg border p-3">The change was not saved. Reload this page and try again.</p>}
     {notice && <p role="status" className="rounded-lg border p-3">The change was saved.</p>}
 
+    <ApplicationContactDetails {...application} />
     <div className="grid gap-6 lg:grid-cols-2">
       <section className="space-y-3"><h2 className="text-xl font-semibold">Original cover letter</h2>
         <p className="whitespace-pre-wrap rounded-lg border p-4">{application.original_submitted_letter}</p></section>

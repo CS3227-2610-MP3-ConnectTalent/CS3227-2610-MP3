@@ -54,7 +54,7 @@ select lives_ok($$select public.edit_hr_job_draft(current_setting('job8.draft_id
 select lives_ok($$select public.publish_hr_job(current_setting('job8.draft_id')::uuid)$$, 'HR explicitly publishes draft');
 select throws_ok($$select public.edit_hr_job_draft(current_setting('job8.draft_id')::uuid, 'Tampered', 'Platform', 'engineering', 'Changed', 'Changed')$$, 'P0001', 'Draft job not found', 'published content cannot be edited');
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a01', true);
-select lives_ok($$select public.submit_application(current_setting('job8.draft_id')::uuid, 'Synthetic submitted letter', null)$$, 'Applicant can submit while job is published');
+select lives_ok($$select public.submit_application_details_v2(current_setting('job8.draft_id')::uuid, 'Synthetic submitted letter','Synthetic Applicant',null,null, null)$$, 'Applicant can submit while job is published');
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a02', true);
 select lives_ok($$select public.close_hr_job(current_setting('job8.draft_id')::uuid)$$, 'HR explicitly closes job');
 select throws_ok($$select public.publish_hr_job(current_setting('job8.draft_id')::uuid)$$, 'P0001', 'Draft job not found', 'closed job cannot be republished');

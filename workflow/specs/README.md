@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.2, 9 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. The accepted SoCLaaS AI change dated 9 October modified APP-004, AID-001/002, AIS-001/002, SEC-001/006/007 and OPS-002. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.3, 9 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. The accepted SoCLaaS AI change dated 9 October modified APP-004, AID-001/002, AIS-001/002, SEC-001/006/007 and OPS-002. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## IDs and normative language
 
@@ -18,7 +18,14 @@ An approved product behavior change increments the numeric minor baseline (for e
 
 ## v1.2 accepted change trace
 
-On 9 October 2026, Paul Cheng separately accepted #36 with recorded limits via the conversation reply “Accept with recorded limits”, after implementation approval and independent review. ACC-005 is synced to [accounts and roles](accounts-and-roles.md) from the [complete archived packet](../archive/2026-10-09-role-navigation-logout/record.md). The ProductSpec index and affected module carry v1.2. The accepted clause and scenarios were compared against the delta before archive. Hosted preview testing and release remain pending.
+On 9 October 2026, Paul Cheng separately accepted issue [#39](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/39) with recorded hosted limits via “Accept with recorded limits”. The [complete archived packet](../archive/2026-10-09-application-form-details/record.md) preserves implementation approval, independent review, actual local checks and acceptance.
+
+| Delta | Canonical destination | Change |
+| --- | --- | --- |
+| Added APP-005 | [Applications and review](applications-and-review.md) | Private saved name/contact fields, trusted verified-email snapshot, frozen submissions, legacy missing-field display and retained invalid-input state |
+| Modified SEC-005/SEC-007 | [Security and privacy](security-and-privacy.md) | Structured contact values excluded from AI payloads and audit/server logs; existing safeguards retained |
+
+This branch advances its v1.1 baseline to v1.2 independently of PR #38's navigation change. Reconcile the combined version/change traces when integrating both branches; this sync does not include or certify #38. Coordinated hosted write-API cutover, preview testing and release remain pending. No sync commit exists yet.
 
 ## v1.1 accepted change trace
 
@@ -144,3 +151,7 @@ The statements in this table are the original v0.6 release acceptance items. Eac
 ## Unresolved decisions retained
 
 This historical v0.6 trace left student names/role ownership and exact SoC LLM limits unresolved. The later issue #6 and #9 packets record Paul Cheng as the Applicant/application workflow owner; HR AI and job-management ownership and exact SoC LLM limits remain unresolved in this index. The v0.8 change selected a controlled manual HR assignment method and four review statuses. The v0.6 source did not specify reopening/editing policy beyond immutable published/closed job content; v0.7 added the letter-edit cutoff. Multi-employer hosting remains outside this release and would require a new spec and authorization design.
+
+## v1.3 combined navigation/contact integration
+
+The #40 integration combines accepted #36 ACC-005 with #39 APP-005 and SEC-005/007. Both independent v1.2 acceptance histories are preserved. [Navigation archive](../archive/2026-10-09-role-navigation-logout/record.md) and [integration packet](../archive/2026-10-09-signup-notice-navigation/record.md) record their distinct gates. This version reconciliation adds no new auth policy and certifies no hosted rollout.

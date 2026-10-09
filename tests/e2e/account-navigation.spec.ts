@@ -20,13 +20,17 @@ test("guest, Applicant and HR navigation stays distinct and logout clears browse
       users.push({ id: data.user!.id, email, role });
       if (role === "hr") expect((await admin.from("profiles").update({ role }).eq("user_id", data.user!.id)).error).toBeNull();
     }
+    await page.goto("/auth/sign-up");
+    await expect(page.getByText("We’ll email a verification link before you can sign in.")).toBeVisible();
+    await expect(page.getByText(/Local testing:/)).toHaveCount(0);
+    await expect(page.locator('a[href="http://127.0.0.1:54324"]')).toHaveCount(0);
     await page.goto("/");
     const nav = page.getByRole("navigation", { name: "Account" });
     await expect(nav.getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
     await expect(nav.getByRole("link", { name: "Create account", exact: true })).toBeVisible();
     await expect(nav.getByRole("link", { name: "My applications", exact: true })).toHaveCount(0);
     await page.goto(`/?authError=sign-out`);
-    await expect(page.getByRole("alert")).toContainText("Sign out could not be completed");
+    await expect(page.locator('p[role="alert"]')).toContainText("Sign out could not be completed");
 
     for (const user of users) {
       await page.goto("/auth/sign-in");
@@ -50,6 +54,7 @@ test("guest, Applicant and HR navigation stays distinct and logout clears browse
       if (user.role === "applicant") {
         expect((await page.goto("/hr/jobs"))?.status()).toBe(404);
         await page.goto(`/jobs/${jobId}/apply`);
+        await page.getByLabel("Full name").fill("Synthetic Navigation Applicant");
         await page.getByLabel("Cover letter").fill("Synthetic navigation test letter.");
         await page.getByRole("button", { name: "Save draft" }).click();
         await expect(page).toHaveURL(/\/applications\/[0-9a-f-]{36}$/);

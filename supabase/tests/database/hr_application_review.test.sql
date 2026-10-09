@@ -29,9 +29,9 @@ select ok(not has_table_privilege('anon', 'public.application_notes', 'SELECT'),
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000a01', true);
-select lives_ok($$select public.save_application_draft('10000000-0000-4000-8000-000000000b02', 'Private draft', null)$$, 'Applicant saves draft');
+select lives_ok($$select public.save_application_details_v2('10000000-0000-4000-8000-000000000b02', 'Private draft','Synthetic Applicant',null,null, null)$$, 'Applicant saves draft');
 select set_config('hr9.draft_id', (select id::text from public.applications where job_id = '10000000-0000-4000-8000-000000000b02'), true);
-select lives_ok($$select public.submit_application('10000000-0000-4000-8000-000000000b01', 'Original', null)$$, 'Applicant submits');
+select lives_ok($$select public.submit_application_details_v2('10000000-0000-4000-8000-000000000b01', 'Original','Synthetic Applicant',null,null, null)$$, 'Applicant submits');
 select set_config('hr9.submitted_id', (select id::text from public.applications where job_id = '10000000-0000-4000-8000-000000000b01'), true);
 select is((select review_status from public.applications where job_id = '10000000-0000-4000-8000-000000000b01'), 'submitted', 'submission initializes review status');
 select throws_ok($$select public.append_hr_application_note((select id from public.applications where job_id = '10000000-0000-4000-8000-000000000b01'), 'attack')$$, '42501', 'Verified HR account required', 'Applicant cannot add HR note');

@@ -94,11 +94,11 @@ select ok(case when to_regclass('public.application_submission_events') is null 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a01', true);
 select lives_ok(
-  $$select public.submit_application('20000000-0000-4000-8000-000000000b01', 'Synthetic private letter', null)$$,
+  $$select public.submit_application_details_v2('20000000-0000-4000-8000-000000000b01', 'Synthetic private letter','Synthetic Applicant',null,null, null)$$,
   'Applicant submission succeeds and invokes the audit trigger');
 select set_config('ai.test_application_id', (select id::text from public.applications where job_id = '20000000-0000-4000-8000-000000000b01'), true);
 select lives_ok(
-  $$select public.save_application_draft('20000000-0000-4000-8000-000000000b03', 'Synthetic unsubmitted draft', null)$$,
+  $$select public.save_application_details_v2('20000000-0000-4000-8000-000000000b03', 'Synthetic unsubmitted draft','Synthetic Applicant',null,null, null)$$,
   'Applicant creates an unsubmitted draft for another published role');
 select set_config('ai.test_draft_application_id', (select id::text from public.applications where job_id = '20000000-0000-4000-8000-000000000b03'), true);
 select is((select count(*) from public.application_submission_events), 0::bigint,
