@@ -1,6 +1,6 @@
 # Spec delta: Security and privacy
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; written delta approved, implementation plan approval pending
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation in progress
 - Canonical file: [security-and-privacy.md](../../../specs/security-and-privacy.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; SEC-001/SEC-006/SEC-007
 - Proposed baseline: v1.1

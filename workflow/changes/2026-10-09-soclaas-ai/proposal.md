@@ -3,7 +3,7 @@
 - Change ID: 2026-10-09-soclaas-ai
 - Issues: [#7 Applicant SoCLaaS cover-letter draft](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10 HR SoCLaaS application summary](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
 - Owner: John, student owner for both issues; assigned in chat on 2026-10-09
-- Status: Written proposal approved for implementation planning; implementation plan approval pending
+- Status: Proposal and plan approved; implementation in progress
 - Date: 2026-10-09
 - Baseline: [ProductSpec v1.0](../../ProductSpec.md), 8 October 2026, baseline commit 0a0f5c4
 - Affected capabilities: applications-and-review APP-004; applicant-ai-draft AID-001/AID-002; hr-ai-summary AIS-001/AIS-002; security-and-privacy SEC-001/SEC-006/SEC-007; deployment-and-operations OPS-002
@@ -44,7 +44,7 @@ The current APP-004 rule allows an Applicant to change the current submitted let
 - Assumptions: Published job content remains fixed under JMG-002. SoCLaaS credentials, model availability, and per-key quotas must be verified in each deployment. The [documented default service limit](https://dochub.comp.nus.edu.sg/cf/guides/soclaas/usage-limits) is 90 requests per minute, but per-key limits may be lower.
 - Dependencies: Existing issues #7 and #10; Applicant/HR session and RLS helpers; SoCLaaS server credentials and model configured outside browser code; local synthetic Supabase data for security tests.
 - Risks: Prompt injection or inaccurate summaries; mitigate with strict data minimization, no tools, Zod parsing, visible source letter, explicit HR verification, and no automated decisions. Provider outage/quota errors; mitigate with bounded calls, no automatic provider retry, safe UI errors, and manual retry. Existing Applicant process ownership is recorded as Paul Cheng; coordinate APP-004 before implementation.
-- Open decisions: John must approve the implementation plan before implementation. Verify actual SoCLaaS model and account-specific quota before a live call. John reported coordinating with Paul Cheng about APP-004 on 2026-10-09; this report is not independently verified and does not change the recorded process-owner role.
+- Open decisions: Verify actual SoCLaaS model and account-specific quota before a live call. John reported coordinating with Paul Cheng about APP-004 on 2026-10-09; this report is not independently verified and does not change the recorded process-owner role.
 
 ## Acceptance evidence and artifacts
 
@@ -60,14 +60,14 @@ The current APP-004 rule allows an Applicant to change the current submitted let
 
 - Spec deltas: specs/applications-and-review.md, applicant-ai-draft.md, hr-ai-summary.md, security-and-privacy.md, deployment-and-operations.md
 - Design: design.md
-- Plan and tasks: Drafted after John approved the written proposal, deltas, and design; plan approval remains pending.
+- Plan and tasks: John approved `plan.md` and `tasks.md` in chat on 2026-10-09; implementation proceeds within that scope.
 - Evidence: record.md
 
 ## Approval record
 
 - [x] John approved the in-chat design for packet drafting on 2026-10-09 and required robust error handling. This permits drafting/review only; it does not approve the implementation plan or product implementation.
 - [x] John approved the written proposal, deltas, and design in chat on 2026-10-09.
-- [ ] Implementation plan and tasks approved by John before product implementation.
+- [x] John approved the implementation plan and tasks before product implementation on 2026-10-09.
 - Approver: John, accountable student owner
-- Decision/date/source: John approved the written artifacts and reported coordinating with Paul in this conversation, 2026-10-09. Implementation plan approval remains pending.
-- Conditions: Preserve current cover_letter as the frozen post-rollout value without overwriting original_submitted_letter. Treat Paul's coordination as user-reported, not independently verified. No product code until the plan gate passes.
+- Decision/date/source: John approved the written artifacts and plan and reported coordinating with Paul in this conversation, 2026-10-09.
+- Conditions: Preserve current cover_letter as the frozen post-rollout value without overwriting original_submitted_letter. Treat Paul's coordination as user-reported, not independently verified. Implement within the approved plan.

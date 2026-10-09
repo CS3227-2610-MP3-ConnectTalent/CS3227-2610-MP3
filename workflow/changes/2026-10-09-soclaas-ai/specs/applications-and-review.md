@@ -1,6 +1,6 @@
 # Spec delta: Applications and review
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; written delta approved, implementation plan approval pending
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation in progress
 - Canonical file: [applications-and-review.md](../../../specs/applications-and-review.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; APP-004 Saved draft and revision boundary
 - Proposed baseline: v1.1

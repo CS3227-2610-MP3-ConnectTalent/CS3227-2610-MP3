@@ -1,6 +1,6 @@
 # Spec delta: Applicant AI draft
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7; John; written delta approved, implementation plan approval pending
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7; John; delta and plan approved, implementation in progress
 - Canonical file: [applicant-ai-draft.md](../../../specs/applicant-ai-draft.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; AID-001/AID-002
 - Proposed baseline: v1.1

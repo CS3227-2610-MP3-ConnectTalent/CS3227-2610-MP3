@@ -2,12 +2,12 @@
 
 - Change/issues: 2026-10-09-soclaas-ai; [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
 - Plan/record: [plan.md](plan.md); [record.md](record.md)
-- Status/owner: Plan draft; John is accountable student; implementation has not started.
+- Status/owner: Plan approved; John is accountable student; implementation in progress.
 
 ## Before implementation
 
 - [x] T00 — John approved the written proposal, spec deltas and design, and reported coordinating with Paul. Evidence: `record.md`, decision in chat dated 2026-10-09; Paul coordination is user-reported, not independently verified. Dependencies: none.
-- [ ] T01 — John approves `plan.md` and this task order before product code changes. Evidence: explicit decision/date/source in `record.md`. Dependencies: T00.
+- [x] T01 — John approves `plan.md` and this task order before product code changes; record the bounded inline implementation assignment. Evidence: explicit decision/date/source in `record.md` and `handoffs/implementation.md`, chat approval on 2026-10-09. Dependencies: T00.
 
 ## Ordered implementation
 

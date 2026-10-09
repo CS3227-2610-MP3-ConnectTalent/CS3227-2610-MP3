@@ -1,7 +1,7 @@
 # Implementation plan: SoCLaaS Applicant draft and HR summary
 
 - Change/issues: 2026-10-09-soclaas-ai; [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
-- Owner/status/date: John, accountable student; draft awaiting plan approval; 2026-10-09
+- Owner/status/date: John, accountable student; plan approved for implementation; 2026-10-09
 - Approved inputs: proposal.md, design.md, specs/applications-and-review.md, specs/applicant-ai-draft.md, specs/hr-ai-summary.md, specs/security-and-privacy.md, specs/deployment-and-operations.md. John approved these written artifacts and reported coordinating with Paul on 2026-10-09. Plan approval is pending.
 - Baseline and affected IDs: ProductSpec v1.0 at `0a0f5c4`; APP-004, AID-001/AID-002, AIS-001/AIS-002, SEC-001 through SEC-008, OPS-002; proposal acceptance AI-AC-01 through AI-AC-07.
 - Constraints: The only code/config/docs targets are those listed in the task table. Do not read or modify `.env.local` or `.env.dev`; preserve the existing user edit to `.env.example` and do not edit that file. Keep credentials server-only and use the signed-in Supabase session, not a service-role key. Use synthetic records/text in tests and live evaluation. Do not reset existing local Supabase data; use a disposable local stack for database checks, and seek approval before any destructive reset if isolation cannot be arranged. No product implementation before John approves this plan.
@@ -27,7 +27,7 @@ Use two role-specific Next.js Route Handlers, focused server-only AI schema/prov
 | Task ID / order | Depends on | Owner / agent role | Requirement and acceptance IDs | Exact files / expected change | Verification command or review / expected evidence |
 | --- | --- | --- | --- | --- | --- |
 | T00 — written spec approval and process coordination | none | John; human owner | APP-004; AID-001/AID-002; AIS-001/AIS-002; AI-AC-01..07 | `record.md`, `proposal.md`, `design.md`, and five files under `specs/`; record the approval and user-reported Paul coordination | User decision recorded with date/source; complete. No independent verification of the reported conversation is claimed. |
-| T01 — approve plan and tasks | T00 | John; human approval | All affected IDs; implementation gate | `record.md`, `plan.md`, `tasks.md`; approve this scope/order before product code | John’s explicit approval recorded in `record.md`; pending. |
+| T01 — approve plan and tasks | T00 | John; human approval | All affected IDs; implementation gate | `record.md`, `plan.md`, `tasks.md`, `handoffs/implementation.md`; approve this scope/order and record the bounded inline assignment before product code | John’s approval is recorded in `record.md`; the implementer handoff is recorded in the packet; complete on 2026-10-09. |
 | T02 — write AI contract and route security tests first | T01 | John accountable; Codex implementation | SEC-001..SEC-008; AI-AC-01/03/05/06/07 | New `tests/unit/ai-schemas.test.ts`, `tests/unit/ai-routes.test.ts`; assert exact model payloads, auth/role denial before protected reads/provider calls, malformed output rejection, script-like output rendered only as escaped text, safe provider/timeout errors, no mutation, quota/audit failure behavior | `corepack pnpm exec vitest run tests/unit/ai-schemas.test.ts tests/unit/ai-routes.test.ts`; capture the intended red result before implementation, then green result after T05. |
 | T03 — write database freeze, audit, and quota tests first | T01 | John accountable; Codex implementation | APP-004; SEC-001/SEC-006/SEC-007; AI-AC-04/05/06/07 | Update `supabase/tests/database/applicant_applications.test.sql`; add `supabase/tests/database/ai_security.test.sql`; add `tests/integration/ai-quota-races.mjs` and `package.json` script `test:ai-race`. Cover direct submitted-edit denial, unchanged values/status, role-specific RPC access, metadata-only submission/AI audit, and concurrent quota reservations | On an isolated disposable local Supabase stack, run `corepack pnpm test:db` and `corepack pnpm test:ai-race`; capture intended red evidence before T04 and green after it. Never reset existing local data without approval. |
 | T04 — implement additive database controls | T02, T03 | John accountable; Codex implementation | APP-004; SEC-001/SEC-006/SEC-007; AI-AC-04/05/06/07 | Add `supabase/migrations/20261009000000_soclaas_ai_security.sql`; change only the listed SQL tests and `package.json`. Revoke Applicant execution of `edit_submitted_letter` and enforce the freeze in database authorization; retain current values and `original_submitted_letter`; add atomic quota reservation/finalization and metadata-only audit storage/RPCs; add submission audit in the submission transaction. Preserve existing HR status-event behavior. | `corepack pnpm test:db` and `corepack pnpm test:ai-race` pass on the disposable local stack; pgTAP proves denials, unchanged rows, roles and audit fields; race evidence proves concurrency cannot exceed the configured caps. |
@@ -52,12 +52,12 @@ The test path is deterministic first: mocked SoCLaaS client and synthetic Supaba
 ## Approval and completion evidence
 
 - [x] John approved the proposal, spec deltas and design and reported coordination with Paul on 2026-10-09; the report is not independently verified.
-- [ ] John approved this plan and tasks before product implementation.
+- [x] John approved this plan and tasks before product implementation on 2026-10-09.
 - [ ] tasks.md matches the ordered work and states acceptance evidence for each checkbox.
 - [ ] Independent review and human acceptance are separate tasks with real decision evidence.
 - [ ] Closeout includes relevant guide/configuration notes, every session log, exact checks and truthful limitations.
 - [ ] Issue-linked PR is the last contributor action; merge/release remain separate human decisions.
-- Approval/date/source: Written artifacts approved by John in chat on 2026-10-09. Plan approval pending.
+- Approval/date/source: John approved the plan and tasks in chat on 2026-10-09, after approving the written artifacts.
 - Changes to this plan: Any change to scope, thresholds, lifecycle, privacy fields, provider authority, migration behavior or acceptance evidence requires a plan update and renewed John approval before implementing the changed behavior.
 
 ## Explicitly not applicable
