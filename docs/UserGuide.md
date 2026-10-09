@@ -42,3 +42,7 @@ Local testing requires the #8 migration in addition to the earlier migrations. T
 - **HR:** review submitted applications, write private notes, request a bounded SoCLaaS summary, and change status through a separate explicit action; manage jobs locally on this branch.
 
 Both AI features are advisory. Applicants submit their own final text; HR makes every hiring decision.
+
+## Role navigation and signup guidance (#40 integration)
+
+The careers header shows Sign in/Create account to guests. Signed-in Applicants see My applications and Sign out; HR sees Application review, Manage jobs and Sign out. A failed sign-out displays retry feedback. Signup keeps neutral email-verification guidance; local Mailpit instructions remain in the development guide, outside the signup screen. The [integration record](../workflow/archive/2026-10-09-signup-notice-navigation/record.md) records local verification and remaining hosted limits.

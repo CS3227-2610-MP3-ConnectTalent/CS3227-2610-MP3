@@ -1,6 +1,6 @@
 # Applications and review
 
-Baseline: ProductSpec v1.2, 9 October 2026 (APP-005 added; APP-001–004 retained).
+Baseline: ProductSpec v1.3, 9 October 2026 (APP-005 added; APP-001–004 retained).
 
 Canonical ownership, notes and status permissions are in [SEC-001 / SEC-002](security-and-privacy.md).
 

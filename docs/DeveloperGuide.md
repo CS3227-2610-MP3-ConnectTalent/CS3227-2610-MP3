@@ -277,3 +277,7 @@ The team must supply actual role assignments/contributions, verify historical su
 - Supabase CLI generated `supabase/config.toml`.
 - OpenAI's JavaScript SDK is included only as an OpenAI-compatible client library for the required SoCLaaS service; no OpenAI API endpoint is configured.
 - Codex assisted with stack planning, scaffolding, repository configuration, and drafting these initial documents. The team must verify and expand the AI-use declaration and list any further reused ideas, code, and documentation in the final submission.
+
+## Role navigation and signup guidance (#40 integration)
+
+The careers header shows Sign in/Create account to guests. Signed-in Applicants see My applications and Sign out; HR sees Application review, Manage jobs and Sign out. A failed sign-out displays retry feedback. Signup keeps neutral email-verification guidance; local Mailpit instructions remain in the development guide, outside the signup screen. The [integration record](../workflow/archive/2026-10-09-signup-notice-navigation/record.md) records local verification and remaining hosted limits.

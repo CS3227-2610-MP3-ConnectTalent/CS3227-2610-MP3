@@ -52,7 +52,12 @@ test("Applicant contact drafts, validation, freeze and submitted-only HR review"
     await expect(page.getByLabel("Cover letter", { exact: true })).toHaveValue("AI synthetic letter");
     await expect(page.getByLabel("Full name")).toHaveValue("Synthetic Applicant");
     await page.unroute("**/api/ai/applicant-draft");
+    // The Saved draft heading already exists; wait for this write before reloading.
+    const savedResponse = page.waitForResponse((response) => response.request().method() === "POST"
+      && Boolean(response.request().headers()["next-action"]));
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    expect(await (await savedResponse).finished()).toBeNull();
+    await expect(page.getByRole("button", { name: "Save draft", exact: true })).toBeEnabled();
     await expect(page.getByText("Saved draft", { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByLabel("Portfolio URL (optional)")).toHaveValue("https://example.test/portfolio");

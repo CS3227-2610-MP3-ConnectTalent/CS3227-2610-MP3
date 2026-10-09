@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v1.2, 9 October 2026 (SEC-005/SEC-007 contact privacy clarified). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v1.3, 9 October 2026 (SEC-005/SEC-007 contact privacy clarified). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
 
 ## SEC-001: Access boundaries
 

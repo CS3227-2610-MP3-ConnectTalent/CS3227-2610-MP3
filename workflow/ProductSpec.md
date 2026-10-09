@@ -1,6 +1,6 @@
 # Product specification
 
-Current baseline: **1.2**, dated **9 October 2026** (application identity/contact details and privacy safeguards). The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+Current baseline: **1.3**, dated **9 October 2026** (combined role navigation, application identity/contact details and privacy safeguards). The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
 
 This product is a careers site for one employer per deployment, with external Applicant and company HR roles. The first release supports multiple job openings and one text-only application per applicant per job. AI drafting and summary features use the course-required SoC LLM and retain human control over submission and hiring status.
 
@@ -19,3 +19,5 @@ The canonical requirements now live in the capability specifications below. The 
 | Environments, operations and release evidence | [Deployment and operations](specs/deployment-and-operations.md) | OPS |
 
 See [specification conventions and the change traces](specs/README.md) for ID rules, version policy and source-to-destination coverage. Applicant process ownership is Paul Cheng; HR process ownership remains unresolved in this index. The application quota is three requests per user and 24 per deployment per rolling minute as specified in SEC-006; the configured provider key may impose a separate limit.
+
+Combined branch integration: accepted #36 ACC-005 navigation and #39 APP-005 contact/privacy requirements coexist in v1.3. The #40 packet records this integration; hosted validation remains separate.

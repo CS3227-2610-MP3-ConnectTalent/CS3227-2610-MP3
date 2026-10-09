@@ -1,6 +1,6 @@
 # Accounts and roles
 
-Baseline: ProductSpec v1.0, 8 October 2026 (ACC-004 added; ACC-001 updated in v0.9; ACC-002 updated in v0.8).
+Baseline: ProductSpec v1.3, 9 October 2026 (accepted ACC-005 navigation integrated; ACC-001–004 retained).
 
 ## ACC-001: Public Applicant signup
 
@@ -35,3 +35,13 @@ An Applicant or HR user MUST be able to request a password reset link to their a
 Scenario: Given a verified Applicant or HR account, when its user follows a valid reset link and submits matching valid passwords, then only that account's password changes and normal sign-in reaches its existing role interface.
 
 Denial/failure: Given an unknown address, when reset is requested, then the public response does not reveal account existence. Given a missing, invalid, expired or reused link and no preexisting session, when update is attempted, then no password changes and a retry path is shown. Given mismatched passwords, when update is attempted, then no password changes. Given an Applicant, when recovery completes, then HR access remains denied.
+
+## ACC-005: Account navigation and sign out
+
+Public job browsing/detail pages and protected Applicant/HR pages MUST provide consistent account navigation. Guests MUST have Sign in and Create account links without protected role dashboards. Verified Applicants MUST have an Applicant label, My applications link and Sign out action. Verified HR MUST have an HR label, Application review and Manage jobs links and Sign out action, without Applicant dashboard or apply controls. Role display MUST derive from the server-verified current user and database profile, never user-editable metadata. Navigation MUST NOT replace server or database authorization. Authenticated accounts without a verified supported role MUST have a generic account indication and sign out, without role-specific links. Authentication/profile lookup failures MUST NOT expose privileged role controls. A successful sign out MUST return to guest navigation and require authentication for subsequent protected requests. A failed sign out MUST give generic retry feedback and MUST NOT claim success. No password, key or private application information may appear in navigation or error feedback.
+
+- Given a guest browsing an opening, when navigation renders, then account access links appear and no role dashboard appears (nav36-AC-01).
+- Given a verified Applicant or HR account, when public or protected product pages render, then only that role's links and its label appear, with Sign out (nav36-AC-02/03).
+- Given HR browsing a published job, when job detail renders, then no Applicant apply control appears (nav36-AC-03).
+- Given a signed-in user, when sign out succeeds, then guest navigation appears and protected routes require login; when the provider reports failure, then generic retry feedback appears without a success claim (nav36-AC-04).
+- Given an unverified account, missing/unknown role, failed role query or forged user metadata, when navigation renders, then no unsupported role controls appear (nav36-AC-05).

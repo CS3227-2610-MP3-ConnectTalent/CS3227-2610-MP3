@@ -74,3 +74,7 @@ Closeout session: [acceptance/sync/archive summary](../../../logs/2026-10-09-app
 Post-archive checks: 300 local Markdown targets resolved across 19 files; APP-005 canonical clause/scenarios match the accepted delta exactly; SEC-005/007 preserve previous obligations with the approved additions; complete eight-file inventory preserved; `git diff --check` passed. Historical log narrative remains unchanged; only their navigation targets were repaired.
 
 Source-control follow-up: on 2026-10-09 Paul explicitly requested “git commit and psuh”, authorising staging the intended #39 files, a focused commit and push to origin/feat/application-form-details. PR creation, merge and hosted operations remain unauthorised. The separate student reflection changes are excluded. This commit contains the implementation and accepted canonical sync; its ID can be read from branch history after creation.
+
+## Authorised combined submission follow-up
+
+On 2026-10-09 Paul requested commit and PR submission, then explicitly chose “Use one combined PR instead”. Submit #39 and #40 together from feat/application-form-details into develop. GitHub confirms PR #38 merged as00b4d4c; sync that baseline before opening, retain both accepted requirement sets asv1.3 and keep student reflection edits out of commits. This authorises commit/push/combined PR, not merge or hosted rollout.

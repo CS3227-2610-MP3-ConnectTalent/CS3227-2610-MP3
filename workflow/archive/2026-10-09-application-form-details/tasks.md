@@ -11,6 +11,6 @@
 - [x] T06: Actual independent review/findings/rechecks complete.
 - [x] T07: Separate human acceptance with recorded limits, 2026-10-09.
 - [x] T08: Accepted canonical v1.2 sync before complete archive, guide links and dated closeout summary.
-- [ ] T09: Explicitly authorised commit/push/PR.
+- [x] T09: Combined commit/push/PR explicitly authorised; completion confirmed by GitHub after opening.
 
 See [plan](plan.md) and [record](record.md). Proposed checks are not passes.
