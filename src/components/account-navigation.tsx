@@ -15,7 +15,7 @@ export async function AccountNavigation() {
               <span className="rounded-full bg-muted px-3 py-1 font-medium">
                 {account.role === "hr" ? "HR" : account.role === "applicant" ? "Applicant" : "Signed in"}
               </span>
-              {account.role === "applicant" && <Link href="/applications" className="underline">My applications</Link>}
+              {account.role === "applicant" && <><Link href="/applications" className="underline">My applications</Link><Link href="/profile" className="underline">My profile</Link></>}
               {account.role === "hr" && <>
                 <Link href="/hr/applications" className="underline">Application review</Link>
                 <Link href="/hr/jobs" className="underline">Manage jobs</Link>

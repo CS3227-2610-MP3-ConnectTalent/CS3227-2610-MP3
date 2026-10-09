@@ -1,5 +1,7 @@
 # Active change packets
 
+[#44 private profiles and PDF résumés](../archive/2026-10-09-profile-resume/record.md) was separately accepted with recorded limits on2026-10-09 and completely archived after canonical v1.4 sync. Work remains uncommitted on feat/44-profile-resume; hosted rollout and the documented validation/cleanup limitations remain open.
+
 [#40 signup notice/navigation integration](../archive/2026-10-09-signup-notice-navigation/record.md) was separately accepted with recorded limits on 2026-10-09 and completely archived. It combines accepted ACC-005 navigation with APP-005 contact requirements under v1.3. No commit/push/PR or hosted validation occurred for this integration.
 
 Issue [#39](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/39) was separately accepted with recorded limits by Paul Cheng on 2026-10-09. Its [complete application-form details packet](../archive/2026-10-09-application-form-details/record.md) is archived after APP-005 and SEC-005/007 synced to canonical v1.2 on this independent branch. Commit/push/PR and coordinated hosted cutover/testing remain pending.

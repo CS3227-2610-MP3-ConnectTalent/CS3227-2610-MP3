@@ -1,12 +1,12 @@
 # Applications and review
 
-Baseline: ProductSpec v1.3, 9 October 2026 (APP-005 added; APP-001–004 retained).
+Baseline: ProductSpec v1.4, 9 October 2026 (APP-006/007 added; APP-001 scope extended).
 
 Canonical ownership, notes and status permissions are in [SEC-001 / SEC-002](security-and-privacy.md).
 
 ## APP-001: Selected-job, submit-once application
 
-An Applicant MUST be able to draft and edit a cover letter and submit at most one text-only application per selected published job. Each application MUST reference its selected job. A database constraint MUST enforce one application per applicant per job. New applications to draft or closed jobs MUST be denied.
+An Applicant MUST be able to draft/edit a cover letter and submit at most one application per selected published job, with details under APP-005/006 and an optional attachment under APP-007. Each application MUST reference its selected job. A database constraint MUST enforce one application per applicant per job. New applications to draft or closed jobs MUST be denied.
 
 Scenario: Given a published job, when an Applicant explicitly submits final text, then the application references that job. A second application by the same applicant to that job is rejected, including by the database constraint. A submission to a draft or closed job is rejected.
 
@@ -45,3 +45,19 @@ Each new application MUST support a full name, verified account email, optional 
 - Given submitted or closed-job records, when a prohibited write is attempted via UI/RPC, then the application is unchanged (form39-AC-05).
 - Given a stale or lost-response write, when retried/reconciled, then no mismatched field set is reported saved and duplicate submission does not mutate existing contents (form39-AC-06).
 - Given legacy data, when read or completed as a draft, then missing details are labelled or valid details can be submitted (form39-AC-07).
+
+## APP-006: Private profile and optional background snapshots
+
+A verified Applicant MUST be able to save/resume their own private profile with optional full name, phone, portfolio URL, education and work experience. Existing APP-005 contact limits/validation MUST apply; education and work experience MUST each be optional trimmed plain text of at most 2,000 characters, allowing line breaks/tabs but excluding other control characters. Blank optional values MUST become absent. Verified Auth email MUST display read-only and MUST NOT be supplied by browser input. A new application form with no persisted draft MUST prefill profile fields through ordinary data copying without AI. Existing saved drafts MUST take precedence; profile changes MUST NOT overwrite a draft or submission.
+
+Application education/work experience MUST save atomically with the draft's other fields and MUST freeze on explicit submission with APP-004/005. These optional snapshots MUST be visible only under SEC-001/009, including after closure. HR MUST see submitted snapshots, never the mutable private profile. Legacy absent fields MUST display “Not provided”; no past snapshot may be fabricated from a current profile. Invalid/stale writes MUST retain entered values without a partial write. APP-005's nonblank full-name submission rule remains.
+
+Scenario: Given a private profile and no saved draft, when opening a new application form, then fields prefill without AI. Given an existing draft or submission, profile changes leave its fields unchanged. Unauthorized profile access is denied under SEC-009. Invalid or stale draft writes preserve consistent saved state.
+
+## APP-007: Optional private PDF attachment
+
+An Applicant MUST be able to attach at most one optional PDF résumé of no more than 1,048,576 bytes to their own draft application while its job is published, and replace/remove it before submission. No attachment MUST be required to submit. The server MUST validate filename/type, bounded byte length and PDF structure; non-PDF, oversized, malformed or encrypted/unparseable PDFs MUST be rejected before finalization. Type/structure validation MUST NOT be described as malware scanning. The interface MUST state the PDF/size limit and show safe upload errors without losing text/profile fields or the previous attached file.
+
+Submission MUST atomically freeze the finalized attachment reference together with application fields. A pending upload MUST NOT be submitted as an attachment; submission while an active upload is pending MUST return a retryable message. Replacement/removal/finalization MUST be denied after submission or job closure, including direct requests and races. Existing owned/submitted downloads MUST remain available after closure under SEC-009. An upload begun before closure/submission MUST NOT subsequently finalize or mutate frozen attachment state. DB/Storage failures and retries MUST preserve prior referenced files and track unreferenced staging objects for bounded cleanup; cleanup MUST NOT delete a referenced or another application's object. Legacy records MUST remain usable without a file.
+
+Scenario: Given a valid optional PDF and an owned open-job draft, upload/download succeeds. Invalid replacement preserves the previous attachment. Submitted/closed-job mutations fail, and a racing upload cannot finalize after closure or submission. Lost-response retries reconcile the matching operation; failed or canceled operations remain tracked for safe cleanup. Private file permissions and AI/log exclusions are defined in [SEC-009](security-and-privacy.md).

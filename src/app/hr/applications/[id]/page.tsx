@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ResumePanel } from "@/components/resume-panel";
+import { getApplicationResume } from "@/lib/application-resumes";
 import { notFound } from "next/navigation";
 
 import { addHRNote, changeHRStatus } from "@/app/hr/applications/actions";
@@ -29,6 +31,7 @@ export default async function HRApplicationDetail({
   }
   if (!application || !notes || !events) notFound();
   const { error, notice } = await searchParams;
+  const resume = await getApplicationResume(application.id);
 
   return <main className="mx-auto max-w-3xl space-y-8 px-5 py-10">
     <Link href="/hr/applications" className="underline">← Application review</Link>
@@ -42,6 +45,7 @@ export default async function HRApplicationDetail({
     {notice && <p role="status" className="rounded-lg border p-3">The change was saved.</p>}
 
     <ApplicationContactDetails {...application} />
+    <ResumePanel applicationId={application.id} revision={application.revision} editable={false} resume={resume} />
     <div className="grid gap-6 lg:grid-cols-2">
       <section className="space-y-3"><h2 className="text-xl font-semibold">Original cover letter</h2>
         <p className="whitespace-pre-wrap rounded-lg border p-4">{application.original_submitted_letter}</p></section>

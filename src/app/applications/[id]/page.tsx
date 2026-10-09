@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ResumePanel } from "@/components/resume-panel";
+import { getApplicationResume } from "@/lib/application-resumes";
 import { notFound } from "next/navigation";
 
 import { ApplicationContactDetails } from "@/components/application-contact-details";
@@ -18,6 +20,7 @@ export default async function ApplicationDetail({
   const application = await getOwnApplication(id);
   if (!application) notFound();
   const job = await getPublishedJob(application.job_id);
+  const resume = await getApplicationResume(application.id);
   const { notice } = await searchParams;
   return <main className="mx-auto max-w-3xl space-y-6 px-5 py-10">
     <Link href="/applications" className="underline">← My applications</Link>
@@ -38,5 +41,6 @@ export default async function ApplicationDetail({
       <section className="space-y-2"><h2 className="text-xl font-semibold">Saved letter</h2>
         <p className="whitespace-pre-wrap rounded-lg border p-4">{application.cover_letter || "(empty draft)"}</p>
       </section>}
+    <ResumePanel applicationId={application.id} revision={application.revision} editable={Boolean(job) && application.submission_state === "draft"} resume={resume} />
   </main>;
 }

@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.3, 9 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. The accepted SoCLaaS AI change dated 9 October modified APP-004, AID-001/002, AIS-001/002, SEC-001/006/007 and OPS-002. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.4, 9 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. The accepted SoCLaaS AI change dated 9 October modified APP-004, AID-001/002, AIS-001/002, SEC-001/006/007 and OPS-002. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## IDs and normative language
 
@@ -155,3 +155,15 @@ This historical v0.6 trace left student names/role ownership and exact SoC LLM l
 ## v1.3 combined navigation/contact integration
 
 The #40 integration combines accepted #36 ACC-005 with #39 APP-005 and SEC-005/007. Both independent v1.2 acceptance histories are preserved. [Navigation archive](../archive/2026-10-09-role-navigation-logout/record.md) and [integration packet](../archive/2026-10-09-signup-notice-navigation/record.md) record their distinct gates. This version reconciliation adds no new auth policy and certifies no hosted rollout.
+
+## v1.4 accepted change trace
+
+Paul Cheng separately accepted #44 with recorded limits on2026-10-09 after implementation and actual separate source review. [Complete archive](../archive/2026-10-09-profile-resume/record.md) preserves approval, branch permission, tests/failures/fixes and distinct acceptance.
+
+| Delta | Canonical destination | Change |
+| --- | --- | --- |
+| Modified OVR-002/003 | [Product overview](product-overview.md) | Optional private PDF replaces text-only/upload exclusion; original roles and AI decision restrictions retained |
+| Modified APP-001; added APP-006/007 | [Applications and review](applications-and-review.md) | Private profile, new-form-only copying, optional frozen background and private PDF lifecycle |
+| Added SEC-009 | [Security and privacy](security-and-privacy.md) | Profile/file role boundaries, private Storage/server validation and content exclusion from AI/logs |
+
+Sync files are uncommitted. Canonical v1.4 describes accepted behavior; hosted rollout/accessibility/clean-reset rehearsal and monitored manual cleanup remain recorded limits. No release claim.
