@@ -78,3 +78,7 @@ Source-control follow-up: on 2026-10-09 Paul explicitly requested “git commit 
 ## Authorised combined submission follow-up
 
 On 2026-10-09 Paul requested commit and PR submission, then explicitly chose “Use one combined PR instead”. Submit #39 and #40 together from feat/application-form-details into develop. GitHub confirms PR #38 merged as00b4d4c; sync that baseline before opening, retain both accepted requirement sets asv1.3 and keep student reflection edits out of commits. This authorises commit/push/combined PR, not merge or hosted rollout.
+
+Final submission preparation: accepted integration commit d61b814; fetched origin/develop00b4d4c (mergedPR38). Six expected overlapping navigation/spec/index conflicts resolved with previously reviewed combined versions; post-resolution typecheck and18focused units passed. Automatic merge retained upstream guide edits. Student reflection changes were backed up/stashed separately and excluded from integration edits. [Combined PR preparation summary](../../../logs/2026-10-09-application-details-combined-pr.md) records this session; verification pending. No hosted operations.
+
+Actual separate final merge recheck by /root/signup_navigation_review: no blocking findings, no unresolved conflicts, staged whitespace check passed; navigation source matches merged develop and canonicalv1.3 retains all accepted IDs. Reviewer did not rerun post-merge units/typecheck; those are implementer evidence.

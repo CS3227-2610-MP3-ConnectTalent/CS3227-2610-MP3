@@ -1,8 +1,12 @@
 # User Guide
 
-Status: job browsing, Applicant applications, HR review and password recovery are in `develop`. HR job management is locally accepted on `feat/8-hr-job-management`. Applicant SoCLaaS drafting and HR summaries are implemented on `feat/7-10-soclaas-ai`; independent review, student acceptance and PR closeout remain pending. This branch is not a deployed release.
+Status: job browsing, Applicant applications, HR review/job management, password recovery and AI assistance are merged into `develop`. Consistent account navigation and logout passed local checks and independent review on `fix/36-role-navigation-logout`; Paul accepted with recorded limits on 2026-10-09; ACC-005 is synced to canonical v1.2 and the packet is archived. This branch is not a deployed release.
 
 ## Access
+
+The shared account navigation appears on browsing, application and HR pages. Guests see **Sign in** and **Create account**. Verified Applicants see **Applicant**, **My applications** and **Sign out**; HR sees **HR**, **Application review**, **Manage jobs** and **Sign out**. HR browsing public job details is not offered **Apply for this role**. Public signup creates an Applicant; HR accounts are assigned by an administrator as described below. An account without a verified supported role gets a generic **Signed in** indication and sign out without role dashboards. Account lookup failures withhold role controls.
+
+Use **Sign out** in that navigation to return to guest browsing. If logout fails, the careers page displays a retry message; it does not claim the session ended. Successful logout requires signing in again before opening protected pages.
 
 Follow the local Supabase and environment setup in the root `README.md`, then run `corepack pnpm dev` and open <http://localhost:3000>. The demo uses neutral branding and does not require a company name. Use `localhost` consistently during signup and confirmation, since browser sessions are tied to that host.
 
