@@ -33,7 +33,8 @@ test("signup retains the email after a server-side mismatch without JavaScript",
   await context.close();
 });
 
-test("verified Applicant saves, submits, and edits one application", async ({ page, request }) => {
+test("verified Applicant saves and submits one frozen application", async ({ page, request }) => {
+  test.setTimeout(60_000);
   const email = `applicant-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`;
   const password = "CorrectHorseBattery9!";
 
@@ -70,21 +71,40 @@ test("verified Applicant saves, submits, and edits one application", async ({ pa
 
   await page.goto("/jobs/00000000-0000-4000-8000-000000000101");
   await page.getByRole("link", { name: "Apply for this role" }).click();
+  await page.route("**/api/ai/applicant-draft", async (route) => {
+    expect(route.request().postDataJSON()).toEqual({
+      jobId: "00000000-0000-4000-8000-000000000101",
+      notes: "Completed a synthetic TypeScript project.",
+    });
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ draft: "AI generated synthetic draft." }) });
+  });
+  await page.getByLabel("Experience notes").fill("Completed a synthetic TypeScript project.");
+  await page.getByRole("button", { name: "Generate draft" }).click();
+  await expect(page.getByLabel("Cover letter")).toHaveValue("AI generated synthetic draft.");
+  await expect(page.getByRole("status")).toContainText("Check every date, skill, and achievement");
+  await expect(page.getByText("Submitted application")).toHaveCount(0);
+  await page.unroute("**/api/ai/applicant-draft");
+  await page.reload();
+  await expect(page.getByLabel("Cover letter")).toHaveValue("");
+
   await page.getByLabel("Cover letter").fill("First saved draft");
   await page.getByRole("button", { name: "Save draft" }).click();
-  await expect(page.getByText("Saved draft")).toBeVisible();
+  await expect(page.getByText("Saved draft", { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("Cover letter")).toHaveValue("First saved draft");
 
   await page.getByLabel("Cover letter").fill("Original submitted letter");
   await page.getByRole("button", { name: "Submit application" }).click();
-  await expect(page.getByText("Submitted application")).toBeVisible();
+  await expect(page.getByText("Submitted application", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Original submission" }).locator("..").getByText("Original submitted letter")).toBeVisible();
+  await expect(page.getByText("Original submitted letter", { exact: true })).toHaveCount(1);
+  await expect(page.getByLabel("Cover letter")).toHaveCount(0);
+  await expect(page.getByText(/Submitted applications are locked\. Contact HR/)).toBeVisible();
 
-  await page.getByLabel("Cover letter").fill("Revised submitted letter");
-  await page.getByRole("button", { name: "Save letter changes" }).click();
-  await expect(page.getByLabel("Cover letter")).toHaveValue("Revised submitted letter");
-  await expect(page.getByRole("heading", { name: "Original submission" }).locator("..").getByText("Original submitted letter")).toBeVisible();
+  await page.goto("/jobs/00000000-0000-4000-8000-000000000101/apply");
+  await expect(page.getByRole("heading", { name: "Application submitted" })).toBeVisible();
+  await expect(page.getByLabel("Cover letter")).toHaveCount(0);
+  await expect(page.getByText(/Submitted applications are locked\. Contact HR/)).toBeVisible();
   await page.goto("/applications");
   const ownApplication = page.getByRole("link", { name: /Software Engineer.*Submitted/ });
   await expect(ownApplication).toHaveCount(1);

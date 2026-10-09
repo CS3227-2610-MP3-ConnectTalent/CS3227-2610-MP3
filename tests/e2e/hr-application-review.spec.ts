@@ -62,9 +62,8 @@ test("HR reviews only submitted applications and Applicant sees status without p
   await page.getByRole("button", { name: "Submit application" }).click();
   await expect(page.getByText("Submitted application", { exact: true })).toBeVisible();
   const applicantUrl = page.url();
-  await page.getByLabel("Cover letter").fill("Current synthetic letter");
-  await page.getByRole("button", { name: "Save letter changes" }).click();
-  await expect(page.getByLabel("Cover letter")).toHaveValue("Current synthetic letter");
+  await expect(page.getByLabel("Cover letter")).toHaveCount(0);
+  await expect(page.getByText(/Submitted applications are locked\. Contact HR/)).toBeVisible();
   await page.goto("/applications");
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -78,7 +77,36 @@ test("HR reviews only submitted applications and Applicant sees status without p
   await page.goto("/hr/applications");
   await page.getByRole("link", { name: new RegExp(submittedTitle) }).click();
   await expect(page.getByRole("heading", { name: "Original cover letter" }).locator("..")).toContainText("Original synthetic letter");
-  await expect(page.getByRole("heading", { name: "Current cover letter" }).locator("..")).toContainText("Current synthetic letter");
+  await expect(page.getByRole("heading", { name: "Current cover letter" }).locator("..")).toContainText("Original synthetic letter");
+
+  await page.route("**/api/ai/hr-summary", async (route) => {
+    await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "AI summaries are temporarily unavailable." }) });
+  });
+  await page.getByRole("button", { name: "Summarize" }).click();
+  await expect(page.locator("p[role=alert]")).toContainText("summary is temporarily unavailable");
+  await expect(page.getByText("Review status: Submitted")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Original cover letter" }).locator("..")).toContainText("Original synthetic letter");
+  await page.unroute("**/api/ai/hr-summary");
+
+  const markup = "<script>window.compromised=true</script>";
+  await page.route("**/api/ai/hr-summary", async (route) => {
+    expect(route.request().postDataJSON()).toEqual({ applicationId: new URL(page.url()).pathname.split("/").at(-1) });
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        evidence_mentioned: [markup],
+        requirements_not_addressed: ["No deployment evidence in the letter"],
+        follow_up_questions: ["Which testing tools did you use?"],
+      }),
+    });
+  });
+  await page.getByRole("button", { name: "Summarize" }).click();
+  await expect(page.getByText(markup, { exact: true })).toBeVisible();
+  await expect(page.locator("script").filter({ hasText: "window.compromised" })).toHaveCount(0);
+  await expect(page.getByText("Review status: Submitted")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Original cover letter" }).locator("..")).toContainText("Original synthetic letter");
+
   await page.getByLabel("Add a note").fill("Private synthetic HR note");
   await page.getByRole("button", { name: "Add note" }).click();
   await expect(page.getByText("Private synthetic HR note")).toBeVisible();

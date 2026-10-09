@@ -33,6 +33,14 @@ function submission() {
   return form;
 }
 
+function submittedEdit() {
+  const form = new FormData();
+  form.set("intent", "edit");
+  form.set("cover_letter", "A post-submission correction");
+  form.set("revision", "2");
+  return form;
+}
+
 describe("application action retry after an uncertain response", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,6 +64,14 @@ describe("application action retry after an uncertain response", () => {
     maybeSingle.mockResolvedValue({ data: null, error: null });
     await expect(updateApplication(jobId, submission()))
       .rejects.toThrow(`REDIRECT:/jobs/${jobId}/apply?error=update`);
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("directs post-submission correction attempts to HR without calling the database", async () => {
+    await expect(updateApplication(jobId, submittedEdit()))
+      .rejects.toThrow("REDIRECT:/applications?error=correction");
+    expect(rpc).not.toHaveBeenCalled();
+    expect(from).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
