@@ -5,7 +5,7 @@ const localAdminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 test.skip(!localAdminKey, "Needs a local-only TEST_SUPABASE_SERVICE_ROLE_KEY.");
 
 test("guest, Applicant and HR navigation stays distinct and logout clears browser access", async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   const admin = createClient("http://127.0.0.1:54321", localAdminKey!, { auth: { persistSession: false, autoRefreshToken: false } });
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const password = "SyntheticNavigation9!";
@@ -50,6 +50,27 @@ test("guest, Applicant and HR navigation stays distinct and logout clears browse
         await expect(nav.getByRole("link", { name: "Application review", exact: true })).toHaveCount(user.role === "hr" ? 1 : 0);
         await expect(nav.getByRole("link", { name: "Manage jobs", exact: true })).toHaveCount(user.role === "hr" ? 1 : 0);
         if (path === `/jobs/${jobId}`) await expect(page.getByRole("link", { name: "Apply for this role" })).toHaveCount(user.role === "applicant" ? 1 : 0);
+        for (const width of [390, 1440]) {
+          await page.setViewportSize({ width, height: 1000 });
+          expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+        }
+      }
+      const roleBadge = nav.getByText(user.role === "hr" ? "HR" : "Applicant", { exact: true });
+      const signOutButton = nav.getByRole("button", { name: "Sign out", exact: true });
+      await signOutButton.hover();
+      for (const control of [roleBadge, signOutButton]) {
+        expect(await control.evaluate((element) => {
+          const style = getComputedStyle(element);
+          const luminance = (color: string) => {
+            const rgb = color.match(/[\d.]+/g)!.slice(0, 3).map(Number).map((value) => {
+              const channel = value / 255;
+              return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+            });
+            return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+          };
+          const foreground = luminance(style.color); const background = luminance(style.backgroundColor);
+          return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+        })).toBeGreaterThanOrEqual(4.5);
       }
       if (user.role === "applicant") {
         expect((await page.goto("/hr/jobs"))?.status()).toBe(404);

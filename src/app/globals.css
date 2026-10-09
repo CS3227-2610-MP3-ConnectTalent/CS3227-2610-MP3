@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: "Segoe UI", Arial, Helvetica, sans-serif;
   --font-mono: Consolas, Monaco, monospace;
   --font-heading: Arial, Helvetica, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -49,24 +49,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: #f5f5f8;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: #6545c1;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: #606576;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: #6545c1;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -127,4 +127,57 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Presentation only; role decisions remain in server modules. */
+@layer components {
+  .account-header { background: #181a22; color: #f5f5fa; border-color: #30323e; }
+  .account-header nav a { text-decoration: none; color: #e0e1ea; border-radius: 0.5rem; padding: 0.5rem 0.65rem; }
+  .account-header nav a:hover { background: #30313e; color: white; }
+  .account-header nav form button { border-color: #727787; background: #292c38; color: white; }
+  .account-header nav form button:hover { background: #414556; }
+  .account-header .account-role { background: #383049; color: #e9dcff; }
+  .careers-hero { position: relative; background: #232333; color: white; }
+  .careers-hero p { color: #d4d4e4; }
+  .careers-hero > div > span { color: #cdb9ff; }
+  .hero-orbit { position: absolute; height: 380px; width: 380px; right: -40px; top: 15px; border: 1px solid #77718d; border-radius: 50%; box-shadow: 0 0 0 45px #ffffff08, 0 0 0 90px #ffffff06, 0 0 0 135px #ffffff04; pointer-events: none; }
+  .category-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.8rem; border-radius: 0.65rem; font-size: 0.875rem; color: #575d6d; }
+  .category-link:hover { background: #f3f0f9; color: #432d82; }
+  .category-active { background: #eee8fa; color: #432d82; font-weight: 600; }
+  .category-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex-shrink: 0; }
+  .category-dot-engineering { background: #7260ae; }
+  .category-dot-human_resources { background: #468173; }
+  .category-dot-legal { background: #4a81aa; }
+  .category-dot-sales { background: #ba7656; }
+  .category-dot-other { background: #747a4b; }
+  .job-card { box-shadow: 0 2px 6px #17172c04; transition: box-shadow 150ms ease, border-color 150ms ease; }
+  .job-card:hover { border-color: #b3a0d9; box-shadow: 0 8px 22px #29204010; }
+  .job-card-panel { min-height: 250px; color: #232333; overflow-wrap: anywhere; }
+  .job-tone-engineering { background: #eae4f8; }
+  .job-tone-human_resources { background: #deefe9; }
+  .job-tone-legal { background: #e1edf8; }
+  .job-tone-sales { background: #f8e5d8; }
+  .job-tone-other { background: #edf0db; }
+  .empty-state { border: 1px dashed #c8c5d4; border-radius: 1rem; background: white; padding: 2.5rem; }
+  .page-shell { width: 100%; min-width: 0; overflow-wrap: anywhere; }
+  .page-shell > h1, .page-shell header h1 { letter-spacing: -0.035em; }
+  .page-shell > section, .page-shell > article, .page-shell > form, .page-shell > dl { background: white; border: 1px solid var(--border); border-radius: 1rem; padding: clamp(1.15rem, 3vw, 2rem); }
+  .page-shell li > a { background: white; border-radius: 1rem; border-color: #e2e0ea; box-shadow: 0 2px 5px #23233303; }
+  .page-shell li > a:hover { background: #faf8ff; border-color: #b3a0d9; }
+  .auth-shell { margin-block: 2.5rem; background: white; border: 1px solid #e3dfed; border-radius: 1.5rem; box-shadow: 0 10px 35px #29204008; }
+  .auth-shell > form { border: 0; padding: 0; }
+  .auth-shell form > button[type="submit"], .auth-shell form > button:not([type]), .auth-panel form > button[type="submit"], .auth-panel form > button:not([type]) { width: 100%; }
+  .page-shell .form-surface { background: white; border-radius: 1rem; border: 1px solid var(--border); padding: clamp(1.1rem, 3vw, 1.75rem); }
+  .page-shell :is(input:not([type="hidden"]), textarea, select) { background: #fff; border-color: #cbc8d6; min-height: 2.75rem; }
+  .page-shell input[readonly] { background: #f5f4f8; color: #606576; }
+  .page-shell [role="alert"], .careers-shell [role="alert"] { background: #fff2f1; color: #8a2828; border: 1px solid #efc3bd; border-radius: 0.75rem; padding: 0.9rem 1rem; }
+  .page-shell p[role="status"] { background: #edf7f2; color: #235b45; border-radius: 0.75rem; padding: 0.9rem 1rem; }
+}
+@layer base {
+  :focus-visible { outline: 3px solid #9571df; outline-offset: 3px; }
+  button:not(:disabled), a { -webkit-tap-highlight-color: transparent; }
+  button:disabled, fieldset:disabled { opacity: 0.65; }
+  textarea { resize: vertical; }
+  @media (max-width: 640px) { .hero-orbit { opacity: 0.25; right: -220px; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; } }
 }

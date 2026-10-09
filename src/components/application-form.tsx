@@ -25,7 +25,7 @@ export function ApplicationForm({ jobId, value, revision, submitted, details, em
     </section>
   </div>;
   return <div className="mt-8 space-y-5">
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="form-surface space-y-5">
       <input type="hidden" name="jobId" value={jobId} />
       <input type="hidden" name="revision" value={revision ?? ""} />
       {state.message && <p role="alert" className="rounded-lg border border-destructive p-3 text-destructive">{state.message}</p>}

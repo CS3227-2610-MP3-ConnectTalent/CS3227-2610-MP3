@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 export default async function ForgotPassword({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
-    <main className="mx-auto max-w-md space-y-6 px-5 py-12">
+    <main className="page-shell auth-shell mx-auto w-[calc(100%-2.5rem)] max-w-md space-y-6 px-5 py-12">
       <Link href="/auth/sign-in" className="text-sm underline">← Sign in</Link>
       <h1 className="text-3xl font-semibold">Reset your password</h1>
       <p>Enter your account email and we’ll send a reset link if the account exists.</p>

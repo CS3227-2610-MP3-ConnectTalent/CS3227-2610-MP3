@@ -1,5 +1,9 @@
 # Active change packets
 
+The approved #44 profile/résumé packet and implementation are maintained separately on `feat/44-profile-resume`; they are excluded from this UI/reflection PR. See [issue #44](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/44).
+
+[#42 UI refresh](../archive/2026-10-09-ui-refresh/record.md) and [#43 individual reflections](../archive/2026-10-09-individual-reflections/record.md) were separately accepted by Paul on2026-10-09 and completely archived; canonical sync N/A because existing product behavior is unchanged. Paul personal/log verification, John completion, hosted testing and source-control submission remain pending.
+
 [#40 signup notice/navigation integration](../archive/2026-10-09-signup-notice-navigation/record.md) was separately accepted with recorded limits on 2026-10-09 and completely archived. It combines accepted ACC-005 navigation with APP-005 contact requirements under v1.3. No commit/push/PR or hosted validation occurred for this integration.
 
 Issue [#39](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/39) was separately accepted with recorded limits by Paul Cheng on 2026-10-09. Its [complete application-form details packet](../archive/2026-10-09-application-form-details/record.md) is archived after APP-005 and SEC-005/007 synced to canonical v1.2 on this independent branch. Commit/push/PR and coordinated hosted cutover/testing remain pending.

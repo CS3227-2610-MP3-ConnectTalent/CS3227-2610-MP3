@@ -2,7 +2,7 @@ import { isPortfolioUrl } from "@/lib/application-details";
 export function ApplicationContactDetails({ full_name, submitted_email, phone, portfolio_url }: {
   full_name: string | null; submitted_email: string | null; phone: string | null; portfolio_url: string | null;
 }) {
-  return <section className="space-y-3 rounded-lg border p-4" aria-labelledby="contact-details-heading">
+  return <section className="space-y-3 rounded-xl border bg-white p-5" aria-labelledby="contact-details-heading">
     <h2 id="contact-details-heading" className="text-xl font-semibold">Applicant details</h2>
     <dl className="grid gap-3 sm:grid-cols-[9rem_1fr]">
       <dt className="font-medium">Full name</dt><dd>{full_name || "Not provided"}</dd>

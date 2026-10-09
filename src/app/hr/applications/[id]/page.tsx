@@ -22,7 +22,7 @@ export default async function HRApplicationDetail({
     application = await getSubmittedApplication(id);
     if (application) [notes, events] = await Promise.all([listHRNotes(id), listHRStatusEvents(id)]);
   } catch {
-    return <main className="mx-auto max-w-3xl px-5 py-10">
+    return <main className="page-shell mx-auto max-w-3xl px-5 py-10">
       <h1 className="text-3xl font-semibold">Application review</h1>
       <p role="alert" className="mt-5">Review data is temporarily unavailable. Try again later.</p>
     </main>;
@@ -30,7 +30,7 @@ export default async function HRApplicationDetail({
   if (!application || !notes || !events) notFound();
   const { error, notice } = await searchParams;
 
-  return <main className="mx-auto max-w-3xl space-y-8 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-3xl space-y-8 px-5 py-10">
     <Link href="/hr/applications" className="underline">← Application review</Link>
     <header className="space-y-2">
       <h1 className="text-3xl font-semibold">{application.job_title}</h1>

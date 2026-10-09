@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function ApplicationsPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const applications = await listOwnApplications();
   const { error } = await searchParams;
-  return <main className="mx-auto max-w-4xl space-y-8 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-4xl space-y-8 px-5 py-10">
     <header className="flex items-center justify-between gap-4">
       <Link href="/" className="underline">← Careers</Link>
     </header>
