@@ -1,11 +1,11 @@
 # Spec delta: Deployment and operations
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; draft awaiting written review
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; written delta approved, implementation plan approval pending
 - Canonical file: [deployment-and-operations.md](../../../specs/deployment-and-operations.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; OPS-002
 - Proposed baseline: v1.1
 - Dependencies/cross-capability IDs: SEC-006/SEC-007, AID-001/AID-002, AIS-001/AIS-002
-- Approval: John approved the design for packet drafting on 2026-10-09; written delta review pending
+- Approval: John approved the written delta in chat on 2026-10-09.
 
 ## MODIFIED
 
@@ -19,7 +19,7 @@
 
 ## Delta review and sync evidence
 
-- [ ] John reviews this delta before a plan is written.
+- [x] John approved this written delta on 2026-10-09.
 - [ ] Verify actual key-specific limit and configured model through SoCLaaS before live evaluation.
 - [ ] Do not sync to the canonical specification until post-implementation acceptance.
 - Sync commit/paths/decision evidence: Pending; no canonical file changed.

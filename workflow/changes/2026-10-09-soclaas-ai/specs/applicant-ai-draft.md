@@ -1,11 +1,11 @@
 # Spec delta: Applicant AI draft
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7; John; draft awaiting written review
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7; John; written delta approved, implementation plan approval pending
 - Canonical file: [applicant-ai-draft.md](../../../specs/applicant-ai-draft.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; AID-001/AID-002
 - Proposed baseline: v1.1
 - Dependencies/cross-capability IDs: APP-001/APP-004, SEC-001 through SEC-007, OPS-002
-- Approval: John approved the design for packet drafting on 2026-10-09; written delta review pending
+- Approval: John approved the written delta in chat on 2026-10-09.
 
 ## MODIFIED
 
@@ -27,7 +27,7 @@
 
 ## Delta review and sync evidence
 
-- [ ] John reviews this delta before a plan is written.
+- [x] John approved this written delta on 2026-10-09.
 - [ ] Confirm cross-links and output limits against SEC-004/SEC-006 before implementation.
 - [ ] Do not sync to the canonical specification until post-implementation acceptance.
 - Sync commit/paths/decision evidence: Pending; no canonical file changed.

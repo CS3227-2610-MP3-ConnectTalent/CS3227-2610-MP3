@@ -1,9 +1,9 @@
 # Design: SoCLaaS Applicant draft and HR summary
 
 - Change ID/issues: 2026-10-09-soclaas-ai; [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7), [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
-- Owner/status/date: John; draft awaiting written review; 2026-10-09
+- Owner/status/date: John; written design approved for planning, implementation plan approval pending; 2026-10-09
 - Inputs: proposal.md; deltas under specs/; ProductSpec v1.0 at 0a0f5c4; APP-004, AID-001/AID-002, AIS-001/AIS-002, SEC-001/SEC-002/SEC-003/SEC-004/SEC-005/SEC-006/SEC-007, OPS-002
-- Scope and affected components/files: Applicant application form and AI-draft route; HR application detail and summary route; server-only SoCLaaS client/schema validation; auth/data-access helpers; additive Supabase migration for post-submit write denial, atomic quotas and metadata audit; unit/route, RLS/database, and browser security tests. Exact allowed files are pending the plan. The existing user edit to .env.example is preserved and excluded.
+- Scope and affected components/files: Applicant application form and AI-draft route; HR application detail and summary route; server-only SoCLaaS client/schema validation; auth/data-access helpers; additive Supabase migration for post-submit write denial, atomic quotas and metadata audit; unit/route, RLS/database, and browser security tests. The exact allowlist is in `plan.md`. The existing user edit to .env.example is preserved and excluded.
 
 ## Decisions and alternatives
 
@@ -86,7 +86,7 @@ UI failures must not clear Applicant notes or typed cover-letter text. HR errors
 ## Review and unresolved decisions
 
 - [x] Architecture/design was approved in chat for packet drafting by John on 2026-10-09; robust error handling is an explicit condition.
-- [ ] John reviews this written design before the plan is prepared.
-- [ ] Coordinate the APP-004 delta with Paul Cheng, named as Applicant process owner in ProductSpec v1.0, before implementation.
+- [x] John approved the written design in chat on 2026-10-09.
+- [x] John reported coordinating the APP-004 delta with Paul Cheng on 2026-10-09; this report is not independently verified and does not change the process-owner record.
 - [ ] Confirm actual SoCLaaS model access and key-specific quotas before live evaluation.
 - Human implementation-plan approval: pending.
