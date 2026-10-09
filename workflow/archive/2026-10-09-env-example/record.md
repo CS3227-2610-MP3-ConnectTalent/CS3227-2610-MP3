@@ -1,6 +1,6 @@
 # Feature record: environment example
 
-Status: accepted locally; archive and PR closeout in progress
+Status: accepted locally; packet archived before PR
 
 Owner: John (accountable student)
 
@@ -11,13 +11,13 @@ Date: 2026-10-09
 
 - Change ID/classification: `2026-10-09-env-example`; documentation/configuration only
 - GitHub issues: [#35](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/35)
-- Branch/commits/PR: `docs/35-env-example`; implementation and closeout commits pending; PR pending
+- Branch/commits/PR: `docs/35-env-example`; implementation commit `1eabcf2`; archive/closeout artifacts are recorded in the closeout commit; PR pending
 - Proposal: [proposal.md](proposal.md)
 - Design: omitted; narrowly scoped example-file edit with no architecture/security model change
 - Deltas: no product-spec delta; OPS-002/OPS-003 setup doc consistency only
 - Implementation plan/tasks: [plan.md](plan.md), [tasks.md](tasks.md)
 - Baseline: `develop` at `dd5e613` (ProductSpec v1.1)
-- Archive path: `workflow/archive/2026-10-09-env-example/` (pending move)
+- Archive path: `workflow/archive/2026-10-09-env-example/`
 
 ## Approval checklist
 
@@ -26,7 +26,7 @@ Date: 2026-10-09
 - [x] Implementation and scoped checks complete; see below.
 - [x] Independent review complete; see [review handoff](handoffs/independent-review.md).
 - [x] Human acceptance recorded separately; John’s conditional proceed instruction was given on 2026-10-09 and its no-further-issues condition was satisfied by the final independent review.
-- [ ] Dated summary and packet archive; pending.
+- [x] Dated summary added and complete packet archived before PR.
 - [ ] PR pending; merge/release remain separate.
 - [x] Product delta N/A: environment example only.
 
@@ -54,7 +54,7 @@ Date: 2026-10-09
 
 ## Implementation and checks
 
-Changed files: `.env.example`; packet files; active packet index pending closeout.
+Changed files: `.env.example`; archived packet; active/archive indexes; dated session summary.
 
 Commands and results:
 
@@ -80,11 +80,11 @@ Known limitation: GitHub API issue creation returned 403; issue #35 was created 
 
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
-| 2026-10-09 | [session summary](../../logs/2026-10-09-env-example.md) | User requested full `.env.example` audit, key-purpose review, and issue-linked PR. | Separate reviewer found no remaining issues; John’s conditional proceed approval was satisfied. Summary records static evidence and limits. |
+| 2026-10-09 | [session summary](../../../logs/2026-10-09-env-example.md) | User requested full `.env.example` audit, key-purpose review, and issue-linked PR. | Separate reviewer found no remaining issues; John’s conditional proceed approval was satisfied. Summary records static evidence and limits. |
 
 ## Canonical sync and archive
 
 - Accepted delta/human decision: no product delta; John’s conditional proceed approval was satisfied after the independent review found no remaining issues.
 - Canonical sync: N/A; no product behavior changed.
-- Archive decision/path: accepted documentation/configuration packet; move to `workflow/archive/2026-10-09-env-example/` after session summary is added.
-- Outstanding work: implementation commit, packet archive/navigation update, closeout commit, push, and PR.
+- Archive decision/path: archived intact at `workflow/archive/2026-10-09-env-example/` after the no-delta decision, independent review, acceptance, and dated summary.
+- Outstanding work: push the implementation and closeout commits, then open the issue-linked PR. Merge and release remain separate.

@@ -6,9 +6,9 @@
 - Scope: audit `.env.example` against app, test, platform, and Supabase config references; clarify runtime/test Supabase key boundaries; fix the template; create an issue-linked PR.
 - Accountable student: John. Implementation and closeout performed by Codex; a separate read-only reviewer completed the independent check.
 - GitHub issue: [#35](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/35).
-- Change packet: [environment example packet](../workflow/changes/2026-10-09-env-example/record.md) (archived before PR creation).
+- Change packet: [archived environment example packet](../workflow/archive/2026-10-09-env-example/record.md) (archived before PR creation).
 - Branch: `docs/35-env-example`, created from local `develop` at `dd5e613`, which was equal to `origin/develop` when checked.
-- Commit and PR: commit/push and PR opening are pending at the time this summary is prepared; PR opening is the final contributor action.
+- Implementation commit: `1eabcf2` (`docs(config): complete environment example`). Archive/navigation closeout is part of the closeout snapshot; push and PR opening are pending at the time this summary is prepared. PR opening is the final contributor action.
 - Issue creation: GitHub issue API integration returned 403; issue #35 was created and verified through the logged-in browser UI and assigned to John.
 
 ## Request, decisions, and implementation

@@ -17,4 +17,5 @@
 
 - [x] T03 — Separate reviewer checks the final diff, scope, and key boundary. Evidence: `handoffs/independent-review.md` and `record.md`.
 - [x] T04 — John records distinct acceptance after review. Evidence: his 2026-10-09 conditional instruction to proceed if no further issues were found; the condition was satisfied by the clean final recheck and is recorded in `record.md`.
-- [ ] T05 — Complete dated summary, archive packet, commit/push, and create issue-linked PR to develop. Evidence: final commit and PR URL in `record.md`.
+- [x] T05 — Complete the dated summary and archive the packet with navigation repaired before PR creation. Evidence: `record.md`, the archived packet, and the session summary.
+- [ ] T06 — Commit the archive/navigation closeout, push the branch, and create the issue-linked PR to `develop`. Evidence: final commit and PR URL in `record.md`.

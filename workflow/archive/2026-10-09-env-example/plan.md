@@ -14,7 +14,8 @@
 | T02 | T01 | Codex / implementer | ENV-AC-01/02/03 | `.env.example`: disable AI by default, use placeholders, explain key alternatives and local-test boundary. | Inspect final file and run a structure/duplicate-key check. |
 | T03 | T02 | Separate reviewer | ENV-AC-01/02/03 | Read-only review of final diff and key-boundary comments. | Record findings and recheck in `record.md`. |
 | T04 | T03 | John / student owner | ENV-AC-01/02/03 | Review evidence and accept the docs-only result. | Record actual decision in `record.md`. |
-| T05 | T04 | Codex / closeout | ENV-AC-01/02/03 | Complete summary, archive packet, commit, push, and issue-linked PR to `develop`. | Record exact commands/results and actual commit/PR. |
+| T05 | T04 | Codex / closeout | ENV-AC-01/02/03 | Complete the dated summary and archive the packet with navigation repaired before PR creation. | Verify packet contents and relative links; retain summary link. |
+| T06 | T05 | Codex / submission | ENV-AC-01/02/03 | Commit the archive/navigation closeout, push the branch, and open an issue-linked PR to `develop`. | Record commit/push result and actual PR URL. |
 
 ## Integration and handoffs
 
@@ -25,5 +26,5 @@ No concurrent implementation. The separate reviewer receives only the final `.en
 - [x] Human approved proposal, no-delta/design-omission, and this plan before implementation.
 - [x] Tasks list matches the bounded work.
 - [x] Independent review and human acceptance: completed; findings, recheck, and John’s conditional acceptance are recorded in the handoff and feature record.
-- [ ] Archive the completed packet before the PR; dated session summary is prepared.
+- [x] Dated session summary added; complete packet archived before the PR and navigation updated.
 - Approval/date/source: John, chat request, 2026-10-09.
