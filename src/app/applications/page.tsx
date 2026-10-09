@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { signOut } from "@/app/auth/actions";
 import { listOwnApplications } from "@/lib/applications";
 import { reviewStatusLabel } from "@/lib/hr-input";
 
@@ -12,7 +11,6 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
   return <main className="mx-auto max-w-4xl space-y-8 px-5 py-10">
     <header className="flex items-center justify-between gap-4">
       <Link href="/" className="underline">← Careers</Link>
-      <form action={signOut}><button className="underline">Sign out</button></form>
     </header>
     <h1 className="text-3xl font-semibold">My applications</h1>
     {error === "correction" ? <p role="alert" className="text-destructive">Submitted applications are locked. Contact HR if you need to request a correction.</p> :

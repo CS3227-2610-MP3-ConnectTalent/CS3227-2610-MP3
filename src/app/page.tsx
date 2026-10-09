@@ -7,22 +7,17 @@ import { listPublishedJobs } from "@/lib/jobs";
 
 export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{ category?: string | string[] }>;
+type SearchParams = Promise<{ category?: string | string[]; authError?: string }>;
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
-  const rawCategory = (await searchParams).category;
+  const { category: rawCategory, authError } = await searchParams;
   const validCategory = isJobCategory(rawCategory) ? rawCategory : undefined;
   const invalidCategory = rawCategory !== undefined && !validCategory;
   const jobs = invalidCategory ? [] : await listPublishedJobs(validCategory);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
-      <header className="mb-14 flex items-center justify-between gap-4 border-b pb-5">
-        <Link href="/" className="text-xl font-semibold tracking-tight focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4">
-          Careers
-        </Link>
-        <nav className="flex gap-4 text-sm"><Link href="/applications" className="underline">My applications</Link><Link href="/auth/sign-in" className="underline">Sign in</Link></nav>
-      </header>
+      {authError === "sign-out" && <p role="alert" className="mb-8 rounded-lg border p-4">Sign out could not be completed. Try again.</p>}
 
       <section className="mb-12 max-w-3xl space-y-5">
         <Badge variant="secondary">Build what comes next</Badge>
