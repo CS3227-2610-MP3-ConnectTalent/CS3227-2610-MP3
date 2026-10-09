@@ -206,6 +206,23 @@ describe("HR summary route", () => {
     });
   });
 
+  it("withholds the generated summary when final audit finalization fails", async () => {
+    spies.finalizeAiInvocation.mockResolvedValueOnce(false);
+
+    const response = await hrSummary(post({ applicationId }));
+    const body = await responseBody(response);
+
+    expect(response.status).toBe(503);
+    expect(body).toEqual({ error: "AI summaries are temporarily unavailable." });
+    expect(body).not.toHaveProperty("evidence_mentioned");
+    expect(spies.generateHrSummary).toHaveBeenCalledTimes(1);
+    expect(spies.finalizeAiInvocation).toHaveBeenCalledWith(
+      actorId,
+      "00000000-0000-4000-8000-000000000b02",
+      "success",
+    );
+  });
+
   it("rejects malformed model structure and never returns a recommendation", async () => {
     spies.generateHrSummary.mockResolvedValueOnce({
       evidence_sentence_ids: [],
