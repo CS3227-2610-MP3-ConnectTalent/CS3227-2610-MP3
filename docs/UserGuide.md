@@ -1,6 +1,6 @@
 # User Guide
 
-Status: job browsing, Applicant applications, HR review and signup password usability are merged into `develop`. Password recovery is locally accepted after independent review on `feat/27-password-reset`; hosted validation remains pending. HR job posting and AI features remain planned. This branch is not a deployed release.
+Status: job browsing, Applicant applications, HR review and password recovery are in `develop`. HR job management is locally accepted on `feat/8-hr-job-management`; hosted validation and deployment remain pending. AI features remain separate. This branch is not a deployed release.
 
 ## Access
 
@@ -20,11 +20,17 @@ From **Sign in**, choose **Forgot password?** and enter your account email. The 
 
 After an administrator promotes a verified, dedicated account to HR, sign in through the same **Sign in** page. The HR account opens **Application review** at `/hr/applications`. The list contains submitted applications only. Open an application to compare original and current cover letters, read private HR notes and status history, add a note of at most 2,000 characters, or change status through the separate **Update status** action. Status starts at **Submitted**; HR may select **In review**, **Shortlisted** or **Rejected** and change among those three later. A stale status form asks you to reload. Submitted applications remain reviewable after job closure. Applicants see their own current status under **My applications**, without HR notes or status history.
 
-Public signup always creates an Applicant. There is no HR signup or role-switching control. A team administrator must provision hosted HR as described in the Developer Guide. For local teammate testing, the README describes a local-only synthetic HR seed command; it does not auto-login or provide a shared grader account. The HR review pages require the issue #9 database migration; a preview using the shared Development Supabase project may be unavailable until the team applies that reviewed migration. HR AI summaries and HR job management remain separate features.
+Public signup always creates an Applicant. There is no HR signup or role-switching control. A team administrator must provision hosted HR as described in the Developer Guide. For local teammate testing, the README describes a local-only synthetic HR seed command; it does not auto-login or provide a shared grader account. The HR review pages require the issue #9 database migration; a preview using the shared Development Supabase project may be unavailable until the team applies that reviewed migration. HR AI summaries remain a separate feature.
+
+## HR job management on this branch
+
+After signing in as HR, choose **Manage jobs** from **Application review**, or open `/hr/jobs`. Choose **Create draft**, fill in the job title, team, category, description and requirements, then **Save draft**. You can reopen and edit a draft. Draft jobs stay hidden from public browsing. On the draft detail page, **Publish job** is a separate action that makes the fixed job visible and accepts applications. Published content cannot be edited. **Close job** is a separate action on a published job; the job then disappears from public browsing and stops accepting applications or edits to submitted cover letters. Applicants and HR can still read existing applications under their normal access rules. Closed jobs remain visible to HR and cannot be republished in this version. There is no job deletion or reopening action.
+
+Local testing requires the #8 migration in addition to the earlier migrations. This feature has been checked locally; shared Development Supabase migration, preview testing and release are pending team operations.
 
 ## Planned roles
 
 - **Applicant:** browse published openings, verify an account, save a private text draft, submit and view an application, and edit the letter until the job closes. SoCLaaS cover-letter drafting is planned.
-- **HR:** review submitted applications, write private notes and change status. Job listing management and a SoCLaaS summary remain planned.
+- **HR:** review submitted applications, write private notes and change status; manage jobs locally on this branch. A SoCLaaS summary remains planned.
 
 Both AI features are advisory. Applicants submit their own final text; HR makes every hiring decision.
