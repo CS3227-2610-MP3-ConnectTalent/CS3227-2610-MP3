@@ -1,6 +1,6 @@
 # Spec delta: Deployment and operations
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation in progress
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation accepted, synced to ProductSpec v1.1 and archived
 - Canonical file: [deployment-and-operations.md](../../../specs/deployment-and-operations.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; OPS-002
 - Proposed baseline: v1.1
@@ -21,5 +21,5 @@
 
 - [x] John approved the original written delta on 2026-10-09 and explicitly approved the 24/minute cap, continued provider 429 handling, and metadata-only server credential amendment in chat on 2026-10-09.
 - [x] Verify the model catalog and actual key-specific limit through SoCLaaS before live evaluation; T10 records allowed models and the observed 30 RPM cap.
-- [ ] Do not sync to the canonical specification until post-implementation acceptance.
-- Sync commit/paths/decision evidence: Pending; no canonical file changed.
+- [x] John accepted the reviewed implementation on 2026-10-09; OPS-002 was synced in `7f326eb` to ProductSpec v1.1.
+- Sync commit/paths/decision evidence: `7f326eb`; `workflow/specs/deployment-and-operations.md`; John’s post-review acceptance is recorded in `../record.md`.

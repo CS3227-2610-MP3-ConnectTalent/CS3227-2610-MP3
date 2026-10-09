@@ -1,7 +1,7 @@
 # Design: SoCLaaS Applicant draft and HR summary
 
 - Change ID/issues: 2026-10-09-soclaas-ai; [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7), [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
-- Owner/status/date: John; proposal, design and plan approved; implementation in progress; 2026-10-09
+- Owner/status/date: John; proposal, design and plan approved; implementation accepted after independent review; canonical sync and archive complete; 2026-10-09
 - Inputs: proposal.md; deltas under specs/; ProductSpec v1.0 at 0a0f5c4; APP-004, AID-001/AID-002, AIS-001/AIS-002, SEC-001/SEC-002/SEC-003/SEC-004/SEC-005/SEC-006/SEC-007, OPS-002
 - Scope and affected components/files: Applicant application form and AI-draft route; HR application detail and summary route; server-only SoCLaaS client/schema validation; auth/data-access helpers; additive Supabase migration for post-submit write denial, atomic quotas and metadata audit; unit/route, RLS/database, and browser security tests. The exact allowlist is in `plan.md`. The existing user edit to .env.example is preserved and excluded.
 

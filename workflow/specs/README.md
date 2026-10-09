@@ -18,7 +18,7 @@ An approved product behavior change increments the numeric minor baseline (for e
 
 ## v1.1 accepted change trace
 
-On 9 October 2026, John accepted the local implementation for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) after the separate final security recheck. The complete [change packet](../changes/2026-10-09-soclaas-ai/record.md) records approval, review, local checks, acceptance and limits. Its accepted deltas are synced here:
+On 9 October 2026, John accepted the local implementation for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) after the separate final security recheck. The complete [archived packet](../archive/2026-10-09-soclaas-ai/record.md) records approval, review, local checks, acceptance and limits. Its accepted deltas are synced here:
 
 | Delta | Canonical destination | Change |
 | --- | --- | --- |

@@ -1,10 +1,10 @@
 # Feature record: SoCLaaS Applicant draft and HR summary
 
-Status: implementation accepted after independent recheck; canonical sync and local checks are in progress; archive and PR remain pending
+Status: implementation accepted after independent recheck; canonical ProductSpec v1.1 sync, dated log and packet archive complete; issue-linked PR pending as the final contributor action
 
 Owner: John, student owner for issues #7 and #10 as assigned in chat on 2026-10-09
 
-Spec version: ProductSpec v1.0 baseline; proposed v1.1 deltas
+Spec version: ProductSpec v1.1 accepted; baseline v1.0
 
 Date: 2026-10-09
 
@@ -12,13 +12,13 @@ Date: 2026-10-09
 
 - Change ID/classification: 2026-10-09-soclaas-ai; behavior change and AI/security integration
 - GitHub issues: [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10). John confirmed feature ownership in chat. No GitHub issue assignment was changed.
-- Branch/commits/PR: `feat/7-10-soclaas-ai`; product baseline `0a0f5c4`; initial packet commit `0826a16`; approved-plan commit `2a5217b`; implementation baseline `d34bd49`; fetched `origin/develop` at `db46f10` and merged it in `6806b08`; implementation commit `70c34cf`; approved HR-output refinement commit `131ef15`; refinement packet update `ab7e3da`; HR audit failure test/evidence commit `9dfddb7`; final independent recheck recorded in this packet; PR pending
+- Branch/commits/PR: `feat/7-10-soclaas-ai`; product baseline `0a0f5c4`; initial packet commit `0826a16`; approved-plan commit `2a5217b`; implementation baseline `d34bd49`; fetched `origin/develop` at `db46f10` and merged it in `6806b08`; implementation commit `70c34cf`; approved HR-output refinement commit `131ef15`; refinement packet update `ab7e3da`; HR audit failure test/evidence commit `9dfddb7`; final recheck evidence commit `9ce2cf5`; accepted canonical sync commit `7f326eb`; PR pending
 - Proposal: proposal.md
 - Design: design.md
 - Deltas: specs/applications-and-review.md (APP-004); specs/applicant-ai-draft.md (AID-001/AID-002); specs/hr-ai-summary.md (AIS-001/AIS-002); specs/security-and-privacy.md (SEC-001/SEC-006/SEC-007); specs/deployment-and-operations.md (OPS-002)
 - Implementation plan/tasks: `plan.md` and `tasks.md`; John approved both in chat on 2026-10-09
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4
-- Archive path: Pending acceptance and canonical sync
+- Archive path: `workflow/archive/2026-10-09-soclaas-ai/`; archived on 2026-10-09 after canonical sync
 
 ## Approval checklist
 
@@ -33,10 +33,11 @@ Date: 2026-10-09
 - [x] Implementation and final deterministic checks complete locally after that amendment. T10 used synthetic-only direct provider calls after querying the configured key's model catalog and budget without printing credentials; the current application flag remains disabled and its configured model remains a placeholder.
 - [x] Independent final recheck completed at `9dfddb7` on 2026-10-09; see [handoffs/independent-review.md](handoffs/independent-review.md). No remaining security findings; the HR final-audit P3 evidence gap is resolved; 4 focused files/22 tests passed.
 - [x] John separately accepted the reviewed local implementation on 2026-10-09 after receiving the final independent recheck, with the documented local/hosted/model limitations. Source: user's explicit chat decision, “Looks good. Please proceed to sync and archive the specs, then create a PR.”
-- [ ] Accepted canonical sync, closeout, dated log, and archive complete.
+- [x] Accepted canonical deltas synced in `7f326eb` to ProductSpec v1.1 on 2026-10-09; static link/ID checks passed and the delta files record the exact destinations.
+- [x] Dated session summary completed and linked; complete packet archived at `workflow/archive/2026-10-09-soclaas-ai/` on 2026-10-09 after ProductSpec v1.1 sync.
 - [ ] Issue-linked PR opened last.
 
-Written-spec approval is not implementation approval. ProductSpec v1.0 names Paul Cheng as Applicant process owner; this packet leaves that ownership unchanged and records John’s reported coordination without claiming independent verification. The feature issues were open and unassigned at intake; John’s ownership was provided in this conversation. No GitHub assignee change was made.
+Written-spec approval is not implementation approval. ProductSpec v1.1 names Paul Cheng as Applicant process owner; this packet leaves that ownership unchanged and records John’s reported coordination without claiming independent verification. The feature issues were open and unassigned at intake; John’s ownership was provided in this conversation. No GitHub assignee change was made.
 
 ## Requirement and acceptance criteria
 
@@ -44,7 +45,7 @@ See proposal.md for AI-AC-01 through AI-AC-07 and their observable outcomes/evid
 
 ## Agent handoffs
 
-Implementation was inline, as recorded in [handoffs/implementation.md](handoffs/implementation.md). A separate read-only security/privacy review is recorded in [handoffs/independent-review.md](handoffs/independent-review.md); the final recheck found no remaining security findings. John’s separate post-review acceptance remains open.
+Implementation was inline, as recorded in [handoffs/implementation.md](handoffs/implementation.md). A separate read-only security/privacy review is recorded in [handoffs/independent-review.md](handoffs/independent-review.md); the final recheck found no remaining security findings. John’s separate post-review acceptance is recorded above.
 
 ## Implementation and tests
 
@@ -73,7 +74,7 @@ Security/adversarial coverage: SQL tests prove submitted-letter immutability, ow
 - Sentence boundary regression: after changing the splitter to `Intl.Segmenter`, a focused test failed because it split “Dr.” from the following name. The splitter now merges standalone common abbreviation fragments; the focused test passes.
 - Focused green: `bun node_modules/vitest/vitest.mjs run tests/unit/ai-schemas.test.ts tests/unit/ai-routes.test.ts tests/unit/ai-provider.test.ts tests/unit/hr-ai-summary.test.tsx` — 4 files, 21 tests passed.
 - Final code checks: `bun run test:unit` — 16 files/74 tests passed; `bun run lint` passed; `bun run typecheck` passed; `bun run test:e2e` — 7 passed/4 skipped; `bun run build` passed and lists both API routes as dynamic. Bun v1.3.13 ran the local package scripts because Node/Corepack/pnpm were unavailable on this shell's PATH. The build reported `.env.local` as a loaded environment file; its contents were not inspected. E2E skips remain HR review, HR job management, and password recovery cases due to the unavailable local test key.
-- Limits: This refinement changed no database migration or quota code, so the prior local pgTAP and quota-race results remain the relevant evidence. No live model was called for this refinement. Sentence selection can still be inaccurate; HR must verify source excerpts against the original letter. The final independent recheck is recorded below; John’s final acceptance remains pending.
+- Limits: This refinement changed no database migration or quota code, so the prior local pgTAP and quota-race results remain the relevant evidence. No live model was called for this refinement. Sentence selection can still be inaccurate; HR must verify source excerpts against the original letter. The final independent recheck and John’s acceptance are recorded below.
 
 ### HR audit-failure regression coverage (2026-10-09)
 
@@ -82,27 +83,27 @@ Security/adversarial coverage: SQL tests prove submitted-letter immutability, ow
 - Verification: `bun node_modules/vitest/vitest.mjs run tests/unit/ai-routes.test.ts tests/unit/ai-schemas.test.ts tests/unit/ai-provider.test.ts tests/unit/hr-ai-summary.test.tsx` — 4 files/22 tests passed; `bun run lint` passed; `bun run typecheck` passed. The initial sandbox run could not read installed Vitest files and package scripts could not locate Node; rerunning with approved workspace dependency access succeeded. No production code changed.
 - Independent recheck completed at `9dfddb7`; the reviewer reran the focused AI suite (4 files/22 tests passed) and found no remaining security findings. See [handoffs/independent-review.md](handoffs/independent-review.md).
 
-Known limitations: post-review student acceptance remains pending. The current local app configuration remains disabled/placeholder, so the live calls do not establish that the application routes are configured for production. HR/job-management/password-recovery browser cases were skipped because the local test service-role key was unavailable. `origin/develop` was merged into the feature branch; its pending local migration was applied, but no hosted migration, deployment, PR merge, or release occurred. The `.env.example` user edit was not read/changed. `.env.local` and `.env.dev` contents were not manually inspected or printed; Next.js reported `.env.local` during local build/dev runs.
+Known limitations: the current local app configuration remains disabled/placeholder, so the live calls do not establish that the application routes are configured for production. HR/job-management/password-recovery browser cases were skipped because the local test service-role key was unavailable. `origin/develop` was merged into the feature branch; its pending local migration was applied, but no hosted migration, deployment, PR merge, or release occurred. The `.env.example` user edit was not read/changed. `.env.local` and `.env.dev` contents were not manually inspected or printed; Next.js reported `.env.local` during local build/dev runs.
 
 ## Review and decision
 
-Reviewer findings and fixes: A separate read-only reviewer examined `70c34cf`; see [handoffs/independent-review.md](handoffs/independent-review.md). Finding 1 (P2): authenticated users could directly reserve shared quota through the public RPC. John approved a narrow server-only metadata-RPC credential and the 24/minute cap on 2026-10-09. Commit `70c34cf` removes authenticated grants and checks actor/role/target; pgTAP and the concurrent quota test pass. The reviewer rechecked this fix. Finding 2 (P2): hiring-decision paraphrases could pass a lexical output filter, which also rejected ordinary wording. John approved an extractive output amendment: the model returns source sentence IDs only, the server validates/maps those IDs, and follow-ups are generated server-side; implementation is in `131ef15`. The reviewer rechecked the source-ID contract and found no remaining P2. The reviewer then requested a separate HR final-audit-failure route assertion; test/evidence commit `9dfddb7` covers it. Final independent recheck found no remaining security findings. John’s post-review implementation acceptance remains pending.
+Reviewer findings and fixes: A separate read-only reviewer examined `70c34cf`; see [handoffs/independent-review.md](handoffs/independent-review.md). Finding 1 (P2): authenticated users could directly reserve shared quota through the public RPC. John approved a narrow server-only metadata-RPC credential and the 24/minute cap on 2026-10-09. Commit `70c34cf` removes authenticated grants and checks actor/role/target; pgTAP and the concurrent quota test pass. The reviewer rechecked this fix. Finding 2 (P2): hiring-decision paraphrases could pass a lexical output filter, which also rejected ordinary wording. John approved an extractive output amendment: the model returns source sentence IDs only, the server validates/maps those IDs, and follow-ups are generated server-side; implementation is in `131ef15`. The reviewer rechecked the source-ID contract and found no remaining P2. The reviewer then requested a separate HR final-audit-failure route assertion; test/evidence commit `9dfddb7` covers it. Final independent recheck found no remaining security findings. John separately accepted the reviewed implementation on 2026-10-09.
 
 Human decisions and date: John approved the written proposal, deltas, design and original plan, and reported coordinating with Paul on 2026-10-09. On 2026-10-09, John approved the amended 24/minute global cap, continued provider 429 handling, server-only quota/audit RPC credential, and source-ID-only HR output with server-generated follow-up questions. After the final independent recheck reported no remaining findings and 22 focused tests passing, John separately accepted the reviewed local implementation and directed canonical sync, archive and PR creation. Hosted RLS/deployment, the noted model factual error, and the skipped local-key-dependent E2E cases remain recorded limits; no hosted migration, deployment, merge or release is implied.
 
-Guide/reflection/log updates: This record is the current evidence index; dated session log is pending closeout.
+Guide/reflection/log updates: [Dated session summary](../../../logs/2026-10-09-soclaas-ai.md) is complete and linked.
 
 ## Session evidence index
 
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
-| 2026-10-09 | Pending closeout log | Issue #7/#10 scope; freeze submitted application decision; SoCLaaS AI design; robust-error handling; owner John; user-reported Paul coordination; plan approval; merge from `origin/develop`; quota/RPC and extractive HR-output amendments; local checks; live synthetic evaluation; reviewer findings and remediation; final independent recheck. | Local migrations applied without reset. pgTAP, both race checks, 74 unit tests, lint, typecheck, build, bundle scan, and final E2E (7 passed/4 skipped) passed. Final focused reviewer rerun passed 4 files/22 tests with no remaining security findings. Live model outputs include an observed factual error; app flag/model remain disabled/placeholder. Student acceptance and workflow closeout remain pending. |
+| 2026-10-09 | [Session summary](../../../logs/2026-10-09-soclaas-ai.md) | Issue #7/#10 scope; freeze submitted application decision; SoCLaaS AI design; robust-error handling; owner John; user-reported Paul coordination; plan approval; merge from `origin/develop`; quota/RPC and extractive HR-output amendments; local checks; live synthetic evaluation; reviewer findings/remediation; final independent recheck; John’s post-review acceptance; accepted v1.1 spec sync; archive closeout. | Local migrations applied without reset. pgTAP, both race checks, 74 unit tests, lint, typecheck, build, bundle scan, final E2E (7 passed/4 skipped), and final focused reviewer rerun (4 files/22 tests) passed. Canonical relative Markdown targets and 32 requirement IDs were checked; no application tests were rerun for the docs-only sync. Live model outputs include an observed factual error; app flag/model remain disabled/placeholder. PR submission remains pending as the final contributor action. |
 
 ## Canonical sync and archive
 
-- Accepted delta/human decision: Pending; deltas remain proposed in this packet.
-- Canonical sync commit/files/version/date: Pending; canonical specs remain unchanged at v1.0.
-- Sync verification: Pending acceptance.
-- Archive decision/date/path: Pending.
-- Navigation repairs after moving: Pending.
-- Outstanding work/limitations: record John’s post-review acceptance; sync accepted canonical requirements; complete dated session log and closeout; open the issue-linked PR last. The live evaluation used synthetic inputs only and exposed an HR factual error; it does not establish production readiness. Paul's coordination is user-reported and not independently verified. The modified `.env.example` remains excluded and untouched.
+- Accepted delta/human decision: John accepted the final locally reviewed implementation on 2026-10-09 after the independent recheck; documented limitations remain explicit.
+- Canonical sync commit/files/version/date: `7f326eb`, 2026-10-09; ProductSpec v1.1; `workflow/ProductSpec.md`, `workflow/specs/README.md`, `applications-and-review.md`, `applicant-ai-draft.md`, `hr-ai-summary.md`, `security-and-privacy.md`, and `deployment-and-operations.md`.
+- Sync verification: `git diff --check` passed; relative Markdown file targets exist across the seven canonical files; stable requirement IDs are unique across all 32 canonical requirements. Application tests were not rerun for this docs-only sync; implementation evidence remains above.
+- Archive decision/date/path: John directed archive after accepting the reviewed implementation; the complete packet was archived at `workflow/archive/2026-10-09-soclaas-ai/` on 2026-10-09 after canonical sync.
+- Navigation repairs after moving: Updated the active changes index, archive index, canonical spec change trace and packet-to-log link; relative Markdown targets were verified after moving.
+- Outstanding work/limitations: Open the issue-linked PR last. The live evaluation used synthetic inputs only and exposed an HR factual error; it does not establish production readiness. Paul's coordination is user-reported and not independently verified. The modified `.env.example` remains excluded and untouched.

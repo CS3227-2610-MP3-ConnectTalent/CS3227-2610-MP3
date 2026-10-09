@@ -1,6 +1,6 @@
 # Spec delta: HR AI summary
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #10; John; delta and plan approved, implementation in progress
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #10; John; delta and plan approved, implementation accepted, synced to ProductSpec v1.1 and archived
 - Canonical file: [hr-ai-summary.md](../../../specs/hr-ai-summary.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; AIS-001/AIS-002
 - Proposed baseline: v1.1
@@ -29,6 +29,6 @@
 
 - [x] John approved this written delta on 2026-10-09.
 - [x] John approved the extractive model-output refinement in chat on 2026-10-09 after independent review found recommendation paraphrases passing the previous lexical filter.
-- [ ] Confirm the current-letter cutoff behavior and migration compatibility before implementation.
-- [ ] Do not sync to the canonical specification until post-implementation acceptance.
-- Sync commit/paths/decision evidence: Pending; no canonical file changed.
+- [x] Current-letter cutoff behavior and migration compatibility were verified against the implementation and its database/lifecycle evidence.
+- [x] John accepted the reviewed implementation on 2026-10-09; AIS-001/AIS-002 were synced in `7f326eb` to ProductSpec v1.1.
+- Sync commit/paths/decision evidence: `7f326eb`; `workflow/specs/hr-ai-summary.md`; John’s post-review acceptance is recorded in `../record.md`.

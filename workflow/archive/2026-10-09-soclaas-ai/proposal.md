@@ -3,7 +3,7 @@
 - Change ID: 2026-10-09-soclaas-ai
 - Issues: [#7 Applicant SoCLaaS cover-letter draft](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10 HR SoCLaaS application summary](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
 - Owner: John, student owner for both issues; assigned in chat on 2026-10-09
-- Status: Proposal and plan approved, including quota/RPC and extractive HR-output amendments; implementation and local checks complete; final review and acceptance pending
+- Status: Proposal and plan approved, including quota/RPC and extractive HR-output amendments; implementation, local checks, independent final recheck, student acceptance, canonical sync and archive complete; issue-linked PR pending as the final contributor action
 - Date: 2026-10-09
 - Baseline: [ProductSpec v1.0](../../ProductSpec.md), 8 October 2026, baseline commit 0a0f5c4
 - Affected capabilities: applications-and-review APP-004; applicant-ai-draft AID-001/AID-002; hr-ai-summary AIS-001/AIS-002; security-and-privacy SEC-001/SEC-006/SEC-007; deployment-and-operations OPS-002

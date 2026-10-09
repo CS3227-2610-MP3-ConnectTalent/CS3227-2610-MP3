@@ -1,6 +1,6 @@
 # Spec delta: Security and privacy
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation in progress
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation accepted, synced to ProductSpec v1.1 and archived
 - Canonical file: [security-and-privacy.md](../../../specs/security-and-privacy.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; SEC-001/SEC-006/SEC-007
 - Proposed baseline: v1.1
@@ -40,5 +40,5 @@
 
 - [x] John approved the original written deltas on 2026-10-09 and explicitly approved the amended global cap and server-only quota/audit RPC boundary in chat on 2026-10-09.
 - [x] Check quota behavior against the configured key’s actual SoCLaaS policy before live calls; T10 records the observed 30 RPM key cap and the application’s 24 RPM cap.
-- [ ] Do not sync to the canonical specification until post-implementation acceptance.
-- Sync commit/paths/decision evidence: Pending; no canonical file changed.
+- [x] John accepted the reviewed implementation on 2026-10-09; SEC-001/SEC-006/SEC-007 were synced in `7f326eb` to ProductSpec v1.1.
+- Sync commit/paths/decision evidence: `7f326eb`; `workflow/specs/security-and-privacy.md`; John’s post-review acceptance is recorded in `../record.md`.

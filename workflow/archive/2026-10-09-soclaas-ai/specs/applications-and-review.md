@@ -1,6 +1,6 @@
 # Spec delta: Applications and review
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation in progress
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7 and #10; John; delta and plan approved, implementation accepted, synced to ProductSpec v1.1 and archived
 - Canonical file: [applications-and-review.md](../../../specs/applications-and-review.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; APP-004 Saved draft and revision boundary
 - Proposed baseline: v1.1
@@ -23,5 +23,5 @@
 - [x] The affected behavior and stable APP-004 ID are identified.
 - [x] John approved this written delta on 2026-10-09.
 - [x] John reported coordination with the existing Applicant process owner, Paul Cheng, on 2026-10-09; not independently verified.
-- [ ] Do not sync to the canonical specification until post-implementation acceptance.
-- Sync commit/paths/decision evidence: Pending; no canonical file changed.
+- [x] John accepted the reviewed implementation on 2026-10-09; APP-004 was synced in `7f326eb` to ProductSpec v1.1.
+- Sync commit/paths/decision evidence: `7f326eb`; `workflow/specs/applications-and-review.md`; John’s post-review acceptance is recorded in `../record.md`.

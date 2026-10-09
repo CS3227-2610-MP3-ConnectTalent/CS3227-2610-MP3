@@ -2,7 +2,7 @@
 
 - Change/issues: 2026-10-09-soclaas-ai; [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10)
 - Plan/record: [plan.md](plan.md); [record.md](record.md)
-- Status/owner: John approved the original plan and the quota/RPC and extractive HR-output amendments; implementation and focused local checks are in progress; independent recheck and post-review student acceptance remain pending.
+- Status/owner: John approved the plan and amendments, accepted the implementation after independent recheck, and accepted canonical ProductSpec v1.1 sync; the full packet is archived. The issue-linked PR remains the final contributor action.
 
 ## Before implementation
 
@@ -27,8 +27,8 @@
 
 - [x] T11 — Independent reviewer rechecked the final diff, security boundaries and acceptance evidence; recorded independence, findings and fixes in `handoffs/independent-review.md`. The quota-RPC finding was corrected in `70c34cf`; the decision-language finding was resolved with the approved source-ID-only HR output; the P3 HR final-audit evidence gap was covered by the test in `9dfddb7`. Final recheck: 4 focused AI test files/22 tests passed; no remaining security findings. Hosted RLS/deployment and model factual accuracy remain outside this local evidence. Depends on: final T09, T10 and T10a.
 - [x] T12 — John separately accepted the reviewed local implementation on 2026-10-09 after T11, with the local/hosted/model limits recorded. Evidence: user's explicit chat instruction and `record.md`. Depends on: T11.
-- [ ] T13 — John syncs accepted deltas to canonical specs and verifies IDs/version/navigation. Depends on: T12. Evidence: sync commit and checks in `record.md`; pending.
-- [ ] T14 — John completes dated session logs and closeout, then archives the full packet. Depends on: T13. Evidence: every session listed in `record.md`, `logs/` entry, link checks, archive path and exact results; pending.
+- [x] T13 — John synced the accepted deltas to ProductSpec v1.1 in `7f326eb` and verified the changed files, relative Markdown targets and stable requirement IDs. Evidence and no-application-tests rationale are in `record.md`. Depends on: T12.
+- [x] T14 — John completed the dated session log, closeout and intact packet archive. Evidence: `../../../logs/2026-10-09-soclaas-ai.md`, archived packet path, navigation/link checks and exact results in `record.md`. Depends on: T13.
 - [ ] T15 — Authorized contributor opens the issue-linked PR as the last contributor action using `.github/pull_request_template.md`. Depends on: T14. Evidence: PR URL, Conventional Commit title and links to #7/#10 in `record.md`; pending.
 
 ## Post-submission (separate decisions)

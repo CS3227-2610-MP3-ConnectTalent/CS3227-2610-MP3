@@ -1,6 +1,6 @@
 # Spec delta: Applicant AI draft
 
-- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7; John; delta and plan approved, implementation in progress
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #7; John; delta and plan approved, implementation accepted, synced to ProductSpec v1.1 and archived
 - Canonical file: [applicant-ai-draft.md](../../../specs/applicant-ai-draft.md)
 - Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; AID-001/AID-002
 - Proposed baseline: v1.1
@@ -28,6 +28,6 @@
 ## Delta review and sync evidence
 
 - [x] John approved this written delta on 2026-10-09.
-- [ ] Confirm cross-links and output limits against SEC-004/SEC-006 before implementation.
-- [ ] Do not sync to the canonical specification until post-implementation acceptance.
-- Sync commit/paths/decision evidence: Pending; no canonical file changed.
+- [x] Cross-links and output limits were checked against SEC-004/SEC-006 and the implemented schemas.
+- [x] John accepted the reviewed implementation on 2026-10-09; AID-001/AID-002 were synced in `7f326eb` to ProductSpec v1.1.
+- Sync commit/paths/decision evidence: `7f326eb`; `workflow/specs/applicant-ai-draft.md`; John’s post-review acceptance is recorded in `../record.md`.
