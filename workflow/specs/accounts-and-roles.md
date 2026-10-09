@@ -1,6 +1,6 @@
 # Accounts and roles
 
-Baseline: ProductSpec v1.2, 9 October 2026 (ACC-005 added; ACC-004 added in v1.0; ACC-001 updated in v0.9; ACC-002 updated in v0.8).
+Baseline: ProductSpec v1.3, 9 October 2026 (accepted ACC-005 navigation integrated; ACC-001–004 retained).
 
 ## ACC-001: Public Applicant signup
 

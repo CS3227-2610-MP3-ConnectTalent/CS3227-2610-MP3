@@ -94,6 +94,7 @@ test("verified Applicant saves and submits one frozen application", async ({ pag
   await expect(page.getByLabel("Cover letter")).toHaveValue("First saved draft");
 
   await page.getByLabel("Cover letter").fill("Original submitted letter");
+  await page.getByLabel("Full name").fill("Synthetic Applicant");
   await page.getByRole("button", { name: "Submit application" }).click();
   await expect(page.getByText("Submitted application", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Original submission" }).locator("..").getByText("Original submitted letter")).toBeVisible();

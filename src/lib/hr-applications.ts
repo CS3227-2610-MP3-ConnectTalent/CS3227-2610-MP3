@@ -12,6 +12,8 @@ const listItemSchema = z.object({
 });
 
 const detailSchema = listItemSchema.extend({
+  full_name: z.string().nullable(), submitted_email: z.string().nullable(),
+  phone: z.string().nullable(), portfolio_url: z.string().nullable(),
   job_id: z.uuid(),
   original_submitted_letter: z.string(),
   cover_letter: z.string(),
@@ -50,7 +52,7 @@ export async function getSubmittedApplication(id: string) {
   if (!z.uuid().safeParse(id).success) return null;
   const { client } = await requireHR();
   const { data, error } = await client.from("applications")
-    .select("id,applicant_id,job_id,job_title,submitted_at,review_status,review_revision,revision,original_submitted_letter,cover_letter")
+    .select("full_name,submitted_email,phone,portfolio_url,id,applicant_id,job_id,job_title,submitted_at,review_status,review_revision,revision,original_submitted_letter,cover_letter")
     .eq("id", id).eq("submission_state", "submitted").maybeSingle();
   if (error) throw new Error("Review data is unavailable.");
   return data ? detailSchema.parse(data) : null;
