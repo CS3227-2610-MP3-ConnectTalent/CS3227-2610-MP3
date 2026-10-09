@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Baseline: ProductSpec v0.8, 8 October 2026 (OPS-001 updated).
+Baseline: ProductSpec v1.1, 9 October 2026 (OPS-002 updated).
 
 ## OPS-001: Separate environments
 
@@ -12,9 +12,11 @@ Denial/failure scenario: Given a preview build or production release, when envir
 
 ## OPS-002: Operational safeguards and audit evidence
 
-Operational evidence MUST demonstrate [SEC-006](security-and-privacy.md) limits, caps, timeouts and retry/error handling, and [SEC-007](security-and-privacy.md) audit fields/privacy. Those requirements have one canonical home in the security specification; exact quota thresholds remain unresolved pending SoC LLM quota review.
+Before enabling either AI feature in an environment, the operator MUST verify the configured SoCLaaS model is available to that key and review that key's current request and budget limits. Each deployment MUST use server-only provider and Supabase credentials and MUST enforce the [SEC-006](security-and-privacy.md) application limits: three requests per user per rolling minute and 24 per deployment per rolling minute. The Supabase secret/service-role credential MUST be used only for quota/audit metadata RPCs; Applicant and HR content reads MUST use the signed-in RLS-scoped session. Development, preview, staging and production SHOULD use separate provider and Supabase keys where available so access and usage are not combined across environments. Operational evidence MUST show bounded output, the 20-second timeout, no automatic provider retry, safe provider 429/5xx handling, metadata-only audit outcomes and rollback by disabling the AI actions while ordinary application submission and HR review remain available.
 
-Scenario: Given release evidence for model outage/quota errors and audited operations, when reviewed, then it shows the safeguards and audit rules rather than recording sensitive letter text or keys.
+Scenario: Given an environment configured for AI, when its readiness is reviewed, then model access, key-specific quota, application limits, safe error handling and rollback are verified without sending private applicant text.
+
+Denial/failure scenario: Given missing/invalid credentials, an unavailable model or provider rate limiting, when AI is invoked, then the feature reports a safe retry-later state, forwards only a valid bounded retry delay, never exposes credentials/provider bodies and does not retry automatically.
 
 ## OPS-003: Consistent release and recorded evidence
 

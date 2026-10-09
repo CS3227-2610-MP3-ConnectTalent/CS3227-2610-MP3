@@ -15,7 +15,8 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
       <form action={signOut}><button className="underline">Sign out</button></form>
     </header>
     <h1 className="text-3xl font-semibold">My applications</h1>
-    {error && <p role="alert" className="text-destructive">Your change was not saved. Open the application and try again.</p>}
+    {error === "correction" ? <p role="alert" className="text-destructive">Submitted applications are locked. Contact HR if you need to request a correction.</p> :
+      error && <p role="alert" className="text-destructive">Your change was not saved. Open the application and try again.</p>}
     {applications.length === 0 ? <p>No applications yet. <Link href="/" className="underline">Browse open roles</Link>.</p> :
       <ul className="space-y-3">{applications.map((application) => <li key={application.id}>
         <Link href={`/applications/${application.id}`} className="block rounded-lg border p-5 hover:bg-muted/40">

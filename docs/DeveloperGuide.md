@@ -36,6 +36,14 @@ For local checks, start Supabase, apply the pending migration with `corepack pnp
 
 The additive [HR review migration](../supabase/migrations/20261008000000_hr_application_review.sql) adds `review_status`/`review_revision` to applications and separate append-only notes and status-event tables. Submitted applications start at `submitted`; verified HR can move to `in_review`, `shortlisted` or `rejected` through a separate action. A stale `review_revision` is rejected under row lock. Applicant users can see only their own current status. HR sees only submitted applications, original/current letters and HR-only notes/history. The existing Applicant submission RPC keeps its signature for compatibility with the older app on `develop`. RLS also denies an HR-promoted former Applicant's old draft. Browser roles have no direct write grants on application, note or status-event tables.
 
+## SoCLaaS Applicant and HR assistance
+
+The Applicant and HR AI route handlers authenticate and authorize with the signed-in Supabase session before reading protected records. They select only the chosen published job fields or one frozen submitted letter plus its published requirements. The routes call SoCLaaS with no tools and return validated draft text or summary sections; they cannot submit an application, create notes, message users, rank candidates, or change review status.
+
+The quota/audit helper uses a server-only `SUPABASE_SECRET_KEY`, or the legacy `SUPABASE_SERVICE_ROLE_KEY` when that is the configured local key, only to call the restricted metadata RPCs. Do not add this key to browser code or `NEXT_PUBLIC_` settings. The quota RPC confirms the actor's profile role and verified email and verifies the selected target before inserting metadata. User-specific data reads remain on the RLS-scoped session client. Current application limits are three calls per user and 24 per deployment per rolling minute. The configured SoCLaaS key observed during feature evaluation allowed 30 RPM; check each environment's key limits independently.
+
+Provider 429 responses become a generic retry-later response. A valid provider `Retry-After` is forwarded only as a bounded numeric or HTTP-date delay; provider response bodies are never sent to users. Provider requests are not retried automatically. A failed generation is finalized as failure metadata, and the UI leaves Applicant text or HR source/status unchanged.
+
 ### HR account provisioning
 
 Public signup always creates an Applicant. In the **intended Supabase project**, a designated administrator verifies the Auth user's email, UUID and absence of Applicant applications. Use a dedicated verified account with no applications for this release. In that project's privileged SQL editor, replace the placeholder with the verified UUID and run:

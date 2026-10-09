@@ -17,7 +17,8 @@ const writeResultSchema = z.object({
 export async function updateApplication(jobId: string, formData: FormData) {
   if (!z.uuid().safeParse(jobId).success) redirect("/applications?error=invalid");
   const intent = formData.get("intent");
-  if (intent !== "save" && intent !== "submit" && intent !== "edit") {
+  if (intent === "edit") redirect("/applications?error=correction");
+  if (intent !== "save" && intent !== "submit") {
     redirect(`/jobs/${jobId}/apply?error=invalid`);
   }
   const parsedLetter = parseCoverLetter(formData.get("cover_letter"), intent === "save" ? "draft" : "submit");
@@ -29,8 +30,7 @@ export async function updateApplication(jobId: string, formData: FormData) {
   }
 
   const { client, user } = await requireApplicant();
-  const functionName = intent === "save" ? "save_application_draft"
-    : intent === "submit" ? "submit_application" : "edit_submitted_letter";
+  const functionName = intent === "save" ? "save_application_draft" : "submit_application";
   const { data, error } = await client.rpc(functionName, {
     p_job_id: jobId,
     p_cover_letter: parsedLetter.value,
@@ -50,8 +50,7 @@ export async function updateApplication(jobId: string, formData: FormData) {
       const notice = intent === "submit" ? "already-submitted" : "saved";
       redirect(`/applications/${reconciledId}?notice=${notice}`);
     }
-    // Do not return provider errors or applicant text to the browser.
-    redirect(intent === "edit" ? "/applications?error=update" : `/jobs/${jobId}/apply?error=update`);
+    redirect(`/jobs/${jobId}/apply?error=update`);
   }
   revalidatePath("/applications");
   redirect(`/applications/${data}`);

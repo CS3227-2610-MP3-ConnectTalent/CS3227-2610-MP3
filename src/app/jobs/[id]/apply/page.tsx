@@ -20,7 +20,7 @@ export default async function ApplyPage({
 
   return <main className="mx-auto max-w-3xl space-y-6 px-5 py-10">
     <Link href={`/jobs/${id}`} className="text-sm underline">← {job.title}</Link>
-    <h1 className="text-3xl font-semibold">{application?.submission_state === "submitted" ? "Edit your cover letter" : `Apply for ${job.title}`}</h1>
+    <h1 className="text-3xl font-semibold">{application?.submission_state === "submitted" ? "Application submitted" : `Apply for ${job.title}`}</h1>
     <p className="text-muted-foreground">{job.team}</p>
     {error && <p role="alert" className="rounded-lg border border-destructive p-3 text-destructive">We could not save your change. Check the letter and job status, reload for the latest version, then try again.</p>}
     <ApplicationForm jobId={id} value={application?.cover_letter ?? ""}

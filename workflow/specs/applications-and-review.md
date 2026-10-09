@@ -1,6 +1,6 @@
 # Applications and review
 
-Baseline: ProductSpec v0.8, 8 October 2026 (APP-002/003 clarified; APP-004 retained).
+Baseline: ProductSpec v1.1, 9 October 2026 (APP-004 updated).
 
 Canonical ownership, notes and status permissions are in [SEC-001 / SEC-002](security-and-privacy.md).
 
@@ -28,8 +28,8 @@ Denial/failure scenario: Given an unsubmitted draft, when HR requests its ID, th
 
 ## APP-004: Saved draft and revision boundary
 
-An Applicant MUST be able to save and later resume one cover-letter draft per selected published job. Saving a draft MUST NOT submit it. Explicit submission MUST retain an immutable snapshot of the first submitted letter. While the job remains published, the Applicant MUST be able to edit the current submitted letter without creating a second application or changing HR status. Once the job closes, edits and new submissions MUST be denied; the existing draft or submission remains available under [SEC-001](security-and-privacy.md). SEC-001 defines who can read drafts, original text and current text. [AID-002](applicant-ai-draft.md) remains the canonical home for AI-generated draft behavior.
+An Applicant MUST be able to save and later resume one cover-letter draft per selected published job. Saving a draft MUST NOT submit it. While the job remains published, the Applicant MAY edit the saved draft. Explicit submission MUST retain an immutable snapshot of the first submitted letter and MUST freeze the current submitted letter. The Applicant MUST NOT edit submitted application text through the UI or a direct request, even while the job remains published. The Applicant MUST be told to contact HR to request a post-submission correction. When this freeze is introduced for existing submissions, the current letter MUST be frozen at one rollout cutoff without overwriting the original first-submission snapshot. Once a job closes, edits to drafts and new submissions MUST remain denied; existing records remain available under [SEC-001](security-and-privacy.md). SEC-001 defines who may read drafts and submitted text. [AID-002](applicant-ai-draft.md) remains the canonical home for AI-generated draft behavior.
 
-Scenario: Given an authenticated Applicant on a published job, when they save text and return later, then the private draft remains available and no submission exists. When they explicitly submit, the original snapshot is retained; later edits update current text while the job remains published.
+Scenario: Given an authenticated Applicant on a published job, when they save and later edit a draft, then the private draft remains available and no submission exists. When they explicitly submit it, the original snapshot and submitted current letter are retained and frozen; an AI-generated draft remains editable until that separate save or submission action.
 
-Denial scenario: Given a closed job, when the owner tries to submit a draft or edit submitted text, then the write is denied and the existing record remains readable under SEC-001.
+Denial scenario: Given a submitted application, when its owner attempts to edit the letter in the UI or through a direct request, then the write is denied and the UI directs them to HR for a correction request. Given a closed job, draft edits and new submissions are denied and existing records remain readable under SEC-001.

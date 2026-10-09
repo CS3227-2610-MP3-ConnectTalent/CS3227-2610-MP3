@@ -20,7 +20,7 @@ values
   ('00000000-0000-4000-8000-000000000b03', 'Closed role', 'Engineering', 'engineering', 'Description', 'Requirements', 'closed', now()),
   ('00000000-0000-4000-8000-000000000b04', 'Second open role', 'Engineering', 'engineering', 'Description', 'Requirements', 'published', now());
 
-select plan(27);
+select plan(30);
 select is((select role from public.profiles where user_id = '00000000-0000-4000-8000-000000000a01'),
   'applicant', 'public signup creates Applicant profile');
 select is((select role from public.profiles where user_id = '00000000-0000-4000-8000-000000000a05'),
@@ -70,21 +70,28 @@ select throws_ok(
   $$select public.submit_application('00000000-0000-4000-8000-000000000b01', 'Again', 2)$$,
   'P0001', 'Application already submitted', 'duplicate submission denied'
 );
-select lives_ok(
+select ok(not has_function_privilege('authenticated', 'public.edit_submitted_letter(uuid,text,integer)', 'EXECUTE'),
+  'authenticated users cannot execute the submitted-letter edit RPC');
+select throws_ok(
   $$select public.edit_submitted_letter('00000000-0000-4000-8000-000000000b01', 'Current letter', 2)$$,
-  'Applicant edits while job is published'
-);
+  '42501', 'permission denied for function edit_submitted_letter',
+  'Applicant cannot edit a submitted application');
 select is((select original_submitted_letter from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
   'Original letter', 'first submitted version remains immutable');
 select is((select cover_letter from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
-  'Current letter', 'current letter changes without new application');
+  'Original letter', 'submitted cover letter remains unchanged');
+select is((select submission_state from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
+  'submitted', 'denied edit cannot change application state');
+select is((select revision from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
+  2, 'denied edit cannot advance application revision');
 
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000a02', true);
 select is((select count(*) from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
   0::bigint, 'other Applicant cannot read submission');
 select throws_ok(
   $$select public.edit_submitted_letter('00000000-0000-4000-8000-000000000b01', 'Attack', 3)$$,
-  'P0001', 'Submitted application not found', 'other Applicant cannot edit'
+  '42501', 'permission denied for function edit_submitted_letter',
+  'other Applicant cannot invoke submitted-letter edit RPC'
 );
 select lives_ok(
   $$select public.save_application_draft('00000000-0000-4000-8000-000000000b04', 'Private draft', null)$$,
@@ -107,7 +114,8 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000a01', true);
 select throws_ok(
   $$select public.edit_submitted_letter('00000000-0000-4000-8000-000000000b01', 'Too late', 3)$$,
-  'P0001', 'Job is not open for edits', 'closure freezes submitted letter'
+  '42501', 'permission denied for function edit_submitted_letter',
+  'submitted-letter edit stays disabled after job closure'
 );
 select is((select count(*) from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
   1::bigint, 'owner still reads application after closure');
