@@ -18,7 +18,7 @@ export default async function ApplyPage({
   const application = await getOwnApplicationForJob(id);
   const { error } = await searchParams;
 
-  return <main className="mx-auto max-w-3xl space-y-6 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-3xl space-y-6 px-5 py-10">
     <Link href={`/jobs/${id}`} className="text-sm underline">← {job.title}</Link>
     <h1 className="text-3xl font-semibold">{application?.submission_state === "submitted" ? "Application submitted" : `Apply for ${job.title}`}</h1>
     <p className="text-muted-foreground">{job.team}</p>
@@ -26,6 +26,5 @@ export default async function ApplyPage({
     <ApplicationForm jobId={id} value={application?.cover_letter ?? ""}
       revision={application?.revision ?? null} submitted={application?.submission_state === "submitted"}
       email={user.email ?? ""} details={application ?? { full_name: null, phone: null, portfolio_url: null, submitted_email: null }} />
-    <Link href="/applications" className="inline-block underline">My applications</Link>
   </main>;
 }
