@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { signOut } from "@/app/auth/actions";
 import { categoryLabel } from "@/lib/job-categories";
 import { requireHR } from "@/lib/hr-auth";
 import { listHRJobs } from "@/lib/hr-jobs";
@@ -15,10 +14,6 @@ export default async function HRJobsPage() {
       <p role="alert" className="mt-5">Jobs are temporarily unavailable. Try again later.</p></main>;
   }
   return <main className="mx-auto max-w-4xl space-y-8 px-5 py-10">
-    <header className="flex flex-wrap items-center justify-between gap-4">
-      <nav className="flex gap-4"><Link href="/hr/applications" className="underline">Application review</Link><Link href="/" className="underline">Careers</Link></nav>
-      <form action={signOut}><button className="underline">Sign out</button></form>
-    </header>
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div><h1 className="text-3xl font-semibold">Manage jobs</h1><p className="text-muted-foreground">Draft, publish and close this employer’s openings.</p></div>
       <Link href="/hr/jobs/new" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Create draft</Link>

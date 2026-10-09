@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { signOut } from "@/app/auth/actions";
 import { requireHR } from "@/lib/hr-auth";
 import { listSubmittedApplications } from "@/lib/hr-applications";
 import { reviewStatusLabel } from "@/lib/hr-input";
@@ -21,8 +20,7 @@ export default async function HRApplicationsPage() {
 
   return <main className="mx-auto max-w-4xl space-y-8 px-5 py-10">
     <header className="flex items-center justify-between gap-4">
-      <nav className="flex gap-4"><Link href="/" className="underline">← Careers</Link><Link href="/hr/jobs" className="underline">Manage jobs</Link></nav>
-      <form action={signOut}><button className="underline">Sign out</button></form>
+      <Link href="/" className="underline">← Careers</Link>
     </header>
     <h1 className="text-3xl font-semibold">Application review</h1>
     <p className="text-muted-foreground">Submitted applications for this careers site.</p>

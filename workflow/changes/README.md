@@ -1,5 +1,7 @@
 # Active change packets
 
+Issue [#36](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/36) was accepted by Paul with recorded limits on 2026-10-09 after independent review. ACC-005 is synced to canonical v1.2 and the [complete navigation/logout packet is archived](../archive/2026-10-09-role-navigation-logout/record.md). Commit/push/PR are authorised; hosted validation and release remain separate.
+
 The accepted packet for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) is [archived here](../archive/2026-10-09-soclaas-ai/record.md). John is the accountable student for this feature, assigned in chat on 2026-10-09. He approved the proposal, deltas, design, plan and security amendments, then accepted the implementation after independent recheck. Canonical ProductSpec v1.1 sync is committed as `7f326eb`; PR submission is the remaining final contributor action.
 
 The issue #6 Applicant accounts and applications packet was accepted locally and [archived](../archive/2026-10-07-applicant-applications/record.md) on 2026-10-07 after canonical v0.7 sync. PR #15 is present in `develop` as `2fad6ed`; release remains separate.
