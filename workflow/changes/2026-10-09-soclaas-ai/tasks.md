@@ -25,7 +25,7 @@
 
 ## Review and closeout
 
-- [ ] T11 — Independent reviewer rechecks the final diff, security boundaries and acceptance evidence; records independence, findings and fixes. Depends on: final T09, T10 and T10a. The first review found quota-RPC abuse and decision-language paraphrases; the quota finding was corrected in `70c34cf`, and the decision-language finding is being resolved with John-approved source-ID-only HR output. The reviewer must recheck the final revision, including source-range validation and absence of model-authored HR output.
+- [x] T11 — Independent reviewer rechecked the final diff, security boundaries and acceptance evidence; recorded independence, findings and fixes in `handoffs/independent-review.md`. The quota-RPC finding was corrected in `70c34cf`; the decision-language finding was resolved with the approved source-ID-only HR output; the P3 HR final-audit evidence gap was covered by the test in `9dfddb7`. Final recheck: 4 focused AI test files/22 tests passed; no remaining security findings. Hosted RLS/deployment and model factual accuracy remain outside this local evidence. Depends on: final T09, T10 and T10a.
 - [ ] T12 — John records student acceptance or requested changes, date and limitations. Depends on: T11. Evidence: actual human decision in `record.md`; pending.
 - [ ] T13 — John syncs accepted deltas to canonical specs and verifies IDs/version/navigation. Depends on: T12. Evidence: sync commit and checks in `record.md`; pending.
 - [ ] T14 — John completes dated session logs and closeout, then archives the full packet. Depends on: T13. Evidence: every session listed in `record.md`, `logs/` entry, link checks, archive path and exact results; pending.

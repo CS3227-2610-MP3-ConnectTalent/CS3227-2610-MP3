@@ -1,6 +1,6 @@
 # Feature record: SoCLaaS Applicant draft and HR summary
 
-Status: approved implementation and amended safeguards verified locally; independent recheck and post-review student acceptance, canonical sync, closeout, and PR remain pending
+Status: approved implementation and amended safeguards verified locally; independent recheck complete; post-review student acceptance, canonical sync, closeout, and PR remain pending
 
 Owner: John, student owner for issues #7 and #10 as assigned in chat on 2026-10-09
 
@@ -12,7 +12,7 @@ Date: 2026-10-09
 
 - Change ID/classification: 2026-10-09-soclaas-ai; behavior change and AI/security integration
 - GitHub issues: [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7); [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10). John confirmed feature ownership in chat. No GitHub issue assignment was changed.
-- Branch/commits/PR: `feat/7-10-soclaas-ai`; product baseline `0a0f5c4`; initial packet commit `0826a16`; approved-plan commit `2a5217b`; implementation baseline `d34bd49`; fetched `origin/develop` at `db46f10` and merged it in `6806b08`; implementation commit `70c34cf`; approved HR-output refinement commit `131ef15`; refinement packet update `ab7e3da`; HR audit failure regression coverage and final recheck packet update are being committed; PR pending
+- Branch/commits/PR: `feat/7-10-soclaas-ai`; product baseline `0a0f5c4`; initial packet commit `0826a16`; approved-plan commit `2a5217b`; implementation baseline `d34bd49`; fetched `origin/develop` at `db46f10` and merged it in `6806b08`; implementation commit `70c34cf`; approved HR-output refinement commit `131ef15`; refinement packet update `ab7e3da`; HR audit failure test/evidence commit `9dfddb7`; final independent recheck recorded in this packet; PR pending
 - Proposal: proposal.md
 - Design: design.md
 - Deltas: specs/applications-and-review.md (APP-004); specs/applicant-ai-draft.md (AID-001/AID-002); specs/hr-ai-summary.md (AIS-001/AIS-002); specs/security-and-privacy.md (SEC-001/SEC-006/SEC-007); specs/deployment-and-operations.md (OPS-002)
@@ -31,7 +31,8 @@ Date: 2026-10-09
 - [x] John approved a plan amendment on 2026-10-09: deployment quota lowered from 60 to 24 per rolling minute; provider 429 handling retained; a server-only Supabase secret/service-role credential may call quota/audit metadata RPCs only; Applicant/HR data reads remain on the signed-in RLS session.
 - [x] John approved a plan amendment on 2026-10-09 after the reviewer found recommendation paraphrases passing the lexical filter: the HR model returns only source sentence IDs; the server validates/maps them to source excerpts and generates follow-up questions.
 - [x] Implementation and final deterministic checks complete locally after that amendment. T10 used synthetic-only direct provider calls after querying the configured key's model catalog and budget without printing credentials; the current application flag remains disabled and its configured model remains a placeholder.
-- [ ] Independent recheck and separate post-review student acceptance complete.
+- [x] Independent final recheck completed at `9dfddb7` on 2026-10-09; see [handoffs/independent-review.md](handoffs/independent-review.md). No remaining security findings; the HR final-audit P3 evidence gap is resolved; 4 focused files/22 tests passed.
+- [ ] Separate post-review student acceptance complete.
 - [ ] Accepted canonical sync, closeout, dated log, and archive complete.
 - [ ] Issue-linked PR opened last.
 
@@ -43,7 +44,7 @@ See proposal.md for AI-AC-01 through AI-AC-07 and their observable outcomes/evid
 
 ## Agent handoffs
 
-Implementation was inline, as recorded in [handoffs/implementation.md](handoffs/implementation.md). A separate read-only security/privacy review is recorded in [handoffs/independent-review.md](handoffs/independent-review.md); its P2 findings and final recheck/acceptance remain open.
+Implementation was inline, as recorded in [handoffs/implementation.md](handoffs/implementation.md). A separate read-only security/privacy review is recorded in [handoffs/independent-review.md](handoffs/independent-review.md); the final recheck found no remaining security findings. John’s separate post-review acceptance remains open.
 
 ## Implementation and tests
 
@@ -72,20 +73,20 @@ Security/adversarial coverage: SQL tests prove submitted-letter immutability, ow
 - Sentence boundary regression: after changing the splitter to `Intl.Segmenter`, a focused test failed because it split “Dr.” from the following name. The splitter now merges standalone common abbreviation fragments; the focused test passes.
 - Focused green: `bun node_modules/vitest/vitest.mjs run tests/unit/ai-schemas.test.ts tests/unit/ai-routes.test.ts tests/unit/ai-provider.test.ts tests/unit/hr-ai-summary.test.tsx` — 4 files, 21 tests passed.
 - Final code checks: `bun run test:unit` — 16 files/74 tests passed; `bun run lint` passed; `bun run typecheck` passed; `bun run test:e2e` — 7 passed/4 skipped; `bun run build` passed and lists both API routes as dynamic. Bun v1.3.13 ran the local package scripts because Node/Corepack/pnpm were unavailable on this shell's PATH. The build reported `.env.local` as a loaded environment file; its contents were not inspected. E2E skips remain HR review, HR job management, and password recovery cases due to the unavailable local test key.
-- Limits: This refinement changed no database migration or quota code, so the prior local pgTAP and quota-race results remain the relevant evidence. No live model was called for this refinement. Sentence selection can still be inaccurate; HR must verify source excerpts against the original letter. Independent reviewer recheck and John’s final acceptance remain pending.
+- Limits: This refinement changed no database migration or quota code, so the prior local pgTAP and quota-race results remain the relevant evidence. No live model was called for this refinement. Sentence selection can still be inaccurate; HR must verify source excerpts against the original letter. The final independent recheck is recorded below; John’s final acceptance remains pending.
 
 ### HR audit-failure regression coverage (2026-10-09)
 
 - The reviewer identified an evidence gap: fail-closed final audit behavior was asserted for the Applicant route but not separately for the HR route. The HR implementation already returned a generic 503 without the generated response when audit finalization failed.
 - Added an HR route unit test that forces finalization to return false after successful generation, then asserts the response contains only the generic error and that the success finalization was attempted for the expected actor and invocation.
 - Verification: `bun node_modules/vitest/vitest.mjs run tests/unit/ai-routes.test.ts tests/unit/ai-schemas.test.ts tests/unit/ai-provider.test.ts tests/unit/hr-ai-summary.test.tsx` — 4 files/22 tests passed; `bun run lint` passed; `bun run typecheck` passed. The initial sandbox run could not read installed Vitest files and package scripts could not locate Node; rerunning with approved workspace dependency access succeeded. No production code changed.
-- Independent recheck of this test and the final revision is pending.
+- Independent recheck completed at `9dfddb7`; the reviewer reran the focused AI suite (4 files/22 tests passed) and found no remaining security findings. See [handoffs/independent-review.md](handoffs/independent-review.md).
 
-Known limitations: independent review recheck and post-review student acceptance remain pending. The current local app configuration remains disabled/placeholder, so the live calls do not establish that the application routes are configured for production. HR/job-management/password-recovery browser cases were skipped because the local test service-role key was unavailable. `origin/develop` was merged into the feature branch; its pending local migration was applied, but no hosted migration, deployment, PR merge, or release occurred. The `.env.example` user edit was not read/changed. `.env.local` and `.env.dev` contents were not manually inspected or printed; Next.js reported `.env.local` during local build/dev runs.
+Known limitations: post-review student acceptance remains pending. The current local app configuration remains disabled/placeholder, so the live calls do not establish that the application routes are configured for production. HR/job-management/password-recovery browser cases were skipped because the local test service-role key was unavailable. `origin/develop` was merged into the feature branch; its pending local migration was applied, but no hosted migration, deployment, PR merge, or release occurred. The `.env.example` user edit was not read/changed. `.env.local` and `.env.dev` contents were not manually inspected or printed; Next.js reported `.env.local` during local build/dev runs.
 
 ## Review and decision
 
-Reviewer findings and fixes: A separate read-only reviewer examined `70c34cf`; see [handoffs/independent-review.md](handoffs/independent-review.md). Finding 1 (P2): authenticated users could directly reserve shared quota through the public RPC. John approved a narrow server-only metadata-RPC credential and the 24/minute cap on 2026-10-09. Commit `70c34cf` removes authenticated grants and checks actor/role/target; pgTAP and the concurrent quota test pass. The reviewer rechecked this fix. Finding 2 (P2): hiring-decision paraphrases could pass a lexical output filter, which also rejected ordinary wording. John approved an extractive output amendment: the model returns source sentence IDs only, the server validates/maps those IDs, and follow-ups are generated server-side; implementation is in `131ef15`. The reviewer found no remaining P2 on the response path but requested a separate HR final-audit-failure route assertion; that regression test is now added and awaits final recheck. John’s post-review implementation acceptance remains pending.
+Reviewer findings and fixes: A separate read-only reviewer examined `70c34cf`; see [handoffs/independent-review.md](handoffs/independent-review.md). Finding 1 (P2): authenticated users could directly reserve shared quota through the public RPC. John approved a narrow server-only metadata-RPC credential and the 24/minute cap on 2026-10-09. Commit `70c34cf` removes authenticated grants and checks actor/role/target; pgTAP and the concurrent quota test pass. The reviewer rechecked this fix. Finding 2 (P2): hiring-decision paraphrases could pass a lexical output filter, which also rejected ordinary wording. John approved an extractive output amendment: the model returns source sentence IDs only, the server validates/maps those IDs, and follow-ups are generated server-side; implementation is in `131ef15`. The reviewer rechecked the source-ID contract and found no remaining P2. The reviewer then requested a separate HR final-audit-failure route assertion; test/evidence commit `9dfddb7` covers it. Final independent recheck found no remaining security findings. John’s post-review implementation acceptance remains pending.
 
 Human decisions and date: John approved the written proposal, deltas, design and original plan, and reported coordinating with Paul on 2026-10-09. On 2026-10-09, John approved the amended 24/minute global cap, continued provider 429 handling, server-only quota/audit RPC credential, and source-ID-only HR output with server-generated follow-up questions. His acceptance of the final reviewed implementation remains pending.
 
@@ -95,7 +96,7 @@ Guide/reflection/log updates: This record is the current evidence index; dated s
 
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
-| 2026-10-09 | Pending closeout log | Issue #7/#10 scope; freeze submitted application decision; SoCLaaS AI design; robust-error handling; owner John; user-reported Paul coordination; plan approval; merge from `origin/develop`; quota/RPC and extractive HR-output amendments; local checks; live synthetic evaluation; reviewer findings and remediation. | Local migrations applied without reset. pgTAP, both race checks, 74 unit tests, lint, typecheck, build, bundle scan, and final E2E (7 passed/4 skipped) passed. Live model outputs include an observed factual error; app flag/model remain disabled/placeholder. Independent recheck, student acceptance and workflow closeout remain pending. |
+| 2026-10-09 | Pending closeout log | Issue #7/#10 scope; freeze submitted application decision; SoCLaaS AI design; robust-error handling; owner John; user-reported Paul coordination; plan approval; merge from `origin/develop`; quota/RPC and extractive HR-output amendments; local checks; live synthetic evaluation; reviewer findings and remediation; final independent recheck. | Local migrations applied without reset. pgTAP, both race checks, 74 unit tests, lint, typecheck, build, bundle scan, and final E2E (7 passed/4 skipped) passed. Final focused reviewer rerun passed 4 files/22 tests with no remaining security findings. Live model outputs include an observed factual error; app flag/model remain disabled/placeholder. Student acceptance and workflow closeout remain pending. |
 
 ## Canonical sync and archive
 
@@ -104,4 +105,4 @@ Guide/reflection/log updates: This record is the current evidence index; dated s
 - Sync verification: Pending acceptance.
 - Archive decision/date/path: Pending.
 - Navigation repairs after moving: Pending.
-- Outstanding work/limitations: obtain independent recheck of both implemented findings, then record John’s post-review acceptance; sync accepted canonical requirements; complete dated session log and closeout; open the issue-linked PR last. The live evaluation used synthetic inputs only and exposed an HR factual error; it does not establish production readiness. Paul's coordination is user-reported and not independently verified. The modified `.env.example` remains excluded and untouched.
+- Outstanding work/limitations: record John’s post-review acceptance; sync accepted canonical requirements; complete dated session log and closeout; open the issue-linked PR last. The live evaluation used synthetic inputs only and exposed an HR factual error; it does not establish production readiness. Paul's coordination is user-reported and not independently verified. The modified `.env.example` remains excluded and untouched.
