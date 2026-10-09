@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.0, 8 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.1, 9 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. The accepted SoCLaaS AI change dated 9 October modified APP-004, AID-001/002, AIS-001/002, SEC-001/006/007 and OPS-002. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## IDs and normative language
 
@@ -15,6 +15,20 @@ MUST and MUST NOT express required behavior and prohibitions. MAY expresses an o
 Give each rule one canonical home. Cross-cutting authorization, access tables, privacy and AI safeguards belong in [security-and-privacy.md](security-and-privacy.md); capability specs link there. Link using a relative file path and cite the stable ID in the link text or nearby prose. Optional heading anchors must match the target heading. Links and illustrative scenarios do not create another independently editable copy of a rule. Changes affecting several capabilities must identify every affected file and ID.
 
 An approved product behavior change increments the numeric minor baseline (for example, 0.6 to 0.7) and updates the version/date in ProductSpec and affected specs together. Pure wording, link repair or reorganization with no intended behavior change retains the version and records the documentation date separately. Use an approved change delta with ADDED, MODIFIED or REMOVED entries before syncing canonical specs. Modified requirements retain their IDs. Removed requirements record their IDs and retirement rationale in preserved change history; never reuse retired IDs. If a rule moves, retain its ID and record the old/new canonical location rather than silently assigning a replacement ID.
+
+## v1.1 accepted change trace
+
+On 9 October 2026, John accepted the local implementation for issues [#7](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/7) and [#10](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/10) after the separate final security recheck. The complete [change packet](../changes/2026-10-09-soclaas-ai/record.md) records approval, review, local checks, acceptance and limits. Its accepted deltas are synced here:
+
+| Delta | Canonical destination | Change |
+| --- | --- | --- |
+| Modified APP-004 | [Applications and review](applications-and-review.md) | Applicant may edit a saved draft before submission; submitted application text is frozen and post-submission corrections go to HR |
+| Modified AID-001/AID-002 | [Applicant AI draft](applicant-ai-draft.md) | Bounded notes and selected published requirements; editable generated text; no automatic persistence/submission; verify personal claims before submit |
+| Modified AIS-001/AIS-002 | [HR AI summary](hr-ai-summary.md) | Selected frozen submitted letter and published requirements; model returns sentence IDs, server maps source excerpts and generates follow-ups; HR retains status decisions |
+| Modified SEC-001/SEC-006/SEC-007 | [Security and privacy](security-and-privacy.md) | Submitted-content access boundary, durable 3/user and 24/deployment rolling-minute limits, fail-closed handling and metadata-only audit events |
+| Modified OPS-002 | [Deployment and operations](deployment-and-operations.md) | Check key-specific SoCLaaS access/limits; server-only provider and metadata RPC credentials; operational evidence and disable-AI rollback |
+
+Local acceptance and this sync do not certify hosted migration, PR merge, deployment or release. The synthetic provider evaluation identified a factual summary error; HR must verify excerpts against the original letter.
 
 ## v1.0 accepted change trace
 

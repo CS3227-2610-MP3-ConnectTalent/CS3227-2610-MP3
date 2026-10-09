@@ -1,6 +1,6 @@
 # Feature record: SoCLaaS Applicant draft and HR summary
 
-Status: approved implementation and amended safeguards verified locally; independent recheck complete; post-review student acceptance, canonical sync, closeout, and PR remain pending
+Status: implementation accepted after independent recheck; canonical sync and local checks are in progress; archive and PR remain pending
 
 Owner: John, student owner for issues #7 and #10 as assigned in chat on 2026-10-09
 
@@ -32,7 +32,7 @@ Date: 2026-10-09
 - [x] John approved a plan amendment on 2026-10-09 after the reviewer found recommendation paraphrases passing the lexical filter: the HR model returns only source sentence IDs; the server validates/maps them to source excerpts and generates follow-up questions.
 - [x] Implementation and final deterministic checks complete locally after that amendment. T10 used synthetic-only direct provider calls after querying the configured key's model catalog and budget without printing credentials; the current application flag remains disabled and its configured model remains a placeholder.
 - [x] Independent final recheck completed at `9dfddb7` on 2026-10-09; see [handoffs/independent-review.md](handoffs/independent-review.md). No remaining security findings; the HR final-audit P3 evidence gap is resolved; 4 focused files/22 tests passed.
-- [ ] Separate post-review student acceptance complete.
+- [x] John separately accepted the reviewed local implementation on 2026-10-09 after receiving the final independent recheck, with the documented local/hosted/model limitations. Source: user's explicit chat decision, “Looks good. Please proceed to sync and archive the specs, then create a PR.”
 - [ ] Accepted canonical sync, closeout, dated log, and archive complete.
 - [ ] Issue-linked PR opened last.
 
@@ -88,7 +88,7 @@ Known limitations: post-review student acceptance remains pending. The current l
 
 Reviewer findings and fixes: A separate read-only reviewer examined `70c34cf`; see [handoffs/independent-review.md](handoffs/independent-review.md). Finding 1 (P2): authenticated users could directly reserve shared quota through the public RPC. John approved a narrow server-only metadata-RPC credential and the 24/minute cap on 2026-10-09. Commit `70c34cf` removes authenticated grants and checks actor/role/target; pgTAP and the concurrent quota test pass. The reviewer rechecked this fix. Finding 2 (P2): hiring-decision paraphrases could pass a lexical output filter, which also rejected ordinary wording. John approved an extractive output amendment: the model returns source sentence IDs only, the server validates/maps those IDs, and follow-ups are generated server-side; implementation is in `131ef15`. The reviewer rechecked the source-ID contract and found no remaining P2. The reviewer then requested a separate HR final-audit-failure route assertion; test/evidence commit `9dfddb7` covers it. Final independent recheck found no remaining security findings. John’s post-review implementation acceptance remains pending.
 
-Human decisions and date: John approved the written proposal, deltas, design and original plan, and reported coordinating with Paul on 2026-10-09. On 2026-10-09, John approved the amended 24/minute global cap, continued provider 429 handling, server-only quota/audit RPC credential, and source-ID-only HR output with server-generated follow-up questions. His acceptance of the final reviewed implementation remains pending.
+Human decisions and date: John approved the written proposal, deltas, design and original plan, and reported coordinating with Paul on 2026-10-09. On 2026-10-09, John approved the amended 24/minute global cap, continued provider 429 handling, server-only quota/audit RPC credential, and source-ID-only HR output with server-generated follow-up questions. After the final independent recheck reported no remaining findings and 22 focused tests passing, John separately accepted the reviewed local implementation and directed canonical sync, archive and PR creation. Hosted RLS/deployment, the noted model factual error, and the skipped local-key-dependent E2E cases remain recorded limits; no hosted migration, deployment, merge or release is implied.
 
 Guide/reflection/log updates: This record is the current evidence index; dated session log is pending closeout.
 

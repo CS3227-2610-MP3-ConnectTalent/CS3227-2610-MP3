@@ -26,7 +26,7 @@
 ## Review and closeout
 
 - [x] T11 — Independent reviewer rechecked the final diff, security boundaries and acceptance evidence; recorded independence, findings and fixes in `handoffs/independent-review.md`. The quota-RPC finding was corrected in `70c34cf`; the decision-language finding was resolved with the approved source-ID-only HR output; the P3 HR final-audit evidence gap was covered by the test in `9dfddb7`. Final recheck: 4 focused AI test files/22 tests passed; no remaining security findings. Hosted RLS/deployment and model factual accuracy remain outside this local evidence. Depends on: final T09, T10 and T10a.
-- [ ] T12 — John records student acceptance or requested changes, date and limitations. Depends on: T11. Evidence: actual human decision in `record.md`; pending.
+- [x] T12 — John separately accepted the reviewed local implementation on 2026-10-09 after T11, with the local/hosted/model limits recorded. Evidence: user's explicit chat instruction and `record.md`. Depends on: T11.
 - [ ] T13 — John syncs accepted deltas to canonical specs and verifies IDs/version/navigation. Depends on: T12. Evidence: sync commit and checks in `record.md`; pending.
 - [ ] T14 — John completes dated session logs and closeout, then archives the full packet. Depends on: T13. Evidence: every session listed in `record.md`, `logs/` entry, link checks, archive path and exact results; pending.
 - [ ] T15 — Authorized contributor opens the issue-linked PR as the last contributor action using `.github/pull_request_template.md`. Depends on: T14. Evidence: PR URL, Conventional Commit title and links to #7/#10 in `record.md`; pending.

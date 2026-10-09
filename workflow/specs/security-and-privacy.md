@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v0.8, 8 October 2026 (SEC-001 updated). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v1.1, 9 October 2026 (SEC-001/SEC-006/SEC-007 updated). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
 
 ## SEC-001: Access boundaries
 
@@ -12,12 +12,12 @@ Access MUST follow these boundaries:
 | Draft jobs | None | Read/write/publish |
 | Closed jobs | Title of a job on their existing application | Read |
 | Saved draft application and cover letter | Own draft read/write while its job is published; own read after closure | None |
-| Submitted application, original/current letter and current review status | Own read; current-letter edit while its job is published; no status write | Read for review; status write through a separate authorized human action |
+| Submitted application, original/current letter and current review status | Own read; no submitted-letter or status write | Read for review; status write through a separate authorized human action |
 | HR notes and status-change history | None | Read; append notes and status events through authorized actions |
 | Role assignment | Cannot set or change | Controlled administration only |
 | Audit events | None | Read as authorized |
 
-Creating jobs, editing job drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT edit another Applicant's draft or submission, change the immutable original submitted letter, change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application, status or AI draft, or see HR notes/history. Anonymous users MUST NOT read any protected application, note or status event or access AI endpoints. HR MUST NOT read unsubmitted drafts, including a draft owned before an account's controlled promotion from Applicant to HR. HR write actions MUST check a verified user's current HR role on the server and in the database. Status events and logs MUST exclude letter and note text. Closing a job MUST NOT broaden or revoke these existing-record read boundaries. [APP-004](applications-and-review.md) owns save/submit/edit lifecycle and job-close behavior. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
+Creating jobs, editing job drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT edit another Applicant's draft or submission, change any submitted letter, change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application, status or AI draft, or see HR notes/history. Anonymous users MUST NOT read any protected application, note or status event or access AI endpoints. HR MUST NOT read unsubmitted drafts, including a draft owned before an account's controlled promotion from Applicant to HR. HR write actions MUST check a verified user's current HR role on the server and in the database. Status events and logs MUST exclude letter and note text. Closing a job MUST NOT broaden or revoke these existing-record read boundaries. [APP-004](applications-and-review.md) owns save/submit/edit lifecycle and job-close behavior. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
 
 Scenario: Given a submitted application, when its owner and authorized HR open it, then each sees their permitted fields; the owner sees current status but not notes/history.
 
@@ -49,15 +49,17 @@ Scenario: Given a selected application/job, when an AI request is assembled, the
 
 ## SEC-006: Bounded AI usage and failure handling
 
-AI endpoints MUST apply per-user usage limits, model output caps, timeouts and clear retry/error handling. Oversized and repeated requests MUST be limited, including when the SoC LLM is unavailable or returns a quota error. Exact thresholds remain unresolved until SoC LLM quotas have been reviewed.
+Both AI endpoints MUST validate request sizes before a provider call and MUST enforce durable, atomic limits of at most three requests per user in any rolling minute across both features and at most 24 provider requests per deployment in any rolling minute. Limits MUST be enforced across server instances using database RPCs callable only by trusted server code. Those RPCs MUST check the confirmed actor profile, role and selected target; Applicant and HR content reads MUST continue using the signed-in user's RLS-scoped session. The Applicant notes limit is 4,000 characters; submitted letters remain limited to the existing 5,000 characters; job requirements remain limited to the existing 10,000 characters. The draft output is capped at 500 provider tokens and 5,000 characters. The summary output is capped at 350 provider tokens and its three arrays are each limited to five strings of at most 240 characters. Each provider request MUST time out after 20 seconds. Each user request MUST make at most one provider call; provider calls MUST NOT be automatically retried.
 
-Scenario: Given oversized or repeated requests, when limits are applied, then requests are bounded. Given an unavailable model or quota error, when a request fails, then timeout/retry/error behavior is clear without bypassing the limits.
+Invalid input MUST return a clear validation error without a provider call. Authentication and role denials MUST occur before protected data loads or provider calls. User quota exhaustion MUST return a recoverable rate-limit state with a retry interval and no provider call. SoCLaaS 429 responses MUST return a safe retry-later response with a sanitized `Retry-After` value when valid; other provider errors and timeouts MUST return safe retry-later states without exposing provider bodies, secrets or prompt text. Empty, malformed, over-limit or schema-invalid model output MUST be discarded and MUST NOT be partially displayed. An audit reservation failure MUST prevent the provider call; a final audit-write failure MUST discard the result and return an error. The Applicant's typed text and HR's source application/status MUST remain unchanged in every failure case.
+
+Scenario: Given oversized input, user/global quota exhaustion or an invalid role, when an endpoint is called, then the request is rejected before SoCLaaS and the interface retains the user's state. Given a provider 429/5xx, timeout, malformed JSON, Zod failure or audit failure, when generation fails, then no partial output or database mutation occurs, a safe error is shown, the outcome is recorded when possible and no automatic provider retry occurs.
 
 ## SEC-007: Privacy-preserving audit logging
 
-Logs MUST record actor, operation, target, timestamp and outcome without cover-letter text or API keys. Audit access follows SEC-001. See [OPS-002](deployment-and-operations.md) for operational evidence.
+Metadata-only audit events MUST record application submission, each HR status change and each provider invocation's actor, operation, target, timestamp and outcome. Application submission metadata MUST be written in the same database transaction as submission. Existing application_status_events remain the record of HR status changes. An AI invocation MUST have a metadata-only start record before the external call and a terminal outcome after it. If start/reservation cannot be recorded, no provider call may occur. If terminal recording fails, the output MUST be withheld and any fallback server log MUST contain metadata only. Logs MUST NOT contain Applicant notes, letter text, prompts, model output, authentication tokens or provider keys. HR read access follows SEC-001; Applicants cannot read audit events. See [OPS-002](deployment-and-operations.md) for operational evidence.
 
-Scenario: Given a logged operation, when its audit record is inspected, then the five fields are present and cover-letter text/API keys are absent.
+Scenario: Given a successful or failed provider invocation, when authorized audit evidence is inspected, then actor, operation, target, time and outcome are present without notes, letter text, prompt, output or key. Given audit storage is unavailable before invocation, the model is not called; if terminal audit finalization fails, the response is withheld.
 
 ## SEC-008: Synthetic development and test records
 
