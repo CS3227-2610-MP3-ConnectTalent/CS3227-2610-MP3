@@ -13,7 +13,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: process.env.PLAYWRIGHT_SERVER_COMMAND ?? "corepack pnpm dev",
+    command: process.env.PLAYWRIGHT_SERVER_COMMAND ?? "pnpm dev",
     url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
