@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createHash } from "node:crypto";
 import { PDFDocument } from "pdf-lib";
 import { expect, test } from "@playwright/test";
 
@@ -46,8 +47,29 @@ test("upload before saving, private profile copy and preserved unsaved fields", 
     await expect(page.getByRole("status")).toContainText("valid, unencrypted PDF");
     expect((await admin.from("applications").select("id").eq("applicant_id", users[0])).data).toHaveLength(0);
     await page.getByLabel("Choose PDF résumé").setInputFiles({ name: "direct.pdf", mimeType: "application/pdf", buffer: pdf });
+    // Simulate a first request that allocates its private pending record, then loses the response.
+    let interruptedOperation: string | undefined;
+    await page.route(`**/api/jobs/${job}/resume`, async route => {
+      const headers = route.request().headers();
+      expect(headers["x-application-revision"]).toBe("");
+      interruptedOperation = headers["x-resume-operation"];
+      expect((await admin.rpc("prepare_application_resume", {
+        p_actor: users[0], p_job: job, p_revision: null, p_operation: interruptedOperation,
+        p_filename: "direct.pdf", p_size: pdf.length, p_sha256: createHash("sha256").update(pdf).digest("hex"),
+      })).error).toBeNull();
+      await route.abort("failed");
+    }, { times: 1 });
     await page.getByRole("button", { name: "Upload résumé", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Retry upload", exact: true })).toBeVisible();
+    const retryRequest = page.waitForRequest(request => request.url().endsWith(`/api/jobs/${job}/resume`) && request.headers()["x-resume-retry"] === "true");
+    await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+    const retryHeaders = (await retryRequest).headers();
+    expect(retryHeaders["x-application-revision"]).toBe("");
+    expect(retryHeaders["x-resume-operation"]).not.toBe(interruptedOperation);
     await expect(page.getByRole("link", { name: "Download résumé: direct.pdf" })).toBeVisible({ timeout: 30_000 });
+    expect((await admin.from("applications").select("id").eq("applicant_id", users[0]).eq("job_id", job)).data).toHaveLength(1);
+    // Recovery retires the reservation; cleanup claims and retains its deleting tombstone.
+    expect((await admin.from("application_resume_objects").select("state").eq("id", interruptedOperation!).single()).data?.state).toBe("deleting");
     await page.getByRole("button", { name: "Use profile résumé", exact: true }).click();
     await expect(page.getByRole("link", { name: "Download résumé: profile.pdf" })).toBeVisible();
     const { data: draft } = await admin.from("applications").select("id,full_name,cover_letter,resume_id").eq("applicant_id", users[0]).single();

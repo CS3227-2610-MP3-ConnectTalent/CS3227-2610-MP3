@@ -99,9 +99,18 @@ export async function cancelResumeUpload(actor: string, job: string) {
 export async function uploadResumeForJob(actor:string,job:string,revision:number|null,file:File,operation:string,retry=false) {
  const validated=await validateResume(file);
  const client=resumeMutationClient();
- if(retry&&revision!==null){const {error}=await client.rpc("recover_pending_application_resume",{p_actor:actor,p_job:job,p_revision:revision});
+ let expectedRevision=revision;
+ // A lost first response can leave an owned draft while the form still has no revision.
+ // Resolve only on explicit retry; supplied revisions must retain their stale-write checks.
+ if(retry&&expectedRevision===null){
+  const {data,error}=await client.from("applications").select("revision").eq("applicant_id",actor).eq("job_id",job).maybeSingle();
+  const persisted=z.object({revision:z.number().int().positive()}).safeParse(data);
+  if(error||(data!==null&&!persisted.success))throw new Error("We could not check the previous upload. Try again later.");
+  if(persisted.success)expectedRevision=persisted.data.revision;
+ }
+ if(retry&&expectedRevision!==null){const {error}=await client.rpc("recover_pending_application_resume",{p_actor:actor,p_job:job,p_revision:expectedRevision});
   if(error)throw new Error("Reload the application before retrying this upload.");await cleanup(actor,job);}
- const {data,error}=await client.rpc("prepare_application_resume",{p_actor:actor,p_job:job,p_revision:revision,p_operation:operation,
+ const {data,error}=await client.rpc("prepare_application_resume",{p_actor:actor,p_job:job,p_revision:expectedRevision,p_operation:operation,
   p_filename:validated.filename,p_size:validated.bytes.length,p_sha256:validated.sha256});
  const prepared=z.object({id:z.uuid(),revision:z.number().int().positive(),state:z.enum(["ready","pending"])}).safeParse(data);
  if(error||!prepared.success)throw new Error("Reload the application before retrying this upload.");

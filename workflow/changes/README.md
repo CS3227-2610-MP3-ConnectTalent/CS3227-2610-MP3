@@ -1,5 +1,7 @@
 # Active change packets
 
+[#53 first-upload retry follow-up](../archive/2026-10-10-first-upload-retry/record.md): Paul separately accepted with recorded limits on 10 October 2026. Complete packet archived; restores existing APP-007 without a canonical delta. Hosted testing and commit/push remain pending.
+
 [#50 withdrawal placement correction](../archive/2026-10-10-withdrawal-placement/record.md): Paul accepted via “Accept correction” on 10 October 2026; canonical APP-008 synced to v1.6 and complete packet archived. My applications offers View/status only; withdrawal stays in individual submitted application details.
 
 [#53 upload-before-save and profile résumé](../archive/2026-10-10-unsaved-profile-resume/record.md) was separately accepted by Paul with recorded limits on 10 October 2026. Canonical v1.8 synced without reverting #52 and the complete packet archived. One combined PR for #49/#50/#52/#53 is authorized; hosted rollout remains pending.
