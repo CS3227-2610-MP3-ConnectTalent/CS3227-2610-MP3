@@ -12,6 +12,9 @@ next-env.d.ts
 # Package-manager generated lockfile
 pnpm-lock.yaml
 
+# Existing project website is outside this change's approved scope
+docs/index.html
+
 # Preserve historical evidence and author-owned reflections
 logs/
 .superpowers/
