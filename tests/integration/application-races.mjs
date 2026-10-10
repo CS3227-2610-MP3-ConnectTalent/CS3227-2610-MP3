@@ -249,7 +249,7 @@ try {
   const savingAppName = `race-save-winning-${userId}`;
   const saving = startSql(
     applicantSql(
-      `select public.save_application_details_v2('${jobs[3]}', 'Winning letter', 'Winning Name', '+65 1111', 'https://example.test/winner', 1)`,
+      `select public.save_application_details_v2('${jobs[3]}', 'Winning letter', 'Winning Name', '+6591234567', 'https://example.test/winner', 1)`,
     ),
     savingAppName,
   );
@@ -257,7 +257,7 @@ try {
   const staleAppName = `race-stale-details-${userId}`;
   const stale = startSql(
     applicantSql(
-      `select public.save_application_details_v2('${jobs[3]}', 'Losing letter', 'Losing Name', '+65 2222', null, 1)`,
+      `select public.save_application_details_v2('${jobs[3]}', 'Losing letter', 'Losing Name', '+6598765432', null, 1)`,
     ),
     staleAppName,
   );
@@ -278,7 +278,7 @@ try {
   );
   if (
     savedDetails.output.trim() !==
-    "Winning letter:Winning Name:+65 1111:https://example.test/winner:2"
+    "Winning letter:Winning Name:+6591234567:https://example.test/winner:2"
   ) {
     throw new Error(
       "Concurrent writes mixed field sets or advanced the wrong revision",

@@ -41,7 +41,7 @@ jobs:
           # shellcheck disable=SC1090
           source "$environment_file"
           rm "$environment_file"
-          for key_to_mask in "${JWT_SECRET:-}" "${PUBLISHABLE_KEY:-}" "${ANON_KEY:-}" "${SERVICE_ROLE_KEY:-}" "${S3_SECRET_KEY:-}" "${SECRET_KEY:-}"; do
+          for key_to_mask in "${JWT_SECRET:-}" "${PUBLISHABLE_KEY:-}" "${ANON_KEY:-}" "${SERVICE_ROLE_KEY:-}" "${S3_PROTOCOL_ACCESS_KEY_SECRET:-}" "${S3_SECRET_KEY:-}" "${SECRET_KEY:-}"; do
             if [[ -n "$key_to_mask" ]]; then
               echo "::add-mask::$key_to_mask"
             fi
@@ -84,7 +84,7 @@ jobs:
           rm "$environment_file"
           : "${API_URL:?Local Supabase API URL is missing}"
           : "${SERVICE_ROLE_KEY:?Local Supabase service-role key is missing}"
-          for key_to_mask in "${JWT_SECRET:-}" "${PUBLISHABLE_KEY:-}" "${ANON_KEY:-}" "$SERVICE_ROLE_KEY" "${S3_SECRET_KEY:-}" "${SECRET_KEY:-}"; do
+          for key_to_mask in "${JWT_SECRET:-}" "${PUBLISHABLE_KEY:-}" "${ANON_KEY:-}" "$SERVICE_ROLE_KEY" "${S3_PROTOCOL_ACCESS_KEY_SECRET:-}" "${S3_SECRET_KEY:-}" "${SECRET_KEY:-}"; do
             if [[ -n "$key_to_mask" ]]; then
               echo "::add-mask::$key_to_mask"
             fi
@@ -127,7 +127,7 @@ jobs:
           : "${API_URL:?Local Supabase API URL is missing}"
           : "${PUBLISHABLE_KEY:?Local Supabase publishable key is missing}"
           : "${SERVICE_ROLE_KEY:?Local Supabase service-role key is missing}"
-          for key_to_mask in "${JWT_SECRET:-}" "$PUBLISHABLE_KEY" "${ANON_KEY:-}" "$SERVICE_ROLE_KEY" "${S3_SECRET_KEY:-}" "${SECRET_KEY:-}"; do
+          for key_to_mask in "${JWT_SECRET:-}" "$PUBLISHABLE_KEY" "${ANON_KEY:-}" "$SERVICE_ROLE_KEY" "${S3_PROTOCOL_ACCESS_KEY_SECRET:-}" "${S3_SECRET_KEY:-}" "${SECRET_KEY:-}"; do
             if [[ -n "$key_to_mask" ]]; then
               echo "::add-mask::$key_to_mask"
             fi

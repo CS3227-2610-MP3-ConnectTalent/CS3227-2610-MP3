@@ -84,15 +84,16 @@ test("Applicant contact drafts, validation, freeze and submitted-only HR review"
       "readonly",
       "",
     );
-    await page.getByLabel("Phone (optional)").fill("+65 5555 0101");
+    await page.getByLabel("Country code", { exact: true }).selectOption("SG");
+    await page.getByLabel("Phone number", { exact: true }).fill("85550101");
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
     await expect(page.getByText("Saved draft", { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByLabel("Full name")).toHaveValue(
       "Synthetic Contact Applicant",
     );
-    await expect(page.getByLabel("Phone (optional)")).toHaveValue(
-      "+65 5555 0101",
+    await expect(page.getByLabel("Phone number", { exact: true })).toHaveValue(
+      "85550101",
     );
     await page.getByLabel("Full name").fill("Synthetic Applicant");
     await page
@@ -108,8 +109,8 @@ test("Applicant contact drafts, validation, freeze and submitted-only HR review"
     await expect(page.getByLabel("Full name")).toHaveValue(
       "Synthetic Applicant",
     );
-    await expect(page.getByLabel("Phone (optional)")).toHaveValue(
-      "+65 5555 0101",
+    await expect(page.getByLabel("Phone number", { exact: true })).toHaveValue(
+      "85550101",
     );
     await expect(page.getByLabel("Portfolio URL (optional)")).toHaveValue(
       "javascript:alert(1)",
