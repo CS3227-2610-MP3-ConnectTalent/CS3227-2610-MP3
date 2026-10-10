@@ -1,0 +1,34 @@
+# Independent verification handoff — quality gates
+
+- Change: `2026-10-10-quality-gates`; issue #51
+- Reviewer: `/root/direct_pnpm_review`, separate read-only agent execution; did not implement this change or edit the workspace
+- Review date: 2026-10-10
+- Initial revision: `2a9f3a101e7ae1540f480f6b26e3c30ad0eb6206`
+- Final revision rechecked: `aa50356` (`chore(tooling): exclude project website from formatting`)
+- Baseline: `origin/develop` at `09b1213f2f8105f9faf2e7f3a8efc534fb9c2902`
+- Scope: approved proposal, plan, task/evidence packet, final `origin/develop...HEAD` delta, formatting and ESLint configuration, blocking CI workflow, and selected application/profile/resume/withdrawal/proxy refactors and tests
+- Exclusions: reviewer checked protected reflection paths by path only and did not read reflection contents; no hosted CI, live Supabase/RLS/storage or browser E2E behavior was claimed
+- Independence limits: separate reviewer execution and no implementation edits; the reviewer could not invoke Node or pnpm, so reported implementation checks were not independently reproduced
+
+## Acceptance review
+
+| ID       | Result                                                                   | Review evidence and limits                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| QG-AC-01 | Passed after scope correction                                            | Ignore policy preserves the approved exclusions. Initial review found `docs/index.html` in the formatted delta despite `docs-site` being a proposal non-goal (P2). The implementer restored the file to the `origin/develop` blob, added it to `.prettierignore`, and reran `pnpm format:check` successfully. The reviewer verified the final blob hash matches `origin/develop`, the file is absent from the final delta, and `prettier --check .` has no override that bypasses the ignore file. Reviewer could not run Prettier independently. |
+| QG-AC-02 | Config verified; independent execution unavailable                       | `eslint.config.mjs` sets error-level cyclomatic complexity 20 (classic), cognitive complexity 15, max-lines 300, and max-lines-per-function 50. The implementation record reports lint, resolved print-config values, and a temporary probe of all four rules. Reviewer could not run lint.                                                                                                                                                                                                                                                       |
+| QG-AC-03 | Static workflow review passed; execution unavailable                     | CI invokes blocking `pnpm format:check` and `pnpm lint`; no `continue-on-error` bypass was found. Hosted Actions for this branch were not run.                                                                                                                                                                                                                                                                                                                                                                                                    |
+| QG-AC-04 | No concrete regression found in reviewed paths; runtime evidence limited | Static comparison of selected proxy, profile, application, resume, and withdrawal code supported preservation of validation, applicant ownership filters, status codes, safe errors, and controls. The implementation record reports typecheck, type generation, build, and standalone unit tests (32 files / 167 tests). Reviewer could not independently rerun them. E2E was not run because local Supabase/Mailpit and the test key were unavailable; live browser and Supabase storage/RLS behavior are unverified.                           |
+| QG-AC-05 | Path review passed                                                       | No protected reflection, historical log, archive, or workflow-record paths appeared in the final delta. Reflection contents were not read.                                                                                                                                                                                                                                                                                                                                                                                                        |
+
+## Finding and recheck
+
+- **P2 — resolved:** Initial revision `2a9f3a1` reformatted `docs/index.html`, conflicting with the approved proposal's docs-site non-goal. Resolution owner: implementer. Commit `aa50356` adds `docs/index.html` to `.prettierignore` and restores the file exactly to `origin/develop`. Reviewer rechecked the blob identity and final delta and confirmed `format:check` respects the ignore policy by configuration. Implementer rechecks after the fix: `pnpm format:check` passed; `pnpm lint` passed. Reviewer-side command execution remained blocked by missing Node/pnpm in that environment.
+- No other concrete source regression was identified in the reviewed paths.
+
+## Reviewer command availability
+
+The reviewer could not invoke `node` or `pnpm`; these commands were not independently run: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm exec next typegen`, `pnpm build`, and `pnpm test:unit`. The implementation record contains the primary-run results. E2E and hosted GitHub Actions were not run. Do not describe implementation-authored check results as independent reviewer reruns.
+
+## Decision gate
+
+The technical review is complete with the P2 resolved. Student post-review acceptance remains pending and must be recorded separately from implementation approval. Do not archive or open a PR until the student gives that decision.
