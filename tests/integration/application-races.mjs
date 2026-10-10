@@ -153,7 +153,7 @@ try {
   const firstAppName = `race-first-submit-${userId}`;
   const first = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[0]}', 'First synthetic letter','Synthetic Applicant',null,null, null)`,
+      `select public.submit_application_details_v2('${jobs[0]}', 'First synthetic letter','Synthetic Applicant','+6591234567',null, null)`,
     ),
     firstAppName,
   );
@@ -161,7 +161,7 @@ try {
   const duplicateAppName = `race-duplicate-${userId}`;
   const duplicate = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[0]}', 'Second synthetic letter','Synthetic Applicant',null,null, null)`,
+      `select public.submit_application_details_v2('${jobs[0]}', 'Second synthetic letter','Synthetic Applicant','+6591234567',null, null)`,
     ),
     duplicateAppName,
   );
@@ -193,7 +193,7 @@ try {
   const lateAppName = `race-too-late-${userId}`;
   const tooLate = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[1]}', 'Too late','Synthetic Applicant',null,null, null)`,
+      `select public.submit_application_details_v2('${jobs[1]}', 'Too late','Synthetic Applicant','+6591234567',null, null)`,
     ),
     lateAppName,
   );
@@ -219,7 +219,7 @@ try {
   const beforeCloseAppName = `race-submit-first-${userId}`;
   const beforeClose = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[2]}', 'Before close','Synthetic Applicant',null,null, null)`,
+      `select public.submit_application_details_v2('${jobs[2]}', 'Before close','Synthetic Applicant','+6591234567',null, null)`,
     ),
     beforeCloseAppName,
   );
