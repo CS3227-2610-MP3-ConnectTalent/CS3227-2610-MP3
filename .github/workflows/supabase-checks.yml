@@ -5,6 +5,13 @@ on:
     branches:
       - develop
       - master
+  push:
+    branches:
+      - develop
+      - master
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,10 +24,138 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.119.0
       - name: Start local Supabase
-        run: supabase start
+        shell: bash
+        run: |
+          if ! supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1; then
+            echo "Local Supabase startup failed; CLI output is withheld because it may contain credentials." >&2
+            exit 1
+          fi
+      - name: Mask local Supabase credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          environment_file="$(mktemp)"
+          supabase status --env --output-format text > "$environment_file"
+          # shellcheck disable=SC1090
+          source "$environment_file"
+          rm "$environment_file"
+          for key_to_mask in "${JWT_SECRET:-}" "${PUBLISHABLE_KEY:-}" "${ANON_KEY:-}" "${SERVICE_ROLE_KEY:-}" "${SECRET_KEY:-}"; do
+            if [[ -n "$key_to_mask" ]]; then
+              echo "::add-mask::$key_to_mask"
+            fi
+          done
+          cat "$RUNNER_TEMP/supabase-start.log"
       - name: Replay migrations from scratch
         run: supabase db reset --local
+      - name: Lint local database
+        run: supabase db lint --local --fail-on error
       - name: Run database tests
         run: supabase test db --local
+
+  integration-checks:
+    name: Integration race suites
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@24
+          require-lockfile: true
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0
+      - name: Start local Supabase
+        shell: bash
+        run: |
+          if ! supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1; then
+            echo "Local Supabase startup failed; CLI output is withheld because it may contain credentials." >&2
+            exit 1
+          fi
+      - name: Export local test credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          environment_file="$(mktemp)"
+          supabase status --env --output-format text > "$environment_file"
+          # shellcheck disable=SC1090
+          source "$environment_file"
+          rm "$environment_file"
+          : "${API_URL:?Local Supabase API URL is missing}"
+          : "${SERVICE_ROLE_KEY:?Local Supabase service-role key is missing}"
+          for key_to_mask in "${JWT_SECRET:-}" "${PUBLISHABLE_KEY:-}" "${ANON_KEY:-}" "$SERVICE_ROLE_KEY" "${SECRET_KEY:-}"; do
+            if [[ -n "$key_to_mask" ]]; then
+              echo "::add-mask::$key_to_mask"
+            fi
+          done
+          printf 'TEST_SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
+          cat "$RUNNER_TEMP/supabase-start.log"
+      - name: Replay migrations from scratch
+        run: supabase db reset --local
+      - name: Run all integration race suites sequentially
+        run: pnpm test:integration
+
+  browser-tests:
+    name: Playwright Chromium
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@24
+          require-lockfile: true
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.119.0
+      - name: Start local Supabase and Mailpit
+        shell: bash
+        run: |
+          if ! supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1; then
+            echo "Local Supabase startup failed; CLI output is withheld because it may contain credentials." >&2
+            exit 1
+          fi
+      - name: Export local application and test credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          environment_file="$(mktemp)"
+          supabase status --env --output-format text > "$environment_file"
+          # shellcheck disable=SC1090
+          source "$environment_file"
+          rm "$environment_file"
+          : "${API_URL:?Local Supabase API URL is missing}"
+          : "${PUBLISHABLE_KEY:?Local Supabase publishable key is missing}"
+          : "${SERVICE_ROLE_KEY:?Local Supabase service-role key is missing}"
+          for key_to_mask in "${JWT_SECRET:-}" "$PUBLISHABLE_KEY" "${ANON_KEY:-}" "$SERVICE_ROLE_KEY" "${SECRET_KEY:-}"; do
+            if [[ -n "$key_to_mask" ]]; then
+              echo "::add-mask::$key_to_mask"
+            fi
+          done
+          {
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+            printf 'SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+            printf 'TEST_SUPABASE_SERVICE_ROLE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+          cat "$RUNNER_TEMP/supabase-start.log"
+      - name: Replay migrations from scratch
+        run: supabase db reset --local
+      - name: Install Chromium and system dependencies
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run critical PR journeys
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: pnpm test:e2e:critical
+      - name: Run complete scheduled or manual suite
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: pnpm test:e2e
+      - name: Upload Playwright reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reports
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

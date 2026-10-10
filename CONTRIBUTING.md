@@ -167,6 +167,7 @@ Common checks available in `package.json`:
 pnpm lint
 pnpm typecheck
 pnpm test:unit
+pnpm test:unit:coverage
 pnpm build
 ```
 
@@ -174,16 +175,30 @@ Browser and database checks use local services and synthetic data:
 
 ```sh
 pnpm db:start
+pnpm test:integration
+pnpm test:e2e:critical
 pnpm test:e2e
 pnpm test:db
 pnpm db:stop
 ```
 
-`test:e2e` uses Playwright and a local Next.js server. `test:db` uses Supabase's
-database test runner and requires local Supabase. Follow the approved plan on which
-checks to run; do not reset or alter a remote database. CI currently runs lint,
-typecheck, unit tests, and build. Do not imply that local E2E or database tests are CI
-gates unless repository configuration changes and verifies that fact.
+`test:e2e` uses Playwright and a local Next.js server; `test:e2e:critical` covers
+public listings, Applicant signup/application and withdrawal, HR review, and AI
+route security. `test:integration` runs all five Docker-backed race suites in
+sequence. `test:db` uses Supabase's database test runner. These commands require this
+project's local Supabase stack; fixture-cleanup tests use its local service-role key.
+Never link or reset a hosted project for these checks.
+
+The app workflow runs lint, Next.js type generation, typecheck, unit tests with JUnit
+and coverage reports, and build on pull requests and pushes to `develop`/`master`.
+The Supabase workflow runs local database lint, pgTAP and integration races on those
+events, and also on its nightly 02:00 UTC schedule and manual dispatch. Critical
+Chromium journeys run on pull requests and branch pushes; the full Playwright suite
+runs nightly and on manual dispatch. CI starts a disposable local Supabase stack and
+generates its own fixture key. The app workflow publishes a job summary
+and downloadable Vitest artifacts; there is no coverage threshold. Repository
+administrators still need to require the desired status checks in GitHub branch
+protection settings.
 
 For documentation-only or Codex configuration changes, validate relevant Markdown
 links/content, TOML syntax/required fields, profile-to-skill references, changed-file

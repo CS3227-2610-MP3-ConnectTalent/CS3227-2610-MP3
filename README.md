@@ -43,10 +43,14 @@ To test password recovery locally, use **Forgot password?** on the sign-in page,
 ```sh
 pnpm lint
 pnpm typecheck
+pnpm test:unit
+pnpm test:unit:coverage
 pnpm build
 ```
 
-Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. With local Supabase running and seeded, run `pnpm test:unit`, `pnpm test:e2e`, `pnpm test:db`, `pnpm test:race`, and `pnpm test:ai-race`. The HR and password-recovery browser tests require `TEST_SUPABASE_SERVICE_ROLE_KEY` from the **local** Supabase stack; without it, those cases are skipped. They create synthetic users/jobs and must never run with a hosted project key. The race checks need Docker and this project's local Supabase database container. CI runs lint, typecheck, unit tests, and build; database, race and browser tests are local gates until CI has a Supabase stack.
+Vitest, Playwright, and Supabase database test runners are configured through `vitest.config.ts`, `playwright.config.ts`, and `supabase/config.toml`. With the local Supabase stack running, use `pnpm test:unit`, `pnpm test:unit:coverage`, `pnpm test:db`, `pnpm test:integration`, `pnpm test:e2e:critical`, or `pnpm test:e2e` as appropriate. `test:integration` runs all five race scripts sequentially and needs Docker plus this project's local Supabase database container. Browser and storage race fixtures are synthetic. Tests that create fixtures need `TEST_SUPABASE_SERVICE_ROLE_KEY` from the **local** Supabase stack; without it some local browser cases are skipped. Never use a hosted project key.
+
+Pull-request and branch-push CI runs lint, Next.js type generation, typecheck, unit tests with JUnit/V8 coverage reports, and build. A separate workflow uses disposable local Supabase for blocking database lint, pgTAP, and the full sequential race suite on pull requests, branch pushes, its nightly 02:00 UTC schedule, and manual dispatch. Its critical Chromium subset covers public job listings, Applicant signup/application and withdrawal, HR application review, and AI route security on pull requests and branch pushes; the complete Playwright suite runs nightly and on manual dispatch. Browser checks start local Supabase/Mailpit and generate test keys from that local stack; no hosted credentials are required. Vitest results and coverage are written to the Actions job summary and downloadable artifacts; coverage has no threshold yet. GitHub branch protection must require the intended status checks separately; workflow files do not prove that setting is enabled.
 
 ## Project layout
 
