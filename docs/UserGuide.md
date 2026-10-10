@@ -16,7 +16,7 @@ The shared account navigation appears on browsing, application and HR pages. Gue
 
 Use **Sign out** in that navigation to return to guest browsing. If logout fails, the careers page displays a retry message; it does not claim the session ended. Successful logout requires signing in again before opening protected pages.
 
-Follow the local Supabase and environment setup in the root `README.md`, then run `corepack pnpm dev` and open <http://localhost:3000>. The demo uses neutral branding and does not require a company name. Use `localhost` consistently during signup and confirmation, since browser sessions are tied to that host.
+Follow the local Supabase and environment setup in the root `README.md`, then run `pnpm dev` and open <http://localhost:3000>. The demo uses neutral branding and does not require a company name. Use `localhost` consistently during signup and confirmation, since browser sessions are tied to that host.
 
 The home page shows published jobs. Use the category links to filter the list, then select a job card to see its title, team, description, and requirements. The local seed has published jobs in Engineering, Human Resources, and Sales, plus a draft Legal job and a closed Other job; the latter two are hidden from public browsing. No public app deployment or test accounts are available yet.
 
