@@ -177,11 +177,13 @@ function CoverLetterSections({
   withdrawn: boolean;
 }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <OriginalLetter letter={application.original_submitted_letter} />
-      {!withdrawn && <HrAiSummary applicationId={application.id} />}
+    <>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <OriginalLetter letter={application.original_submitted_letter} />
+        {!withdrawn && <HrAiSummary applicationId={application.id} />}
+      </div>
       <CurrentLetter letter={application.cover_letter} />
-    </div>
+    </>
   );
 }
 
