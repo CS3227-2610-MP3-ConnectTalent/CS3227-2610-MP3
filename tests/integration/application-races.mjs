@@ -96,16 +96,23 @@ async function waitForSleep(process, appName) {
   );
 }
 
-async function assertLockWait(appName) {
+async function assertLockWait(appName, transaction) {
   const deadline = Date.now() + 4_000;
   while (Date.now() < deadline) {
     const result = await runSql(
       `select count(*) from pg_stat_activity where application_name = '${appName}' and wait_event_type = 'Lock'`,
     );
     if (result.output.trim() === "1") return;
+    if (transaction.finished) {
+      throw new Error(
+        `Transaction ${appName} exited before reaching a database lock wait (exit ${transaction.exitCode}): ${transaction.errors.trim()} ${transaction.output.trim()}`,
+      );
+    }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  throw new Error(`${appName} never reached a database lock wait`);
+  throw new Error(
+    `Transaction ${appName} timed out before reaching a database lock wait: ${transaction.errors.trim()} ${transaction.output.trim()}`,
+  );
 }
 
 function applicantSql(statement) {
@@ -127,12 +134,14 @@ function hrSql(statement) {
 }
 
 const insertFixtures = `
+  begin;
   insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at)
     values ('${userId}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '${email}', '', now()),
       ('${hrId}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'race-hr-${hrId}@example.test', '', now());
   update public.profiles set role = 'hr' where user_id = '${hrId}';
   insert into public.jobs (id, title, team, category, description, requirements, status, published_at)
-    values ${jobs.map((id, index) => `('${id}', 'Race job ${index + 1}', 'Engineering', 'engineering', 'Synthetic description', 'Synthetic requirements', 'published', now())`).join(",\n")};`;
+    values ${jobs.map((id, index) => `('${id}', 'Race job ${index + 1}', 'Engineering', 'engineering', 'Synthetic description', 'Synthetic requirements', 'published', now())`).join(",\n")};
+  commit;`;
 const cleanup = `
   delete from public.applications where job_id in (${jobs.map((id) => `'${id}'`).join(",")});
   delete from public.jobs where id in (${jobs.map((id) => `'${id}'`).join(",")});
@@ -165,7 +174,7 @@ try {
     ),
     duplicateAppName,
   );
-  await assertLockWait(duplicateAppName);
+  await assertLockWait(duplicateAppName, duplicate);
   const firstResult = await first.done;
   const duplicateResult = await duplicate.done;
   if (
@@ -197,7 +206,7 @@ try {
     ),
     lateAppName,
   );
-  await assertLockWait(lateAppName);
+  await assertLockWait(lateAppName, tooLate);
   const closingResult = await closing.done;
   const tooLateResult = await tooLate.done;
   if (
@@ -229,7 +238,7 @@ try {
     hrSql(`select public.close_hr_job('${jobs[2]}')`),
     closeAppName,
   );
-  await assertLockWait(closeAppName);
+  await assertLockWait(closeAppName, closeAfter);
   const submitResult = await beforeClose.done;
   const closeAfterResult = await closeAfter.done;
   if (submitResult.code !== 0 || closeAfterResult.code !== 0) {
@@ -261,7 +270,7 @@ try {
     ),
     staleAppName,
   );
-  await assertLockWait(staleAppName);
+  await assertLockWait(staleAppName, stale);
   const savingResult = await saving.done;
   const staleResult = await stale.done;
   if (
