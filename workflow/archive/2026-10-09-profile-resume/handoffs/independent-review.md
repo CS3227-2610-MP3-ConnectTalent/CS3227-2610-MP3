@@ -1,0 +1,11 @@
+# Independent review: #44
+
+Actual execution: /root/final_diff_review, separate read-only reviewer through followup_task. No implementation/test authorship; model identifier not recorded. Reviewed worktree diff against ee79065, approved packet, source/SQL and root's actual check reports. Root wrote this handoff from reviewer returns; applying skills alone is not claimed as a run.
+
+Initial medium finding: cancellation could delete an absent in-flight upload path and mark its metadata deleted before the upload finished, leaving later bytes outside cleanup. Primary reproduced with a deterministic deferred-upload fault test; retained deleting tombstones now remain eligible for exact-key cleanup after late upload completion. Test failed before fix and passed afterward. Operational limit: no scheduled sweeper; manual/next owner mutation recovery and retained operation monitoring remain necessary.
+
+Initial medium retry evidence concern: each HTTP request generated a fresh operation ID, so only in-process finalization retries reconciled. Primary reproduced separate-request re-upload with a focused fault test; client now retains per-selected-file UUID, route validates it, service matches actor/hash/filename/size and SQL validates its active application reference. Expanded real Storage browser test repeated an exact operation with stale revision and observed200without replacing frozen data. Ready operation with changed bytes is rejected. No resurrection after removal/cancellation.
+
+Reviewer also requested accurate lost-response feedback; primary replaced deterministic “previous attachment retained” claim with reload-to-check-which-file-saved guidance. Minor environment comment claiming privileged key was only for AI metadata corrected to include authorized résumé staging/cleanup.
+
+Independent recheck found both lifecycle concerns addressed in source and no confirmed authorization/privacy bypass. Reviewer ran git diff --check (passed with line-ending warnings); did not independently rerun runtime/database suites. Root's139units,253DBchecks, four lock-wait races and browser checks are implementer evidence. Hosted validation, full assistive-technology audit and student acceptance remain pending. Review does not authorize acceptance, commit/push/PR or release.

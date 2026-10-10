@@ -1,5 +1,13 @@
 # User Guide
 
+## Profile and résumé — local #44 branch
+
+This feature is implemented locally; accepted locally with recorded limits; hosted deployment/migration remains pending. Applicant navigation includes **My profile**. Save optional name, phone, HTTP(S) portfolio, education and work experience there; verified email is read-only. Education/work experience each allow up to2,000characters. These values prefill only a new application without a saved draft. Editing your profile never changes an existing draft or submitted application. HR cannot browse profiles.
+
+Save an application draft, then choose **Choose PDF résumé** and **Upload résumé**. Attachment is optional, PDF only and at most1MiB (1,048,576bytes). Encrypted or invalid PDFs are rejected. You can replace/remove the résumé before submission while the job is open. An invalid replacement preserves the existing attached file. Uploaded files are private and not sent to AI. **Download résumé** downloads the file; it is not displayed inline.
+
+Explicit submission locks the letter, details, education/work experience and attachment. HR can then see the submitted background and download the résumé; HR cannot read draft files. Existing permitted downloads remain available after job closure. **Cancel interrupted upload** clears a pending operation and retries its tracked cleanup; it does not remove an already finalized résumé. If a network response is lost, reload to check which attachment was saved before trying again. Structural PDF validation is not malware scanning.
+
 Status: job browsing, Applicant applications, HR review/job management, password recovery and AI assistance are merged into `develop`. Consistent account navigation and logout passed local checks and independent review on `fix/36-role-navigation-logout`; Paul accepted with recorded limits on 2026-10-09; ACC-005 is synced to canonical v1.2 and the packet is archived. This branch is not a deployed release.
 
 ## Access

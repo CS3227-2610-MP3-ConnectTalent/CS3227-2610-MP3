@@ -1,10 +1,10 @@
 # Security and privacy
 
-Baseline: ProductSpec v1.3, 9 October 2026 (SEC-005/SEC-007 contact privacy clarified). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v1.4, 9 October 2026 (SEC-009 profile and attachment privacy added). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
 
 ## SEC-001: Access boundaries
 
-Access MUST follow these boundaries:
+Access MUST follow these boundaries. Additional profile, background-snapshot and attachment permissions have their canonical home in SEC-009 below:
 
 | Data/action | Applicant access | HR access |
 | --- | --- | --- |
@@ -68,3 +68,20 @@ Contact privacy scenario (form39-AC-08): Given stored contact fields, submission
 Development and security tests MUST use synthetic applicant records.
 
 Scenario: Given applicant fixtures used for development or security testing, when reviewed, then they are synthetic records.
+
+## SEC-009: Profile and attachment privacy
+
+Server authorization and database/Storage RLS MUST enforce:
+
+| Data/action | Verified Applicant | Authorized verified HR | Anonymous |
+| --- | --- | --- | --- |
+| Mutable Applicant profile | Own read/write only | None | None |
+| Application background snapshots | Own read; draft write while published | Submitted read only | None |
+| Finalized résumé bytes/metadata | Own draft/submitted read; draft mutation while published via validated server workflow only | Submitted read only, including after closure | None |
+| Upload reservation/staged objects | Own operation state through authorized server workflow; no arbitrary object access | None | None |
+
+The bucket MUST be private and MUST NOT expose public object URLs. Browser credentials MUST NOT allow direct object upload/overwrite/delete bypassing server validation or frozen state. Download MUST authenticate and authorize the current user for the selected finalized attachment on every request, then return an attachment response with private/no-store caching; guessed paths or foreign/draft-HR access MUST reveal no bytes. Server credential use for staging MUST remain server-only, narrowly scoped to authorized generated object paths and never replace user-scoped private-record read authorization. Referenced submitted files MUST be protected from deletion/overwrite in permitted client/service interfaces. A privileged project administrator remains outside the normal product role boundary.
+
+Paths MUST use generated identifiers without email or original filenames. Filenames MUST be bounded/escaped and never trusted as paths or raw HTTP headers. Files MUST NOT be rendered inline, executed, parsed for autofill or sent to AI. New profile values, education/work experience, filename, bytes and file-access tokens MUST NOT be logged or included in AI requests; existing SEC-005/007 restrictions remain. Metadata-only operational logs MAY identify actor, application, generated operation ID, outcome and cleanup state. Stored profile/application fields remain private product data, not logs. Tests MUST use synthetic PDFs and profiles under SEC-008.
+
+Scenario: Given another Applicant, guest or HR requesting a draft file/profile, direct API/Storage/download access returns no private data. Direct browser object writes and stale finalization after submit/closure fail unchanged. Authorized submitted downloads remain available after closure; responses force attachment/no-store and new profile/file content stays out of AI inputs/logs.

@@ -53,7 +53,7 @@ describe("application action retry after an uncertain response", () => {
 
   it("re-reads only the owner and selected job, then shows the existing submission", async () => {
     maybeSingle.mockResolvedValue({ data: {
-      id: applicationId, submission_state: "submitted", cover_letter: "First letter", full_name: null, phone: null, portfolio_url: null, revision: 2,
+      id: applicationId, education: null, work_experience: null, submission_state: "submitted", cover_letter: "First letter", full_name: null, phone: null, portfolio_url: null, revision: 2,
     }, error: null });
 
     await expect(updateApplication(initial, submission()))
@@ -86,9 +86,9 @@ describe("application field boundary and error retention", () => {
     rpc.mockResolvedValue({ data: applicationId, error: null });
     const form = submission(); form.set("submitted_email", "forged@example.test"); form.set("email", "forged@example.test");
     await expect(updateApplication(initial, form)).rejects.toThrow(`REDIRECT:/applications/${applicationId}`);
-    expect(rpc).toHaveBeenCalledWith("submit_application_details_v2", {
+    expect(rpc).toHaveBeenCalledWith("submit_application_details_v3", {
       p_job_id: jobId, p_cover_letter: "Retried letter", p_full_name: "Synthetic Applicant",
-      p_phone: null, p_portfolio_url: null, p_expected_revision: 1,
+      p_phone: null, p_portfolio_url: null, p_education: null, p_work_experience: null, p_expected_revision: 1,
     });
   });
   it("retains every entered field without a database call on validation errors", async () => {

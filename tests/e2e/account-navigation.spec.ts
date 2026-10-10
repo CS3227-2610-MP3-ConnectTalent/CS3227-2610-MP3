@@ -88,7 +88,7 @@ test("guest, Applicant and HR navigation stays distinct and logout clears browse
       }
       await page.goto(`/jobs/${jobId}`);
       await nav.getByRole("button", { name: "Sign out", exact: true }).click();
-      await expect(page).toHaveURL(/localhost:3000\/$/);
+      await expect(page).toHaveURL(url => url.pathname === "/");
       await expect(nav.getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
       await expect(nav.getByRole("button", { name: "Sign out", exact: true })).toHaveCount(0);
       await page.goto(user.role === "hr" ? "/hr/jobs" : "/applications");
