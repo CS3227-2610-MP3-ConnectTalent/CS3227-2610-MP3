@@ -1,5 +1,7 @@
 # Active change packets
 
+No active change packets.
+
 [#44 private profiles and PDF résumés](../archive/2026-10-09-profile-resume/record.md) was separately accepted with recorded limits on2026-10-09 and completely archived after canonical v1.4 sync. Work remains uncommitted on feat/44-profile-resume; hosted rollout and the documented validation/cleanup limitations remain open.
 
 [#40 signup notice/navigation integration](../archive/2026-10-09-signup-notice-navigation/record.md) was separately accepted with recorded limits on 2026-10-09 and completely archived. It combines accepted ACC-005 navigation with APP-005 contact requirements under v1.3. No commit/push/PR or hosted validation occurred for this integration.

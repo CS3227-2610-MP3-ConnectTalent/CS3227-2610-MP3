@@ -44,7 +44,7 @@ and demonstrations.
 ### Requirements
 
 - Node.js 24 LTS. Next.js 16's minimum is 20.9, but Node 20 is end of life.
-- pnpm 12.8.1, as declared in `package.json`. Corepack selects the pinned version; a directly installed matching pnpm also works.
+- pnpm 12.8.1, as declared in `package.json`; install it directly with `npm install --global pnpm@12.8.1`.
 - Docker Desktop or a compatible container runtime for local Supabase.
 - Supabase/SoCLaaS access only for work that uses those services. Do not put private
   applicant data or credentials into prompts or test fixtures.
@@ -52,11 +52,11 @@ and demonstrations.
 ### Install and run
 
 ```sh
-corepack pnpm install
-corepack pnpm db:start
+pnpm install
+pnpm db:start
 ```
 
-Copy `.env.example` to `.env.local`. Run `corepack pnpm exec supabase status` to
+Copy `.env.example` to `.env.local`. Run `pnpm exec supabase status` to
 retrieve the local URL and publishable key; put those values in
 `NEXT_PUBLIC_SUPABASE_URL` and
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. `SOCLAAS_BASE_URL`, `SOCLAAS_API_KEY`, and
@@ -67,23 +67,23 @@ real `.env` file, token, or credential.
 Start the Next.js development server with:
 
 ```sh
-corepack pnpm dev
+pnpm dev
 ```
 
 The local Supabase database uses synthetic seed data. Apply pending migrations to an
-existing local stack with `corepack pnpm exec supabase migration up --local`.
+existing local stack with `pnpm exec supabase migration up --local`.
 To create a local-only synthetic HR login, add `TEST_SUPABASE_SERVICE_ROLE_KEY`
 from the local `supabase status` output and a chosen `LOCAL_HR_SEED_PASSWORD`
-(8–72 characters) to ignored `.env.local`, then run `corepack pnpm seed:local-hr`.
+(8–72 characters) to ignored `.env.local`, then run `pnpm seed:local-hr`.
 Sign in as `local-hr@example.test` with that password. The command refuses hosted
 Supabase URLs, checks the account has no Applicant applications, and does not
 auto-login or create a shared grader account. Never commit or send the key/password.
-`corepack pnpm db:reset`
+`pnpm db:reset`
 rebuilds the local database and can discard local data; use it only when that reset
 is intended. Stop the local Supabase stack when finished:
 
 ```sh
-corepack pnpm db:stop
+pnpm db:stop
 ```
 
 See the root [README](README.md) for current product status and deployment notes.
@@ -164,19 +164,19 @@ visible; a command that did not run is not a pass.
 Common checks available in `package.json`:
 
 ```sh
-corepack pnpm lint
-corepack pnpm typecheck
-corepack pnpm test:unit
-corepack pnpm build
+pnpm lint
+pnpm typecheck
+pnpm test:unit
+pnpm build
 ```
 
 Browser and database checks use local services and synthetic data:
 
 ```sh
-corepack pnpm db:start
-corepack pnpm test:e2e
-corepack pnpm test:db
-corepack pnpm db:stop
+pnpm db:start
+pnpm test:e2e
+pnpm test:db
+pnpm db:stop
 ```
 
 `test:e2e` uses Playwright and a local Next.js server. `test:db` uses Supabase's
