@@ -2,7 +2,7 @@
 
 - Change/issues: 2026-10-10-ci-test-matrix; [#55](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/55)
 - Plan/record: `plan.md`; `record.md`
-- Status/owner: in progress; Johnwz123
+- Status/owner: archived with post-submission review follow-up; Johnwz123
 
 ## Before implementation
 
@@ -20,4 +20,10 @@
 - [x] T05 — Separate reviewer execution reviews final diff, acceptance evidence, secrets/permissions and maintainability; implementer resolves/rechecks findings. Depends on: T01-T04. Evidence: `handoffs/independent-review.md`.
 - [x] T06 — Johnwz123 records post-review acceptance/rejection/conditions independently from implementation approval. Depends on: T05. Evidence: `record.md`; accepted 2026-10-10 with no additional conditions stated.
 - [x] T07 — After acceptance, record no product sync, archive full packet, update navigation, add dated session summary and prepare final record. Depends on: T06. Evidence: archive path and `logs/` link in `record.md`.
-- [ ] T08 — Open issue-linked PR as the final contributor action only after accepted closeout is complete. Depends on: T07. Evidence: PR URL and `Closes #55` in `record.md`.
+- [x] T08 — Open issue-linked PR as the final contributor action only after accepted closeout is complete. Depends on: T07. Evidence: [PR #56](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/56), with `Closes #55` in its description.
+
+## Post-submission follow-up
+
+- The nine original PR #56 review threads were resolved after the independent review of `8e3361a` found no actionable P1/P2 findings and CI/Supabase CI passed on that revision.
+- Comment 4238453086 identified possible local Auth rate limiting in the full browser suite. Commit `c85aefb` increases only `auth.rate_limit.sign_in_sign_ups` in local Supabase config from 30 to 200. The separate review found no blocker, app CI run `38071140832` and Supabase CI run `38071141002` passed on `c85aefb`, and the thread was then resolved.
+- User instruction on 2026-10-11 authorizes fixing review comments and resolving them after verification; merge/release remain separate decisions.
