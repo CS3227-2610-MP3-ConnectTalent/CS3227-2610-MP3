@@ -36,9 +36,7 @@ jobs:
           name: vitest-reports
           path: |
             test-results/vitest-junit.xml
-            coverage/coverage-summary.json
-            coverage/lcov.info
-            coverage/index.html
+            coverage/
           if-no-files-found: ignore
           retention-days: 14
       - name: Build

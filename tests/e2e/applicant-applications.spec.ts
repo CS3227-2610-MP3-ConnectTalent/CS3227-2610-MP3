@@ -38,6 +38,17 @@ test("verified Applicant saves and submits one frozen application", async ({ pag
   const email = `applicant-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`;
   const password = "CorrectHorseBattery9!";
 
+  async function completeRequiredProfile(fullName: string) {
+    await expect(page).toHaveURL(/\/profile$/);
+    await page.getByLabel("Full name", { exact: true }).fill(fullName);
+    await page.getByLabel("Country code", { exact: true }).selectOption("SG");
+    await page.getByLabel("Phone number", { exact: true }).fill("91234567");
+    await page.getByRole("button", { name: "Save profile", exact: true }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await page.goto("/applications");
+    await expect(page.getByRole("heading", { name: "My applications" })).toBeVisible();
+  }
+
   await page.goto("/auth/sign-up");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
@@ -67,7 +78,7 @@ test("verified Applicant saves and submits one frozen application", async ({ pag
   const confirmationUrl = text.match(/https?:\/\/[^\s<>"']+\/auth\/v1\/verify\?[^\s<>"']+/)?.[0];
   expect(confirmationUrl).toBeTruthy();
   await page.goto(confirmationUrl!);
-  await expect(page.getByRole("heading", { name: "My applications" })).toBeVisible();
+  await completeRequiredProfile("Synthetic Applicant");
 
   await page.goto("/jobs/00000000-0000-4000-8000-000000000101");
   await page.getByRole("link", { name: "Apply for this role" }).click();
@@ -133,7 +144,7 @@ test("verified Applicant saves and submits one frozen application", async ({ pag
   const secondConfirmationUrl = secondText.match(/https?:\/\/[^\s<>"']+\/auth\/v1\/verify\?[^\s<>"']+/)?.[0];
   expect(secondConfirmationUrl).toBeTruthy();
   await page.goto(secondConfirmationUrl!);
-  await expect(page.getByRole("heading", { name: "My applications" })).toBeVisible();
+  await completeRequiredProfile("Synthetic Applicant Two");
   const deniedResponse = await page.goto(ownApplicationUrl!);
   expect(deniedResponse?.status()).toBe(404);
   await expect(page.getByText("Original submitted letter")).toHaveCount(0);

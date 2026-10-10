@@ -37,6 +37,17 @@ test("HR reviews only submitted applications and Applicant sees status without p
   expect(applicantResult.error).toBeNull();
   expect(hrResult.error).toBeNull();
   expect(otherResult.error).toBeNull();
+  for (const [userId, fullName] of [
+    [applicantResult.data.user!.id, "Synthetic HR review Applicant"],
+    [otherResult.data.user!.id, "Synthetic other Applicant"],
+  ] as const) {
+    const { error } = await admin.from("applicant_profiles").upsert({
+      user_id: userId,
+      full_name: fullName,
+      phone: "+6591234567",
+    });
+    expect(error).toBeNull();
+  }
   const { error: promotionError } = await admin.from("profiles").update({ role: "hr" }).eq("user_id", hrResult.data.user!.id);
   expect(promotionError).toBeNull();
 

@@ -37,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           environment_file="$(mktemp)"
-          supabase status --env --output-format text > "$environment_file"
+          supabase status -o env > "$environment_file"
           # shellcheck disable=SC1090
           source "$environment_file"
           rm "$environment_file"
@@ -78,7 +78,7 @@ jobs:
         run: |
           set -euo pipefail
           environment_file="$(mktemp)"
-          supabase status --env --output-format text > "$environment_file"
+          supabase status -o env > "$environment_file"
           # shellcheck disable=SC1090
           source "$environment_file"
           rm "$environment_file"
@@ -120,7 +120,7 @@ jobs:
         run: |
           set -euo pipefail
           environment_file="$(mktemp)"
-          supabase status --env --output-format text > "$environment_file"
+          supabase status -o env > "$environment_file"
           # shellcheck disable=SC1090
           source "$environment_file"
           rm "$environment_file"
