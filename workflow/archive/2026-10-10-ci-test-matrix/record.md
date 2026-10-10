@@ -1,6 +1,6 @@
 # Feature record: CI test matrix
 
-Status: in progress
+Status: accepted and archived; PR pending at closeout
 
 Owner: Johnwz123
 
@@ -12,13 +12,13 @@ Date: 2026-10-10
 
 - Change ID/classification: 2026-10-10-ci-test-matrix; process/tooling only
 - GitHub issues: [#55](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/55)
-- Branch/commits/PR: `feat/55-ci-test-matrix`; baseline `09b1213`; implementation commit/PR pending
+- Branch/commits/PR: `feat/55-ci-test-matrix`; baseline `09b1213`; implementation commit `96245bd`; archive/summary closeout commit is on the branch; PR was pending when this record was finalized
 - Proposal: `proposal.md`
 - Design: `design.md`
 - Deltas: none; no Applicant/HR behavior changes
 - Implementation plan/tasks: `plan.md`; `tasks.md`
 - Baseline: `origin/develop` `09b1213` on 2026-10-10
-- Archive path: pending separate post-review student acceptance and closeout
+- Archive path: `workflow/archive/2026-10-10-ci-test-matrix/`
 
 ## Approval checklist
 
@@ -27,7 +27,7 @@ Date: 2026-10-10
 - [x] Implementation and relevant checks complete; record exact commands/results below.
 - [x] Independent review complete; findings and rechecks recorded.
 - [x] Student post-review acceptance separately recorded: Johnwz123 accepted the reviewed implementation on 2026-10-10 in chat with “Looks good, I accept.” The same response authorized sync/archive and PR creation.
-- [ ] Contributor guides and dated session summary handled at closeout.
+- [x] Contributor guides and dated session summary handled at closeout; see [closeout summary](../../../logs/2026-10-10-ci-test-matrix-closeout.md).
 - [x] No product delta: this process/tooling change alters no product behavior or canonical requirement, so product-spec sync is N/A.
 
 ## Requirement and acceptance criteria
@@ -48,7 +48,7 @@ Independent read-only `test_engineer` review occurred in two passes and is recor
 
 ## Implementation and tests
 
-Changed files: `.github/workflows/ci.yml`, `.github/workflows/supabase-checks.yml`, `CONTRIBUTING.md`, `README.md`, `docs/DeveloperGuide.md`, `package.json`, `playwright.config.ts`, `pnpm-lock.yaml`, `vitest.config.ts`, `scripts/ci/write-vitest-summary.py`, `workflow/changes/README.md`, this packet, and `workflow/changes/2026-10-10-ci-test-matrix/handoffs/independent-review.md`.
+Changed files: `.github/workflows/ci.yml`, `.github/workflows/supabase-checks.yml`, `CONTRIBUTING.md`, `README.md`, `docs/DeveloperGuide.md`, `package.json`, `playwright.config.ts`, `pnpm-lock.yaml`, `vitest.config.ts`, `scripts/ci/write-vitest-summary.py`, `workflow/changes/README.md`, `workflow/archive/README.md`, the archived packet, and `logs/2026-10-10-ci-test-matrix-closeout.md`.
 
 Commands and results: local frozen-lockfile install, unit coverage, CI-mode JUnit/coverage summary, typecheck, lint, critical Playwright listing, YAML parsing/static matrix assertions, and `git diff --check` passed as detailed below. Application behavior changes are N/A; this changes CI/test tooling. Local Supabase/DB/race/browser runtime checks and hosted Actions remain pending.
 
@@ -71,19 +71,19 @@ Known limitations: no local Supabase/Docker execution was possible because Docke
 
 - Reviewer findings and fixes: first independent pass reported (1) P1 wrong public key variable and (2) P2 omitted scheduled/manual DB/race trigger documentation. Both were fixed and confirmed by the second independent read-only pass; no additional P1/P2 findings. Details: `handoffs/independent-review.md`.
 - Human decision and date: implementation scope approved before work; Johnwz123 separately accepted the reviewed implementation on 2026-10-10 with “Looks good, I accept.” The accepted decision authorizes sync/archive and PR creation; limitations are recorded above and in the review handoff.
-- Guide/reflection/log updates: contributor guides updated; dated session summary is pending post-review acceptance/closeout; personal reflections excluded and not to be opened.
+- Guide/reflection/log updates: README, CONTRIBUTING and Developer Guide updated; dated summary completed and linked; personal reflections excluded and not opened.
 
 ## Session evidence index
 
 | Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
-| 2026-10-10 / current session | Pending closeout log | CI review, issue #55, proposal/design/plan, implementation and two-pass independent review. | Implementation/review evidence recorded; student acceptance, sync/archive, dated summary and PR pending. |
+| 2026-10-10 / current session | [CI test matrix closeout](../../../logs/2026-10-10-ci-test-matrix-closeout.md) | CI review, issue #55, proposal/design/plan, implementation, two-pass independent review, acceptance, no-product-delta sync and archive. | Acceptance and closeout recorded; local Docker suites/build final result and hosted CI remain unverified; PR submission was the next action. |
 
 ## Canonical sync and archive
 
 - Accepted delta/human decision: no product delta; Johnwz123 accepted the reviewed CI/tooling implementation on 2026-10-10.
 - Canonical sync commit/files/version/date: N/A; no product specs or requirements changed.
-- Sync verification: compare final diff with `origin/develop`; confirm no `workflow/specs/` or `workflow/ProductSpec.md` changes.
-- Archive decision/date/path: authorized by the accepted decision; archive at `workflow/archive/2026-10-10-ci-test-matrix/` during closeout.
-- Navigation repairs after moving: pending archive decision.
-- Outstanding work/limitations: student post-review acceptance, closeout summary, sync/archive, hosted Actions evidence, administrator branch-protection configuration, and PR remain separate gates.
+- Sync verification: `git fetch origin develop:refs/remotes/origin/develop` succeeded; `origin/develop` remained at `09b1213f2f8105f9faf2e7f3a8efc534fb9c2902`, equal to the branch's pre-implementation base. No `workflow/specs/` or `workflow/ProductSpec.md` files changed. Product sync is N/A.
+- Archive decision/date/path: authorized by Johnwz123's acceptance on 2026-10-10; complete packet archived at `workflow/archive/2026-10-10-ci-test-matrix/` before PR submission.
+- Navigation repairs after moving: active index now reports no pending implementation packets and links to the archived record; archive index includes issue #55 and its handoff/summary.
+- Outstanding work/limitations: PR submission is authorized and pending at record time; hosted Actions results, external branch-protection configuration, local Supabase execution and build final exit remain unverified.
