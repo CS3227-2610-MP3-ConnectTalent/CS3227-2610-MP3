@@ -2,10 +2,15 @@
 import { revalidatePath } from "next/cache";
 import { requireApplicant } from "@/lib/auth";
 import { parseProfile } from "@/lib/profile-input";
+import { phoneFromForm } from "@/lib/phone";
+import { isProfileComplete } from "@/lib/profile-readiness";
+import { redirect } from "next/navigation";
 export type ProfileState = { values: Record<string, string>; errors: Record<string, string | undefined>; message?: string };
 export async function saveProfile(_state: ProfileState, form: FormData): Promise<ProfileState> {
-  const { client } = await requireApplicant();
+  const { client, user } = await requireApplicant({ allowIncomplete: true });
+  const { data: before } = await client.from("applicant_profiles").select("full_name,phone").eq("user_id", user.id).maybeSingle();
   const values = Object.fromEntries(["full_name", "phone", "portfolio_url", "education", "work_experience"].map(key => [key, typeof form.get(key) === "string" ? form.get(key) as string : ""]));
+  values.phone = phoneFromForm(form);
   const parsed = parseProfile(values);
   if (!parsed.success) return { values, errors: parsed.errors, message: "Check the highlighted fields. Your profile has not been saved." };
   try {
@@ -13,5 +18,7 @@ export async function saveProfile(_state: ProfileState, form: FormData): Promise
     if (error) return { values, errors: {}, message: "We could not save your profile. Try again later." };
   } catch { return { values, errors: {}, message: "We could not save your profile. Try again later." }; }
   revalidatePath("/profile");
-  return { values, errors: {}, message: "Profile saved. Existing applications are unchanged." };
+  revalidatePath("/", "layout");
+  if (!isProfileComplete(before, user.email)) redirect("/");
+  return { values, errors: {}, message: "Profile saved." };
 }

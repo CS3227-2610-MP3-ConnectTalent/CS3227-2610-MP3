@@ -102,6 +102,11 @@ export async function POST(request: Request) {
           : json({ error: "AI summaries are temporarily unavailable." }, 503);
       }
 
+      const stillActive = await getSubmittedApplication(context.client, application.id);
+      if (!stillActive) {
+        await finalizeAiInvocation(context.user.id, reservation.invocationId, "failure");
+        return json({ error: "This submitted application is unavailable." }, 404);
+      }
       const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "success");
       return finalized
         ? json(response, 200)

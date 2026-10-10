@@ -89,7 +89,12 @@ describe("Supabase Auth redirect origins", () => {
     vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "careers.example.com");
     vi.stubEnv("VERCEL_URL", "preview-123.vercel.app");
     const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
-    mocks.createSupabaseServerClient.mockResolvedValue({ auth: { exchangeCodeForSession } });
+    mocks.createSupabaseServerClient.mockResolvedValue({
+      auth: { exchangeCodeForSession, getUser: async () => ({ data: { user: { id: "synthetic", email: "synthetic@example.test", email_confirmed_at: "2026-10-10" } } }) },
+      from: (table: string) => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({
+        data: table === "profiles" ? { role: "applicant" } : null, error: null,
+      }) }) }) }),
+    });
     const request = {
       nextUrl: {
         searchParams: new URLSearchParams("code=confirmation-code"),
@@ -100,7 +105,7 @@ describe("Supabase Auth redirect origins", () => {
     const response = await authCallback(request);
 
     expect(exchangeCodeForSession).toHaveBeenCalledWith("confirmation-code");
-    expect(response.headers.get("location")).toBe("https://careers.example.com/applications");
+    expect(response.headers.get("location")).toBe("https://careers.example.com/profile");
   });
 
   it("uses the configured site origin for failed confirmation redirects too", async () => {

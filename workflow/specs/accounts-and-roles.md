@@ -1,6 +1,6 @@
 # Accounts and roles
 
-Baseline: ProductSpec v1.3, 9 October 2026 (accepted ACC-005 navigation integrated; ACC-001–004 retained).
+Baseline: ProductSpec v1.7, 10 October 2026 (accepted #52 required profile onboarding; earlier role/recovery rules retained).
 
 ## ACC-001: Public Applicant signup
 
@@ -13,6 +13,8 @@ Denial scenario: Given different password and confirmation values, when signup i
 Scenario: Given an entered email and different password values, when signup is attempted, then the user sees the mismatch error, the email remains on the form, and no account is created, with or without JavaScript.
 
 Scenario: Given a password field, when its visibility control is activated, then that field switches between obscured and visible text without submitting the form.
+
+After verification/sign-in, an Applicant with an incomplete required profile MUST enter profile completion under ACC-006 before other signed-in product access. Email MUST remain read-only from verified Auth. This uses a restricted authenticated session for secure profile saving, not an unauthenticated profile write.
 
 ## ACC-002: Controlled HR assignment
 
@@ -45,3 +47,13 @@ Public job browsing/detail pages and protected Applicant/HR pages MUST provide c
 - Given HR browsing a published job, when job detail renders, then no Applicant apply control appears (nav36-AC-03).
 - Given a signed-in user, when sign out succeeds, then guest navigation appears and protected routes require login; when the provider reports failure, then generic retry feedback appears without a success claim (nav36-AC-04).
 - Given an unverified account, missing/unknown role, failed role query or forged user metadata, when navigation renders, then no unsupported role controls appear (nav36-AC-05).
+
+ACC-006 qualifies Applicant navigation during onboarding: incomplete Applicants MUST see My profile and Sign out only; Careers MUST lead to My profile and My applications MUST remain unavailable. Complete Applicants MUST have My profile and My applications alongside their role label and Sign out. HR and guest navigation are unchanged.
+
+## ACC-006: Required Applicant profile onboarding
+
+A verified Applicant MUST complete full name and phone, with required read-only verified Auth email, before accessing other signed-in product pages/actions. Verification/sign-in MUST send incomplete Applicants directly to My profile. Listings/filter/detail/apply, My applications and application details/download/withdrawal MUST enforce the same readiness gate on direct server requests; application writes and new application-file allocation MUST independently require readiness in the database. Applicant AI drafting MUST check readiness before quota/provider calls, without sending profile fields to AI. Readiness MUST derive from trusted verified identity and validated persisted name/phone, never user-editable metadata. Failed lookups MUST NOT grant completion.
+
+My profile, owned optional profile-file actions, account verification/recovery and Sign out MUST remain available during onboarding. Completion restores retained-record access without modifying saved drafts or frozen submissions. Existing incomplete Applicants MUST complete the same fields; no fabricated backfill. First successful completion MUST lead to a fixed internal open-roles destination. HR MUST NOT browse Applicant profiles and MUST NOT be subject to Applicant readiness. Guests retain public published-job browsing; onboarding is not confidentiality for publicly readable jobs. Field format/snapshot rules are owned by APP-005/006; existing SEC privacy and role boundaries remain.
+
+Scenarios: Given verified signup/sign-in with absent or malformed required profile data, My profile is the only product destination and direct restricted requests are blocked. Given a valid saved name/phone and verified email, browsing/applications unlock and new applications prefill those details without AI. Given forged metadata or a failed lookup, readiness remains denied. Profile résumé upload alone does not complete onboarding. Guest/HR/recovery/sign-out flows remain usable. After completing a current profile, the owner can access and withdraw a legacy submission without rewriting its historical phone or other frozen fields.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseApplicationDetails } from "../../src/lib/application-details";
-const valid = { full_name: "Synthetic Applicant", phone: null, portfolio_url: null };
+const valid = { full_name: "Synthetic Applicant", phone: "+6591234567", portfolio_url: null };
 describe("application identity and contact validation", () => {
   it("allows incomplete drafts but requires a name when submitting", () => {
     expect(parseApplicationDetails({ ...valid, full_name: "" }, "draft").success).toBe(true);
@@ -8,7 +8,7 @@ describe("application identity and contact validation", () => {
     expect(parseApplicationDetails({ ...valid, full_name: "\u00a0\u2003" }, "submit").success).toBe(false);
   });
   it("normalizes whitespace and absent optional values", () => {
-    expect(parseApplicationDetails({ full_name: "  Synthetic Applicant  ", phone: " ", portfolio_url: " " }, "submit").data)
+    expect(parseApplicationDetails({ full_name: "  Synthetic Applicant  ", phone: "+6591234567", portfolio_url: " " }, "submit").data)
       .toEqual(valid);
   });
   it.each([
@@ -26,7 +26,7 @@ describe("application identity and contact validation", () => {
   it("accepts a safe empty port consistently with the database", () => {
     expect(parseApplicationDetails({ ...valid, portfolio_url: "https://example.test:" }, "submit").success).toBe(true);
   });
-  it("allows international phone text and bounded HTTP(S) URLs", () => {
-    expect(parseApplicationDetails({ ...valid, phone: "+65 1234-5678 ext 9", portfolio_url: "https://example.test/projects?a=1" }, "submit").success).toBe(true);
+  it("allows normalized international phone and bounded HTTP(S) URLs", () => {
+    expect(parseApplicationDetails({ ...valid, phone: "+6591234567", portfolio_url: "https://example.test/projects?a=1" }, "submit").success).toBe(true);
   });
 });

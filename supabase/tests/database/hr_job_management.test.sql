@@ -7,6 +7,8 @@ values
   ('20000000-0000-4000-8000-000000000a01', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'job8-applicant@example.test', '', now()),
   ('20000000-0000-4000-8000-000000000a02', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'job8-hr@example.test', '', now()),
   ('20000000-0000-4000-8000-000000000a03', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'job8-unverified@example.test', '', null);
+-- Completed synthetic profile fixtures for #52; no real-data backfill.
+insert into public.applicant_profiles(user_id,full_name,phone) values ('20000000-0000-4000-8000-000000000a01','Fixture Applicant','+6591234567'),('20000000-0000-4000-8000-000000000a02','Fixture Applicant','+6591234567'),('20000000-0000-4000-8000-000000000a03','Fixture Applicant','+6591234567') on conflict(user_id) do nothing;
 update public.profiles set role = 'hr' where user_id in
   ('20000000-0000-4000-8000-000000000a02', '20000000-0000-4000-8000-000000000a03');
 
@@ -54,7 +56,7 @@ select lives_ok($$select public.edit_hr_job_draft(current_setting('job8.draft_id
 select lives_ok($$select public.publish_hr_job(current_setting('job8.draft_id')::uuid)$$, 'HR explicitly publishes draft');
 select throws_ok($$select public.edit_hr_job_draft(current_setting('job8.draft_id')::uuid, 'Tampered', 'Platform', 'engineering', 'Changed', 'Changed')$$, 'P0001', 'Draft job not found', 'published content cannot be edited');
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a01', true);
-select lives_ok($$select public.submit_application_details_v2(current_setting('job8.draft_id')::uuid, 'Synthetic submitted letter','Synthetic Applicant',null,null, null)$$, 'Applicant can submit while job is published');
+select lives_ok($$select public.submit_application_details_v2(current_setting('job8.draft_id')::uuid, 'Synthetic submitted letter','Synthetic Applicant','+6591234567',null, null)$$, 'Applicant can submit while job is published');
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a02', true);
 select lives_ok($$select public.close_hr_job(current_setting('job8.draft_id')::uuid)$$, 'HR explicitly closes job');
 select throws_ok($$select public.publish_hr_job(current_setting('job8.draft_id')::uuid)$$, 'P0001', 'Draft job not found', 'closed job cannot be republished');
