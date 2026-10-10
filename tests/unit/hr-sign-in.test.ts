@@ -30,7 +30,7 @@ describe("role-aware sign-in", () => {
     await expect(signIn(credentials())).rejects.toThrow("REDIRECT:/hr/applications");
   });
 
-  it("keeps verified Applicants in their own area", async () => {
+  it("sends incomplete verified Applicants to profile completion", async () => {
     mocks.createSupabaseServerClient.mockResolvedValue({
       auth: {
         signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
@@ -38,6 +38,6 @@ describe("role-aware sign-in", () => {
       },
       from: vi.fn().mockReturnValue({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { role: "applicant" }, error: null }) }) }) }),
     });
-    await expect(signIn(credentials())).rejects.toThrow("REDIRECT:/applications");
+    await expect(signIn(credentials())).rejects.toThrow("REDIRECT:/profile");
   });
 });

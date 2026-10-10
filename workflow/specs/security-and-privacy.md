@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v1.4, 9 October 2026 (SEC-009 profile and attachment privacy added). This file is the canonical home for cross-cutting authorization, privacy and AI safeguards. Capability specs link here; their scenarios illustrate these rules without establishing a separate policy.
+Baseline: ProductSpec v1.8, 10 October 2026 (accepted #53 private profile file boundaries; prior security rules retained).
 
 ## SEC-001: Access boundaries
 
@@ -22,6 +22,8 @@ Creating jobs, editing job drafts, publishing and closing MUST be restricted to 
 Scenario: Given a submitted application, when its owner and authorized HR open it, then each sees their permitted fields; the owner sees current status but not notes/history.
 
 Denial scenario: Given anonymous access, another Applicant or an HR user requesting a saved draft, when the record is fetched by direct ID, then server checks and RLS return no protected data. Given an Applicant sending an HR write request, when authorization runs, then the operation is denied.
+
+APP-008 withdrawal is the only new Applicant lifecycle write: a verified owner MAY withdraw their submitted record, including after closure, via the controlled operation only. HR cannot withdraw. Existing submitted read/download and notes privacy boundaries MUST remain after withdrawal; subsequent HR note/status writes and summary requests MUST be denied. Neither withdrawal nor retry grants general row UPDATE/DELETE or public Storage access.
 
 ## SEC-002: Server and database enforcement
 
@@ -85,3 +87,9 @@ The bucket MUST be private and MUST NOT expose public object URLs. Browser crede
 Paths MUST use generated identifiers without email or original filenames. Filenames MUST be bounded/escaped and never trusted as paths or raw HTTP headers. Files MUST NOT be rendered inline, executed, parsed for autofill or sent to AI. New profile values, education/work experience, filename, bytes and file-access tokens MUST NOT be logged or included in AI requests; existing SEC-005/007 restrictions remain. Metadata-only operational logs MAY identify actor, application, generated operation ID, outcome and cleanup state. Stored profile/application fields remain private product data, not logs. Tests MUST use synthetic PDFs and profiles under SEC-008.
 
 Scenario: Given another Applicant, guest or HR requesting a draft file/profile, direct API/Storage/download access returns no private data. Direct browser object writes and stale finalization after submit/closure fail unchanged. Authorized submitted downloads remain available after closure; responses force attachment/no-store and new profile/file content stays out of AI inputs/logs.
+
+Finalized profile resume bytes/metadata MUST be readable/mutable only by their current verified Applicant owner through a validated server workflow; HR and anonymous/unverified/foreign users MUST have no access. Profile storage MUST be private with the same no-public-URL, generated-path, forced-download/no-store, byte-validation and no direct browser writes guarantees. Profile uploads MUST be permitted before completion of required text, but only after verified Auth/role checks; they MUST NOT change the user's role or mark onboarding complete. Pending profile objects MUST not be downloadable as finalized files. File operations MUST not implicitly persist unsaved profile/application fields.
+
+Explicit owner reuse MUST create an application-owned snapshot that is independently retained and subject to application RLS/closure/freeze/withdrawal rules. Later profile replacement/removal MUST NOT delete or overwrite an application snapshot. Copying MUST authorize the selected current owner source, protect or reconcile its version during transfer and prevent substitution by a foreign/stale operation. Cleanup MUST remain tracked and bounded to unreferenced generated keys; no sweeper or malware-scanning guarantee is introduced. New profile file metadata/bytes/access tokens MUST remain excluded from AI/logs as above.
+
+Denial scenario: Given HR, another Applicant or an unverified/anonymous caller requesting profile PDF/API/Storage objects, no private metadata/bytes or mutation occurs. Given profile replacement/removal after application submission or withdrawal, the submitted snapshot and permitted existing download remain unchanged.

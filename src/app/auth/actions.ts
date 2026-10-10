@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAppSiteOrigin } from "@/lib/supabase/site-url";
+import { isProfileComplete } from "@/lib/profile-readiness";
 
 const credentialsSchema = z.object({ email: z.email().max(254), password: z.string().min(8).max(72) });
 
@@ -39,6 +40,8 @@ export async function signIn(formData: FormData) {
     .select("role").eq("user_id", user.id).maybeSingle();
   if (profileError || !profile) redirect("/auth/sign-in?error=credentials");
   if (profile.role === "hr") redirect("/hr/applications");
+  const { data: details, error: detailsError } = await client.from("applicant_profiles").select("full_name,phone").eq("user_id", user.id).maybeSingle();
+  if (detailsError || !isProfileComplete(details, user.email)) redirect("/profile");
   redirect("/applications");
 }
 

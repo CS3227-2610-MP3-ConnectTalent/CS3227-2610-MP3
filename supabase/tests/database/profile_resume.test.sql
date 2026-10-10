@@ -17,35 +17,37 @@ insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_co
  ('44000000-0000-4000-8000-000000000002','00000000-0000-0000-0000-000000000000','authenticated','authenticated','profile44-other@example.test','',now()),
  ('44000000-0000-4000-8000-000000000003','00000000-0000-0000-0000-000000000000','authenticated','authenticated','profile44-hr@example.test','',now()),
  ('44000000-0000-4000-8000-000000000004','00000000-0000-0000-0000-000000000000','authenticated','authenticated','profile44-unverified@example.test','',null);
+-- Completed synthetic profile fixtures for #52; no real-data backfill.
+insert into public.applicant_profiles(user_id,full_name,phone) values ('44000000-0000-4000-8000-000000000001','Fixture Applicant','+6591234567'),('44000000-0000-4000-8000-000000000002','Fixture Applicant','+6591234567'),('44000000-0000-4000-8000-000000000003','Fixture Applicant','+6591234567'),('44000000-0000-4000-8000-000000000004','Fixture Applicant','+6591234567') on conflict(user_id) do nothing;
 update public.profiles set role='hr' where user_id='44000000-0000-4000-8000-000000000003';
 insert into public.jobs(id,title,team,category,description,requirements,status,published_at)
  values('44000000-0000-4000-8000-000000000101','Profile test role','Synthetic','engineering','Synthetic','Synthetic','published',now());
 set local role authenticated;
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000001',true);
-select lives_ok($$select public.save_applicant_profile('Synthetic Owner',null,'https://example.test',E'College\nComputing','Internship')$$,'profile saves');
+select lives_ok($$select public.save_applicant_profile('Synthetic Owner','+6591234567','https://example.test',E'College\nComputing','Internship')$$,'profile saves');
 select is((select education from public.applicant_profiles),E'College\nComputing','profile keeps multiline text');
-select throws_ok($$select public.save_applicant_profile('Owner',null,null,repeat('x',2001),null)$$,'23514',null,'profile bounds enforced in DB');
-select throws_ok($$select public.save_applicant_profile(E'\nOwner',null,null,null,null)$$,'22023','Enter valid profile contact fields','profile RPC rejects controls before trimming');
+select throws_ok($$select public.save_applicant_profile('Owner','+6591234567',null,repeat('x',2001),null)$$,'23514',null,'profile bounds enforced in DB');
+select throws_ok($$select public.save_applicant_profile(E'\nOwner','+6591234567',null,null,null)$$,'22023','Enter valid profile contact fields','profile RPC rejects controls before trimming');
 select lives_ok($$select public.save_application_details_v3('44000000-0000-4000-8000-000000000101','Letter','Owner',null,null,'College','Internship',null)$$,'new full draft saves');
 select is((select education from public.applications where job_title='Profile test role'),'College','background saves with draft');
 select lives_ok($$select public.save_application_details_v2('44000000-0000-4000-8000-000000000101','Letter updated','Owner',null,null,1)$$,'old contact client remains usable');
 select is((select education from public.applications where job_title='Profile test role'),'College','old API preserves optional background');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000002',true);
-select is((select count(*) from public.applicant_profiles),0::bigint,'another Applicant cannot read profile');
+select is((select count(*) from public.applicant_profiles where user_id='44000000-0000-4000-8000-000000000001'),0::bigint,'another Applicant cannot read profile');
 select is((select count(*) from public.applications where job_title='Profile test role'),0::bigint,'another Applicant cannot read snapshots');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000003',true);
 select is((select count(*) from public.applicant_profiles),0::bigint,'HR cannot read mutable profiles');
 select is((select count(*) from public.applications where job_title='Profile test role'),0::bigint,'HR cannot read draft background');
-select throws_ok($$select public.save_applicant_profile('HR',null,null,null,null)$$,'42501','Verified Applicant account required','HR cannot write profile');
+select throws_ok($$select public.save_applicant_profile('HR','+6591234567',null,null,null)$$,'42501','Verified Applicant account required','HR cannot write profile');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000004',true);
-select throws_ok($$select public.save_applicant_profile('Unverified',null,null,null,null)$$,'42501','Verified Applicant account required','unverified cannot save profile');
+select throws_ok($$select public.save_applicant_profile('Unverified','+6591234567',null,null,null)$$,'42501','Verified Applicant account required','unverified cannot save profile');
 reset role;
 select lives_ok($$select public.reserve_application_resume('44000000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000101',2,'44000000-0000-4000-8000-000000000201','synthetic.pdf',512,repeat('a',64))$$,'trusted reservation succeeds');
 select throws_ok($$select public.reserve_application_resume('44000000-0000-4000-8000-000000000003','44000000-0000-4000-8000-000000000101',2,'44000000-0000-4000-8000-000000000202','synthetic.pdf',512,repeat('a',64))$$,'42501','Verified Applicant account required','HR cannot act as Applicant');
 select throws_ok($$select public.finalize_application_resume('44000000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000101',2,'44000000-0000-4000-8000-000000000201')$$,'P0001','Upload is incomplete','missing Storage object cannot finalize');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000001',true);
-select throws_ok($$select public.submit_application_details_v3('44000000-0000-4000-8000-000000000101','Letter','Owner',null,null,'College','Internship',2)$$,'P0001','Finish or cancel the pending upload before submitting','pending file blocks submission atomically');
+select throws_ok($$select public.submit_application_details_v3('44000000-0000-4000-8000-000000000101','Letter','Owner','+6591234567',null,'College','Internship',2)$$,'P0001','Finish or cancel the pending upload before submitting','pending file blocks submission atomically');
 select is((select submission_state from public.applications where job_title='Profile test role'),'draft','pending submit leaves draft intact');
 reset role;
 -- Only a synthetic Storage metadata fixture; real upload/content checks run through the Storage API separately.
@@ -55,19 +57,19 @@ select is((select revision from public.applications where job_title='Profile tes
 select lives_ok($$select public.finalize_application_resume('44000000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000101',2,'44000000-0000-4000-8000-000000000201')$$,'lost-response finalize reconciles exact ready object');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000001',true);
-select is((select count(*) from public.application_resume_objects),1::bigint,'owner sees finalized metadata');
-select is((select count(*) from storage.objects where bucket_id='application-resumes'),1::bigint,'owner sees owned finalized object');
+select is((select count(*) from public.application_resume_objects where applicant_id='44000000-0000-4000-8000-000000000001'),1::bigint,'owner sees finalized metadata');
+select is((select count(*) from storage.objects where bucket_id='application-resumes' and name like '%/44000000-0000-4000-8000-000000000201.pdf'),1::bigint,'owner sees owned finalized object');
 select throws_ok($$insert into storage.objects(bucket_id,name) values('application-resumes','bypass.pdf')$$,'42501',null,'browser upload bypass denied');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000003',true);
-select is((select count(*) from public.application_resume_objects),0::bigint,'HR cannot read draft resume metadata');
-select is((select count(*) from storage.objects where bucket_id='application-resumes'),0::bigint,'HR cannot download draft resume');
+select is((select count(*) from public.application_resume_objects where applicant_id='44000000-0000-4000-8000-000000000001'),0::bigint,'HR cannot read draft resume metadata');
+select is((select count(*) from storage.objects where bucket_id='application-resumes' and name like '%/44000000-0000-4000-8000-000000000201.pdf'),0::bigint,'HR cannot download draft resume');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000001',true);
-select lives_ok($$select public.submit_application_details_v3('44000000-0000-4000-8000-000000000101','Frozen letter','Owner',null,null,'College','Internship',3)$$,'application freezes ready attachment and background');
-select lives_ok($$select public.save_applicant_profile('Different',null,null,'Different College','Different Work')$$,'profile can change independently');
+select lives_ok($$select public.submit_application_details_v3('44000000-0000-4000-8000-000000000101','Frozen letter','Owner','+6591234567',null,'College','Internship',3)$$,'application freezes ready attachment and background');
+select lives_ok($$select public.save_applicant_profile('Different','+6591234567',null,'Different College','Different Work')$$,'profile can change independently');
 select is((select education from public.applications where job_title='Profile test role'),'College','profile edit never rewrites snapshot');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000003',true);
-select is((select count(*) from public.application_resume_objects),1::bigint,'HR sees submitted resume metadata');
-select is((select count(*) from storage.objects where bucket_id='application-resumes'),1::bigint,'HR can read submitted object');
+select is((select count(*) from public.application_resume_objects where applicant_id='44000000-0000-4000-8000-000000000001'),1::bigint,'HR sees submitted resume metadata');
+select is((select count(*) from storage.objects where bucket_id='application-resumes' and name like '%/44000000-0000-4000-8000-000000000201.pdf'),1::bigint,'HR can read submitted object');
 reset role;
 select throws_ok($$update public.applications set education='Different' where job_title='Profile test role'$$,'42501','Submitted applications are locked','even accidental privileged background edit is frozen');
 select throws_ok($$select public.remove_application_resume('44000000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000101',4)$$,'P0001','Editable saved draft required','submitted resume removal denied');
@@ -76,9 +78,9 @@ select throws_ok($$select public.reserve_application_resume('44000000-0000-4000-
 select is((select count(*) from public.claim_resume_cleanup('44000000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000101')),0::bigint,'cleanup never claims referenced submitted file');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000001',true);
-select is((select count(*) from storage.objects where bucket_id='application-resumes'),1::bigint,'closed-job owner download remains permitted');
+select is((select count(*) from storage.objects where bucket_id='application-resumes' and name like '%/44000000-0000-4000-8000-000000000201.pdf'),1::bigint,'closed-job owner download remains permitted');
 select set_config('request.jwt.claim.sub','44000000-0000-4000-8000-000000000002',true);
-select is((select count(*) from storage.objects where bucket_id='application-resumes'),0::bigint,'other Applicant still sees no submitted bytes');
+select is((select count(*) from storage.objects where bucket_id='application-resumes' and name like '%/44000000-0000-4000-8000-000000000201.pdf'),0::bigint,'other Applicant still sees no submitted bytes');
 reset role;
 select * from finish();
 rollback;

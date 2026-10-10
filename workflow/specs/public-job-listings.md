@@ -1,12 +1,14 @@
 # Public job listings
 
-Baseline: ProductSpec v0.6, 5 October 2026.
+Baseline: ProductSpec v1.7, 10 October 2026 (accepted #52 signed-in Applicant onboarding gate).
 
 ## JOB-001: Published-only browsing
 
 The public UI and data MUST expose only this company's published openings. Applicants MUST be able to browse those openings. See [OVR-001](product-overview.md) for the employer boundary, [JMG-002 / JMG-003](job-management.md) for publication and closing, and [SEC-001](security-and-privacy.md) for access rules.
 
 Scenario: Given draft, published and closed jobs, when a visitor browses public listings, then only published jobs appear.
+
+Signed-in verified Applicants with incomplete required profiles MUST be redirected from listing/category routes to My profile before querying/rendering openings under [ACC-006](accounts-and-roles.md). Guests and HR retain public published browsing; public job data remains public. Given an incomplete signed-in Applicant, direct category or listing navigation leads to profile completion; valid completion restores browsing.
 
 ## JOB-002: Controlled category and filtering
 
@@ -19,3 +21,5 @@ Scenario: Given published and unpublished jobs in Engineering, when an Applicant
 Each job MUST have a title, team name, description and requirements. Applicants MUST be able to open a published job and read its title, team, description and requirements.
 
 Scenario: Given a published job, when an Applicant opens its detail page, then those four fields are visible.
+
+The app job-detail route MUST apply [ACC-006](accounts-and-roles.md) before loading the job for an incomplete signed-in Applicant. Complete Applicants, guests and HR retain published-detail access. Direct apply/write eligibility follows ACC-006 and APP-005. Given an incomplete Applicant opening a direct job-detail/apply URL, the app leads to profile completion.

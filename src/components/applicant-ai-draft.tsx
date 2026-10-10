@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 import { Textarea } from "@/components/ui/textarea";
 
@@ -10,8 +10,7 @@ export function ApplicantAiDraft({ jobId, onDraft }: { jobId: string; onDraft: (
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function generate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function generate() {
     setError("");
     setNotice("");
     setBusy(true);
@@ -51,17 +50,17 @@ export function ApplicantAiDraft({ jobId, onDraft }: { jobId: string; onDraft: (
       <p className="text-sm text-muted-foreground">Add experience notes. These notes and this job’s title and requirements are sent to SoCLaaS for this request only. Generation does not save or submit your application.</p>
       <p className="text-sm text-muted-foreground">AI can make mistakes. Check every date, skill, and achievement before saving or submitting.</p>
     </div>
-    <form onSubmit={generate} className="space-y-3">
+    <div className="space-y-3">
       <label htmlFor="ai-experience-notes" className="block font-medium">Experience notes</label>
       <Textarea id="ai-experience-notes" value={notes} onChange={(event) => setNotes(event.target.value)}
         maxLength={4000} rows={5} aria-describedby="ai-notes-limit" />
       <p id="ai-notes-limit" className="text-sm text-muted-foreground">Maximum 4,000 characters. Notes are used for this request only.</p>
-      <button type="submit" disabled={busy || notes.trim().length === 0}
+      <button type="button" onClick={() => void generate()} disabled={busy || notes.trim().length === 0}
         className="rounded-lg border px-4 py-2 disabled:cursor-not-allowed disabled:opacity-60">
         {busy ? "Drafting…" : "Generate draft"}
       </button>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       {notice && <p role="status" className="text-sm">{notice}</p>}
-    </form>
+    </div>
   </section>;
 }

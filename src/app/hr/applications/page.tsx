@@ -29,7 +29,7 @@ export default async function HRApplicationsPage() {
         <Link href={`/hr/applications/${application.id}`} className="block rounded-lg border p-5 hover:bg-muted/40">
           <span className="block font-semibold">{application.job_title}</span>
           <span className="block text-sm">Applicant {application.applicant_id}</span>
-          <span className="block text-sm text-muted-foreground">{reviewStatusLabel(application.review_status)} · Submitted {new Date(application.submitted_at).toLocaleString()}</span>
+          <span className="block text-sm text-muted-foreground">{application.withdrawn_at ? "Withdrawn" : reviewStatusLabel(application.review_status)} · Submitted {new Date(application.submitted_at).toLocaleString()}</span>
         </Link>
       </li>)}
     </ul>}

@@ -1,6 +1,14 @@
 # Active change packets
 
-No active change packets.
+[#53 first-upload retry follow-up](../archive/2026-10-10-first-upload-retry/record.md): Paul separately accepted with recorded limits on 10 October 2026. Complete packet archived; restores existing APP-007 without a canonical delta. Hosted testing and commit/push remain pending.
+
+[#50 withdrawal placement correction](../archive/2026-10-10-withdrawal-placement/record.md): Paul accepted via “Accept correction” on 10 October 2026; canonical APP-008 synced to v1.6 and complete packet archived. My applications offers View/status only; withdrawal stays in individual submitted application details.
+
+[#53 upload-before-save and profile résumé](../archive/2026-10-10-unsaved-profile-resume/record.md) was separately accepted by Paul with recorded limits on 10 October 2026. Canonical v1.8 synced without reverting #52 and the complete packet archived. One combined PR for #49/#50/#52/#53 is authorized; hosted rollout remains pending.
+
+[#52 required Applicant profile and phone](../archive/2026-10-10-required-applicant-profile/record.md) was separately accepted by Paul via “Accept with recorded limits” on 10 October 2026 after the approved onboarding amendment and independent review. Canonical v1.7 synced before complete archive; hosted rollout/reset/accessibility and Git publication remain pending.
+
+[#49/#50 application form and withdrawal](../archive/2026-10-10-application-form-withdrawal/record.md) was separately accepted locally with recorded limits by Paul on 10 October 2026. APP-002/003/007/008, SEC-001 and AIS-001 synced to canonical v1.5 before the complete nine-file archive. Commit/push/PR and hosted rollout remain pending and require separate authorization.
 
 [#44 private profiles and PDF résumés](../archive/2026-10-09-profile-resume/record.md) was separately accepted with recorded limits on2026-10-09 and completely archived after canonical v1.4 sync. Work remains uncommitted on feat/44-profile-resume; hosted rollout and the documented validation/cleanup limitations remain open.
 

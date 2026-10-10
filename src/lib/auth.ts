@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isProfileComplete } from "./profile-readiness";
 
 export async function currentApplicant() {
   const client = await createSupabaseServerClient();
@@ -12,8 +13,12 @@ export async function currentApplicant() {
   return { client, user };
 }
 
-export async function requireApplicant() {
+export async function requireApplicant({ allowIncomplete = false }: { allowIncomplete?: boolean } = {}) {
   const applicant = await currentApplicant();
   if (!applicant) redirect("/auth/sign-in");
+  if (!allowIncomplete) {
+    const { data, error } = await applicant.client.from("applicant_profiles").select("full_name,phone").eq("user_id", applicant.user.id).maybeSingle();
+    if (error || !isProfileComplete(data, applicant.user.email)) redirect("/profile");
+  }
   return applicant;
 }

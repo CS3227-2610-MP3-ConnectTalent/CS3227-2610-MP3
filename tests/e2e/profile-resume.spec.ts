@@ -17,6 +17,11 @@ test("profile prefill, private PDF, submission freeze and HR access", async ({ p
   }
   try {
     for (const email of emails) { const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true }); expect(error).toBeNull(); users.push(data.user!.id); }
+    for(const email of [emails[0],emails[2]]) {
+      const fixture=createClient("http://127.0.0.1:54321",adminKey!,{auth:{persistSession:false}});
+      expect((await fixture.auth.signInWithPassword({email,password})).error).toBeNull();
+      expect((await fixture.rpc("save_applicant_profile",{p_full_name:"Fixture Applicant",p_phone:"+6591234567",p_portfolio_url:null,p_education:null,p_work_experience:null})).error).toBeNull();
+    }
     expect((await admin.from("profiles").update({ role: "hr" }).eq("user_id", users[1])).error).toBeNull();
     expect((await admin.from("jobs").insert({ id: job, title: `Profile role ${suffix}`, team: "Synthetic Platform", category: "engineering", description: "Synthetic", requirements: "Synthetic", status: "published", published_at: new Date().toISOString() })).error).toBeNull();
     await login(page, emails[0]); await page.getByRole("link", { name: "My profile", exact: true }).click();

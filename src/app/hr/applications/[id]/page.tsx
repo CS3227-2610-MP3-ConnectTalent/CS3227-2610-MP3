@@ -38,18 +38,19 @@ export default async function HRApplicationDetail({
     <header className="space-y-2">
       <h1 className="text-3xl font-semibold">{application.job_title}</h1>
       <p>Applicant {application.applicant_id}</p>
-      <p>Review status: <strong>{reviewStatusLabel(application.review_status)}</strong></p>
+      <p>Review status: <strong>{application.withdrawn_at ? "Withdrawn" : reviewStatusLabel(application.review_status)}</strong></p>
       <p className="text-sm text-muted-foreground">Submitted {new Date(application.submitted_at).toLocaleString()}</p>
     </header>
     {error && <p role="alert" className="rounded-lg border p-3">The change was not saved. Reload this page and try again.</p>}
     {notice && <p role="status" className="rounded-lg border p-3">The change was saved.</p>}
 
+    {application.withdrawn_at && <p className="rounded-lg border p-3">Withdrawn by the Applicant. History remains available; further review actions are disabled.</p>}
     <ApplicationContactDetails {...application} />
     <ResumePanel applicationId={application.id} revision={application.revision} editable={false} resume={resume} />
     <div className="grid gap-6 lg:grid-cols-2">
       <section className="space-y-3"><h2 className="text-xl font-semibold">Original cover letter</h2>
         <p className="whitespace-pre-wrap rounded-lg border p-4">{application.original_submitted_letter}</p></section>
-      <HrAiSummary applicationId={application.id} />
+      {!application.withdrawn_at && <HrAiSummary applicationId={application.id} />}
     </div>
     <section className="space-y-3"><h2 className="text-xl font-semibold">Current cover letter</h2>
       <p className="whitespace-pre-wrap rounded-lg border p-4">{application.cover_letter}</p></section>
@@ -60,17 +61,17 @@ export default async function HRApplicationDetail({
           <p className="whitespace-pre-wrap">{note.body}</p>
           <p className="mt-2 text-sm text-muted-foreground">By {note.author_id} · {new Date(note.created_at).toLocaleString()}</p>
         </li>)}</ul>}
-      <form action={addHRNote} className="space-y-3">
+      {!application.withdrawn_at && <form action={addHRNote} className="space-y-3">
         <input type="hidden" name="applicationId" value={application.id} />
         <label htmlFor="hr-note" className="block font-medium">Add a note</label>
         <textarea id="hr-note" name="body" required maxLength={2000} rows={5} className="w-full rounded-lg border p-3" />
         <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Add note</button>
-      </form>
+      </form>}
     </section>
 
     <section className="space-y-4 border-t pt-6"><h2 className="text-xl font-semibold">Change review status</h2>
       <p className="text-sm text-muted-foreground">This is a separate human action. It does not change the cover letter.</p>
-      <form action={changeHRStatus} className="flex flex-wrap items-end gap-3">
+      {!application.withdrawn_at && <form action={changeHRStatus} className="flex flex-wrap items-end gap-3">
         <input type="hidden" name="applicationId" value={application.id} />
         <input type="hidden" name="expectedRevision" value={application.review_revision} />
         <div className="space-y-2"><label htmlFor="review-status" className="block font-medium">New status</label>
@@ -81,7 +82,7 @@ export default async function HRApplicationDetail({
             <option value="rejected">Rejected</option>
           </select></div>
         <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Update status</button>
-      </form>
+      </form>}
       {events.length > 0 && <><h3 className="font-medium">Status history</h3><ul className="space-y-2">
         {events.map((event) => <li key={event.id} className="text-sm text-muted-foreground">
           {reviewStatusLabel(event.from_status)} → {reviewStatusLabel(event.to_status)} · {new Date(event.created_at).toLocaleString()} · By {event.actor_id}

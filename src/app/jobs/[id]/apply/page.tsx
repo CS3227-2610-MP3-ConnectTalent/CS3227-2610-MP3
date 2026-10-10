@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ResumePanel } from "@/components/resume-panel";
 import { getApplicationResume } from "@/lib/application-resumes";
+import { getProfileResume } from "@/lib/profile-resumes";
 import { notFound } from "next/navigation";
 
 import { ApplicationForm } from "@/components/application-form";
@@ -21,6 +22,7 @@ export default async function ApplyPage({
   const application = await getOwnApplicationForJob(id);
   const profile = application ? null : await getApplicantProfile();
   const resume = application ? await getApplicationResume(application.id) : null;
+  const profileResume = await getProfileResume();
   const { error } = await searchParams;
 
   return <main className="page-shell mx-auto max-w-3xl space-y-6 px-5 py-10">
@@ -30,8 +32,8 @@ export default async function ApplyPage({
     {error && <p role="alert" className="rounded-lg border border-destructive p-3 text-destructive">We could not save your change. Check the letter and job status, reload for the latest version, then try again.</p>}
     <ApplicationForm jobId={id} value={application?.cover_letter ?? ""}
       revision={application?.revision ?? null} submitted={application?.submission_state === "submitted"}
-      email={user.email ?? ""} details={application ?? { ...profile!, submitted_email: null }} />
-    <Link href="/applications" className="inline-block underline">My applications</Link>
-    <ResumePanel applicationId={application?.id ?? null} revision={application?.revision ?? null} editable={application?.submission_state !== "submitted"} resume={resume} />
+      email={user.email ?? ""} details={application ?? { ...profile!, submitted_email: null }}
+      applicationId={application?.id ?? null} resume={resume} profileResume={profileResume} />
+    {application?.submission_state === "submitted" && <ResumePanel applicationId={application.id} revision={application.revision} editable={false} resume={resume} />}
   </main>;
 }

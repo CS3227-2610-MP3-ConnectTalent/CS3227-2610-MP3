@@ -8,6 +8,8 @@ values
   ('10000000-0000-4000-8000-000000000a02', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'hr9-other@example.test', '', now()),
   ('10000000-0000-4000-8000-000000000a03', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'hr9-hr@example.test', '', now()),
   ('10000000-0000-4000-8000-000000000a04', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'hr9-unverified@example.test', '', null);
+-- Completed synthetic profile fixtures for #52; no real-data backfill.
+insert into public.applicant_profiles(user_id,full_name,phone) values ('10000000-0000-4000-8000-000000000a01','Fixture Applicant','+6591234567'),('10000000-0000-4000-8000-000000000a02','Fixture Applicant','+6591234567'),('10000000-0000-4000-8000-000000000a03','Fixture Applicant','+6591234567'),('10000000-0000-4000-8000-000000000a04','Fixture Applicant','+6591234567') on conflict(user_id) do nothing;
 update public.profiles set role = 'hr' where user_id in
   ('10000000-0000-4000-8000-000000000a03', '10000000-0000-4000-8000-000000000a04');
 
@@ -31,7 +33,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000a01', true);
 select lives_ok($$select public.save_application_details_v2('10000000-0000-4000-8000-000000000b02', 'Private draft','Synthetic Applicant',null,null, null)$$, 'Applicant saves draft');
 select set_config('hr9.draft_id', (select id::text from public.applications where job_id = '10000000-0000-4000-8000-000000000b02'), true);
-select lives_ok($$select public.submit_application_details_v2('10000000-0000-4000-8000-000000000b01', 'Original','Synthetic Applicant',null,null, null)$$, 'Applicant submits');
+select lives_ok($$select public.submit_application_details_v2('10000000-0000-4000-8000-000000000b01', 'Original','Synthetic Applicant','+6591234567',null, null)$$, 'Applicant submits');
 select set_config('hr9.submitted_id', (select id::text from public.applications where job_id = '10000000-0000-4000-8000-000000000b01'), true);
 select is((select review_status from public.applications where job_id = '10000000-0000-4000-8000-000000000b01'), 'submitted', 'submission initializes review status');
 select throws_ok($$select public.append_hr_application_note((select id from public.applications where job_id = '10000000-0000-4000-8000-000000000b01'), 'attack')$$, '42501', 'Verified HR account required', 'Applicant cannot add HR note');

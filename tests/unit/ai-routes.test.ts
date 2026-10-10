@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const spies = vi.hoisted(() => ({
   getApplicantContext: vi.fn(),
@@ -30,6 +30,8 @@ vi.mock("@/lib/ai/soclaas-client", () => ({
 
 import { POST as applicantDraft } from "../../src/app/api/ai/applicant-draft/route";
 import { POST as hrSummary } from "../../src/app/api/ai/hr-summary/route";
+
+afterEach(() => vi.resetAllMocks());
 
 const jobId = "00000000-0000-4000-8000-000000000101";
 const applicationId = "00000000-0000-4000-8000-000000000a11";
@@ -204,6 +206,22 @@ describe("HR summary route", () => {
       requirements_not_addressed: ["Cloud deployment experience."],
       follow_up_questions: ["Could you share an example related to this requirement: “Cloud deployment experience.”?"],
     });
+  });
+
+  it("withholds a summary if withdrawal commits during provider generation", async () => {
+    spies.getSubmittedApplication.mockResolvedValueOnce({ id: applicationId, coverLetter: "Synthetic letter.", requirements: "Synthetic requirement. Another requirement." }).mockResolvedValueOnce(null);
+    const response = await hrSummary(post({ applicationId }));
+    expect(response.status).toBe(404);
+    expect(await responseBody(response)).not.toHaveProperty("evidence_mentioned");
+    expect(spies.generateHrSummary).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not reserve quota or call the provider for an unavailable withdrawn application", async () => {
+    spies.getSubmittedApplication.mockResolvedValue(null);
+    const response = await hrSummary(post({ applicationId }));
+    expect(response.status).toBe(404);
+    expect(spies.reserveAiInvocation).not.toHaveBeenCalled();
+    expect(spies.generateHrSummary).not.toHaveBeenCalled();
   });
 
   it("withholds the generated summary when final audit finalization fails", async () => {

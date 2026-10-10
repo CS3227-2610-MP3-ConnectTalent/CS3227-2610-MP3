@@ -45,7 +45,7 @@ export async function POST(request: Request, { params }: Context) {
         const file = new File([bytes], filename, { type: request.headers.get("content-type") ?? "" });
         const operation = request.headers.get("x-resume-operation");
         if (!z.uuid().safeParse(operation).success) throw new Error("Choose the file again before retrying the upload.");
-        await uploadApplicationResume(account.user.id, app.job_id, revision, file, operation!);
+        await uploadApplicationResume(account.user.id, app.job_id, revision, file, operation!, request.headers.get("x-resume-retry") === "true");
       } else throw new Error("Choose an upload action.");
     }
     return Response.json({ ok: true }, { headers });

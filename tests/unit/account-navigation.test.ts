@@ -28,7 +28,7 @@ describe("server-derived account navigation", () => {
   it.each(["applicant", "hr"] as const)("uses the current database %s role", async (role) => {
     mocks.getUser.mockResolvedValue({ data: { user: user() }, error: null });
     mocks.profile.mockResolvedValue({ data: { role }, error: null });
-    expect(await getAccountNavigation()).toEqual({ kind: "signed-in", role });
+    expect(await getAccountNavigation()).toEqual({ kind: "signed-in", role, ...(role === "applicant" ? { incomplete: true } : {}) });
     expect(mocks.eq).toHaveBeenCalledWith("user_id", "synthetic-user");
   });
   it("gives an unverified account only generic signed-in navigation", async () => {
@@ -49,7 +49,7 @@ describe("server-derived account navigation", () => {
   it("retains only generic account navigation on a thrown profile failure", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: user() }, error: null });
     mocks.profile.mockRejectedValue(new Error("private details"));
-    expect(await getAccountNavigation()).toEqual({ kind: "signed-in", role: null });
+    expect(await getAccountNavigation()).toEqual({ kind: "signed-in", role: null, incomplete: true });
   });
   it.each(["provider", "transport", "config"])("fails closed on %s identity failure", async (failure) => {
     if (failure === "provider") mocks.getUser.mockResolvedValue({ data: { user: user() }, error: { message: "private error" } });

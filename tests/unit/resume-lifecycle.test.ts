@@ -35,4 +35,13 @@ describe("durable resume lifecycle failures and retries", () => {
     expect(mocks.upload).not.toHaveBeenCalled();
     expect(mocks.rpc).toHaveBeenCalledWith("finalize_application_resume", expect.objectContaining({ p_operation: operation, p_actor: "actor", p_job: "job" }));
   });
+  it("recovers an owned stale pending upload only on explicit retry", async () => {
+    mocks.rpc.mockImplementation(async (name: string) => name === "reserve_application_resume"
+      ? { data: "44000000-0000-4000-8000-000000000101/44000000-0000-4000-8000-000000000201.pdf", error: null }
+      : name === "claim_resume_cleanup" ? { data: [], error: null } : { error: null });
+    await uploadApplicationResume("actor", "job", 1, new File(["synthetic"], "synthetic.pdf"), "44000000-0000-4000-8000-000000000201", true);
+    expect(mocks.rpc).toHaveBeenCalledWith("recover_pending_application_resume", { p_actor: "actor", p_job: "job", p_revision: 1 });
+    expect(mocks.upload).toHaveBeenCalledTimes(1);
+  });
+
 });

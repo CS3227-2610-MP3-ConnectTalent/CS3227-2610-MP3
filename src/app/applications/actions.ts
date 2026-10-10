@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { performWithdrawal } from "@/lib/application-withdrawal";
 
 import { requireApplicant } from "@/lib/auth";
 import { parseBackground } from "@/lib/profile-input";
 import { parseCoverLetter } from "@/lib/application-input";
 import { parseApplicationDetails } from "@/lib/application-details";
+import { phoneFromForm } from "@/lib/phone";
 import type { ApplicationFormState, ApplicationFormValues } from "@/lib/application-form-state";
 import { reconcileApplicationWrite } from "@/lib/application-retry";
 
@@ -25,7 +27,7 @@ export async function updateApplication(_previous: ApplicationFormState, formDat
   const { client, user } = await requireApplicant();
   const read = (name: string) => typeof formData.get(name) === "string" ? formData.get(name) as string : "";
   const values: ApplicationFormValues = {
-    education: read("education"), work_experience: read("work_experience"), full_name: read("full_name"), phone: read("phone"), portfolio_url: read("portfolio_url"), cover_letter: read("cover_letter"),
+    education: read("education"), work_experience: read("work_experience"), full_name: read("full_name"), phone: phoneFromForm(formData), portfolio_url: read("portfolio_url"), cover_letter: read("cover_letter"),
   };
   const failure = (message: string, errors: ApplicationFormState["errors"] = {}): ApplicationFormState => ({ values, errors, message });
   const intent = formData.get("intent");
@@ -66,4 +68,17 @@ export async function updateApplication(_previous: ApplicationFormState, formDat
   revalidatePath("/applications");
   const notice = reconciled ? `?notice=${intent === "submit" ? "already-submitted" : "saved"}` : "";
   redirect(`/applications/${resultId}${notice}`);
+}
+
+export async function withdrawApplication(_previous: { message: string | null }, form: FormData): Promise<{ message: string | null }> {
+  const { client, user } = await requireApplicant();
+  const id = form.get("applicationId");
+  if (typeof id !== "string" || !z.uuid().safeParse(id).success || form.get("confirmed") !== "true") {
+    return { message: "Confirm withdrawal of a submitted application before continuing." };
+  }
+  if (!await performWithdrawal(client, user.id, id)) {
+    return { message: "We could not confirm withdrawal. Reload to check the application before trying again." };
+  }
+  for (const path of ["/applications", `/applications/${id}`, "/hr/applications", `/hr/applications/${id}`]) revalidatePath(path);
+  redirect(`/applications/${id}?notice=withdrawn`);
 }

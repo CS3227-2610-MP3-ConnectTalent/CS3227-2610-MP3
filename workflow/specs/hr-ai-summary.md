@@ -1,6 +1,6 @@
 # HR AI summary
 
-Baseline: ProductSpec v1.1, 9 October 2026 (AIS-001/AIS-002 updated).
+Baseline: ProductSpec v1.5, 10 October 2026 (accepted #49/#50 application form and withdrawal changes).
 
 Every summary endpoint follows the canonical [security and privacy contract](security-and-privacy.md), including denial of Applicant access and authorization before loading data.
 
@@ -11,6 +11,8 @@ The HR AI summary MUST accept only one authorized submitted application's curren
 Scenario: Given authorized HR selecting a submitted application, when the summary request is made, then model input contains only that application's frozen current letter and its job's fixed published requirements.
 
 Denial scenario: Given an Applicant, anonymous visitor, unsubmitted application or inaccessible application ID, when summary is requested, then it is denied before protected data or a model call is produced.
+
+A withdrawn application under APP-008 MUST be ineligible for a new summary request. Eligibility MUST be verified before protected input loading/provider invocation and rechecked before returning a response. A withdrawal committed during an already in-flight provider request MUST prevent the response being returned as a current review summary; this does not claim the external request can be recalled.
 
 ## AIS-002: Evidence summary without hiring decisions
 
