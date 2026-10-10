@@ -12,7 +12,7 @@ Date: 2026-10-10
 
 - Change ID/classification: 2026-10-10-quality-gates; process/tooling only
 - GitHub issues: [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51)
-- Branch/commits/PR: chore/51-quality-gates; implementation commit `8828cd7`; merging fetched `develop` commit `09b1213`; merge-resolution edits are pending in the merge commit; no PR
+- Branch/commits/PR: `chore/51-quality-gates`; implementation commit `8828cd7`; merge commit `06f2a9c` has first parent `8828cd7` and second parent fetched `develop` `09b1213`; no PR
 - Proposal: proposal.md
 - Design: omitted; bounded tooling/configuration integration with no application architecture, authorization, schema, AI, or service-interface impact
 - Deltas: none; process-only work does not change canonical capability specs
@@ -37,7 +37,7 @@ Implementation approval is recorded from the actual user instruction. The packet
 
 | Exact acceptance ID | Issue criterion / canonical requirement ID and link | Observable outcome                                                                                                               | Evidence, result and limitation                                                                                                                                                                                                                                         |
 | ------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| QG-AC-01            | Issue #51; process-only                             | Prettier formats approved maintained files and check fails for a formatting violation.                                           | `pnpm format:check` passes. `git diff --check` will be recorded after staging. Ignore/path review found zero protected reflection paths modified; reflection contents were not opened.                                                                                  |
+| QG-AC-01            | Issue #51; process-only                             | Prettier formats approved maintained files and check fails for a formatting violation.                                           | `pnpm format:check` and staged `git diff --check` pass. Ignore/path review found zero protected reflection paths modified; reflection contents were not opened.                                                                                                         |
 | QG-AC-02            | Issue #51; process-only                             | ESLint errors when cyclomatic complexity exceeds 20, cognitive exceeds 15, file exceeds 300 lines, or function exceeds 50 lines. | `pnpm lint` passes. `pnpm exec eslint --print-config src/app/page.tsx` resolves the approved error-level values. A controlled temporary source probe triggered `complexity`, `sonarjs/cognitive-complexity`, `max-lines`, and `max-lines-per-function`; it was removed. |
 | QG-AC-03            | Issue #51; process-only                             | CI blocks on either formatting or ESLint failure.                                                                                | `.github/workflows/ci.yml` runs `pnpm format:check` and `pnpm lint` in the blocking app job. Hosted GitHub Actions has not run for this local revision.                                                                                                                 |
 | QG-AC-04            | Issue #51; process-only                             | First-party violations are refactored while limits remain fixed and behavior is retained.                                        | `pnpm lint`, `pnpm typecheck`, `pnpm test:unit` (32 files / 167 tests), `pnpm exec next typegen`, and `pnpm build` pass after the merge. E2E was not run: `TEST_SUPABASE_SERVICE_ROLE_KEY` is absent and local Supabase/Mailpit ports 54321/54324 are closed.           |
@@ -62,13 +62,13 @@ Commands and results:
 - `pnpm build` — passed with Next.js 16.3.8.
 - `pnpm exec eslint --print-config src/app/page.tsx` — resolved the approved error-level limits listed above.
 - Temporary rule probe — exited with expected errors for all four approved rules and was removed.
-- `git -c core.safecrlf=false diff --check` — pending final staged check.
+- `git diff --cached --check` — passed before the merge commit.
 - `pnpm test:e2e` — not run because local Supabase/Mailpit services were stopped and `TEST_SUPABASE_SERVICE_ROLE_KEY` was absent.
 - GitHub Actions — not run for this local revision.
 
 Security/adversarial cases: not applicable; this is tooling and structure work with no intended product/runtime or data-access behavior change.
 
-Known limitations: E2E and hosted CI were not run. Independent review, student acceptance, archive, dated summary, merge commit, and PR remain pending. The initial Prettier pass reached vendored Supabase copies before the ignore policy was corrected; those copies were restored to the repository version and are excluded from the final format scope.
+Known limitations: E2E and hosted CI were not run. A unit-suite run concurrent with other checks hit the three-second PDF worker timeout once; the focused PDF test and complete unit suite both passed when rerun without concurrent checks. Independent review, student acceptance, archive, dated summary, and PR remain pending. The initial Prettier pass reached vendored Supabase copies before the ignore policy was corrected; those copies were restored to the repository version and are excluded from the final format scope.
 
 ## Review and decision
 
