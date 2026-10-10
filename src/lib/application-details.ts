@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export type ApplicationDetails = { full_name: string; phone: string | null; portfolio_url: string | null };
-export type ApplicationFieldErrors = Partial<Record<keyof ApplicationDetails | "cover_letter", string>>;
+export type ApplicationFieldErrors = Partial<Record<keyof ApplicationDetails | "cover_letter" | "education" | "work_experience", string>>;
 const controls = /[\u0000-\u001f\u007f-\u009f]/;
 const characters = (value: string) => [...value].length;
 

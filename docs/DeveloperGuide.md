@@ -1,5 +1,17 @@
 # Developer Guide
 
+## Local #44 profile and résumé implementation
+
+[Accepted archived packet](../workflow/archive/2026-10-09-profile-resume/record.md), accepted locally and synced to canonical v1.4; not a hosted release. [Migration](../supabase/migrations/20261009230000_profile_resume.sql) adds owner-only applicant_profiles, nullable background snapshots and private application_resume_objects lifecycle records. Public authenticated profile and v3 application RPCs verify the current confirmed Applicant; direct table writes remain denied. v2 contact wrappers preserve existing background and use the same freeze/pending-upload triggers, keeping older contact clients compatible.
+
+Private bucket application-resumes allows only finalized-object reads tied through application RLS. No browser upload/overwrite/delete policy exists. The POST route verifies Origin, current verified Applicant and owned application before narrowly scoped privileged staging/RPC/cleanup. It streams at most1MiB, validates filename/type and PDF structure in a time/memory-limited worker, then reserves→uploads→finalizes under advisory→job→application locks. Stable client operation IDs reconcile a repeated exact-file HTTP request. Submission refuses pending uploads and atomically freezes the finalized reference; late finalization cannot bypass closure/freeze.
+
+The GET route rechecks verified Auth and uses user-scoped RLS metadata/Storage reads, returning attachment/no-store bytes without public/signed URLs. New structured fields and PDF data are not added to AI inputs. Next development Server Function argument logging is disabled. The worker's pdf-lib dependencies are explicitly traced into the upload route build.
+
+Runtime uploads need server-only SUPABASE_SECRET_KEY or legacy SUPABASE_SERVICE_ROLE_KEY even if AI is disabled. TEST_SUPABASE_SERVICE_ROLE_KEY remains a separate local test setting; no production fallback to it. Tests must target local127.0.0.1:54321 only. The isolated worktree was tested onlocalhost:3001; PLAYWRIGHT_BASE_URL/PLAYWRIGHT_SERVER_COMMAND override defaults for this setup.
+
+Retired/canceled keys remain deleting tombstones after Storage removal, so an earlier in-flight upload stays tracked for an exact-key retry. Cancel interrupted upload and later owner mutations retry cleanup; there is no scheduled sweeper or guaranteed cleanup after all processes disappear. Operators must monitor retained operations; never delete referenced objects or arbitrary bucket prefixes. The local race test uses synthetic Storage metadata but its cleanup uses the supported Storage API; browser tests additionally verify real bytes, replacement/removal and access. Keep migration/bucket/runtime config and preview validation as separate authorized Development rollout tasks. Rollback preserves columns/data/files and freezes, with app/API compatibility evidence before selecting an older app.
+
 Status: public browsing, Applicant applications, HR review/job management, password recovery and AI assistance are merged into `develop`. Issue #36 account navigation/logout passed local checks and independent review on `fix/36-role-navigation-logout`; Paul accepted with recorded limits on 2026-10-09; ACC-005 is synced to canonical v1.2 and the packet is archived. Hosted preview validation and production release remain separate team operations.
 
 ## Architecture

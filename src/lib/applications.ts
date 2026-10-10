@@ -4,6 +4,7 @@ import { requireApplicant } from "@/lib/auth";
 import { hrReviewStatusSchema } from "@/lib/hr-input";
 
 const applicationSchema = z.object({
+  education: z.string().nullable(), work_experience: z.string().nullable(),
   full_name: z.string().nullable(),
   submitted_email: z.string().nullable(),
   phone: z.string().nullable(),
@@ -22,7 +23,7 @@ const applicationSchema = z.object({
 
 export type ApplicantApplication = z.infer<typeof applicationSchema>;
 
-const fields = "full_name,submitted_email,phone,portfolio_url,id,job_id,job_title,submission_state,cover_letter,original_submitted_letter,submitted_at,updated_at,revision,review_status";
+const fields = "education,work_experience,full_name,submitted_email,phone,portfolio_url,id,job_id,job_title,submission_state,cover_letter,original_submitted_letter,submitted_at,updated_at,revision,review_status";
 
 export async function listOwnApplications(): Promise<ApplicantApplication[]> {
   const { client, user } = await requireApplicant();

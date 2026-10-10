@@ -10,10 +10,10 @@ import type { ApplicationFormState } from "@/lib/application-form-state";
 
 export function ApplicationForm({ jobId, value, revision, submitted, details, email }: {
   jobId: string; value: string; revision: number | null; submitted: boolean; email: string;
-  details: { full_name: string | null; phone: string | null; portfolio_url: string | null; submitted_email: string | null };
+  details: { full_name: string | null; phone: string | null; portfolio_url: string | null; submitted_email: string | null; education?: string | null; work_experience?: string | null };
 }) {
   const initial: ApplicationFormState = { values: {
-    full_name: details.full_name ?? "", phone: details.phone ?? "", portfolio_url: details.portfolio_url ?? "", cover_letter: value,
+    education: details.education ?? "", work_experience: details.work_experience ?? "", full_name: details.full_name ?? "", phone: details.phone ?? "", portfolio_url: details.portfolio_url ?? "", cover_letter: value,
   }, errors: {} };
   const [state, formAction, pending] = useActionState(updateApplication, initial, `/jobs/${jobId}/apply`);
   const [coverLetter, setCoverLetter] = useState(state.values.cover_letter);
@@ -50,6 +50,7 @@ export function ApplicationForm({ jobId, value, revision, submitted, details, em
             aria-invalid={Boolean(state.errors.portfolio_url)} aria-describedby="portfolio-help" className="w-full rounded-lg border p-3" />
           <p id="portfolio-help" className="text-sm text-muted-foreground">{state.errors.portfolio_url ?? "Use an http:// or https:// address without embedded credentials. Maximum 2,048 characters."}</p>
         </div>
+        {([['education','Education (optional)'],['work_experience','Work experience (optional)']] as const).map(([key,label]) => <div className="space-y-2" key={key}><Label htmlFor={key}>{label}</Label><Textarea id={key} name={key} rows={5} maxLength={2000} defaultValue={state.values[key]} aria-invalid={Boolean(state.errors[key])} aria-describedby={key+'-help'} /><p id={key+'-help'} className="text-sm text-muted-foreground">{state.errors[key] ?? 'Optional. Maximum 2,000 characters. Submitted details are locked.'}</p></div>)}
         <div className="space-y-2"><Label htmlFor="cover_letter">Cover letter</Label>
           <Textarea id="cover_letter" name="cover_letter" value={coverLetter} onChange={(event) => setCoverLetter(event.target.value)}
             maxLength={5000} rows={12} aria-invalid={Boolean(state.errors.cover_letter)} aria-describedby="letter-help" />

@@ -1,9 +1,9 @@
 import type { ApplicationDetails } from "./application-details";
 export type ExistingApplication = ApplicationDetails & {
-  id: string; submission_state: "draft" | "submitted"; cover_letter: string; revision: number;
+  education?: string | null; work_experience?: string | null; id: string; submission_state: "draft" | "submitted"; cover_letter: string; revision: number;
 };
 export function reconcileApplicationWrite(
-  intent: "save" | "submit", attempted: ApplicationDetails & { cover_letter: string },
+  intent: "save" | "submit", attempted: ApplicationDetails & { cover_letter: string; education?: string | null; work_experience?: string | null },
   expectedRevision: number | null, existing: ExistingApplication | null,
 ): string | null {
   if (!existing) return null;
@@ -12,6 +12,8 @@ export function reconcileApplicationWrite(
     && existing.revision === (expectedRevision ?? 0) + 1
     && existing.cover_letter === attempted.cover_letter
     && existing.full_name === attempted.full_name && existing.phone === attempted.phone
-    && existing.portfolio_url === attempted.portfolio_url) return existing.id;
+    && existing.portfolio_url === attempted.portfolio_url
+    && (attempted.education === undefined || existing.education === attempted.education)
+    && (attempted.work_experience === undefined || existing.work_experience === attempted.work_experience)) return existing.id;
   return null;
 }
