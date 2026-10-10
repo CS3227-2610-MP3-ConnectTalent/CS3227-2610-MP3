@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("signup rejects different passwords before creating an account", async ({ page }) => {
   await page.goto("/auth/sign-up");
-  await expect(page.getByText(/not sent to Gmail/)).toBeVisible();
+  await expect(page.getByText(/verification link before you can sign in/)).toBeVisible();
   const email = `mismatch-${Date.now()}@example.test`;
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill("CorrectHorseBattery9!");

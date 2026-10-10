@@ -37,17 +37,23 @@ test("HR reviews only submitted applications and Applicant sees status without p
   expect(applicantResult.error).toBeNull();
   expect(hrResult.error).toBeNull();
   expect(otherResult.error).toBeNull();
-  for (const [userId, fullName] of [
-    [applicantResult.data.user!.id, "Synthetic HR review Applicant"],
-    [otherResult.data.user!.id, "Synthetic other Applicant"],
-  ] as const) {
-    const { error } = await admin.from("applicant_profiles").upsert({
-      user_id: userId,
-      full_name: fullName,
-      phone: "+6591234567",
+  async function createApplicantProfile(email: string, fullName: string) {
+    const applicant = createClient("http://127.0.0.1:54321", localAdminKey!, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
-    expect(error).toBeNull();
+    const { error: signInError } = await applicant.auth.signInWithPassword({ email, password });
+    expect(signInError).toBeNull();
+    const { error: profileError } = await applicant.rpc("save_applicant_profile", {
+      p_full_name: fullName,
+      p_phone: "+6591234567",
+      p_portfolio_url: null,
+      p_education: null,
+      p_work_experience: null,
+    });
+    expect(profileError).toBeNull();
   }
+  await createApplicantProfile(applicantEmail, "Synthetic HR review Applicant");
+  await createApplicantProfile(otherEmail, "Synthetic other Applicant");
   const { error: promotionError } = await admin.from("profiles").update({ role: "hr" }).eq("user_id", hrResult.data.user!.id);
   expect(promotionError).toBeNull();
 

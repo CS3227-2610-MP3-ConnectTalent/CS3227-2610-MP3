@@ -89,6 +89,12 @@ let fixturesCreated = false;
 try {
   await runSql(insertFixtures);
   fixturesCreated = true;
+  // Complete the Applicant fixture through the authorized RPC used by the app.
+  await runSql(`begin;
+    set local role authenticated;
+    select set_config('request.jwt.claim.sub', '${userId}', true);
+    select public.save_applicant_profile('Synthetic Applicant', '+6591234567', null, null, null);
+    commit;`);
 
   // One transaction holds the first submission and its job/advisory locks.
   const first = startSql(applicantSql(`select public.submit_application_details_v2('${jobs[0]}', 'First synthetic letter','Synthetic Applicant',null,null, null)`, "FIRST_SUBMITTED"));
