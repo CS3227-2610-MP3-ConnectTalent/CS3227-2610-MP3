@@ -133,17 +133,17 @@ The change folder is the unit of work and review. Capability deltas go under `ch
 
 The 0.6 baseline will be moved without intended behavior changes into these files:
 
-| Canonical file | Requirement area |
-| --- | --- |
-| `product-overview.md` | One employer per deployment, users, first-release boundary, non-goals |
-| `accounts-and-roles.md` | Applicant signup, controlled HR account assignment, role permissions |
-| `public-job-listings.md` | Published-only browsing, category filtering, job detail fields |
-| `job-management.md` | HR draft creation/editing, publication, closing, immutable published content |
-| `applications-and-review.md` | One application per applicant/job, applicant ownership, HR status and notes |
-| `applicant-ai-draft.md` | Allowed inputs, editable output, explicit applicant submission |
-| `hr-ai-summary.md` | Allowed inputs/outputs, follow-up questions, no score/rank/status decision |
-| `security-and-privacy.md` | Authorization order, RLS, untrusted text, data minimization, logging and limits |
-| `deployment-and-operations.md` | Separate environments, audit evidence, operational and release expectations |
+| Canonical file                 | Requirement area                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| `product-overview.md`          | One employer per deployment, users, first-release boundary, non-goals           |
+| `accounts-and-roles.md`        | Applicant signup, controlled HR account assignment, role permissions            |
+| `public-job-listings.md`       | Published-only browsing, category filtering, job detail fields                  |
+| `job-management.md`            | HR draft creation/editing, publication, closing, immutable published content    |
+| `applications-and-review.md`   | One application per applicant/job, applicant ownership, HR status and notes     |
+| `applicant-ai-draft.md`        | Allowed inputs, editable output, explicit applicant submission                  |
+| `hr-ai-summary.md`             | Allowed inputs/outputs, follow-up questions, no score/rank/status decision      |
+| `security-and-privacy.md`      | Authorization order, RLS, untrusted text, data minimization, logging and limits |
+| `deployment-and-operations.md` | Separate environments, audit evidence, operational and release expectations     |
 
 Each normative requirement receives a stable capability-prefixed identifier (for example, `JOB-001` or `APP-003`) and at least one observable scenario where appropriate. IDs are never reused; retired IDs remain noted in change history. Requirements use clear normative language and define role, input, outcome, and denial behavior for security-sensitive paths. Cross-cutting rules have one canonical home and are linked from capability specs instead of duplicated with potentially conflicting wording.
 

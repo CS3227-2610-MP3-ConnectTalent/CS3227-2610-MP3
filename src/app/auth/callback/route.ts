@@ -10,7 +10,20 @@ export async function GET(request: NextRequest) {
   if (code) {
     const client = await createSupabaseServerClient();
     const { error } = await client.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(isRecovery ? "/auth/reset-password" : "/applications", siteOrigin));
+    if (!error)
+      return NextResponse.redirect(
+        new URL(
+          isRecovery ? "/auth/reset-password" : "/applications",
+          siteOrigin,
+        ),
+      );
   }
-  return NextResponse.redirect(new URL(isRecovery ? "/auth/forgot-password?error=link" : "/auth/sign-in?error=confirmation", siteOrigin));
+  return NextResponse.redirect(
+    new URL(
+      isRecovery
+        ? "/auth/forgot-password?error=link"
+        : "/auth/sign-in?error=confirmation",
+      siteOrigin,
+    ),
+  );
 }

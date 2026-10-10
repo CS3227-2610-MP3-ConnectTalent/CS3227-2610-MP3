@@ -1,6 +1,10 @@
 # Active change packets
 
-No active change packets.
+## Active proposals
+
+- Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) proposes Prettier and blocking ESLint complexity/size limits in CI. John approved the revised defaults and implementation in chat on 2026-10-10. Its [packet](2026-10-10-quality-gates/proposal.md) records the approval; implementation is in progress.
+
+## Accepted and archived work
 
 [#44 private profiles and PDF résumés](../archive/2026-10-09-profile-resume/record.md) was separately accepted with recorded limits on2026-10-09 and completely archived after canonical v1.4 sync. Work remains uncommitted on feat/44-profile-resume; hosted rollout and the documented validation/cleanup limitations remain open.
 
@@ -26,15 +30,15 @@ Start future contributor changes with a triaged GitHub issue, then create `workf
 
 Copy and fill the [templates](../templates/ProposalTemplate.md):
 
-| Packet artifact | Source template / rule |
-| --- | --- |
-| proposal.md | [Proposal](../templates/ProposalTemplate.md): problem, scope, acceptance evidence, approval |
-| design.md | [Design](../templates/DesignTemplate.md): required for architecture, authorization, schema, AI boundaries, integrations, risk or multiple modules; narrow work records an omission reason |
-| specs/<capability>.md | [Spec delta](../templates/SpecDeltaTemplate.md): one file per changed [canonical capability](../specs/README.md), using ADDED/MODIFIED/REMOVED and stable IDs |
-| plan.md | [Implementation plan](../templates/ImplementationPlanTemplate.md): dependency order, owners, files and verification |
-| tasks.md | [Tasks](../templates/TasksTemplate.md): checkboxes tied to actual evidence |
-| record.md | [Feature record](../templates/FeatureRecordTemplate.md): approvals, exact results, independent review, human decisions and every session log |
-| handoffs/<task-role>.md, if used | [Agent handoff](../templates/AgentHandoffTemplate.md): bounded assignment and actual returned evidence |
+| Packet artifact                  | Source template / rule                                                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| proposal.md                      | [Proposal](../templates/ProposalTemplate.md): problem, scope, acceptance evidence, approval                                                                                               |
+| design.md                        | [Design](../templates/DesignTemplate.md): required for architecture, authorization, schema, AI boundaries, integrations, risk or multiple modules; narrow work records an omission reason |
+| specs/<capability>.md            | [Spec delta](../templates/SpecDeltaTemplate.md): one file per changed [canonical capability](../specs/README.md), using ADDED/MODIFIED/REMOVED and stable IDs                             |
+| plan.md                          | [Implementation plan](../templates/ImplementationPlanTemplate.md): dependency order, owners, files and verification                                                                       |
+| tasks.md                         | [Tasks](../templates/TasksTemplate.md): checkboxes tied to actual evidence                                                                                                                |
+| record.md                        | [Feature record](../templates/FeatureRecordTemplate.md): approvals, exact results, independent review, human decisions and every session log                                              |
+| handoffs/<task-role>.md, if used | [Agent handoff](../templates/AgentHandoffTemplate.md): bounded assignment and actual returned evidence                                                                                    |
 
 A defect restoring existing specified behavior cites the existing IDs; change the delta only if expected behavior changes. Documentation/process-only work may use a lightweight record with an approved design/plan and an explicit no-product-delta statement. Do not invent product requirements or completed verification to fill fields.
 

@@ -6,16 +6,16 @@ Baseline: ProductSpec v1.4, 9 October 2026 (SEC-009 profile and attachment priva
 
 Access MUST follow these boundaries. Additional profile, background-snapshot and attachment permissions have their canonical home in SEC-009 below:
 
-| Data/action | Applicant access | HR access |
-| --- | --- | --- |
-| This company's published jobs, categories and requirements | Read | Read/close |
-| Draft jobs | None | Read/write/publish |
-| Closed jobs | Title of a job on their existing application | Read |
-| Saved draft application and cover letter | Own draft read/write while its job is published; own read after closure | None |
-| Submitted application, original/current letter and current review status | Own read; no submitted-letter or status write | Read for review; status write through a separate authorized human action |
-| HR notes and status-change history | None | Read; append notes and status events through authorized actions |
-| Role assignment | Cannot set or change | Controlled administration only |
-| Audit events | None | Read as authorized |
+| Data/action                                                              | Applicant access                                                        | HR access                                                                |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| This company's published jobs, categories and requirements               | Read                                                                    | Read/close                                                               |
+| Draft jobs                                                               | None                                                                    | Read/write/publish                                                       |
+| Closed jobs                                                              | Title of a job on their existing application                            | Read                                                                     |
+| Saved draft application and cover letter                                 | Own draft read/write while its job is published; own read after closure | None                                                                     |
+| Submitted application, original/current letter and current review status | Own read; no submitted-letter or status write                           | Read for review; status write through a separate authorized human action |
+| HR notes and status-change history                                       | None                                                                    | Read; append notes and status events through authorized actions          |
+| Role assignment                                                          | Cannot set or change                                                    | Controlled administration only                                           |
+| Audit events                                                             | None                                                                    | Read as authorized                                                       |
 
 Creating jobs, editing job drafts, publishing and closing MUST be restricted to HR. An Applicant MUST NOT edit another Applicant's draft or submission, change any submitted letter, change HR status or invoke the HR summary. Applicant A MUST NOT read Applicant B's application, status or AI draft, or see HR notes/history. Anonymous users MUST NOT read any protected application, note or status event or access AI endpoints. HR MUST NOT read unsubmitted drafts, including a draft owned before an account's controlled promotion from Applicant to HR. HR write actions MUST check a verified user's current HR role on the server and in the database. Status events and logs MUST exclude letter and note text. Closing a job MUST NOT broaden or revoke these existing-record read boundaries. [APP-004](applications-and-review.md) owns save/submit/edit lifecycle and job-close behavior. Public published-job browsing remains available under [JOB-001](public-job-listings.md).
 
@@ -73,12 +73,12 @@ Scenario: Given applicant fixtures used for development or security testing, whe
 
 Server authorization and database/Storage RLS MUST enforce:
 
-| Data/action | Verified Applicant | Authorized verified HR | Anonymous |
-| --- | --- | --- | --- |
-| Mutable Applicant profile | Own read/write only | None | None |
-| Application background snapshots | Own read; draft write while published | Submitted read only | None |
-| Finalized résumé bytes/metadata | Own draft/submitted read; draft mutation while published via validated server workflow only | Submitted read only, including after closure | None |
-| Upload reservation/staged objects | Own operation state through authorized server workflow; no arbitrary object access | None | None |
+| Data/action                       | Verified Applicant                                                                          | Authorized verified HR                       | Anonymous |
+| --------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------- | --------- |
+| Mutable Applicant profile         | Own read/write only                                                                         | None                                         | None      |
+| Application background snapshots  | Own read; draft write while published                                                       | Submitted read only                          | None      |
+| Finalized résumé bytes/metadata   | Own draft/submitted read; draft mutation while published via validated server workflow only | Submitted read only, including after closure | None      |
+| Upload reservation/staged objects | Own operation state through authorized server workflow; no arbitrary object access          | None                                         | None      |
 
 The bucket MUST be private and MUST NOT expose public object URLs. Browser credentials MUST NOT allow direct object upload/overwrite/delete bypassing server validation or frozen state. Download MUST authenticate and authorize the current user for the selected finalized attachment on every request, then return an attachment response with private/no-store caching; guessed paths or foreign/draft-HR access MUST reveal no bytes. Server credential use for staging MUST remain server-only, narrowly scoped to authorized generated object paths and never replace user-scoped private-record read authorization. Referenced submitted files MUST be protected from deletion/overwrite in permitted client/service interfaces. A privileged project administrator remains outside the normal product role boundary.
 

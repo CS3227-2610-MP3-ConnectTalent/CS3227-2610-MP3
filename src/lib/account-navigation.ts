@@ -11,24 +11,39 @@ export type AccountNavigationState =
 
 // React cache shares this lookup only within the current server render/request.
 // This display state does not replace protected page/action authorization.
-export const getAccountNavigation = cache(async (): Promise<AccountNavigationState> => {
-  try {
-    const client = await createSupabaseServerClient();
-    const { data: { user }, error } = await client.auth.getUser();
-    if (error) return { kind: error.name === "AuthSessionMissingError" ? "guest" : "unavailable" };
-    if (!user) return { kind: "guest" };
-    if (!user.email_confirmed_at) return { kind: "signed-in", role: null };
-
+export const getAccountNavigation = cache(
+  async (): Promise<AccountNavigationState> => {
     try {
-      const { data: profile, error: profileError } = await client.from("profiles")
-        .select("role").eq("user_id", user.id).maybeSingle();
-      const role = !profileError && (profile?.role === "applicant" || profile?.role === "hr")
-        ? profile.role : null;
-      return { kind: "signed-in", role };
+      const client = await createSupabaseServerClient();
+      const {
+        data: { user },
+        error,
+      } = await client.auth.getUser();
+      if (error)
+        return {
+          kind:
+            error.name === "AuthSessionMissingError" ? "guest" : "unavailable",
+        };
+      if (!user) return { kind: "guest" };
+      if (!user.email_confirmed_at) return { kind: "signed-in", role: null };
+
+      try {
+        const { data: profile, error: profileError } = await client
+          .from("profiles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        const role =
+          !profileError &&
+          (profile?.role === "applicant" || profile?.role === "hr")
+            ? profile.role
+            : null;
+        return { kind: "signed-in", role };
+      } catch {
+        return { kind: "signed-in", role: null };
+      }
     } catch {
-      return { kind: "signed-in", role: null };
+      return { kind: "unavailable" };
     }
-  } catch {
-    return { kind: "unavailable" };
-  }
-});
+  },
+);

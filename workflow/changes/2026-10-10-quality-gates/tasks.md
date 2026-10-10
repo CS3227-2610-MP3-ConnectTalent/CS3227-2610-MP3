@@ -1,0 +1,16 @@
+# Tasks: formatting and complexity gates
+
+- Change: `2026-10-10-quality-gates`; issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51)
+- Approved plan: `plan.md`; proposal: `proposal.md`
+
+| Task | Work | Status | Evidence / remaining work |
+| --- | --- | --- | --- |
+| T00 | Record approval of proposal and plan before implementation. | Complete | Approval recorded in `proposal.md` and `record.md` on 2026-10-10. |
+| T01 | Add Prettier configuration, scripts, ignores, and format supported maintained files. | Complete | `pnpm format:check` and `git diff --check` passed; excluded paths reviewed. |
+| T02 | Configure SonarJS cyclomatic 20/classic, cognitive 15, max 300 lines/file, and max 50 lines/function at error level using default rule options. | Complete | `pnpm lint` passed; `eslint --print-config` confirmed values. Initial lint runs exposed violations that were refactored. |
+| T03 | Make formatting and lint checks blocking in CI. | Complete | `.github/workflows/ci.yml` runs `pnpm format:check` and `pnpm lint` in the blocking app job. Hosted CI is not available for this local revision. |
+| T04 | Refactor first-party JS/TS files that violate the fixed limits and verify behavior. | Implementation complete; verification pending | `pnpm lint` and `pnpm typecheck` passed. Run `pnpm test:unit` after merging current `develop`; E2E verification is not recorded. |
+| T05 | Obtain an independent review of final changed paths and record findings/rechecks. | Pending | Review the merged final revision. |
+| T06 | Record the student's post-review acceptance or requested changes. | Pending | Record the actual decision and date separately from implementation approval. |
+| T07 | Complete process-only closeout, document no product delta, archive the packet, and write/link a dated session summary. | Pending | Do after review and acceptance; canonical product sync is N/A because this change is tooling/process only. |
+| T08 | Open an issue-linked PR to `develop`. | Pending | Final contributor action after T07 and all pre-PR gates. |

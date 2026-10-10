@@ -11,18 +11,33 @@ function reviewPath(id: string) {
   return `/hr/applications/${id}`;
 }
 
-function audit(actor: string, operation: "note" | "status", target: string, outcome: "changed" | "denied") {
-  console.info(JSON.stringify({ actor, operation, target, at: new Date().toISOString(), outcome }));
+function audit(
+  actor: string,
+  operation: "note" | "status",
+  target: string,
+  outcome: "changed" | "denied",
+) {
+  console.info(
+    JSON.stringify({
+      actor,
+      operation,
+      target,
+      at: new Date().toISOString(),
+      outcome,
+    }),
+  );
 }
 
 export async function addHRNote(formData: FormData) {
   const { client, user } = await requireHR();
   const id = formData.get("applicationId");
   const parsed = parseHRNote(formData.get("body"));
-  if (typeof id !== "string" || !z.uuid().safeParse(id).success) redirect("/hr/applications?error=invalid");
+  if (typeof id !== "string" || !z.uuid().safeParse(id).success)
+    redirect("/hr/applications?error=invalid");
   if (!parsed.success) redirect(`${reviewPath(id)}?error=note`);
   const { error } = await client.rpc("append_hr_application_note", {
-    p_application_id: id, p_body: parsed.value,
+    p_application_id: id,
+    p_body: parsed.value,
   });
   audit(user.id, "note", id, error ? "denied" : "changed");
   if (error) redirect(`${reviewPath(id)}?error=note`);
@@ -33,8 +48,12 @@ export async function addHRNote(formData: FormData) {
 export async function changeHRStatus(formData: FormData) {
   const { client, user } = await requireHR();
   const id = formData.get("applicationId");
-  const parsed = parseHRStatusChange(formData.get("status"), formData.get("expectedRevision"));
-  if (typeof id !== "string" || !z.uuid().safeParse(id).success) redirect("/hr/applications?error=invalid");
+  const parsed = parseHRStatusChange(
+    formData.get("status"),
+    formData.get("expectedRevision"),
+  );
+  if (typeof id !== "string" || !z.uuid().safeParse(id).success)
+    redirect("/hr/applications?error=invalid");
   if (!parsed.success) redirect(`${reviewPath(id)}?error=status`);
   const { error } = await client.rpc("change_hr_application_status", {
     p_application_id: id,

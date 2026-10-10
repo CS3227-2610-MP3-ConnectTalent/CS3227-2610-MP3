@@ -2,10 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseServerClient: vi.fn(),
-  redirect: vi.fn((destination: string) => { throw new Error(`REDIRECT:${destination}`); }),
+  redirect: vi.fn((destination: string) => {
+    throw new Error(`REDIRECT:${destination}`);
+  }),
 }));
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
-vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: mocks.createSupabaseServerClient }));
+vi.mock("@/lib/supabase/server", () => ({
+  createSupabaseServerClient: mocks.createSupabaseServerClient,
+}));
 
 import { signIn } from "../../src/app/auth/actions";
 
@@ -23,21 +27,48 @@ describe("role-aware sign-in", () => {
     mocks.createSupabaseServerClient.mockResolvedValue({
       auth: {
         signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
-        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "hr-id", email_confirmed_at: "2026-10-08" } }, error: null }),
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: "hr-id", email_confirmed_at: "2026-10-08" } },
+          error: null,
+        }),
       },
-      from: vi.fn().mockReturnValue({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { role: "hr" }, error: null }) }) }) }),
+      from: vi.fn().mockReturnValue({
+        select: () => ({
+          eq: () => ({
+            maybeSingle: async () => ({ data: { role: "hr" }, error: null }),
+          }),
+        }),
+      }),
     });
-    await expect(signIn(credentials())).rejects.toThrow("REDIRECT:/hr/applications");
+    await expect(signIn(credentials())).rejects.toThrow(
+      "REDIRECT:/hr/applications",
+    );
   });
 
   it("keeps verified Applicants in their own area", async () => {
     mocks.createSupabaseServerClient.mockResolvedValue({
       auth: {
         signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
-        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "applicant-id", email_confirmed_at: "2026-10-08" } }, error: null }),
+        getUser: vi.fn().mockResolvedValue({
+          data: {
+            user: { id: "applicant-id", email_confirmed_at: "2026-10-08" },
+          },
+          error: null,
+        }),
       },
-      from: vi.fn().mockReturnValue({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { role: "applicant" }, error: null }) }) }) }),
+      from: vi.fn().mockReturnValue({
+        select: () => ({
+          eq: () => ({
+            maybeSingle: async () => ({
+              data: { role: "applicant" },
+              error: null,
+            }),
+          }),
+        }),
+      }),
     });
-    await expect(signIn(credentials())).rejects.toThrow("REDIRECT:/applications");
+    await expect(signIn(credentials())).rejects.toThrow(
+      "REDIRECT:/applications",
+    );
   });
 });

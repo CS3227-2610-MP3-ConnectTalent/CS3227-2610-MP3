@@ -6,32 +6,76 @@ import { reviewStatusLabel } from "@/lib/hr-input";
 
 export const dynamic = "force-dynamic";
 
+type Applications = Awaited<ReturnType<typeof listSubmittedApplications>>;
+type Application = Applications[number];
+
 export default async function HRApplicationsPage() {
   await requireHR();
-  let applications;
+  let applications: Applications;
   try {
     applications = await listSubmittedApplications();
   } catch {
-    return <main className="page-shell mx-auto max-w-4xl px-5 py-10">
-      <h1 className="text-3xl font-semibold">Application review</h1>
-      <p role="alert" className="mt-5">Review data is temporarily unavailable. Try again later.</p>
-    </main>;
+    return <ApplicationReviewUnavailable />;
   }
+  return <HRApplicationsContent applications={applications} />;
+}
 
-  return <main className="page-shell mx-auto max-w-4xl space-y-8 px-5 py-10">
-    <header className="flex items-center justify-between gap-4">
-      <Link href="/" className="underline">← Careers</Link>
-    </header>
-    <h1 className="text-3xl font-semibold">Application review</h1>
-    <p className="text-muted-foreground">Submitted applications for this careers site.</p>
-    {applications.length === 0 ? <p>No submitted applications yet.</p> : <ul className="space-y-3">
-      {applications.map((application) => <li key={application.id}>
-        <Link href={`/hr/applications/${application.id}`} className="block rounded-lg border p-5 hover:bg-muted/40">
-          <span className="block font-semibold">{application.job_title}</span>
-          <span className="block text-sm">Applicant {application.applicant_id}</span>
-          <span className="block text-sm text-muted-foreground">{reviewStatusLabel(application.review_status)} · Submitted {new Date(application.submitted_at).toLocaleString()}</span>
+function ApplicationReviewUnavailable() {
+  return (
+    <main className="page-shell mx-auto max-w-4xl px-5 py-10">
+      <h1 className="text-3xl font-semibold">Application review</h1>
+      <p role="alert" className="mt-5">
+        Review data is temporarily unavailable. Try again later.
+      </p>
+    </main>
+  );
+}
+
+function HRApplicationsContent({
+  applications,
+}: {
+  applications: Applications;
+}) {
+  return (
+    <main className="page-shell mx-auto max-w-4xl space-y-8 px-5 py-10">
+      <header className="flex items-center justify-between gap-4">
+        <Link href="/" className="underline">
+          ← Careers
         </Link>
-      </li>)}
-    </ul>}
-  </main>;
+      </header>
+      <h1 className="text-3xl font-semibold">Application review</h1>
+      <p className="text-muted-foreground">
+        Submitted applications for this careers site.
+      </p>
+      {applications.length === 0 ? (
+        <p>No submitted applications yet.</p>
+      ) : (
+        <ul className="space-y-3">
+          {applications.map((application) => (
+            <HRApplicationRow key={application.id} application={application} />
+          ))}
+        </ul>
+      )}
+    </main>
+  );
+}
+
+function HRApplicationRow({ application }: { application: Application }) {
+  return (
+    <li>
+      <Link
+        href={`/hr/applications/${application.id}`}
+        className="block rounded-lg border p-5 hover:bg-muted/40"
+      >
+        <span className="block font-semibold">{application.job_title}</span>
+        <span className="block text-sm">
+          Applicant {application.applicant_id}
+        </span>
+        <span className="block text-sm text-muted-foreground">
+          {reviewStatusLabel(application.review_status)} · Submitted{" "}
+          {new Date(application.submitted_at).toLocaleString()}
+        </span>
+      </Link>
+    </li>
+  );
 }

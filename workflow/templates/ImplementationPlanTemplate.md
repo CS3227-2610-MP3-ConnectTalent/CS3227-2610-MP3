@@ -10,10 +10,10 @@ Copy to `workflow/changes/<YYYY-MM-DD-short-name>/plan.md`.
 
 ## Dependency-ordered work
 
-| Task ID / order | Depends on | Owner / agent role | Requirement and acceptance IDs | Exact files / expected change | Verification command or review / expected evidence |
-| --- | --- | --- | --- | --- | --- |
-| <T01> | <none or IDs> | <student; role/tool> | <JOB-001; change-AC-01> | <bounded edits> | <command, expected result and evidence path> |
-| <T02> | <T01> | <owner/role> | <IDs> | <files> | <check and output location> |
+| Task ID / order | Depends on    | Owner / agent role   | Requirement and acceptance IDs | Exact files / expected change | Verification command or review / expected evidence |
+| --------------- | ------------- | -------------------- | ------------------------------ | ----------------------------- | -------------------------------------------------- |
+| <T01>           | <none or IDs> | <student; role/tool> | <JOB-001; change-AC-01>        | <bounded edits>               | <command, expected result and evidence path>       |
+| <T02>           | <T01>         | <owner/role>         | <IDs>                          | <files>                       | <check and output location>                        |
 
 For behavior changes, plan test-first work with the relevant unit/integration/browser/security cases and expected failure/pass evidence. For documentation-only work, use appropriate structure/link/content checks without claiming runtime verification. Add documentation, security review, migration, deployment and rollback tasks when relevant; explicitly explain N/A rather than running irrelevant work.
 

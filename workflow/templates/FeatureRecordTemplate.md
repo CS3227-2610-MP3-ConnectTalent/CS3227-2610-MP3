@@ -38,19 +38,19 @@ For each unchecked/N/A gate, record why, who must act, and what evidence is miss
 
 List the exact spec clauses and observable success/failure cases, including role boundaries and AI security cases.
 
-| Exact acceptance ID | Issue criterion / canonical requirement ID and link | Observable success / denial / failure | Evidence, result and limitation |
-| --- | --- | --- | --- |
-| <change-AC-01> | <#issue; JOB-001 or process-only criterion> | <Given / When / Then> | <actual command/output/review link or pending> |
+| Exact acceptance ID | Issue criterion / canonical requirement ID and link | Observable success / denial / failure | Evidence, result and limitation                |
+| ------------------- | --------------------------------------------------- | ------------------------------------- | ---------------------------------------------- |
+| <change-AC-01>      | <#issue; JOB-001 or process-only criterion>         | <Given / When / Then>                 | <actual command/output/review link or pending> |
 
 Keep original release-acceptance item numbers where relevant; scope partial coverage explicitly. Link stable canonical IDs using workflow/specs/README.md conventions. A scenario describes expected behavior, not an observed pass.
 
 ## Agent handoffs
 
 | Role and tool | Input/context supplied | Output and assumptions | Human verification |
-| --- | --- | --- | --- |
-| Analyst | | | |
-| Implementer | | | |
-| Reviewer | | | |
+| ------------- | ---------------------- | ---------------------- | ------------------ |
+| Analyst       |                        |                        |                    |
+| Implementer   |                        |                        |                    |
+| Reviewer      |                        |                        |                    |
 
 Link filled handoff artifacts with inputs, allowed files, acceptance IDs, dependencies, assumptions, actual agent/tool identity, output/range, and human checks. List only real runs; mark planned roles pending. Identify self-review explicitly and do not count it as independent review.
 
@@ -63,9 +63,9 @@ Commands and results:
 Security/adversarial cases and results:
 Known limitations:
 
-| Date / environment / commit | Exact command or manual check | Exit/result and counts | Output/evidence link | What this proves / does not prove |
-| --- | --- | --- | --- | --- |
-| <actual context> | <exact invocation> | <pass/fail/not run; failure and rerun> | <log/path> | <scope and limitations> |
+| Date / environment / commit | Exact command or manual check | Exit/result and counts                 | Output/evidence link | What this proves / does not prove |
+| --------------------------- | ----------------------------- | -------------------------------------- | -------------------- | --------------------------------- |
+| <actual context>            | <exact invocation>            | <pass/fail/not run; failure and rerun> | <log/path>           | <scope and limitations>           |
 
 For relevant test-first work, record the observed failing test and subsequent pass. For docs-only work, record document/link checks; do not claim product verification. Security cases should identify actor, allowed/denied action and observed result, or state N/A with rationale. Never log credentials or private applicant content.
 
@@ -85,9 +85,9 @@ Guide/reflection/log updates:
 
 List every session summary contributing to this change, including analysis, implementation, debugging, review and closeout. Describe any missing coverage; do not claim transcript completeness without evidence.
 
-| Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
-| --- | --- | --- | --- |
-| <date/session ID> | <relative link to logs/YYYY-MM-DD-topic.md> | <brief scope> | <verified / team verification pending / missing source> |
+| Date / session    | Summary log link                            | Work / prompts / decisions covered | Verification status / missing coverage                  |
+| ----------------- | ------------------------------------------- | ---------------------------------- | ------------------------------------------------------- |
+| <date/session ID> | <relative link to logs/YYYY-MM-DD-topic.md> | <brief scope>                      | <verified / team verification pending / missing source> |
 
 ## Canonical sync and archive
 

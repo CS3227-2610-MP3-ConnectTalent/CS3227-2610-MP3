@@ -3,7 +3,11 @@ import "server-only";
 const DEFAULT_LOCAL_ORIGIN = "http://localhost:3000";
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-function normalizeOrigin(value: string, variableName: string, allowLocalHttp: boolean): string {
+function normalizeOrigin(
+  value: string,
+  variableName: string,
+  allowLocalHttp: boolean,
+): string {
   let url: URL;
   try {
     url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
@@ -12,7 +16,8 @@ function normalizeOrigin(value: string, variableName: string, allowLocalHttp: bo
   }
 
   const isLocalHost = LOCAL_HOSTS.has(url.hostname);
-  const isAllowedHttp = allowLocalHttp && isLocalHost && url.protocol === "http:";
+  const isAllowedHttp =
+    allowLocalHttp && isLocalHost && url.protocol === "http:";
   if (
     url.username ||
     url.password ||
@@ -21,7 +26,9 @@ function normalizeOrigin(value: string, variableName: string, allowLocalHttp: bo
     url.hash ||
     (url.protocol !== "https:" && !isAllowedHttp)
   ) {
-    throw new Error(`${variableName} must be an HTTPS origin without a path, query, or fragment.`);
+    throw new Error(
+      `${variableName} must be an HTTPS origin without a path, query, or fragment.`,
+    );
   }
 
   return url.origin;
@@ -29,7 +36,9 @@ function normalizeOrigin(value: string, variableName: string, allowLocalHttp: bo
 
 function configuredOverride(allowLocalHttp: boolean): string | undefined {
   const value = process.env.APP_SITE_URL?.trim();
-  return value ? normalizeOrigin(value, "APP_SITE_URL", allowLocalHttp) : undefined;
+  return value
+    ? normalizeOrigin(value, "APP_SITE_URL", allowLocalHttp)
+    : undefined;
 }
 
 export function getAppSiteOrigin(): string {
@@ -38,12 +47,18 @@ export function getAppSiteOrigin(): string {
   if (vercelEnvironment === "production") {
     const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
     if (productionUrl) {
-      return normalizeOrigin(productionUrl, "VERCEL_PROJECT_PRODUCTION_URL", false);
+      return normalizeOrigin(
+        productionUrl,
+        "VERCEL_PROJECT_PRODUCTION_URL",
+        false,
+      );
     }
 
     const override = configuredOverride(false);
     if (override) return override;
-    throw new Error("VERCEL_PROJECT_PRODUCTION_URL is required to build production Auth redirects.");
+    throw new Error(
+      "VERCEL_PROJECT_PRODUCTION_URL is required to build production Auth redirects.",
+    );
   }
 
   if (vercelEnvironment === "preview") {

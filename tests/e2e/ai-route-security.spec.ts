@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("anonymous requests to each AI endpoint are denied", async ({ request }) => {
+test("anonymous requests to each AI endpoint are denied", async ({
+  request,
+}) => {
   const routes = ["/api/ai/applicant-draft", "/api/ai/hr-summary"];
 
   for (const route of routes) {

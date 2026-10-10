@@ -1,8 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ createClient: vi.fn(), signOut: vi.fn() }));
-vi.mock("@/lib/supabase/server", () => ({ createSupabaseServerClient: mocks.createClient }));
-vi.mock("next/navigation", () => ({ redirect: (url: string) => { throw new Error(`REDIRECT:${url}`); } }));
+vi.mock("@/lib/supabase/server", () => ({
+  createSupabaseServerClient: mocks.createClient,
+}));
+vi.mock("next/navigation", () => ({
+  redirect: (url: string) => {
+    throw new Error(`REDIRECT:${url}`);
+  },
+}));
 import { signOut } from "@/app/auth/actions";
 
 beforeEach(() => {

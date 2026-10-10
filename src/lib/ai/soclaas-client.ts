@@ -2,7 +2,12 @@ import "server-only";
 
 import OpenAI from "openai";
 
-import { applicantDraftMessages, hrSummaryMessages, type ApplicantDraftInput, type HrSummaryInput } from "./prompts";
+import {
+  applicantDraftMessages,
+  hrSummaryMessages,
+  type ApplicantDraftInput,
+  type HrSummaryInput,
+} from "./prompts";
 
 const providerTimeoutMs = 20_000;
 
@@ -19,8 +24,13 @@ function providerConfiguration() {
   } catch {
     return null;
   }
-  const localHost = endpoint.hostname === "localhost" || endpoint.hostname === "127.0.0.1";
-  if (endpoint.protocol !== "https:" && !(localHost && endpoint.protocol === "http:")) return null;
+  const localHost =
+    endpoint.hostname === "localhost" || endpoint.hostname === "127.0.0.1";
+  if (
+    endpoint.protocol !== "https:" &&
+    !(localHost && endpoint.protocol === "http:")
+  )
+    return null;
   return { apiKey, baseURL, model };
 }
 
@@ -40,7 +50,12 @@ function clientForRequest() {
   return { client, model: configuration.model };
 }
 
-async function requestJson(messages: ReturnType<typeof applicantDraftMessages> | ReturnType<typeof hrSummaryMessages>, maxTokens: number) {
+async function requestJson(
+  messages:
+    | ReturnType<typeof applicantDraftMessages>
+    | ReturnType<typeof hrSummaryMessages>,
+  maxTokens: number,
+) {
   const { client, model } = clientForRequest();
   const response = await client.chat.completions.create({
     model,
@@ -49,7 +64,8 @@ async function requestJson(messages: ReturnType<typeof applicantDraftMessages> |
     max_tokens: maxTokens,
   });
   const content = response.choices[0]?.message.content;
-  if (typeof content !== "string" || content.length === 0) throw new Error("SoCLaaS returned no JSON content.");
+  if (typeof content !== "string" || content.length === 0)
+    throw new Error("SoCLaaS returned no JSON content.");
   try {
     return JSON.parse(content) as unknown;
   } catch {
