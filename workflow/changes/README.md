@@ -1,5 +1,13 @@
 # Active change packets
 
+## Active proposals
+
+No proposals are awaiting implementation. Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission and its complete packet is [archived](../archive/2026-10-10-quality-gates/record.md); the authorized PR is the remaining final action.
+
+## Accepted and archived work
+
+Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission by Johnwz123 on 2026-10-10 after the independent review and requested closeout. The no-product-delta packet is [archived](../archive/2026-10-10-quality-gates/record.md); the PR is authorized and pending its final opening action. Hosted CI has not yet run for this branch.
+
 [#53 first-upload retry follow-up](../archive/2026-10-10-first-upload-retry/record.md): Paul separately accepted with recorded limits on 10 October 2026. Complete packet archived; restores existing APP-007 without a canonical delta. Hosted testing and commit/push remain pending.
 
 [#50 withdrawal placement correction](../archive/2026-10-10-withdrawal-placement/record.md): Paul accepted via “Accept correction” on 10 October 2026; canonical APP-008 synced to v1.6 and complete packet archived. My applications offers View/status only; withdrawal stays in individual submitted application details.
@@ -34,15 +42,15 @@ Start future contributor changes with a triaged GitHub issue, then create `workf
 
 Copy and fill the [templates](../templates/ProposalTemplate.md):
 
-| Packet artifact | Source template / rule |
-| --- | --- |
-| proposal.md | [Proposal](../templates/ProposalTemplate.md): problem, scope, acceptance evidence, approval |
-| design.md | [Design](../templates/DesignTemplate.md): required for architecture, authorization, schema, AI boundaries, integrations, risk or multiple modules; narrow work records an omission reason |
-| specs/<capability>.md | [Spec delta](../templates/SpecDeltaTemplate.md): one file per changed [canonical capability](../specs/README.md), using ADDED/MODIFIED/REMOVED and stable IDs |
-| plan.md | [Implementation plan](../templates/ImplementationPlanTemplate.md): dependency order, owners, files and verification |
-| tasks.md | [Tasks](../templates/TasksTemplate.md): checkboxes tied to actual evidence |
-| record.md | [Feature record](../templates/FeatureRecordTemplate.md): approvals, exact results, independent review, human decisions and every session log |
-| handoffs/<task-role>.md, if used | [Agent handoff](../templates/AgentHandoffTemplate.md): bounded assignment and actual returned evidence |
+| Packet artifact                  | Source template / rule                                                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| proposal.md                      | [Proposal](../templates/ProposalTemplate.md): problem, scope, acceptance evidence, approval                                                                                               |
+| design.md                        | [Design](../templates/DesignTemplate.md): required for architecture, authorization, schema, AI boundaries, integrations, risk or multiple modules; narrow work records an omission reason |
+| specs/<capability>.md            | [Spec delta](../templates/SpecDeltaTemplate.md): one file per changed [canonical capability](../specs/README.md), using ADDED/MODIFIED/REMOVED and stable IDs                             |
+| plan.md                          | [Implementation plan](../templates/ImplementationPlanTemplate.md): dependency order, owners, files and verification                                                                       |
+| tasks.md                         | [Tasks](../templates/TasksTemplate.md): checkboxes tied to actual evidence                                                                                                                |
+| record.md                        | [Feature record](../templates/FeatureRecordTemplate.md): approvals, exact results, independent review, human decisions and every session log                                              |
+| handoffs/<task-role>.md, if used | [Agent handoff](../templates/AgentHandoffTemplate.md): bounded assignment and actual returned evidence                                                                                    |
 
 A defect restoring existing specified behavior cites the existing IDs; change the delta only if expected behavior changes. Documentation/process-only work may use a lightweight record with an approved design/plan and an explicit no-product-delta statement. Do not invent product requirements or completed verification to fill fields.
 

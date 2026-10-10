@@ -12,10 +12,10 @@ Scenario: Given a deployed portal, when a visitor browses its openings, then the
 
 The first release MUST support multiple job openings and one application per applicant per job, including a cover letter, identity/contact details, optional education/work experience and one optional private PDF résumé. Its two user roles remain external Applicant and company HR staff. Planned AI features MUST use the course-required SoC LLM.
 
-| Role | Owns | AI feature | Human control |
-| --- | --- | --- | --- |
-| Applicant | Own application, final cover letter, private profile and draft attachment | Draft from applicant notes and the published job | Edit and explicitly submit final text |
-| HR | This company's job listings, review, and status of submitted applications | Summarize a submitted letter against published requirements | Publish jobs, read the original application, and decide status |
+| Role      | Owns                                                                      | AI feature                                                  | Human control                                                  |
+| --------- | ------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| Applicant | Own application, final cover letter, private profile and draft attachment | Draft from applicant notes and the published job            | Edit and explicitly submit final text                          |
+| HR        | This company's job listings, review, and status of submitted applications | Summarize a submitted letter against published requirements | Publish jobs, read the original application, and decide status |
 
 See [applications and review](applications-and-review.md), [Applicant AI draft](applicant-ai-draft.md) and [HR AI summary](hr-ai-summary.md) for these behaviors, and [SEC-001 / SEC-002](security-and-privacy.md) for canonical access boundaries.
 

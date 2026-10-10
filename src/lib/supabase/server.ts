@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 function publicConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) throw new Error("Supabase URL and publishable key are required.");
+  if (!url || !key)
+    throw new Error("Supabase URL and publishable key are required.");
   return { url, key };
 }
 
@@ -18,7 +19,9 @@ export async function createSupabaseServerClient() {
       },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options),
+          );
         } catch {
           // Server Components cannot write cookies. src/proxy.ts refreshes sessions.
         }

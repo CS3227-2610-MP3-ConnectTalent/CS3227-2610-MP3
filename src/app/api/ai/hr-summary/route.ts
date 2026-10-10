@@ -1,130 +1,206 @@
-import { getHrContext, getSubmittedApplication } from "@/lib/ai/application-data";
+import {
+  getHrContext,
+  getSubmittedApplication,
+} from "@/lib/ai/application-data";
 import { hrSummaryRequestSchema } from "@/lib/ai/schemas";
-import { buildHrSummaryResponse, splitHrSummarySource } from "@/lib/ai/hr-summary";
-import { finalizeAiInvocation, reserveAiInvocation } from "@/lib/ai/quota-audit";
+import {
+  buildHrSummaryResponse,
+  splitHrSummarySource,
+} from "@/lib/ai/hr-summary";
+import {
+  finalizeAiInvocation,
+  reserveAiInvocation,
+} from "@/lib/ai/quota-audit";
 import { getProviderRateLimit } from "@/lib/ai/provider-errors";
 import { generateHrSummary, isSoCLaaSReady } from "@/lib/ai/soclaas-client";
+import { jsonNoStore, readJson } from "@/lib/ai/http";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const maxRequestBytes = 2_000;
 
-type JsonRead = { ok: true; value: unknown } | { ok: false };
-
-async function readJson(request: Request): Promise<JsonRead> {
-  const contentLength = request.headers.get("content-length");
-  if (contentLength && /^\d+$/.test(contentLength) && Number(contentLength) > maxRequestBytes) return { ok: false };
-  const reader = request.body?.getReader();
-  if (!reader) return { ok: false };
-
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.byteLength;
-      if (size > maxRequestBytes) {
-        await reader.cancel();
-        return { ok: false };
-      }
-      chunks.push(value);
-    }
-  } catch {
-    return { ok: false };
-  }
-
-  const bytes = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  try {
-    return { ok: true, value: JSON.parse(new TextDecoder().decode(bytes)) as unknown };
-  } catch {
-    return { ok: false };
-  }
-}
-
-function json(body: unknown, status: number, headers?: HeadersInit) {
-  return Response.json(body, {
-    status,
-    headers: { "Cache-Control": "no-store", ...headers },
-  });
-}
-
 function authorizationResponse(status: "anonymous" | "forbidden") {
   return status === "anonymous"
-    ? json({ error: "Sign in to use application summaries." }, 401)
-    : json({ error: "Application summaries are available to HR only." }, 403);
+    ? jsonNoStore({ error: "Sign in to use application summaries." }, 401)
+    : jsonNoStore(
+        { error: "Application summaries are available to HR only." },
+        403,
+      );
+}
+
+function unavailable(message = "AI summaries are temporarily unavailable.") {
+  return jsonNoStore({ error: message }, 503);
+}
+
+async function createSummaryRequest(request: Request) {
+  const context = await getHrContext();
+  if (context.status !== "authorized")
+    return authorizationResponse(context.status);
+
+  const read = await readJson(request, maxRequestBytes);
+  if (!read.ok)
+    return jsonNoStore({ error: "Check the request and try again." }, 400);
+  const parsed = hrSummaryRequestSchema.safeParse(read.value);
+  if (!parsed.success)
+    return jsonNoStore({ error: "Select one submitted application." }, 400);
+  if (!isSoCLaaSReady()) return unavailable();
+
+  return summarizeApplication(context, parsed.data.applicationId);
+}
+
+async function summarizeApplication(
+  context: Extract<
+    Awaited<ReturnType<typeof getHrContext>>,
+    { status: "authorized" }
+  >,
+  applicationId: string,
+) {
+  const application = await getSubmittedApplication(
+    context.client,
+    applicationId,
+  );
+  if (!application)
+    return jsonNoStore(
+      { error: "This submitted application is unavailable." },
+      404,
+    );
+
+  const letterSentences = splitHrSummarySource(application.coverLetter);
+  const requirementSentences = splitHrSummarySource(application.requirements);
+  if (letterSentences.length === 0 || requirementSentences.length === 0)
+    return unavailable();
+
+  const reservation = await reserveAiInvocation(
+    context.user.id,
+    "hr_summary",
+    application.id,
+  );
+  if (!reservation.ok)
+    return reservationResponse(reservation.retryAfterSeconds);
+
+  return generateReservedSummary(
+    context,
+    application.id,
+    context.user.id,
+    reservation.invocationId,
+    letterSentences,
+    requirementSentences,
+  );
+}
+
+function reservationResponse(retryAfterSeconds?: number) {
+  return retryAfterSeconds
+    ? jsonNoStore(
+        { error: "AI usage limit reached. Try again shortly." },
+        429,
+        { "Retry-After": String(retryAfterSeconds) },
+      )
+    : unavailable();
+}
+
+async function generateReservedSummary(
+  context: Extract<
+    Awaited<ReturnType<typeof getHrContext>>,
+    { status: "authorized" }
+  >,
+  applicationId: string,
+  userId: string,
+  invocationId: string,
+  letterSentences: string[],
+  requirementSentences: string[],
+) {
+  try {
+    const output = await generateHrSummary({
+      letterSentences,
+      requirementSentences,
+    });
+    const response = buildHrSummaryResponse(
+      output,
+      letterSentences,
+      requirementSentences,
+    );
+    if (!response) return finalizeInvalidSummary(userId, invocationId);
+    const unavailable = await finalizeIfApplicationWithdrawn(
+      context,
+      applicationId,
+      userId,
+      invocationId,
+    );
+    if (unavailable) return unavailable;
+    return finalizeSuccessfulSummary(userId, invocationId, response);
+  } catch (error) {
+    return handleSummaryProviderFailure(userId, invocationId, error);
+  }
+}
+
+async function finalizeIfApplicationWithdrawn(
+  context: Extract<
+    Awaited<ReturnType<typeof getHrContext>>,
+    { status: "authorized" }
+  >,
+  applicationId: string,
+  userId: string,
+  invocationId: string,
+) {
+  const application = await getSubmittedApplication(
+    context.client,
+    applicationId,
+  );
+  if (application) return null;
+  await finalizeAiInvocation(userId, invocationId, "failure");
+  return jsonNoStore(
+    { error: "This submitted application is unavailable." },
+    404,
+  );
+}
+
+async function finalizeInvalidSummary(userId: string, invocationId: string) {
+  const finalized = await finalizeAiInvocation(userId, invocationId, "failure");
+  return finalized
+    ? jsonNoStore(
+        { error: "The generated summary could not be validated. Try again." },
+        502,
+      )
+    : unavailable();
+}
+
+async function finalizeSuccessfulSummary(
+  userId: string,
+  invocationId: string,
+  response: NonNullable<ReturnType<typeof buildHrSummaryResponse>>,
+) {
+  const finalized = await finalizeAiInvocation(userId, invocationId, "success");
+  return finalized ? jsonNoStore(response, 200) : unavailable();
+}
+
+async function handleSummaryProviderFailure(
+  userId: string,
+  invocationId: string,
+  error: unknown,
+) {
+  const finalized = await finalizeAiInvocation(userId, invocationId, "failure");
+  if (!finalized) return unavailable();
+  const rateLimit = getProviderRateLimit(error);
+  if (!rateLimit)
+    return unavailable(
+      "AI summaries are temporarily unavailable. Try again later.",
+    );
+
+  const headers = rateLimit.retryAfterSeconds
+    ? { "Retry-After": String(rateLimit.retryAfterSeconds) }
+    : undefined;
+  return jsonNoStore(
+    { error: "AI summaries are temporarily busy. Try again later." },
+    503,
+    headers,
+  );
 }
 
 export async function POST(request: Request) {
   try {
-    const context = await getHrContext();
-    if (context.status !== "authorized") return authorizationResponse(context.status);
-
-    const read = await readJson(request);
-    if (!read.ok) return json({ error: "Check the request and try again." }, 400);
-    const parsed = hrSummaryRequestSchema.safeParse(read.value);
-    if (!parsed.success) return json({ error: "Select one submitted application." }, 400);
-    if (!isSoCLaaSReady()) return json({ error: "AI summaries are temporarily unavailable." }, 503);
-
-    const application = await getSubmittedApplication(context.client, parsed.data.applicationId);
-    if (!application) return json({ error: "This submitted application is unavailable." }, 404);
-
-    const letterSentences = splitHrSummarySource(application.coverLetter);
-    const requirementSentences = splitHrSummarySource(application.requirements);
-    if (letterSentences.length === 0 || requirementSentences.length === 0) {
-      return json({ error: "AI summaries are temporarily unavailable." }, 503);
-    }
-
-    const reservation = await reserveAiInvocation(context.user.id, "hr_summary", application.id);
-    if (!reservation.ok) {
-      if (reservation.retryAfterSeconds) {
-        return json({ error: "AI usage limit reached. Try again shortly." }, 429, { "Retry-After": String(reservation.retryAfterSeconds) });
-      }
-      return json({ error: "AI summaries are temporarily unavailable." }, 503);
-    }
-
-    try {
-      const output = await generateHrSummary({
-        letterSentences,
-        requirementSentences,
-      });
-      const response = buildHrSummaryResponse(output, letterSentences, requirementSentences);
-      if (!response) {
-        const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "failure");
-        return finalized
-          ? json({ error: "The generated summary could not be validated. Try again." }, 502)
-          : json({ error: "AI summaries are temporarily unavailable." }, 503);
-      }
-
-      const stillActive = await getSubmittedApplication(context.client, application.id);
-      if (!stillActive) {
-        await finalizeAiInvocation(context.user.id, reservation.invocationId, "failure");
-        return json({ error: "This submitted application is unavailable." }, 404);
-      }
-      const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "success");
-      return finalized
-        ? json(response, 200)
-        : json({ error: "AI summaries are temporarily unavailable." }, 503);
-    } catch (error) {
-      const finalized = await finalizeAiInvocation(context.user.id, reservation.invocationId, "failure");
-      if (!finalized) return json({ error: "AI summaries are temporarily unavailable." }, 503);
-
-      const providerRateLimit = getProviderRateLimit(error);
-      if (providerRateLimit) {
-        const headers = providerRateLimit.retryAfterSeconds
-          ? { "Retry-After": String(providerRateLimit.retryAfterSeconds) }
-          : undefined;
-        return json({ error: "AI summaries are temporarily busy. Try again later." }, 503, headers);
-      }
-      return json({ error: "AI summaries are temporarily unavailable. Try again later." }, 503);
-    }
+    return await createSummaryRequest(request);
   } catch {
-    return json({ error: "AI summaries are temporarily unavailable." }, 503);
+    return unavailable();
   }
 }

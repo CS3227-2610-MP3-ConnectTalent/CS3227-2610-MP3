@@ -9,8 +9,8 @@ Copy to `workflow/changes/<YYYY-MM-DD-short-name>/design.md` when architecture, 
 
 ## Decisions and alternatives
 
-| Decision | Considered alternatives | Reason and tradeoffs | Human approval reference |
-| --- | --- | --- | --- |
+| Decision          | Considered alternatives               | Reason and tradeoffs           | Human approval reference   |
+| ----------------- | ------------------------------------- | ------------------------------ | -------------------------- |
 | <chosen approach> | <options, including current approach> | <evidence, constraints, risks> | <decision/date or pending> |
 
 ## Interfaces and data flow
@@ -23,8 +23,8 @@ Copy to `workflow/changes/<YYYY-MM-DD-short-name>/design.md` when architecture, 
 
 ## Failure behavior
 
-| Failure / adversarial input | Observable outcome / state guarantees | Verification |
-| --- | --- | --- |
+| Failure / adversarial input                                                    | Observable outcome / state guarantees           | Verification                 |
+| ------------------------------------------------------------------------------ | ----------------------------------------------- | ---------------------------- |
 | <timeout, quota, invalid input, partial write, unauthorized actor as relevant> | <error handling, retry/idempotency, safe state> | <acceptance ID and evidence> |
 
 ## Migration and backward compatibility
