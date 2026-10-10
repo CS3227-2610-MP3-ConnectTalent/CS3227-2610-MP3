@@ -23,7 +23,7 @@ export default async function ApplyPage({
   const resume = application ? await getApplicationResume(application.id) : null;
   const { error } = await searchParams;
 
-  return <main className="mx-auto max-w-3xl space-y-6 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-3xl space-y-6 px-5 py-10">
     <Link href={`/jobs/${id}`} className="text-sm underline">← {job.title}</Link>
     <h1 className="text-3xl font-semibold">{application?.submission_state === "submitted" ? "Application submitted" : `Apply for ${job.title}`}</h1>
     <p className="text-muted-foreground">{job.team}</p>

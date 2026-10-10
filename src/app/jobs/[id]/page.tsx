@@ -19,7 +19,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const canApply = account.kind === "guest" || (account.kind === "signed-in" && account.role === "applicant");
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
+    <main className="page-shell mx-auto min-h-screen w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
       <header className="mb-10 flex items-center justify-between gap-4 border-b pb-5">
         <Link href="/" className="text-sm text-muted-foreground underline-offset-4 hover:underline">All roles</Link>
       </header>

@@ -299,3 +299,9 @@ The team must supply actual role assignments/contributions, verify historical su
 ## Role navigation and signup guidance (#40 integration)
 
 The careers header shows Sign in/Create account to guests. Signed-in Applicants see My applications and Sign out; HR sees Application review, Manage jobs and Sign out. A failed sign-out displays retry feedback. Signup keeps neutral email-verification guidance; local Mailpit instructions remain in the development guide, outside the signup screen. The [integration record](../workflow/archive/2026-10-09-signup-notice-navigation/record.md) records local verification and remaining hosted limits.
+
+## Presentation and individual reflections (#42/#43)
+
+Presentation tokens and scoped account/header/card/page/auth classes live in src/app/globals.css; page layout changes preserve server action contracts and data modules. Category colors are accompanied by labels. The public listing uses actual job data only, and mobile card text wraps long tokens. Keyboard focus, reduced-motion styles and header contrast were checked locally; exhaustive screen-reader/contrast testing and hosted previews remain open. Browser screenshots are generated under ignored test-results/ui-after; baseline captures were preserved in a temporary local directory. UI changes require no migration.
+
+[Reflections](Reflections.md) is the main index linking the AI-assisted Paul draft and incomplete John outline. Each student must verify their personal conclusions and attribution before submission. The [UI packet](../workflow/archive/2026-10-09-ui-refresh/record.md) and [reflection packet](../workflow/archive/2026-10-09-individual-reflections/record.md) hold approval, review and actual evidence; neither document organisation nor local UI acceptance establishes release.

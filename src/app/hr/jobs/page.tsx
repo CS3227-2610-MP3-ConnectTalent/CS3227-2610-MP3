@@ -10,10 +10,10 @@ export default async function HRJobsPage() {
   await requireHR();
   let jobs;
   try { jobs = await listHRJobs(); } catch {
-    return <main className="mx-auto max-w-4xl px-5 py-10"><h1 className="text-3xl font-semibold">Manage jobs</h1>
+    return <main className="page-shell mx-auto max-w-4xl px-5 py-10"><h1 className="text-3xl font-semibold">Manage jobs</h1>
       <p role="alert" className="mt-5">Jobs are temporarily unavailable. Try again later.</p></main>;
   }
-  return <main className="mx-auto max-w-4xl space-y-8 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-4xl space-y-8 px-5 py-10">
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div><h1 className="text-3xl font-semibold">Manage jobs</h1><p className="text-muted-foreground">Draft, publish and close this employer’s openings.</p></div>
       <Link href="/hr/jobs/new" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Create draft</Link>

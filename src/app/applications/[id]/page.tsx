@@ -22,7 +22,7 @@ export default async function ApplicationDetail({
   const job = await getPublishedJob(application.job_id);
   const resume = await getApplicationResume(application.id);
   const { notice } = await searchParams;
-  return <main className="mx-auto max-w-3xl space-y-6 px-5 py-10">
+  return <main className="page-shell mx-auto max-w-3xl space-y-6 px-5 py-10">
     <Link href="/applications" className="underline">← My applications</Link>
     <h1 className="text-3xl font-semibold">{application.job_title}</h1>
     {notice === "already-submitted" && <p role="status" className="rounded-lg border p-3">This application was already submitted. Review the saved details and letter below; they may differ from what you just tried to send.</p>}
