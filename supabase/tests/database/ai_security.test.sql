@@ -8,6 +8,8 @@ values
   ('20000000-0000-4000-8000-000000000a02', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ai-other@example.test', '', now()),
   ('20000000-0000-4000-8000-000000000a03', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ai-hr@example.test', '', now()),
   ('20000000-0000-4000-8000-000000000a04', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ai-unverified-hr@example.test', '', null);
+-- Completed synthetic profile fixtures for #52; no real-data backfill.
+insert into public.applicant_profiles(user_id,full_name,phone) values ('20000000-0000-4000-8000-000000000a01','Fixture Applicant','+6591234567'),('20000000-0000-4000-8000-000000000a02','Fixture Applicant','+6591234567'),('20000000-0000-4000-8000-000000000a03','Fixture Applicant','+6591234567'),('20000000-0000-4000-8000-000000000a04','Fixture Applicant','+6591234567') on conflict(user_id) do nothing;
 update public.profiles set role = 'hr'
   where user_id in ('20000000-0000-4000-8000-000000000a03', '20000000-0000-4000-8000-000000000a04');
 insert into public.jobs (id, title, team, category, description, requirements, status, published_at)
@@ -94,7 +96,7 @@ select ok(case when to_regclass('public.application_submission_events') is null 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a01', true);
 select lives_ok(
-  $$select public.submit_application_details_v2('20000000-0000-4000-8000-000000000b01', 'Synthetic private letter','Synthetic Applicant',null,null, null)$$,
+  $$select public.submit_application_details_v2('20000000-0000-4000-8000-000000000b01', 'Synthetic private letter','Synthetic Applicant','+6591234567',null, null)$$,
   'Applicant submission succeeds and invokes the audit trigger');
 select set_config('ai.test_application_id', (select id::text from public.applications where job_id = '20000000-0000-4000-8000-000000000b01'), true);
 select lives_ok(

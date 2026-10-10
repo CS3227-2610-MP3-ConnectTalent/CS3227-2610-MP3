@@ -8,14 +8,14 @@ export async function AccountNavigation() {
   return (
     <header className="account-header border-b">
       <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5 text-xl font-semibold tracking-tight"><span className="grid h-8 w-8 place-items-center rounded-lg bg-violet-400 text-lg text-slate-950" aria-hidden="true">↗</span>Careers</Link>
+        <Link href={account.kind === "signed-in" && account.incomplete ? "/profile" : "/"} className="flex items-center gap-2.5 text-xl font-semibold tracking-tight"><span className="grid h-8 w-8 place-items-center rounded-lg bg-violet-400 text-lg text-slate-950" aria-hidden="true">↗</span>Careers</Link>
         <nav aria-label="Account" className="flex flex-wrap items-center gap-4 text-sm">
           {account.kind === "signed-in" ? (
             <>
               <span className="account-role rounded-full px-3 py-1 font-medium">
                 {account.role === "hr" ? "HR" : account.role === "applicant" ? "Applicant" : "Signed in"}
               </span>
-              {account.role === "applicant" && <><Link href="/applications" className="underline">My applications</Link><Link href="/profile" className="underline">My profile</Link></>}
+              {account.role === "applicant" && <>{!account.incomplete && <Link href="/applications" className="underline">My applications</Link>}<Link href="/profile" className="underline">My profile</Link></>}
               {account.role === "hr" && <>
                 <Link href="/hr/applications" className="underline">Application review</Link>
                 <Link href="/hr/jobs" className="underline">Manage jobs</Link>

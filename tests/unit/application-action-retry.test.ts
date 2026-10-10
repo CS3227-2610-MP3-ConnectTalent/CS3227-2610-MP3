@@ -31,6 +31,7 @@ function submission() {
   form.set("jobId", jobId);
   form.set("intent", "submit");
   form.set("full_name", "Synthetic Applicant");
+  form.set("phone", "+6591234567");
   form.set("cover_letter", "Retried letter");
   form.set("revision", "1");
   return form;
@@ -88,7 +89,7 @@ describe("application field boundary and error retention", () => {
     await expect(updateApplication(initial, form)).rejects.toThrow(`REDIRECT:/applications/${applicationId}`);
     expect(rpc).toHaveBeenCalledWith("submit_application_details_v3", {
       p_job_id: jobId, p_cover_letter: "Retried letter", p_full_name: "Synthetic Applicant",
-      p_phone: null, p_portfolio_url: null, p_education: null, p_work_experience: null, p_expected_revision: 1,
+      p_phone: "+6591234567", p_portfolio_url: null, p_education: null, p_work_experience: null, p_expected_revision: 1,
     });
   });
   it("retains every entered field without a database call on validation errors", async () => {
