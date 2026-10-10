@@ -4,6 +4,8 @@ import { requireHR } from "@/lib/hr-auth";
 import { hrReviewStatusSchema } from "@/lib/hr-input";
 
 const listItemSchema = z.object({
+  withdrawn_at: z.string().nullable(),
+  withdrawn_by: z.uuid().nullable(),
   id: z.uuid(),
   applicant_id: z.uuid(),
   job_title: z.string(),
@@ -46,7 +48,9 @@ export async function listSubmittedApplications() {
   const { client } = await requireHR();
   const { data, error } = await client
     .from("applications")
-    .select("id,applicant_id,job_title,submitted_at,review_status")
+    .select(
+      "withdrawn_at,withdrawn_by,id,applicant_id,job_title,submitted_at,review_status",
+    )
     .eq("submission_state", "submitted")
     .order("submitted_at", { ascending: false });
   if (error) throw new Error("Review data is unavailable.");
@@ -59,7 +63,7 @@ export async function getSubmittedApplication(id: string) {
   const { data, error } = await client
     .from("applications")
     .select(
-      "education,work_experience,full_name,submitted_email,phone,portfolio_url,id,applicant_id,job_id,job_title,submitted_at,review_status,review_revision,revision,original_submitted_letter,cover_letter",
+      "withdrawn_at,withdrawn_by,education,work_experience,full_name,submitted_email,phone,portfolio_url,id,applicant_id,job_id,job_title,submitted_at,review_status,review_revision,revision,original_submitted_letter,cover_letter",
     )
     .eq("id", id)
     .eq("submission_state", "submitted")

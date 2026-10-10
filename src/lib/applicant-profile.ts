@@ -17,7 +17,7 @@ export const emptyProfile: ApplicantProfile = {
   work_experience: null,
 };
 export async function getApplicantProfile() {
-  const { client, user } = await requireApplicant();
+  const { client, user } = await requireApplicant({ allowIncomplete: true });
   const { data, error } = await client
     .from("applicant_profiles")
     .select("full_name,phone,portfolio_url,education,work_experience")

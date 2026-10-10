@@ -35,6 +35,17 @@ export async function addHRNote(formData: FormData) {
   if (typeof id !== "string" || !z.uuid().safeParse(id).success)
     redirect("/hr/applications?error=invalid");
   if (!parsed.success) redirect(`${reviewPath(id)}?error=note`);
+  const { data: active, error: activeError } = await client
+    .from("applications")
+    .select("id")
+    .eq("id", id)
+    .eq("submission_state", "submitted")
+    .is("withdrawn_at", null)
+    .maybeSingle();
+  if (activeError || !active) {
+    audit(user.id, "note", id, "denied");
+    redirect(`${reviewPath(id)}?error=withdrawn`);
+  }
   const { error } = await client.rpc("append_hr_application_note", {
     p_application_id: id,
     p_body: parsed.value,
@@ -55,6 +66,17 @@ export async function changeHRStatus(formData: FormData) {
   if (typeof id !== "string" || !z.uuid().safeParse(id).success)
     redirect("/hr/applications?error=invalid");
   if (!parsed.success) redirect(`${reviewPath(id)}?error=status`);
+  const { data: active, error: activeError } = await client
+    .from("applications")
+    .select("id")
+    .eq("id", id)
+    .eq("submission_state", "submitted")
+    .is("withdrawn_at", null)
+    .maybeSingle();
+  if (activeError || !active) {
+    audit(user.id, "status", id, "denied");
+    redirect(`${reviewPath(id)}?error=withdrawn`);
+  }
   const { error } = await client.rpc("change_hr_application_status", {
     p_application_id: id,
     p_status: parsed.value.status,

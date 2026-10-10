@@ -7,95 +7,83 @@ import {
   removeApplicationResume,
   uploadApplicationResume,
 } from "@/lib/application-resumes";
-import { RESUME_MAX_BYTES } from "@/lib/resume-input";
+import {
+  readResumeFile,
+  resumeDownload,
+  resumeFailure,
+  resumeHeaders,
+} from "@/lib/resume-request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type Context = { params: Promise<{ id: string }> };
-const headers = {
-  "Cache-Control": "private, no-store",
-  "X-Content-Type-Options": "nosniff",
-};
+type UploadContext = { actorId: string; jobId: string };
 
 export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
-  if (!z.uuid().safeParse(id).success)
-    return new Response(null, { status: 404, headers });
+  if (!isUuid(id))
+    return new Response(null, { status: 404, headers: resumeHeaders });
   try {
     const result = await downloadApplicationResume(id);
-    if (!result) return new Response(null, { status: 404, headers });
-    return new Response(result.bytes, {
-      headers: {
-        ...headers,
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="resume.pdf"; filename*=UTF-8''${encodeURIComponent(result.info.filename).replace(/'/g, "%27")}`,
-      },
-    });
+    return result
+      ? resumeDownload(result.bytes, result.info.filename)
+      : new Response(null, { status: 404, headers: resumeHeaders });
   } catch {
-    return new Response(null, { status: 503, headers });
+    return new Response(null, { status: 503, headers: resumeHeaders });
   }
-}
-
-type AuthorizedRequest = { userId: string; jobId: string };
-
-async function authorizeChange(
-  request: Request,
-  params: Context["params"],
-): Promise<AuthorizedRequest | Response> {
-  if (request.headers.get("origin") !== new URL(request.url).origin)
-    return Response.json(
-      { error: "Request not allowed." },
-      { status: 403, headers },
-    );
-
-  const account = await currentApplicant();
-  if (!account)
-    return Response.json(
-      { error: "Applicant access required." },
-      { status: 403, headers },
-    );
-
-  const { id } = await params;
-  if (!z.uuid().safeParse(id).success) return unavailableApplicationResponse();
-  const application = await getOwnApplication(id);
-  if (!application) return unavailableApplicationResponse();
-  return { userId: account.user.id, jobId: application.job_id };
-}
-
-function unavailableApplicationResponse() {
-  return Response.json(
-    { error: "Application unavailable." },
-    { status: 404, headers },
-  );
 }
 
 export async function POST(request: Request, { params }: Context) {
-  const access = await authorizeChange(request, params);
-  if (access instanceof Response) return access;
-
+  const context = await getUploadContext(request, params);
+  if (context instanceof Response) return context;
   try {
-    await applyResumeIntent(request, access.userId, access.jobId);
-    return Response.json({ ok: true }, { headers });
+    await updateResume(request, context);
+    return Response.json({ ok: true }, { headers: resumeHeaders });
   } catch (error) {
-    return resumeChangeError(error);
+    return Response.json(resumeFailure(error), {
+      status: 400,
+      headers: resumeHeaders,
+    });
   }
 }
 
-async function applyResumeIntent(
+async function getUploadContext(
   request: Request,
-  userId: string,
-  jobId: string,
-) {
-  const intent = request.headers.get("x-resume-intent");
-  if (intent === "cancel") return cancelResumeUpload(userId, jobId);
+  params: Context["params"],
+): Promise<UploadContext | Response> {
+  if (!sameOrigin(request)) return errorResponse("Request not allowed.", 403);
+  const account = await currentApplicant();
+  if (!account) return errorResponse("Applicant access required.", 403);
+  const { id } = await params;
+  if (!isUuid(id)) return errorResponse("Application unavailable.", 404);
+  const application = await getOwnApplication(id);
+  return application
+    ? { actorId: account.user.id, jobId: application.job_id }
+    : errorResponse("Application unavailable.", 404);
+}
 
+function sameOrigin(request: Request) {
+  return request.headers.get("origin") === new URL(request.url).origin;
+}
+
+function isUuid(value: string | null): value is string {
+  return value !== null && z.uuid().safeParse(value).success;
+}
+
+function errorResponse(message: string, status: number) {
+  return Response.json({ error: message }, { status, headers: resumeHeaders });
+}
+
+async function updateResume(request: Request, context: UploadContext) {
+  const intent = request.headers.get("x-resume-intent");
+  if (intent === "cancel")
+    return cancelResumeUpload(context.actorId, context.jobId);
   const revision = readRevision(request);
   if (intent === "remove")
-    return removeApplicationResume(userId, jobId, revision);
-  if (intent === "upload")
-    return uploadResume(request, userId, jobId, revision);
-  throw new Error("Choose an upload action.");
+    return removeApplicationResume(context.actorId, context.jobId, revision);
+  if (intent !== "upload") throw new Error("Choose an upload action.");
+  return uploadResume(request, context, revision);
 }
 
 function readRevision(request: Request) {
@@ -107,76 +95,19 @@ function readRevision(request: Request) {
 
 async function uploadResume(
   request: Request,
-  userId: string,
-  jobId: string,
+  context: UploadContext,
   revision: number,
 ) {
   const file = await readResumeFile(request);
   const operation = request.headers.get("x-resume-operation");
-  const parsedOperation = z.uuid().safeParse(operation);
-  if (!parsedOperation.success)
+  if (!isUuid(operation))
     throw new Error("Choose the file again before retrying the upload.");
-  await uploadApplicationResume(
-    userId,
-    jobId,
+  return uploadApplicationResume(
+    context.actorId,
+    context.jobId,
     revision,
     file,
-    parsedOperation.data,
+    operation,
+    request.headers.get("x-resume-retry") === "true",
   );
-}
-
-async function readResumeFile(request: Request) {
-  const reader = request.body?.getReader();
-  if (!reader) throw chooseResumeError();
-
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.length;
-      if (size > RESUME_MAX_BYTES) {
-        await reader.cancel();
-        throw chooseResumeError();
-      }
-      chunks.push(value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-
-  return createResumeFile(request, chunks, size);
-}
-
-function chooseResumeError() {
-  return new Error("Choose a PDF résumé of at most 1 MiB.");
-}
-
-function createResumeFile(
-  request: Request,
-  chunks: Uint8Array[],
-  size: number,
-) {
-  const bytes = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.length;
-  }
-  const filename = decodeURIComponent(
-    request.headers.get("x-resume-filename") ?? "",
-  );
-  return new File([bytes], filename, {
-    type: request.headers.get("content-type") ?? "",
-  });
-}
-
-function resumeChangeError(error: unknown) {
-  const message =
-    error instanceof Error &&
-    /^(Choose|Reload|Save the latest|We could not)/.test(error.message)
-      ? error.message
-      : "The résumé change could not be saved. Reload and try again.";
-  return Response.json({ error: message }, { status: 400, headers });
 }

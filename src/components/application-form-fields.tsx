@@ -2,6 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PhoneInput } from "@/components/phone-input";
 import type { ApplicationFormState } from "@/lib/application-form-state";
 
 type Values = ApplicationFormState["values"];
@@ -20,7 +21,7 @@ export function ApplicantContactFields({
     <>
       <FullNameField value={values.full_name} error={errors.full_name} />
       <VerifiedEmailField email={email} />
-      <PhoneField value={values.phone} error={errors.phone} />
+      <PhoneInput value={values.phone} error={errors.phone} />
       <PortfolioField
         value={values.portfolio_url}
         error={errors.portfolio_url}
@@ -65,29 +66,6 @@ function VerifiedEmailField({ email }: { email: string }) {
       />
       <p id="email-help" className="text-sm text-muted-foreground">
         From your verified account. This address is recorded when you submit.
-      </p>
-    </div>
-  );
-}
-
-function PhoneField({ value, error }: { value: string; error?: string }) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor="phone">Phone (optional)</Label>
-      <input
-        id="phone"
-        name="phone"
-        type="tel"
-        maxLength={40}
-        autoComplete="tel"
-        defaultValue={value}
-        aria-invalid={Boolean(error)}
-        aria-describedby="phone-help"
-        className="w-full rounded-lg border p-3"
-      />
-      <p id="phone-help" className="text-sm text-muted-foreground">
-        {error ??
-          "Include a country code if appropriate. Maximum 40 characters."}
       </p>
     </div>
   );

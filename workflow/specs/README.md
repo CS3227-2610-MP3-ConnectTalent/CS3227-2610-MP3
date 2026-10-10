@@ -2,7 +2,39 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.4, 9 October 2026**. The split dated 6 October 2026 preserved v0.6 behavior; the accepted Applicant change dated 7 October added ACC-001, APP-004 and SEC-001 clarifications. The locally accepted HR review change dated 8 October modified ACC-002, APP-002/003, SEC-001 and OPS-001. The later accepted signup change modified ACC-001. The accepted recovery change added ACC-004. The accepted SoCLaaS AI change dated 9 October modified APP-004, AID-001/002, AIS-001/002, SEC-001/006/007 and OPS-002. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.8, 10 October 2026**. Earlier change traces below preserve the accepted lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.8 accepted résumé-first/profile-file change
+
+Paul separately accepted #53 via “Accept with recorded limits” on 10 October 2026 and authorized one combined PR. [Archived record](../archive/2026-10-10-unsaved-profile-resume/record.md) preserves concrete approval, checks, independent review and separate acceptance. APP-006/007 and SEC-009 are extended for optional private profile PDFs, explicit independent attachment copying, and uploads before Save draft without typed-field persistence. #52's required name/phone and restricted onboarding rules remain; older #53 base clauses cannot revert them. Canonical sync preceded complete archive. No hosted rollout/reset/accessibility or scheduled cleanup guarantee; publication is separate from release.
+
+## v1.7 accepted required-profile onboarding
+
+Paul separately accepted #52 via “Accept with recorded limits” on 10 October 2026, after the approved stricter [onboarding amendment](../archive/2026-10-10-required-applicant-profile/onboarding-amendment.md), local checks and independent review. [Record](../archive/2026-10-10-required-applicant-profile/record.md) preserves both approval and acceptance, historical superseded proposal wording and resolved legacy-withdrawal finding.
+
+| Accepted delta / amendment          | Canonical destination                                                                                                                                                                          |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modified ACC-001/005; added ACC-006 | [Accounts and roles](accounts-and-roles.md): verified restricted session, profile-only navigation and direct-request readiness; profile/file/recovery/sign-out exceptions; guest/HR unaffected |
+| Modified JOB-001/003                | [Public jobs](public-job-listings.md): listing/filter/detail gates for incomplete signed-in Applicants                                                                                         |
+| Modified APP-005/006                | [Applications](applications-and-review.md): required profile name/phone, trusted email, normalized country-code/number input, new-form autofill, helper-copy removal and frozen history        |
+
+The final accepted amendment supersedes earlier unformatted-phone and incomplete-history exemptions. The [accepted-sync reconciliation](../archive/2026-10-10-required-applicant-profile/accepted-sync.md) maps those changes; #53 remains separately unaccepted and unsynced. Canonical files were synced before complete archive. No sync commit/publication or hosted release is implied. Hosted rollout, clean-reset rehearsal and full accessibility limits remain.
+
+## v1.6 accepted placement correction
+
+Paul accepted the #50 follow-up via “Accept correction” on 10 October 2026. APP-008 specifies withdrawal only inside application details and status/View without withdrawal controls on the list. [Archived record](../archive/2026-10-10-withdrawal-placement/record.md). No authorization/lifecycle/schema change; hosted validation remains pending. #53 is separately unaccepted and is not synced.
+
+## v1.5 accepted change trace
+
+On 10 October 2026, Paul Cheng separately accepted local #49/#50 via “Accept with recorded limits” after the implementation/review results and limitations were presented. The [complete archived packet](../archive/2026-10-10-application-form-withdrawal/record.md) preserves approval, independent review, actual checks and acceptance.
+
+| Delta                                   | Canonical destination                                 | Change                                                                                                                                    |
+| --------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Added APP-008; modified APP-002/003/007 | [Applications and review](applications-and-review.md) | Confirmed terminal owner withdrawal, retained records, View/Withdrawn display, HR processing denial and safe styled upload/retry controls |
+| Modified SEC-001                        | [Security and privacy](security-and-privacy.md)       | Controlled owner withdrawal; retained read/privacy boundaries; no general UPDATE/DELETE or public Storage grant                           |
+| Modified AIS-001                        | [HR AI summary](hr-ai-summary.md)                     | Withdrawn input eligibility and response recheck; already dispatched requests cannot be recalled                                          |
+
+Accepted deltas were synced before archive. The existing AID-002 generation-without-save contract is restored by form composition and needs no new delta. Hosted migration/preview, clean-reset rehearsal and full accessibility audit remain pending. No sync commit exists yet.
 
 ## IDs and normative language
 

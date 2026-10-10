@@ -45,7 +45,6 @@ it("returns the email without creating an account when signup passwords differ",
   });
   expect(mocks.createSupabaseServerClient).not.toHaveBeenCalled();
 });
-
 it("sends signup confirmation to the current preview callback", async () => {
   vi.stubEnv("VERCEL_ENV", "preview");
   vi.stubEnv("VERCEL_URL", "feature-123.vercel.app");
@@ -70,7 +69,6 @@ it("sends signup confirmation to the current preview callback", async () => {
     },
   });
 });
-
 it("sends signup confirmation to the production callback despite a preview URL", async () => {
   vi.stubEnv("VERCEL_ENV", "production");
   vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "careers.example.com");
@@ -94,14 +92,34 @@ it("sends signup confirmation to the production callback despite a preview URL",
     options: { emailRedirectTo: "https://careers.example.com/auth/callback" },
   });
 });
-
 it("redirects a successful confirmation to the configured site origin", async () => {
   vi.stubEnv("VERCEL_ENV", "production");
   vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "careers.example.com");
   vi.stubEnv("VERCEL_URL", "preview-123.vercel.app");
   const exchangeCodeForSession = vi.fn().mockResolvedValue({ error: null });
   mocks.createSupabaseServerClient.mockResolvedValue({
-    auth: { exchangeCodeForSession },
+    auth: {
+      exchangeCodeForSession,
+      getUser: async () => ({
+        data: {
+          user: {
+            id: "synthetic",
+            email: "synthetic@example.test",
+            email_confirmed_at: "2026-10-10",
+          },
+        },
+      }),
+    },
+    from: (table: string) => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: table === "profiles" ? { role: "applicant" } : null,
+            error: null,
+          }),
+        }),
+      }),
+    }),
   });
   const request = {
     nextUrl: {
@@ -114,10 +132,9 @@ it("redirects a successful confirmation to the configured site origin", async ()
 
   expect(exchangeCodeForSession).toHaveBeenCalledWith("confirmation-code");
   expect(response.headers.get("location")).toBe(
-    "https://careers.example.com/applications",
+    "https://careers.example.com/profile",
   );
 });
-
 it("uses the configured site origin for failed confirmation redirects too", async () => {
   vi.stubEnv("VERCEL_ENV", "preview");
   vi.stubEnv("VERCEL_URL", "feature-123.vercel.app");

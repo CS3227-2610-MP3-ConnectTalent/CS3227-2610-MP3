@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseServerClient: vi.fn(),
@@ -22,53 +22,48 @@ function credentials() {
 
 beforeEach(() => vi.clearAllMocks());
 
-describe("role-aware sign-in", () => {
-  it("sends verified HR to the HR review area", async () => {
-    mocks.createSupabaseServerClient.mockResolvedValue({
-      auth: {
-        signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: "hr-id", email_confirmed_at: "2026-10-08" } },
-          error: null,
+it("sends verified HR to the HR review area", async () => {
+  mocks.createSupabaseServerClient.mockResolvedValue({
+    auth: {
+      signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "hr-id", email_confirmed_at: "2026-10-08" } },
+        error: null,
+      }),
+    },
+    from: vi.fn().mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({ data: { role: "hr" }, error: null }),
         }),
-      },
-      from: vi.fn().mockReturnValue({
-        select: () => ({
-          eq: () => ({
-            maybeSingle: async () => ({ data: { role: "hr" }, error: null }),
+      }),
+    }),
+  });
+  await expect(signIn(credentials())).rejects.toThrow(
+    "REDIRECT:/hr/applications",
+  );
+});
+it("sends incomplete verified Applicants to profile completion", async () => {
+  mocks.createSupabaseServerClient.mockResolvedValue({
+    auth: {
+      signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
+      getUser: vi.fn().mockResolvedValue({
+        data: {
+          user: { id: "applicant-id", email_confirmed_at: "2026-10-08" },
+        },
+        error: null,
+      }),
+    },
+    from: vi.fn().mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: { role: "applicant" },
+            error: null,
           }),
         }),
       }),
-    });
-    await expect(signIn(credentials())).rejects.toThrow(
-      "REDIRECT:/hr/applications",
-    );
+    }),
   });
-
-  it("keeps verified Applicants in their own area", async () => {
-    mocks.createSupabaseServerClient.mockResolvedValue({
-      auth: {
-        signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
-        getUser: vi.fn().mockResolvedValue({
-          data: {
-            user: { id: "applicant-id", email_confirmed_at: "2026-10-08" },
-          },
-          error: null,
-        }),
-      },
-      from: vi.fn().mockReturnValue({
-        select: () => ({
-          eq: () => ({
-            maybeSingle: async () => ({
-              data: { role: "applicant" },
-              error: null,
-            }),
-          }),
-        }),
-      }),
-    });
-    await expect(signIn(credentials())).rejects.toThrow(
-      "REDIRECT:/applications",
-    );
-  });
+  await expect(signIn(credentials())).rejects.toThrow("REDIRECT:/profile");
 });

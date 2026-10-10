@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isInternationalPhone } from "./phone";
 
 export type ApplicationDetails = {
   full_name: string;
@@ -82,7 +83,11 @@ export function parseApplicationDetails(
       ),
     phone: optionalText(
       40,
-      "Use at most 40 characters without control characters for your phone.",
+      "Enter a phone number without control characters.",
+    ).refine(
+      (value) =>
+        (mode === "draft" && value === null) || isInternationalPhone(value),
+      "Choose a country code and enter a phone number of 7–15 digits including the code.",
     ),
     portfolio_url: optionalText(
       2048,

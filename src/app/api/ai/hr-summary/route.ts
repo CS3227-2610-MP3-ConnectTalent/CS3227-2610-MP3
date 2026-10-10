@@ -80,6 +80,8 @@ async function summarizeApplication(
     return reservationResponse(reservation.retryAfterSeconds);
 
   return generateReservedSummary(
+    context,
+    application.id,
     context.user.id,
     reservation.invocationId,
     letterSentences,
@@ -98,6 +100,11 @@ function reservationResponse(retryAfterSeconds?: number) {
 }
 
 async function generateReservedSummary(
+  context: Extract<
+    Awaited<ReturnType<typeof getHrContext>>,
+    { status: "authorized" }
+  >,
+  applicationId: string,
   userId: string,
   invocationId: string,
   letterSentences: string[],
@@ -114,10 +121,38 @@ async function generateReservedSummary(
       requirementSentences,
     );
     if (!response) return finalizeInvalidSummary(userId, invocationId);
+    const unavailable = await finalizeIfApplicationWithdrawn(
+      context,
+      applicationId,
+      userId,
+      invocationId,
+    );
+    if (unavailable) return unavailable;
     return finalizeSuccessfulSummary(userId, invocationId, response);
   } catch (error) {
     return handleSummaryProviderFailure(userId, invocationId, error);
   }
+}
+
+async function finalizeIfApplicationWithdrawn(
+  context: Extract<
+    Awaited<ReturnType<typeof getHrContext>>,
+    { status: "authorized" }
+  >,
+  applicationId: string,
+  userId: string,
+  invocationId: string,
+) {
+  const application = await getSubmittedApplication(
+    context.client,
+    applicationId,
+  );
+  if (application) return null;
+  await finalizeAiInvocation(userId, invocationId, "failure");
+  return jsonNoStore(
+    { error: "This submitted application is unavailable." },
+    404,
+  );
 }
 
 async function finalizeInvalidSummary(userId: string, invocationId: string) {

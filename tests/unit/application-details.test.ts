@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import { parseApplicationDetails } from "../../src/lib/application-details";
 const valid = {
   full_name: "Synthetic Applicant",
-  phone: null,
+  phone: "+6591234567",
   portfolio_url: null,
 };
 it("allows incomplete drafts but requires a name when submitting", () => {
@@ -22,7 +22,7 @@ it("normalizes whitespace and absent optional values", () => {
     parseApplicationDetails(
       {
         full_name: "  Synthetic Applicant  ",
-        phone: " ",
+        phone: "+6591234567",
         portfolio_url: " ",
       },
       "submit",
@@ -59,12 +59,12 @@ it("accepts a safe empty port consistently with the database", () => {
     ).success,
   ).toBe(true);
 });
-it("allows international phone text and bounded HTTP(S) URLs", () => {
+it("allows normalized international phone and bounded HTTP(S) URLs", () => {
   expect(
     parseApplicationDetails(
       {
         ...valid,
-        phone: "+65 1234-5678 ext 9",
+        phone: "+6591234567",
         portfolio_url: "https://example.test/projects?a=1",
       },
       "submit",

@@ -32,7 +32,7 @@ export function parseBackground(values: unknown) {
   return { success: false as const, errors };
 }
 export function parseProfile(values: unknown) {
-  const details = parseApplicationDetails(values, "draft");
+  const details = parseApplicationDetails(values, "submit");
   const background = parseBackground(values);
   if (!details.success || !background.success)
     return {

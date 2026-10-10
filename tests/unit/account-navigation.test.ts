@@ -47,7 +47,11 @@ it.each(["applicant", "hr"] as const)(
   async (role) => {
     mocks.getUser.mockResolvedValue({ data: { user: user() }, error: null });
     mocks.profile.mockResolvedValue({ data: { role }, error: null });
-    expect(await getAccountNavigation()).toEqual({ kind: "signed-in", role });
+    expect(await getAccountNavigation()).toEqual({
+      kind: "signed-in",
+      role,
+      ...(role === "applicant" ? { incomplete: true } : {}),
+    });
     expect(mocks.eq).toHaveBeenCalledWith("user_id", "synthetic-user");
   },
 );
@@ -90,6 +94,7 @@ it("retains only generic account navigation on a thrown profile failure", async 
   expect(await getAccountNavigation()).toEqual({
     kind: "signed-in",
     role: null,
+    incomplete: true,
   });
 });
 it.each(["provider", "transport", "config"])(

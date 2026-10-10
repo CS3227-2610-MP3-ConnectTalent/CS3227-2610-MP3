@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const spies = vi.hoisted(() => ({
   getApplicantContext: vi.fn(),
@@ -24,6 +24,8 @@ vi.mock("@/lib/ai/soclaas-client", () => ({
 
 import { POST as applicantDraft } from "../../src/app/api/ai/applicant-draft/route";
 
+afterEach(() => vi.resetAllMocks());
+
 const jobId = "00000000-0000-4000-8000-000000000101";
 const actorId = "00000000-0000-4000-8000-000000000a12";
 const client = {};
@@ -40,7 +42,7 @@ async function responseBody(response: Response) {
   return response.json() as Promise<Record<string, unknown>>;
 }
 
-function setupApplicantDefaults() {
+beforeEach(() => {
   vi.clearAllMocks();
   spies.getApplicantContext.mockResolvedValue({
     status: "authorized",
@@ -58,36 +60,12 @@ function setupApplicantDefaults() {
   });
   spies.finalizeAiInvocation.mockResolvedValue(true);
   spies.isSoCLaaSReady.mockReturnValue(true);
-  spies.generateApplicantDraft.mockResolvedValue({ draft: "A checked draft" });
-}
-
-describe("Applicant draft route", () => {
-  beforeEach(setupApplicantDefaults);
-  it(
-    "denies anonymous and wrong-role callers before protected reads or model calls",
-    denyApplicantAccess,
-  );
-  it(
-    "rejects oversized notes before job reads or provider calls",
-    rejectOversizedNotes,
-  );
-  it(
-    "sends only Applicant notes and the selected published job fields",
-    sendScopedApplicantData,
-  );
-  it("fails closed when quota is exhausted", rejectQuotaExhaustion);
-  it(
-    "withholds drafts when final audit finalization fails",
-    rejectAuditFailure,
-  );
-  it("hides provider error details", hidesProviderFailure);
-  it(
-    "maps provider throttling to a safe retry-later response",
-    mapsProviderThrottle,
-  );
+  spies.generateApplicantDraft.mockResolvedValue({
+    draft: "A checked draft",
+  });
 });
 
-async function denyApplicantAccess() {
+it("denies anonymous and wrong-role callers before protected reads or model calls", async () => {
   spies.getApplicantContext.mockResolvedValueOnce({ status: "anonymous" });
   const anonymous = await applicantDraft(post({ jobId, notes: "Notes" }));
   expect(anonymous.status).toBe(401);
@@ -100,18 +78,18 @@ async function denyApplicantAccess() {
   expect(wrongRole.status).toBe(403);
   expect(spies.getPublishedJob).not.toHaveBeenCalled();
   expect(spies.generateApplicantDraft).not.toHaveBeenCalled();
-}
+});
 
-async function rejectOversizedNotes() {
+it("rejects oversized notes before job reads or provider calls", async () => {
   const response = await applicantDraft(
     post({ jobId, notes: "x".repeat(4001) }),
   );
   expect(response.status).toBe(400);
   expect(spies.getPublishedJob).not.toHaveBeenCalled();
   expect(spies.generateApplicantDraft).not.toHaveBeenCalled();
-}
+});
 
-async function sendScopedApplicantData() {
+it("sends only Applicant notes and the selected published job title and requirements", async () => {
   const response = await applicantDraft(
     post({ jobId, notes: "Built a course project" }),
   );
@@ -128,48 +106,46 @@ async function sendScopedApplicantData() {
     requirements: "TypeScript and testing",
   });
   expect(await responseBody(response)).toEqual({ draft: "A checked draft" });
-}
+});
 
-async function rejectQuotaExhaustion() {
+it("fails closed on quota, final audit, and provider errors", async () => {
   spies.reserveAiInvocation.mockResolvedValueOnce({
     ok: false,
     retryAfterSeconds: 37,
   });
-  const response = await applicantDraft(post({ jobId, notes: "Notes" }));
-  expect(response.status).toBe(429);
-  expect(response.headers.get("Retry-After")).toBe("37");
+  const limited = await applicantDraft(post({ jobId, notes: "Notes" }));
+  expect(limited.status).toBe(429);
+  expect(limited.headers.get("Retry-After")).toBe("37");
   expect(spies.generateApplicantDraft).not.toHaveBeenCalled();
-}
 
-async function rejectAuditFailure() {
   spies.finalizeAiInvocation.mockResolvedValueOnce(false);
-  const response = await applicantDraft(post({ jobId, notes: "Notes" }));
-  expect(response.status).toBe(503);
-  expect(await responseBody(response)).not.toHaveProperty("draft");
-}
+  const auditFailure = await applicantDraft(post({ jobId, notes: "Notes" }));
+  expect(auditFailure.status).toBe(503);
+  expect(await responseBody(auditFailure)).not.toHaveProperty("draft");
 
-async function hidesProviderFailure() {
   spies.generateApplicantDraft.mockRejectedValueOnce(
     new Error("provider body contains secret details"),
   );
-  const response = await applicantDraft(post({ jobId, notes: "Notes" }));
-  expect(response.status).toBe(503);
-  expect(JSON.stringify(await responseBody(response))).not.toContain(
+  const providerFailure = await applicantDraft(post({ jobId, notes: "Notes" }));
+  expect(providerFailure.status).toBe(503);
+  expect(JSON.stringify(await responseBody(providerFailure))).not.toContain(
     "secret details",
   );
-}
+});
 
-async function mapsProviderThrottle() {
+it("maps provider throttling to a safe retry-later response", async () => {
   spies.generateApplicantDraft.mockRejectedValueOnce(
     Object.assign(new Error("provider response includes secret details"), {
       status: 429,
       headers: new Headers({ "retry-after": "37" }),
     }),
   );
-  const response = await applicantDraft(post({ jobId, notes: "Notes" }));
-  expect(response.status).toBe(503);
-  expect(response.headers.get("Retry-After")).toBe("37");
-  expect(JSON.stringify(await responseBody(response))).not.toContain(
+  const applicantResponse = await applicantDraft(
+    post({ jobId, notes: "Notes" }),
+  );
+  expect(applicantResponse.status).toBe(503);
+  expect(applicantResponse.headers.get("Retry-After")).toBe("37");
+  expect(JSON.stringify(await responseBody(applicantResponse))).not.toContain(
     "secret details",
   );
   expect(spies.finalizeAiInvocation).toHaveBeenCalledWith(
@@ -177,4 +153,4 @@ async function mapsProviderThrottle() {
     "00000000-0000-4000-8000-000000000b01",
     "failure",
   );
-}
+});

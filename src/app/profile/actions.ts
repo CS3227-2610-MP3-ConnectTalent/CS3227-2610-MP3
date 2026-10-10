@@ -2,6 +2,9 @@
 import { revalidatePath } from "next/cache";
 import { requireApplicant } from "@/lib/auth";
 import { parseProfile } from "@/lib/profile-input";
+import { phoneFromForm } from "@/lib/phone";
+import { isProfileComplete } from "@/lib/profile-readiness";
+import { redirect } from "next/navigation";
 export type ProfileState = {
   values: Record<string, string>;
   errors: Record<string, string | undefined>;
@@ -11,7 +14,8 @@ export async function saveProfile(
   _state: ProfileState,
   form: FormData,
 ): Promise<ProfileState> {
-  const { client } = await requireApplicant();
+  const { client, user } = await requireApplicant({ allowIncomplete: true });
+  const before = await readExistingProfile(client, user.id);
   const values = Object.fromEntries(
     ["full_name", "phone", "portfolio_url", "education", "work_experience"].map(
       (key) => [
@@ -20,6 +24,7 @@ export async function saveProfile(
       ],
     ),
   );
+  values.phone = phoneFromForm(form);
   const parsed = parseProfile(values);
   if (!parsed.success)
     return {
@@ -48,9 +53,19 @@ export async function saveProfile(
     };
   }
   revalidatePath("/profile");
-  return {
-    values,
-    errors: {},
-    message: "Profile saved. Existing applications are unchanged.",
-  };
+  revalidatePath("/", "layout");
+  if (!isProfileComplete(before, user.email)) redirect("/");
+  return { values, errors: {}, message: "Profile saved." };
+}
+
+async function readExistingProfile(
+  client: Awaited<ReturnType<typeof requireApplicant>>["client"],
+  userId: string,
+) {
+  const { data } = await client
+    .from("applicant_profiles")
+    .select("full_name,phone")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data;
 }

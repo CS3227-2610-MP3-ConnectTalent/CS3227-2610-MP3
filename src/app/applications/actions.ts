@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { performWithdrawal } from "@/lib/application-withdrawal";
 
 import { requireApplicant } from "@/lib/auth";
 import { parseBackground } from "@/lib/profile-input";
 import { parseCoverLetter } from "@/lib/application-input";
 import { parseApplicationDetails } from "@/lib/application-details";
+import { phoneFromForm } from "@/lib/phone";
 import type {
   ApplicationFormState,
   ApplicationFormValues,
@@ -29,63 +31,48 @@ const writeResultSchema = z.object({
   revision: z.number().int().positive(),
 });
 
-type UpdateIntent = "save" | "submit";
-type ValidDetails = Extract<
-  ReturnType<typeof parseApplicationDetails>,
-  { success: true }
->["data"];
-type ValidBackground = Extract<
-  ReturnType<typeof parseBackground>,
-  { success: true }
->["data"];
-type ValidLetter = Extract<
-  ReturnType<typeof parseCoverLetter>,
-  { success: true }
->;
-type ValidatedUpdate = {
-  intent: UpdateIntent;
-  details: ValidDetails;
-  background: ValidBackground;
-  letter: ValidLetter;
-  revision: number | null;
-};
-type UpdateValidation =
-  | { valid: true; data: ValidatedUpdate }
-  | { valid: false; state: ApplicationFormState };
-type ActionClient = Awaited<ReturnType<typeof requireApplicant>>["client"];
-
 export async function updateApplication(
   _previous: ApplicationFormState,
   formData: FormData,
 ): Promise<ApplicationFormState> {
-  const jobId = readJobId(formData);
-  if (!z.uuid().safeParse(jobId).success)
-    redirect("/applications?error=invalid");
+  const jobId = getJobId(formData);
+  if (!jobId) redirect("/applications?error=invalid");
   const { client, user } = await requireApplicant();
-  const values = readApplicationValues(formData);
-  const validation = validateUpdate(formData, values);
-  if (!validation.valid) return validation.state;
-
-  const resultId = await saveApplicationUpdate(
-    client,
-    user.id,
-    jobId,
-    values,
-    validation.data,
-  );
-  if (!resultId)
-    return createFailure(
-      values,
+  const parsed = parseApplicationInput(formData);
+  if (!parsed.ok) return parsed.state;
+  const result = await saveApplication(client, user.id, jobId, parsed.data);
+  if (!result.id)
+    return failure(
+      parsed.data.values,
       "We could not save your changes. Check that the job is open. Copy your changes before reloading for the latest version, then try again.",
     );
-
   revalidatePath("/applications");
-  redirect(`/applications/${resultId.path}${resultId.notice}`);
+  const notice = result.reconciled
+    ? `?notice=${parsed.data.intent === "submit" ? "already-submitted" : "saved"}`
+    : "";
+  redirect(`/applications/${result.id}${notice}`);
 }
 
-function readJobId(formData: FormData) {
+type SaveInput = {
+  intent: "save" | "submit";
+  values: ApplicationFormValues;
+  details: Extract<
+    ReturnType<typeof parseApplicationDetails>,
+    { success: true }
+  >;
+  background: Extract<ReturnType<typeof parseBackground>, { success: true }>;
+  letter: Extract<ReturnType<typeof parseCoverLetter>, { success: true }>;
+  revision: number | null;
+};
+
+type ParseResult =
+  { ok: true; data: SaveInput } | { ok: false; state: ApplicationFormState };
+
+function getJobId(formData: FormData) {
   const value = formData.get("jobId");
-  return typeof value === "string" ? value : "";
+  return typeof value === "string" && z.uuid().safeParse(value).success
+    ? value
+    : null;
 }
 
 function readApplicationValues(formData: FormData): ApplicationFormValues {
@@ -97,13 +84,13 @@ function readApplicationValues(formData: FormData): ApplicationFormValues {
     education: read("education"),
     work_experience: read("work_experience"),
     full_name: read("full_name"),
-    phone: read("phone"),
+    phone: phoneFromForm(formData),
     portfolio_url: read("portfolio_url"),
     cover_letter: read("cover_letter"),
   };
 }
 
-function createFailure(
+function failure(
   values: ApplicationFormValues,
   message: string,
   errors: ApplicationFormState["errors"] = {},
@@ -111,45 +98,65 @@ function createFailure(
   return { values, errors, message };
 }
 
-function invalidUpdate(
-  values: ApplicationFormValues,
-  message: string,
-  errors: ApplicationFormState["errors"] = {},
-): UpdateValidation {
-  return { valid: false, state: createFailure(values, message, errors) };
-}
-
-function validateUpdate(
-  formData: FormData,
-  values: ApplicationFormValues,
-): UpdateValidation {
+function parseApplicationInput(formData: FormData): ParseResult {
+  const values = readApplicationValues(formData);
   const intent = formData.get("intent");
   if (intent === "edit")
-    return invalidUpdate(
-      values,
-      "Submitted applications are locked. Contact HR if you need to request a correction.",
-    );
+    return {
+      ok: false,
+      state: failure(
+        values,
+        "Submitted applications are locked. Contact HR if you need to request a correction.",
+      ),
+    };
   if (intent !== "save" && intent !== "submit")
-    return invalidUpdate(values, "Choose Save draft or Submit application.");
-  return validateUpdateContent(formData, values, intent);
-}
+    return {
+      ok: false,
+      state: failure(values, "Choose Save draft or Submit application."),
+    };
 
-function validateUpdateContent(
-  formData: FormData,
-  values: ApplicationFormValues,
-  intent: UpdateIntent,
-): UpdateValidation {
   const mode = intent === "save" ? "draft" : "submit";
   const details = parseApplicationDetails(values, mode);
   const background = parseBackground(values);
   const letter = parseCoverLetter(formData.get("cover_letter"), mode);
-  if (!details.success || !letter.success || !background.success)
-    return invalidUpdate(
+  if (!details.success || !background.success || !letter.success)
+    return parseFailure(values, details, background, letter);
+  const revision = parseRevision(formData.get("revision"));
+  if (!revision.ok)
+    return {
+      ok: false,
+      state: failure(
+        values,
+        "The application version is invalid. Copy your changes, reload and try again.",
+      ),
+    };
+  return {
+    ok: true,
+    data: {
+      intent,
+      values,
+      details,
+      background,
+      letter,
+      revision: revision.value,
+    },
+  };
+}
+
+function parseFailure(
+  values: ApplicationFormValues,
+  details: ReturnType<typeof parseApplicationDetails>,
+  background: ReturnType<typeof parseBackground>,
+  letter: ReturnType<typeof parseCoverLetter>,
+): ParseResult {
+  return {
+    ok: false,
+    state: failure(
       values,
       "Check the highlighted fields. Your changes have not been saved.",
       {
-        ...details.errors,
-        ...background.errors,
+        ...(details.success ? {} : details.errors),
+        ...(background.success ? {} : background.errors),
         ...(!letter.success
           ? {
               cover_letter:
@@ -157,94 +164,62 @@ function validateUpdateContent(
             }
           : {}),
       },
-    );
-  return validateRevision(
-    formData,
-    values,
-    intent,
-    details.data,
-    background.data,
-    letter,
-  );
-}
-
-function validateRevision(
-  formData: FormData,
-  values: ApplicationFormValues,
-  intent: UpdateIntent,
-  details: ValidDetails,
-  background: ValidBackground,
-  letter: ValidLetter,
-): UpdateValidation {
-  const rawRevision = formData.get("revision");
-  const revision = rawRevision === "" ? null : Number(rawRevision);
-  if (
-    typeof rawRevision !== "string" ||
-    (revision !== null && (!Number.isSafeInteger(revision) || revision < 1))
-  )
-    return invalidUpdate(
-      values,
-      "The application version is invalid. Copy your changes, reload and try again.",
-    );
-  return {
-    valid: true,
-    data: { intent, details, background, letter, revision },
+    ),
   };
 }
 
-async function saveApplicationUpdate(
-  client: ActionClient,
+function parseRevision(raw: FormDataEntryValue | null) {
+  if (typeof raw !== "string") return { ok: false as const };
+  const value = raw === "" ? null : Number(raw);
+  if (value !== null && (!Number.isSafeInteger(value) || value < 1))
+    return { ok: false as const };
+  return { ok: true as const, value };
+}
+
+async function saveApplication(
+  client: Awaited<ReturnType<typeof requireApplicant>>["client"],
   userId: string,
   jobId: string,
-  values: ApplicationFormValues,
-  update: ValidatedUpdate,
+  input: SaveInput,
 ) {
-  const resultId = await callApplicationWrite(client, jobId, update);
-  const reconciledId = resultId
-    ? null
-    : await reconcileLostWrite(client, userId, jobId, update);
-  const committedId = resultId ?? reconciledId;
-  if (!committedId) return null;
-  return {
-    path: committedId,
-    notice: reconciledId
-      ? `?notice=${update.intent === "submit" ? "already-submitted" : "saved"}`
-      : "",
-  };
+  const id = await callApplicationWrite(client, jobId, input);
+  if (id) return { id, reconciled: false };
+  const reconciledId = await reconcileApplication(client, userId, jobId, input);
+  return { id: reconciledId, reconciled: Boolean(reconciledId) };
 }
 
 async function callApplicationWrite(
-  client: ActionClient,
+  client: Awaited<ReturnType<typeof requireApplicant>>["client"],
   jobId: string,
-  update: ValidatedUpdate,
+  input: SaveInput,
 ) {
   const functionName =
-    update.intent === "save"
+    input.intent === "save"
       ? "save_application_details_v3"
       : "submit_application_details_v3";
   try {
     const { data, error } = await client.rpc(functionName, {
       p_job_id: jobId,
-      p_cover_letter: update.letter.value,
-      p_full_name: update.details.full_name,
-      p_education: update.background.education,
-      p_work_experience: update.background.work_experience,
-      p_phone: update.details.phone,
-      p_portfolio_url: update.details.portfolio_url,
-      p_expected_revision: update.revision,
+      p_cover_letter: input.letter.value,
+      p_full_name: input.details.data.full_name,
+      p_education: input.background.data.education,
+      p_work_experience: input.background.data.work_experience,
+      p_phone: input.details.data.phone,
+      p_portfolio_url: input.details.data.portfolio_url,
+      p_expected_revision: input.revision,
     });
     return !error && z.uuid().safeParse(data).success ? (data as string) : null;
   } catch {
-    /* A lost response can follow a committed write; reconcile the owner's row. */
+    /* A lost response can follow a committed write; check only the owner's row. */
     return null;
   }
 }
 
-async function reconcileLostWrite(
-  client: ActionClient,
+async function reconcileApplication(
+  client: Awaited<ReturnType<typeof requireApplicant>>["client"],
   userId: string,
   jobId: string,
-  update: ValidatedUpdate,
+  input: SaveInput,
 ) {
   try {
     const { data, error } = await client
@@ -257,17 +232,49 @@ async function reconcileLostWrite(
       .maybeSingle();
     const parsed = error ? null : writeResultSchema.safeParse(data);
     return reconcileApplicationWrite(
-      update.intent,
+      input.intent,
       {
-        ...update.details,
-        ...update.background,
-        cover_letter: update.letter.value,
+        ...input.details.data,
+        ...input.background.data,
+        cover_letter: input.letter.value,
       },
-      update.revision,
+      input.revision,
       parsed?.success ? parsed.data : null,
     );
   } catch {
-    /* Retain inputs and show the generic failure state. */
+    /* Retain inputs and give generic feedback below. */
     return null;
   }
+}
+
+export async function withdrawApplication(
+  _previous: { message: string | null },
+  form: FormData,
+): Promise<{ message: string | null }> {
+  const { client, user } = await requireApplicant();
+  const id = form.get("applicationId");
+  if (
+    typeof id !== "string" ||
+    !z.uuid().safeParse(id).success ||
+    form.get("confirmed") !== "true"
+  ) {
+    return {
+      message:
+        "Confirm withdrawal of a submitted application before continuing.",
+    };
+  }
+  if (!(await performWithdrawal(client, user.id, id))) {
+    return {
+      message:
+        "We could not confirm withdrawal. Reload to check the application before trying again.",
+    };
+  }
+  for (const path of [
+    "/applications",
+    `/applications/${id}`,
+    "/hr/applications",
+    `/hr/applications/${id}`,
+  ])
+    revalidatePath(path);
+  redirect(`/applications/${id}?notice=withdrawn`);
 }

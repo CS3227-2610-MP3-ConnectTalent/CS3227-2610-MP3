@@ -44,6 +44,7 @@ function submission() {
   form.set("jobId", jobId);
   form.set("intent", "submit");
   form.set("full_name", "Synthetic Applicant");
+  form.set("phone", "+6591234567");
   form.set("cover_letter", "Retried letter");
   form.set("revision", "1");
   return form;
@@ -58,16 +59,8 @@ function submittedEdit() {
   return form;
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  rpc.mockResolvedValue({
-    data: null,
-    error: { message: "Application already submitted" },
-  });
-});
-
-it("re-reads only the owner and selected job, then shows the existing submission", async () => {
-  maybeSingle.mockResolvedValue({
+function existingSubmission() {
+  return {
     data: {
       id: applicationId,
       education: null,
@@ -80,8 +73,19 @@ it("re-reads only the owner and selected job, then shows the existing submission
       revision: 2,
     },
     error: null,
-  });
+  };
+}
 
+beforeEach(() => {
+  vi.clearAllMocks();
+  rpc.mockResolvedValue({
+    data: null,
+    error: { message: "Application already submitted" },
+  });
+});
+
+it("re-reads only the owner and selected job, then shows the existing submission", async () => {
+  maybeSingle.mockResolvedValue(existingSubmission());
   await expect(updateApplication(initial, submission())).rejects.toThrow(
     `REDIRECT:/applications/${applicationId}?notice=already-submitted`,
   );
@@ -116,9 +120,6 @@ it("directs post-submission correction attempts to HR without calling the databa
   expect(revalidatePath).not.toHaveBeenCalled();
 });
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 it("never passes browser-supplied email to the database", async () => {
   rpc.mockResolvedValue({ data: applicationId, error: null });
   const form = submission();
@@ -131,7 +132,7 @@ it("never passes browser-supplied email to the database", async () => {
     p_job_id: jobId,
     p_cover_letter: "Retried letter",
     p_full_name: "Synthetic Applicant",
-    p_phone: null,
+    p_phone: "+6591234567",
     p_portfolio_url: null,
     p_education: null,
     p_work_experience: null,

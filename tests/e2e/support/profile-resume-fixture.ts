@@ -1,3 +1,4 @@
+import { createClient } from "@supabase/supabase-js";
 import { expect } from "@playwright/test";
 import type { AdminClient } from "./admin-client";
 export type ProfileFixture = {
@@ -40,6 +41,29 @@ export async function promoteProfileHR(admin: AdminClient, userId: string) {
     .from("profiles")
     .update({ role: "hr" })
     .eq("user_id", userId);
+  expect(error).toBeNull();
+}
+
+export async function createApplicantProfile(
+  adminKey: string,
+  email: string,
+  password: string,
+) {
+  const applicant = createClient("http://127.0.0.1:54321", adminKey, {
+    auth: { persistSession: false },
+  });
+  const { error: signInError } = await applicant.auth.signInWithPassword({
+    email,
+    password,
+  });
+  expect(signInError).toBeNull();
+  const { error } = await applicant.rpc("save_applicant_profile", {
+    p_full_name: "Fixture Applicant",
+    p_phone: "+6591234567",
+    p_portfolio_url: null,
+    p_education: null,
+    p_work_experience: null,
+  });
   expect(error).toBeNull();
 }
 

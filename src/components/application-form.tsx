@@ -10,6 +10,8 @@ import {
   ApplicationFormActions,
   CoverLetterField,
 } from "@/components/application-form-fields";
+import { ResumePanel } from "@/components/resume-panel";
+import type { ResumeMetadata } from "@/lib/application-resumes";
 import type { ApplicationFormState } from "@/lib/application-form-state";
 
 type ApplicationDetails = {
@@ -20,16 +22,20 @@ type ApplicationDetails = {
   education?: string | null;
   work_experience?: string | null;
 };
-type ApplicationFormProps = {
+
+type Props = {
   jobId: string;
   value: string;
   revision: number | null;
   submitted: boolean;
-  email: string;
   details: ApplicationDetails;
+  email: string;
+  applicationId?: string | null;
+  resume?: ResumeMetadata | null;
+  profileResume?: ResumeMetadata | null;
 };
 
-export function ApplicationForm(props: ApplicationFormProps) {
+export function ApplicationForm(props: Props) {
   const initial = createInitialState(props.details, props.value);
   const [state, formAction, pending] = useActionState(
     updateApplication,
@@ -37,6 +43,11 @@ export function ApplicationForm(props: ApplicationFormProps) {
     `/jobs/${props.jobId}/apply`,
   );
   const [coverLetter, setCoverLetter] = useState(state.values.cover_letter);
+  const [attachment, setAttachment] = useState({
+    applicationId: props.applicationId ?? null,
+    revision: props.revision,
+  });
+  const [attachmentPending, setAttachmentPending] = useState(false);
   if (props.submitted)
     return (
       <SubmittedApplication details={props.details} coverLetter={coverLetter} />
@@ -46,7 +57,10 @@ export function ApplicationForm(props: ApplicationFormProps) {
       {...props}
       state={state}
       formAction={formAction}
-      pending={pending}
+      pending={pending || attachmentPending}
+      attachment={attachment}
+      setAttachment={setAttachment}
+      onAttachmentPending={setAttachmentPending}
       coverLetter={coverLetter}
       setCoverLetter={setCoverLetter}
     />
@@ -92,50 +106,79 @@ function SubmittedApplication({
   );
 }
 
-function ApplicationDraftForm({
-  jobId,
-  revision,
-  email,
-  state,
-  formAction,
-  pending,
-  coverLetter,
-  setCoverLetter,
-}: ApplicationFormProps & {
+type Attachment = { applicationId: string | null; revision: number | null };
+type DraftProps = Props & {
   state: ApplicationFormState;
   formAction: (formData: FormData) => void;
   pending: boolean;
+  attachment: Attachment;
+  setAttachment: (value: Attachment) => void;
+  onAttachmentPending: (value: boolean) => void;
   coverLetter: string;
   setCoverLetter: (value: string) => void;
-}) {
+};
+
+function ApplicationDraftForm(props: DraftProps) {
   return (
     <div className="mt-8 space-y-5">
-      <form action={formAction} className="form-surface space-y-5">
-        <input type="hidden" name="jobId" value={jobId} />
-        <input type="hidden" name="revision" value={revision ?? ""} />
-        <ApplicationFormMessage message={state.message} />
-        <fieldset disabled={pending} className="space-y-5">
+      <form action={props.formAction} className="form-surface space-y-5">
+        <input type="hidden" name="jobId" value={props.jobId} />
+        <input
+          type="hidden"
+          name="revision"
+          value={props.attachment.revision ?? ""}
+        />
+        <ApplicationFormMessage message={props.state.message} />
+        <fieldset disabled={props.pending} className="space-y-5">
           <legend className="mb-4 text-xl font-semibold">Your details</legend>
           <ApplicantContactFields
-            values={state.values}
-            errors={state.errors}
-            email={email}
+            values={props.state.values}
+            errors={props.state.errors}
+            email={props.email}
           />
           <ApplicationBackgroundFields
-            values={state.values}
-            errors={state.errors}
+            values={props.state.values}
+            errors={props.state.errors}
+          />
+          <ApplicationResumeFields {...props} />
+          <ApplicantAiDraft
+            jobId={props.jobId}
+            onDraft={props.setCoverLetter}
           />
           <CoverLetterField
-            value={coverLetter}
-            error={state.errors.cover_letter}
-            onChange={setCoverLetter}
+            value={props.coverLetter}
+            error={props.state.errors.cover_letter}
+            onChange={props.setCoverLetter}
           />
           <ApplicationFormActions />
         </fieldset>
-        {pending && <p role="status">Saving your application…</p>}
+        {props.pending && <p role="status">Saving your application…</p>}
       </form>
-      <ApplicantAiDraft jobId={jobId} onDraft={setCoverLetter} />
     </div>
+  );
+}
+
+function ApplicationResumeFields(props: DraftProps) {
+  return (
+    <ResumePanel
+      jobId={props.jobId}
+      applicationId={props.attachment.applicationId}
+      revision={props.attachment.revision}
+      editable
+      resume={props.resume ?? null}
+      profileResume={props.profileResume}
+      onPending={props.onAttachmentPending}
+      onChange={(result) => {
+        if (
+          typeof result.applicationId === "string" &&
+          typeof result.revision === "number"
+        )
+          props.setAttachment({
+            applicationId: result.applicationId,
+            revision: result.revision,
+          });
+      }}
+    />
   );
 }
 

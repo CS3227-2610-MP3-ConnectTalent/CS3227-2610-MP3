@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isProfileComplete } from "@/lib/profile-readiness";
 
 type ServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 type AiContext =
@@ -44,6 +45,15 @@ async function getRoleContext(role: "applicant" | "hr"): Promise<AiContext> {
     .maybeSingle();
   if (profileError) throw new Error("AI authorization data is unavailable.");
   if (profile?.role !== role) return { status: "forbidden" };
+  if (role === "applicant") {
+    const { data: details, error } = await client
+      .from("applicant_profiles")
+      .select("full_name,phone")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (error || !isProfileComplete(details, user.email))
+      return { status: "forbidden" };
+  }
   return { status: "authorized", client, user: { id: user.id } };
 }
 
@@ -76,6 +86,7 @@ export async function getSubmittedApplication(
     .select("id,job_id,cover_letter")
     .eq("id", applicationId)
     .eq("submission_state", "submitted")
+    .is("withdrawn_at", null)
     .maybeSingle();
   if (error) throw new Error("Selected application is unavailable.");
   if (!data) return null;

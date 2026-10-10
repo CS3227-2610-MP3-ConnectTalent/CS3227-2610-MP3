@@ -1,13 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
-import {
-  test,
-  type Browser,
-  type BrowserContext,
-  type Page,
-} from "@playwright/test";
-import type { AdminClient } from "./support/admin-client";
+import { test } from "@playwright/test";
 import {
   cleanupProfileFixture,
+  createApplicantProfile,
   createProfileFixture,
   createProfileJob,
   createProfileUsers,
@@ -30,29 +25,33 @@ test("profile prefill, private PDF, submission freeze and HR access", async ({
   page,
   browser,
   baseURL,
-}) => runProfileResumeScenario(page, browser, baseURL));
-
-async function runProfileResumeScenario(
-  page: Page,
-  browser: Browser,
-  baseURL: string | undefined,
-) {
+}) => {
   test.setTimeout(150_000);
-  const admin: AdminClient = createClient("http://127.0.0.1:54321", adminKey!, {
+  const admin = createClient("http://127.0.0.1:54321", adminKey!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const fixture = createProfileFixture();
   const users: string[] = [];
+  const contexts: Awaited<ReturnType<typeof browser.newContext>>[] = [];
   let applicationId: string | undefined;
-  let hrContext: BrowserContext | undefined;
-  let otherContext: BrowserContext | undefined;
   try {
     await createProfileUsers(admin, fixture, users);
+    await createApplicantProfile(
+      adminKey!,
+      fixture.emails[0],
+      fixture.password,
+    );
+    await createApplicantProfile(
+      adminKey!,
+      fixture.emails[2],
+      fixture.password,
+    );
     await promoteProfileHR(admin, users[1]);
     await createProfileJob(admin, fixture.jobId);
     applicationId = await runApplicantResumeFlow(page, admin, fixture, baseURL);
-    hrContext = await browser.newContext({ baseURL });
-    otherContext = await browser.newContext({ baseURL });
+    const hrContext = await browser.newContext({ baseURL });
+    const otherContext = await browser.newContext({ baseURL });
+    contexts.push(hrContext, otherContext);
     const hr = await hrContext.newPage();
     const other = await otherContext.newPage();
     await verifyRoleBoundaries(hr, other, fixture, applicationId);
@@ -66,8 +65,7 @@ async function runProfileResumeScenario(
       baseURL,
     );
   } finally {
-    await hrContext?.close();
-    await otherContext?.close();
+    for (const context of contexts) await context.close();
     await cleanupProfileFixture(admin, fixture.jobId, applicationId, users);
   }
-}
+});

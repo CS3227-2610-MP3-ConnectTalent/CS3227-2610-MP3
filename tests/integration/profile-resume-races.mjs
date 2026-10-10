@@ -94,7 +94,7 @@ function hold(sql, marker) {
 }
 function write(job, mode, revision) {
   return `set local role authenticated; select set_config('request.jwt.claim.sub','${actor}',true);
- select public.${mode}_application_details_v3('${job}','Synthetic letter','Synthetic Applicant',null,null,'College','Internship',${revision})`;
+ select public.${mode}_application_details_v3('${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,'College','Internship',${revision})`;
 }
 function reserve(index) {
   return `select public.reserve_application_resume('${actor}','${jobs[index]}',1,'${operations[index]}','synthetic.pdf',512,repeat('a',64))`;
@@ -120,7 +120,8 @@ async function pair(firstSql, secondSql, failure) {
 try {
   await runSql(`insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at)
    values('${actor}','00000000-0000-0000-0000-000000000000','authenticated','authenticated','resume-race-${actor}@example.test','',now());
-   insert into public.jobs(id,title,team,category,description,requirements,status,published_at) values
+   insert into public.applicant_profiles(user_id,full_name,phone) values('${actor}','Fixture Applicant','+6591234567');
+    insert into public.jobs(id,title,team,category,description,requirements,status,published_at) values
    ${jobs.map((job) => `('${job}','Resume race','Synthetic','engineering','Synthetic','Synthetic','published',now())`).join(",")};`);
   for (const job of jobs)
     await runSql(`begin; ${write(job, "save", "null")}; commit;`);

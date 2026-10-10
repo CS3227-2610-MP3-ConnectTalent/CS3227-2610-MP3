@@ -1,19 +1,22 @@
 import Link from "next/link";
-import { ResumePanel } from "@/components/resume-panel";
-import { getApplicationResume } from "@/lib/application-resumes";
 import { notFound } from "next/navigation";
-
 import { ApplicationContactDetails } from "@/components/application-contact-details";
-import { requireApplicant } from "@/lib/auth";
 import { ApplicationForm } from "@/components/application-form";
+import { ResumePanel } from "@/components/resume-panel";
+import { WithdrawalControl } from "@/components/withdrawal-control";
+import { getApplicationResume } from "@/lib/application-resumes";
 import { getOwnApplication } from "@/lib/applications";
-import { getPublishedJob } from "@/lib/jobs";
+import { requireApplicant } from "@/lib/auth";
 import { reviewStatusLabel } from "@/lib/hr-input";
+import { getPublishedJob } from "@/lib/jobs";
+import { getProfileResume } from "@/lib/profile-resumes";
 
 export const dynamic = "force-dynamic";
 
 type Application = NonNullable<Awaited<ReturnType<typeof getOwnApplication>>>;
 type Job = Awaited<ReturnType<typeof getPublishedJob>>;
+type Resume = Awaited<ReturnType<typeof getApplicationResume>>;
+type ProfileResume = Awaited<ReturnType<typeof getProfileResume>>;
 
 export default async function ApplicationDetail({
   params,
@@ -27,56 +30,74 @@ export default async function ApplicationDetail({
   const application = await getOwnApplication(id);
   if (!application) notFound();
   const job = await getPublishedJob(application.job_id);
-  const resume = await getApplicationResume(application.id);
-  const { notice } = await searchParams;
-
+  const [resume, profileResume, { notice }] = await Promise.all([
+    getApplicationResume(application.id),
+    job ? getProfileResume() : null,
+    searchParams,
+  ]);
   return (
-    <ApplicationDetailView
+    <ApplicationDetailContent
       application={application}
       job={job}
+      resume={resume}
+      profileResume={profileResume}
       email={user.email ?? ""}
       notice={notice}
-      resume={resume}
     />
   );
 }
 
-function ApplicationDetailView({
+function ApplicationDetailContent({
   application,
   job,
+  resume,
+  profileResume,
   email,
   notice,
-  resume,
 }: {
   application: Application;
   job: Job;
+  resume: Resume;
+  profileResume: ProfileResume;
   email: string;
   notice?: string;
-  resume: Awaited<ReturnType<typeof getApplicationResume>>;
 }) {
+  const submitted = application.submission_state === "submitted";
   return (
     <main className="page-shell mx-auto max-w-3xl space-y-6 px-5 py-10">
       <Link href="/applications" className="underline">
         ← My applications
       </Link>
       <h1 className="text-3xl font-semibold">{application.job_title}</h1>
-      <ApplicationNotices notice={notice} job={job} />
-      <ApplicationProgress application={application} />
-      {(application.submission_state === "submitted" || !job) && (
-        <ApplicationContactDetails {...application} />
-      )}
-      <ApplicationLetter application={application} job={job} email={email} />
-      <ResumePanel
-        applicationId={application.id}
-        revision={application.revision}
-        editable={Boolean(job) && application.submission_state === "draft"}
+      <ApplicationNotices application={application} notice={notice} />
+      <ApplicationState application={application} job={job} />
+      {(submitted || !job) && <ApplicationContactDetails {...application} />}
+      <ApplicationBody
+        application={application}
+        job={job}
+        email={email}
         resume={resume}
+        profileResume={profileResume}
       />
+      {(submitted || !job) && (
+        <ResumePanel
+          applicationId={application.id}
+          revision={application.revision}
+          editable={false}
+          resume={resume}
+        />
+      )}
     </main>
   );
 }
 
-function ApplicationNotices({ notice, job }: { notice?: string; job: Job }) {
+function ApplicationNotices({
+  application,
+  notice,
+}: {
+  application: Application;
+  notice?: string;
+}) {
   return (
     <>
       {notice === "already-submitted" && (
@@ -90,6 +111,36 @@ function ApplicationNotices({ notice, job }: { notice?: string; job: Job }) {
           Your change was already saved. Review the current letter below.
         </p>
       )}
+      {application.withdrawn_at && (
+        <p role="status" className="rounded-lg border p-3">
+          Withdrawn — this application is retained for your records and cannot
+          be reopened.
+        </p>
+      )}
+    </>
+  );
+}
+
+function ApplicationState({
+  application,
+  job,
+}: {
+  application: Application;
+  job: Job;
+}) {
+  const submitted = application.submission_state === "submitted";
+  return (
+    <>
+      {submitted && !application.withdrawn_at && (
+        <WithdrawalControl applicationId={application.id} />
+      )}
+      <p>{submitted ? "Submitted application" : "Saved draft"}</p>
+      {submitted && application.review_status && !application.withdrawn_at && (
+        <p>
+          Review status:{" "}
+          <strong>{reviewStatusLabel(application.review_status)}</strong>
+        </p>
+      )}
       {!job && (
         <p className="rounded-lg border p-3">
           This job is no longer open. Your application remains available to
@@ -100,56 +151,43 @@ function ApplicationNotices({ notice, job }: { notice?: string; job: Job }) {
   );
 }
 
-function ApplicationProgress({ application }: { application: Application }) {
-  return (
-    <>
-      <p>
-        {application.submission_state === "draft"
-          ? "Saved draft"
-          : "Submitted application"}
-      </p>
-      {application.submission_state === "submitted" &&
-        application.review_status && (
-          <p>
-            Review status:{" "}
-            <strong>{reviewStatusLabel(application.review_status)}</strong>
-          </p>
-        )}
-    </>
-  );
-}
-
-function ApplicationLetter({
+function ApplicationBody({
   application,
   job,
   email,
+  resume,
+  profileResume,
 }: {
   application: Application;
   job: Job;
   email: string;
+  resume: Resume;
+  profileResume: ProfileResume;
 }) {
   if (application.submission_state === "submitted")
-    return <OriginalSubmission application={application} />;
-  if (job)
-    return (
-      <ApplicationForm
-        jobId={application.job_id}
-        value={application.cover_letter}
-        revision={application.revision}
-        submitted={false}
-        email={email}
-        details={application}
-      />
-    );
-  return <SavedLetter application={application} />;
+    return <SubmittedLetter letter={application.original_submitted_letter} />;
+  if (!job) return <SavedLetter letter={application.cover_letter} />;
+  return (
+    <ApplicationForm
+      jobId={application.job_id}
+      value={application.cover_letter}
+      revision={application.revision}
+      submitted={false}
+      email={email}
+      details={application}
+      applicationId={application.id}
+      resume={resume}
+      profileResume={profileResume}
+    />
+  );
 }
 
-function OriginalSubmission({ application }: { application: Application }) {
+function SubmittedLetter({ letter }: { letter: string | null }) {
   return (
     <section className="space-y-2">
       <h2 className="text-xl font-semibold">Original submission</h2>
       <p className="whitespace-pre-wrap rounded-lg border p-4">
-        {application.original_submitted_letter}
+        {letter ?? ""}
       </p>
       <p className="text-sm text-muted-foreground">
         Submitted applications are locked. Contact HR if you need to request a
@@ -159,12 +197,12 @@ function OriginalSubmission({ application }: { application: Application }) {
   );
 }
 
-function SavedLetter({ application }: { application: Application }) {
+function SavedLetter({ letter }: { letter: string }) {
   return (
     <section className="space-y-2">
       <h2 className="text-xl font-semibold">Saved letter</h2>
       <p className="whitespace-pre-wrap rounded-lg border p-4">
-        {application.cover_letter || "(empty draft)"}
+        {letter || "(empty draft)"}
       </p>
     </section>
   );

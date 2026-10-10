@@ -2,25 +2,44 @@
 
 import { useActionState } from "react";
 import { saveProfile } from "@/app/profile/actions";
+import { PhoneInput } from "@/components/phone-input";
+import { ResumePanel } from "@/components/resume-panel";
+import type { ResumeMetadata } from "@/lib/application-resumes";
 import type { ApplicantProfile } from "@/lib/applicant-profile";
+import type { ProfileState } from "@/app/profile/actions";
 
-const profileFields = [
+type FieldKey = "full_name" | "portfolio_url" | "education" | "work_experience";
+type FieldSpec = {
+  key: FieldKey;
+  label: string;
+  limit: number;
+  multiline?: boolean;
+};
+const fields: FieldSpec[] = [
   { key: "full_name", label: "Full name", limit: 120 },
-  { key: "phone", label: "Phone (optional)", limit: 40 },
   { key: "portfolio_url", label: "Portfolio URL (optional)", limit: 2048 },
-  { key: "education", label: "Education (optional)", limit: 2000 },
-  { key: "work_experience", label: "Work experience (optional)", limit: 2000 },
-] as const;
-
-type ProfileState = Awaited<ReturnType<typeof saveProfile>>;
-type ProfileFieldKey = (typeof profileFields)[number]["key"];
+  {
+    key: "education",
+    label: "Education (optional)",
+    limit: 2000,
+    multiline: true,
+  },
+  {
+    key: "work_experience",
+    label: "Work experience (optional)",
+    limit: 2000,
+    multiline: true,
+  },
+];
 
 export function ProfileForm({
   profile,
   email,
+  resume = null,
 }: {
   profile: ApplicantProfile;
   email: string;
+  resume?: ResumeMetadata | null;
 }) {
   const [state, action, pending] = useActionState(saveProfile, {
     values: Object.fromEntries(
@@ -30,16 +49,22 @@ export function ProfileForm({
   });
   return (
     <form action={action} className="space-y-5 rounded-xl border p-5">
-      <VerifiedProfileEmail email={email} />
-      {profileFields.map((field) => (
-        <ProfileField key={field.key} field={field} state={state} />
-      ))}
-      <ProfileFormFeedback state={state} pending={pending} />
+      <VerifiedEmail email={email} />
+      <ProfileFields state={state} />
+      <ResumePanel
+        profileMode
+        applicationId={null}
+        revision={null}
+        editable
+        resume={resume}
+      />
+      <ProfileFeedback state={state} />
+      <SaveProfileButton pending={pending} />
     </form>
   );
 }
 
-function VerifiedProfileEmail({ email }: { email: string }) {
+function VerifiedEmail({ email }: { email: string }) {
   return (
     <label className="block">
       Verified email
@@ -52,71 +77,98 @@ function VerifiedProfileEmail({ email }: { email: string }) {
   );
 }
 
+function ProfileFields({ state }: { state: ProfileState }) {
+  return (
+    <>
+      <ProfileField field={fields[0]} state={state} />
+      <PhoneInput value={state.values.phone} error={state.errors.phone} />
+      {fields.slice(1).map((field) => (
+        <ProfileField key={field.key} field={field} state={state} />
+      ))}
+    </>
+  );
+}
+
 function ProfileField({
   field,
   state,
 }: {
-  field: (typeof profileFields)[number];
+  field: FieldSpec;
   state: ProfileState;
 }) {
-  const id = `profile-${field.key}`;
+  const error = state.errors[field.key];
   return (
     <div>
-      <label htmlFor={id} className="block font-medium">
+      <label htmlFor={`profile-${field.key}`} className="block font-medium">
         {field.label}
       </label>
-      <ProfileFieldInput field={field} id={id} state={state} />
-      <p id={`help-${field.key}`} className="text-sm text-muted-foreground">
-        {state.errors[field.key] ??
-          `Optional. Maximum ${field.limit.toLocaleString()} characters.`}
-      </p>
+      <ProfileFieldInput
+        field={field}
+        value={state.values[field.key]}
+        error={error}
+      />
+      <ProfileFieldHelp field={field} error={error} />
     </div>
   );
 }
 
 function ProfileFieldInput({
   field,
-  id,
-  state,
+  value,
+  error,
 }: {
-  field: (typeof profileFields)[number];
-  id: string;
-  state: ProfileState;
+  field: FieldSpec;
+  value: string;
+  error?: string;
 }) {
-  const props = {
-    id,
+  const common = {
+    id: `profile-${field.key}`,
     name: field.key,
     maxLength: field.limit,
-    defaultValue: state.values[field.key as ProfileFieldKey],
-    "aria-invalid": Boolean(state.errors[field.key]),
-    "aria-describedby": `help-${field.key}`,
+    defaultValue: value,
+    "aria-invalid": Boolean(error),
+    "aria-describedby":
+      field.key !== "full_name" || error ? `help-${field.key}` : undefined,
     className: "mt-2 w-full rounded-lg border p-3",
   };
-  if (field.key === "education" || field.key === "work_experience")
-    return <textarea {...props} rows={5} />;
-  return <input {...props} />;
+  return field.multiline ? (
+    <textarea {...common} rows={5} />
+  ) : (
+    <input {...common} required={field.key === "full_name"} />
+  );
 }
 
-function ProfileFormFeedback({
-  state,
-  pending,
+function ProfileFieldHelp({
+  field,
+  error,
 }: {
-  state: ProfileState;
-  pending: boolean;
+  field: FieldSpec;
+  error?: string;
 }) {
+  if (field.key === "full_name" && !error) return null;
   return (
-    <>
-      {state.message && (
-        <p role={Object.keys(state.errors).length ? "alert" : "status"}>
-          {state.message}
-        </p>
-      )}
-      <button
-        disabled={pending}
-        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
-      >
-        {pending ? "Saving…" : "Save profile"}
-      </button>
-    </>
+    <p id={`help-${field.key}`} className="text-sm text-muted-foreground">
+      {error ?? `Optional. Maximum ${field.limit.toLocaleString()} characters.`}
+    </p>
+  );
+}
+
+function ProfileFeedback({ state }: { state: ProfileState }) {
+  if (!state.message) return null;
+  return (
+    <p role={Object.keys(state.errors).length ? "alert" : "status"}>
+      {state.message}
+    </p>
+  );
+}
+
+function SaveProfileButton({ pending }: { pending: boolean }) {
+  return (
+    <button
+      disabled={pending}
+      className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+    >
+      {pending ? "Saving…" : "Save profile"}
+    </button>
   );
 }

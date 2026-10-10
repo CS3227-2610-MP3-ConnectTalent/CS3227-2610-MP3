@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import { addHRNote, changeHRStatus } from "@/app/hr/applications/actions";
+import { HRApplicationActions } from "@/components/hr-application-actions";
 import { ApplicationContactDetails } from "@/components/application-contact-details";
 import { HrAiSummary } from "@/components/hr-ai-summary";
 import { ResumePanel } from "@/components/resume-panel";
@@ -21,10 +20,7 @@ type Application = NonNullable<
 >;
 type Notes = Awaited<ReturnType<typeof listHRNotes>>;
 type Events = Awaited<ReturnType<typeof listHRStatusEvents>>;
-type ReviewLoad =
-  | { status: "unavailable" }
-  | { status: "missing" }
-  | { status: "ready"; application: Application; notes: Notes; events: Events };
+type Resume = Awaited<ReturnType<typeof getApplicationResume>>;
 
 export default async function HRApplicationDetail({
   params,
@@ -36,38 +32,39 @@ export default async function HRApplicationDetail({
   await requireHR();
   const { id } = await params;
   const review = await loadReview(id);
-  if (review.status === "unavailable") return <ReviewUnavailable />;
   if (review.status === "missing") notFound();
-
-  const { error, notice } = await searchParams;
-  const resume = await getApplicationResume(review.application.id);
+  if (review.status === "error") return <ReviewLoadError />;
+  const [{ error, notice }, resume] = await Promise.all([
+    searchParams,
+    getApplicationResume(review.application.id),
+  ]);
   return (
-    <HRApplicationContent
+    <HRApplicationReview
       application={review.application}
       notes={review.notes}
       events={review.events}
       resume={resume}
-      hasError={Boolean(error)}
-      hasNotice={Boolean(notice)}
+      error={error}
+      notice={notice}
     />
   );
 }
 
-async function loadReview(id: string): Promise<ReviewLoad> {
+async function loadReview(id: string) {
   try {
     const application = await getSubmittedApplication(id);
-    if (!application) return { status: "missing" };
+    if (!application) return { status: "missing" as const };
     const [notes, events] = await Promise.all([
       listHRNotes(id),
       listHRStatusEvents(id),
     ]);
-    return { status: "ready", application, notes, events };
+    return { status: "loaded" as const, application, notes, events };
   } catch {
-    return { status: "unavailable" };
+    return { status: "error" as const };
   }
 }
 
-function ReviewUnavailable() {
+function ReviewLoadError() {
   return (
     <main className="page-shell mx-auto max-w-3xl px-5 py-10">
       <h1 className="text-3xl font-semibold">Application review</h1>
@@ -78,28 +75,29 @@ function ReviewUnavailable() {
   );
 }
 
-function HRApplicationContent({
+function HRApplicationReview({
   application,
   notes,
   events,
   resume,
-  hasError,
-  hasNotice,
+  error,
+  notice,
 }: {
   application: Application;
   notes: Notes;
   events: Events;
-  resume: Awaited<ReturnType<typeof getApplicationResume>>;
-  hasError: boolean;
-  hasNotice: boolean;
+  resume: Resume;
+  error?: string;
+  notice?: string;
 }) {
+  const withdrawn = Boolean(application.withdrawn_at);
   return (
     <main className="page-shell mx-auto max-w-3xl space-y-8 px-5 py-10">
       <Link href="/hr/applications" className="underline">
         ← Application review
       </Link>
-      <ReviewHeader application={application} />
-      <ReviewNotices hasError={hasError} hasNotice={hasNotice} />
+      <ApplicationHeading application={application} />
+      <ReviewFeedback error={error} notice={notice} withdrawn={withdrawn} />
       <ApplicationContactDetails {...application} />
       <ResumePanel
         applicationId={application.id}
@@ -107,21 +105,27 @@ function HRApplicationContent({
         editable={false}
         resume={resume}
       />
-      <ApplicationLetters application={application} />
-      <PrivateNotesSection applicationId={application.id} notes={notes} />
-      <ReviewStatusSection application={application} events={events} />
+      <CoverLetterSections application={application} withdrawn={withdrawn} />
+      <HRApplicationActions
+        application={application}
+        notes={notes}
+        events={events}
+        editable={!withdrawn}
+      />
     </main>
   );
 }
 
-function ReviewHeader({ application }: { application: Application }) {
+function ApplicationHeading({ application }: { application: Application }) {
+  const status = application.withdrawn_at
+    ? "Withdrawn"
+    : reviewStatusLabel(application.review_status);
   return (
     <header className="space-y-2">
       <h1 className="text-3xl font-semibold">{application.job_title}</h1>
       <p>Applicant {application.applicant_id}</p>
       <p>
-        Review status:{" "}
-        <strong>{reviewStatusLabel(application.review_status)}</strong>
+        Review status: <strong>{status}</strong>
       </p>
       <p className="text-sm text-muted-foreground">
         Submitted {new Date(application.submitted_at).toLocaleString()}
@@ -130,165 +134,71 @@ function ReviewHeader({ application }: { application: Application }) {
   );
 }
 
-function ReviewNotices({
-  hasError,
-  hasNotice,
+function ReviewFeedback({
+  error,
+  notice,
+  withdrawn,
 }: {
-  hasError: boolean;
-  hasNotice: boolean;
+  error?: string;
+  notice?: string;
+  withdrawn: boolean;
 }) {
   return (
     <>
-      {hasError && (
+      {error && (
         <p role="alert" className="rounded-lg border p-3">
           The change was not saved. Reload this page and try again.
         </p>
       )}
-      {hasNotice && (
+      {notice && (
         <p role="status" className="rounded-lg border p-3">
           The change was saved.
         </p>
       )}
+      {withdrawn && <WithdrawnNotice />}
     </>
   );
 }
 
-function ApplicationLetters({ application }: { application: Application }) {
+function WithdrawnNotice() {
+  return (
+    <p className="rounded-lg border p-3">
+      Withdrawn by the Applicant. History remains available; further review
+      actions are disabled.
+    </p>
+  );
+}
+
+function CoverLetterSections({
+  application,
+  withdrawn,
+}: {
+  application: Application;
+  withdrawn: boolean;
+}) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Original cover letter</h2>
-        <p className="whitespace-pre-wrap rounded-lg border p-4">
-          {application.original_submitted_letter}
-        </p>
-      </section>
-      <HrAiSummary applicationId={application.id} />
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Current cover letter</h2>
-        <p className="whitespace-pre-wrap rounded-lg border p-4">
-          {application.cover_letter}
-        </p>
-      </section>
+      <OriginalLetter letter={application.original_submitted_letter} />
+      {!withdrawn && <HrAiSummary applicationId={application.id} />}
+      <CurrentLetter letter={application.cover_letter} />
     </div>
   );
 }
 
-function PrivateNotesSection({
-  applicationId,
-  notes,
-}: {
-  applicationId: string;
-  notes: Notes;
-}) {
+function OriginalLetter({ letter }: { letter: string }) {
   return (
-    <section className="space-y-4 border-t pt-6">
-      <h2 className="text-xl font-semibold">Private HR notes</h2>
-      <NotesList notes={notes} />
-      <form action={addHRNote} className="space-y-3">
-        <input type="hidden" name="applicationId" value={applicationId} />
-        <label htmlFor="hr-note" className="block font-medium">
-          Add a note
-        </label>
-        <textarea
-          id="hr-note"
-          name="body"
-          required
-          maxLength={2000}
-          rows={5}
-          className="w-full rounded-lg border p-3"
-        />
-        <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">
-          Add note
-        </button>
-      </form>
+    <section className="space-y-3">
+      <h2 className="text-xl font-semibold">Original cover letter</h2>
+      <p className="whitespace-pre-wrap rounded-lg border p-4">{letter}</p>
     </section>
   );
 }
 
-function NotesList({ notes }: { notes: Notes }) {
-  if (notes.length === 0) return <p>No notes yet.</p>;
+function CurrentLetter({ letter }: { letter: string }) {
   return (
-    <ul className="space-y-3">
-      {notes.map((note) => (
-        <li key={note.id} className="rounded-lg border p-4">
-          <p className="whitespace-pre-wrap">{note.body}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            By {note.author_id} · {new Date(note.created_at).toLocaleString()}
-          </p>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function ReviewStatusSection({
-  application,
-  events,
-}: {
-  application: Application;
-  events: Events;
-}) {
-  return (
-    <section className="space-y-4 border-t pt-6">
-      <h2 className="text-xl font-semibold">Change review status</h2>
-      <p className="text-sm text-muted-foreground">
-        This is a separate human action. It does not change the cover letter.
-      </p>
-      <ReviewStatusForm application={application} />
-      <StatusHistory events={events} />
+    <section className="space-y-3">
+      <h2 className="text-xl font-semibold">Current cover letter</h2>
+      <p className="whitespace-pre-wrap rounded-lg border p-4">{letter}</p>
     </section>
-  );
-}
-
-function ReviewStatusForm({ application }: { application: Application }) {
-  return (
-    <form action={changeHRStatus} className="flex flex-wrap items-end gap-3">
-      <input type="hidden" name="applicationId" value={application.id} />
-      <input
-        type="hidden"
-        name="expectedRevision"
-        value={application.review_revision}
-      />
-      <div className="space-y-2">
-        <label htmlFor="review-status" className="block font-medium">
-          New status
-        </label>
-        <select
-          id="review-status"
-          name="status"
-          required
-          defaultValue=""
-          className="rounded-lg border bg-background p-2"
-        >
-          <option value="" disabled>
-            Choose status
-          </option>
-          <option value="in_review">In review</option>
-          <option value="shortlisted">Shortlisted</option>
-          <option value="rejected">Rejected</option>
-        </select>
-      </div>
-      <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">
-        Update status
-      </button>
-    </form>
-  );
-}
-
-function StatusHistory({ events }: { events: Events }) {
-  if (events.length === 0) return null;
-  return (
-    <>
-      <h3 className="font-medium">Status history</h3>
-      <ul className="space-y-2">
-        {events.map((event) => (
-          <li key={event.id} className="text-sm text-muted-foreground">
-            {reviewStatusLabel(event.from_status)} →{" "}
-            {reviewStatusLabel(event.to_status)} ·{" "}
-            {new Date(event.created_at).toLocaleString()} · By {event.actor_id}
-          </li>
-        ))}
-      </ul>
-    </>
   );
 }
