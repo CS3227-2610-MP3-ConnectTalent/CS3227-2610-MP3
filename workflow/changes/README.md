@@ -2,9 +2,11 @@
 
 ## Active proposals
 
-- Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) proposes Prettier and blocking ESLint complexity/size limits in CI. John approved the revised defaults and implementation in chat on 2026-10-10. Its [packet](2026-10-10-quality-gates/proposal.md) records the approval; implementation is in progress.
+No proposals are awaiting implementation. Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission and its complete packet is [archived](../archive/2026-10-10-quality-gates/record.md); the authorized PR is the remaining final action.
 
 ## Accepted and archived work
+
+Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission by Johnwz123 on 2026-10-10 after the independent review and requested closeout. The no-product-delta packet is [archived](../archive/2026-10-10-quality-gates/record.md); the PR is authorized and pending its final opening action. Hosted CI has not yet run for this branch.
 
 [#53 first-upload retry follow-up](../archive/2026-10-10-first-upload-retry/record.md): Paul separately accepted with recorded limits on 10 October 2026. Complete packet archived; restores existing APP-007 without a canonical delta. Hosted testing and commit/push remain pending.
 
