@@ -15,5 +15,15 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
+    reporters: process.env.CI ? ["default", "junit"] : ["default"],
+    outputFile: process.env.CI
+      ? { junit: "test-results/vitest-junit.xml" }
+      : undefined,
+    coverage: {
+      provider: "v8",
+      reportsDirectory: "coverage",
+      reporter: ["text-summary", "json-summary", "lcov", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+    },
   },
 });

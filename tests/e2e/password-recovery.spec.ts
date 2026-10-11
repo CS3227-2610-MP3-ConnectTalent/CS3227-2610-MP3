@@ -1,20 +1,37 @@
 import { createClient } from "@supabase/supabase-js";
 import { expect, test, type APIRequestContext } from "@playwright/test";
+import { saveCompleteApplicantProfile } from "./support/profile-fixtures";
 
 const localAdminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
-test.skip(!localAdminKey, "Local password recovery browser test needs the local Supabase admin key.");
+test.skip(
+  !localAdminKey,
+  "Local password recovery browser test needs the local Supabase admin key.",
+);
 
-async function waitForRecoveryLink(request: APIRequestContext, recipient: string): Promise<string> {
+async function waitForRecoveryLink(
+  request: APIRequestContext,
+  recipient: string,
+): Promise<string> {
   for (let attempt = 0; attempt < 30; attempt += 1) {
-    const listResponse = await request.get("http://127.0.0.1:54324/api/v1/messages?limit=50");
+    const listResponse = await request.get(
+      "http://127.0.0.1:54324/api/v1/messages?limit=50",
+    );
     expect(listResponse.ok()).toBe(true);
-    const list = await listResponse.json() as { messages: Array<{ ID: string; To: Array<{ Address: string }> }> };
-    const message = list.messages.find((item) => item.To.some((address) => address.Address === recipient));
+    const list = (await listResponse.json()) as {
+      messages: Array<{ ID: string; To: Array<{ Address: string }> }>;
+    };
+    const message = list.messages.find((item) =>
+      item.To.some((address) => address.Address === recipient),
+    );
     if (message) {
-      const textResponse = await request.get(`http://127.0.0.1:54324/view/${message.ID}.txt`);
+      const textResponse = await request.get(
+        `http://127.0.0.1:54324/view/${message.ID}.txt`,
+      );
       expect(textResponse.ok()).toBe(true);
       const text = await textResponse.text();
-      const url = text.match(/https?:\/\/[^\s<>"']+/g)?.find((value) => value.includes("/auth/v1/verify"));
+      const url = text
+        .match(/https?:\/\/[^\s<>"']+/g)
+        ?.find((value) => value.includes("/auth/v1/verify"));
       if (url) return url.replaceAll("&amp;", "&");
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -22,7 +39,10 @@ async function waitForRecoveryLink(request: APIRequestContext, recipient: string
   throw new Error("No recovery email arrived in local Mailpit.");
 }
 
-test("Applicant and HR recover passwords without changing roles", async ({ page, request }) => {
+test("Applicant and HR recover passwords without changing roles", async ({
+  page,
+  request,
+}) => {
   test.setTimeout(120_000);
   const admin = createClient("http://127.0.0.1:54321", localAdminKey!, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -35,13 +55,27 @@ test("Applicant and HR recover passwords without changing roles", async ({ page,
   try {
     for (const role of ["applicant", "hr"] as const) {
       const email = `recovery-${role}-${suffix}@example.test`;
-      const { data, error } = await admin.auth.admin.createUser({ email, password: oldPassword, email_confirm: true });
+      const { data, error } = await admin.auth.admin.createUser({
+        email,
+        password: oldPassword,
+        email_confirm: true,
+      });
       expect(error).toBeNull();
       const userId = data.user!.id;
       createdIds.push(userId);
       if (role === "hr") {
-        const { error: promotionError } = await admin.from("profiles").update({ role: "hr" }).eq("user_id", userId);
+        const { error: promotionError } = await admin
+          .from("profiles")
+          .update({ role: "hr" })
+          .eq("user_id", userId);
         expect(promotionError).toBeNull();
+      } else {
+        await saveCompleteApplicantProfile(
+          localAdminKey!,
+          email,
+          oldPassword,
+          "Synthetic Recovery Applicant",
+        );
       }
 
       await page.goto("/auth/sign-in");
@@ -50,7 +84,9 @@ test("Applicant and HR recover passwords without changing roles", async ({ page,
       await page.getByLabel("Email").fill(email);
       await expect(page.getByLabel("Email")).toHaveValue(email);
       await page.getByRole("button", { name: "Send reset link" }).click();
-      await expect(page.getByRole("heading", { name: "Reset request received" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Reset request received" }),
+      ).toBeVisible();
 
       const recoveryUrl = await waitForRecoveryLink(request, email);
       await page.goto(recoveryUrl);
@@ -69,9 +105,15 @@ test("Applicant and HR recover passwords without changing roles", async ({ page,
       await page.getByLabel("Email").fill(email);
       await page.getByLabel("Password", { exact: true }).fill(newPassword);
       await page.getByRole("button", { name: "Sign in" }).click();
-      await expect(page).toHaveURL(role === "hr" ? /\/hr\/applications$/ : /\/applications$/);
+      await expect(page).toHaveURL(
+        role === "hr" ? /\/hr\/applications$/ : /\/applications$/,
+      );
 
-      const { data: profile, error: profileError } = await admin.from("profiles").select("role").eq("user_id", userId).single();
+      const { data: profile, error: profileError } = await admin
+        .from("profiles")
+        .select("role")
+        .eq("user_id", userId)
+        .single();
       expect(profileError).toBeNull();
       expect(profile?.role).toBe(role);
       await page.getByRole("button", { name: "Sign out" }).click();
@@ -81,10 +123,14 @@ test("Applicant and HR recover passwords without changing roles", async ({ page,
   }
 });
 
-test("invalid recovery link cannot open the password form", async ({ page }) => {
+test("invalid recovery link cannot open the password form", async ({
+  page,
+}) => {
   await page.goto("/auth/callback?flow=recovery&code=invalid-code");
   await expect(page).toHaveURL(/\/auth\/forgot-password\?error=link$/);
-  await expect(page.getByText("That reset link is invalid or expired.", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("That reset link is invalid or expired.", { exact: false }),
+  ).toBeVisible();
   await page.goto("/auth/reset-password");
   await expect(page).toHaveURL(/\/auth\/forgot-password\?error=link$/);
 });
