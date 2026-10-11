@@ -7,8 +7,21 @@ import { requireHR } from "@/lib/hr-auth";
 import { parseHRJobFields, parseHRJobId } from "@/lib/hr-job-input";
 
 type Operation = "create" | "edit" | "publish" | "close";
-function audit(actor: string, operation: Operation, target: string, outcome: "changed" | "denied") {
-  console.info(JSON.stringify({ actor, operation, target, at: new Date().toISOString(), outcome }));
+function audit(
+  actor: string,
+  operation: Operation,
+  target: string,
+  outcome: "changed" | "denied",
+) {
+  console.info(
+    JSON.stringify({
+      actor,
+      operation,
+      target,
+      at: new Date().toISOString(),
+      outcome,
+    }),
+  );
 }
 
 function refreshJobs(id?: string) {
@@ -29,15 +42,23 @@ export async function createHRJobDraft(formData: FormData) {
   let result: { data: unknown; error: unknown };
   try {
     result = await client.rpc("create_hr_job_draft", {
-      p_title: fields.title, p_team: fields.team, p_category: fields.category,
-      p_description: fields.description, p_requirements: fields.requirements,
+      p_title: fields.title,
+      p_team: fields.team,
+      p_category: fields.category,
+      p_description: fields.description,
+      p_requirements: fields.requirements,
     });
   } catch {
     audit(user.id, "create", "new", "denied");
     redirect("/hr/jobs/new?error=save");
   }
   const id = parseHRJobId(result.data);
-  audit(user.id, "create", id.success ? id.value : "new", result.error || !id.success ? "denied" : "changed");
+  audit(
+    user.id,
+    "create",
+    id.success ? id.value : "new",
+    result.error || !id.success ? "denied" : "changed",
+  );
   if (result.error || !id.success) redirect("/hr/jobs/new?error=save");
   refreshJobs(id.value);
   redirect(`/hr/jobs/${id.value}?notice=created`);
@@ -58,8 +79,11 @@ export async function editHRJobDraft(formData: FormData) {
   let error: unknown;
   try {
     ({ error } = await client.rpc("edit_hr_job_draft", {
-      p_job_id: id.value, p_title: fields.value.title, p_team: fields.value.team,
-      p_category: fields.value.category, p_description: fields.value.description,
+      p_job_id: id.value,
+      p_title: fields.value.title,
+      p_team: fields.value.team,
+      p_category: fields.value.category,
+      p_description: fields.value.description,
       p_requirements: fields.value.requirements,
     }));
   } catch {
@@ -71,7 +95,10 @@ export async function editHRJobDraft(formData: FormData) {
   redirect(`/hr/jobs/${id.value}?notice=saved`);
 }
 
-async function transitionHRJob(formData: FormData, operation: "publish" | "close") {
+async function transitionHRJob(
+  formData: FormData,
+  operation: "publish" | "close",
+) {
   const { client, user } = await requireHR();
   const id = parseHRJobId(formData.get("jobId"));
   if (!id.success) {
@@ -80,14 +107,19 @@ async function transitionHRJob(formData: FormData, operation: "publish" | "close
   }
   let error: unknown;
   try {
-    ({ error } = await client.rpc(operation === "publish" ? "publish_hr_job" : "close_hr_job", { p_job_id: id.value }));
+    ({ error } = await client.rpc(
+      operation === "publish" ? "publish_hr_job" : "close_hr_job",
+      { p_job_id: id.value },
+    ));
   } catch {
     error = true;
   }
   audit(user.id, operation, id.value, error ? "denied" : "changed");
   if (error) redirect(`/hr/jobs/${id.value}?error=transition`);
   refreshJobs(id.value);
-  redirect(`/hr/jobs/${id.value}?notice=${operation === "publish" ? "published" : "closed"}`);
+  redirect(
+    `/hr/jobs/${id.value}?notice=${operation === "publish" ? "published" : "closed"}`,
+  );
 }
 
 export async function publishHRJob(formData: FormData) {

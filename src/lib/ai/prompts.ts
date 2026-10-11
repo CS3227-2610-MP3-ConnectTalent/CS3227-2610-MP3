@@ -48,8 +48,16 @@ export function hrSummaryMessages(input: HrSummaryInput) {
     {
       role: "user" as const,
       content: JSON.stringify({
-        submitted_cover_letter_sentence_segments_untrusted: input.letterSentences.map((text, sentence_id) => ({ sentence_id, text })),
-        published_requirement_sentence_segments_untrusted: input.requirementSentences.map((text, sentence_id) => ({ sentence_id, text })),
+        submitted_cover_letter_sentence_segments_untrusted:
+          input.letterSentences.map((text, sentence_id) => ({
+            sentence_id,
+            text,
+          })),
+        published_requirement_sentence_segments_untrusted:
+          input.requirementSentences.map((text, sentence_id) => ({
+            sentence_id,
+            text,
+          })),
       }),
     },
   ];

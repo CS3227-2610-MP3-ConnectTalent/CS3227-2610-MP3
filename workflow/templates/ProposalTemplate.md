@@ -24,9 +24,9 @@ Copy to `workflow/changes/<YYYY-MM-DD-short-name>/proposal.md`. Replace placehol
 
 ## Alternatives and dependencies
 
-| Alternative | Benefit / cost / risk | Decision and reason |
-| --- | --- | --- |
-| <including keeping current behavior> | <tradeoffs> | <chosen or rejected> |
+| Alternative                          | Benefit / cost / risk | Decision and reason  |
+| ------------------------------------ | --------------------- | -------------------- |
+| <including keeping current behavior> | <tradeoffs>           | <chosen or rejected> |
 
 - Assumptions: <evidence or validation owner; unresolved assumptions explicitly pending>
 - Dependencies: <issues, services, prerequisites, owners and blocking order>
@@ -35,8 +35,8 @@ Copy to `workflow/changes/<YYYY-MM-DD-short-name>/proposal.md`. Replace placehol
 
 ## Acceptance evidence and artifacts
 
-| Acceptance ID | Issue criterion and canonical requirement IDs | Given / When / Then outcome | Required evidence and owner |
-| --- | --- | --- | --- |
+| Acceptance ID     | Issue criterion and canonical requirement IDs          | Given / When / Then outcome                        | Required evidence and owner                        |
+| ----------------- | ------------------------------------------------------ | -------------------------------------------------- | -------------------------------------------------- |
 | <change-ID-AC-01> | <#issue; JOB-001 or process criterion; canonical link> | <actor/input/action/observable success and denial> | <test, review, or document check; expected result> |
 
 - Spec deltas: <one specs/<capability>.md per changed canonical capability; existing IDs for restoration; N/A with reason for docs-only>

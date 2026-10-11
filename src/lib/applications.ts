@@ -4,8 +4,10 @@ import { requireApplicant } from "@/lib/auth";
 import { hrReviewStatusSchema } from "@/lib/hr-input";
 
 const applicationSchema = z.object({
-  withdrawn_at: z.string().nullable(), withdrawn_by: z.uuid().nullable(),
-  education: z.string().nullable(), work_experience: z.string().nullable(),
+  withdrawn_at: z.string().nullable(),
+  withdrawn_by: z.uuid().nullable(),
+  education: z.string().nullable(),
+  work_experience: z.string().nullable(),
   full_name: z.string().nullable(),
   submitted_email: z.string().nullable(),
   phone: z.string().nullable(),
@@ -24,30 +26,46 @@ const applicationSchema = z.object({
 
 export type ApplicantApplication = z.infer<typeof applicationSchema>;
 
-const fields = "withdrawn_at,withdrawn_by,education,work_experience,full_name,submitted_email,phone,portfolio_url,id,job_id,job_title,submission_state,cover_letter,original_submitted_letter,submitted_at,updated_at,revision,review_status";
+const fields =
+  "withdrawn_at,withdrawn_by,education,work_experience,full_name,submitted_email,phone,portfolio_url,id,job_id,job_title,submission_state,cover_letter,original_submitted_letter,submitted_at,updated_at,revision,review_status";
 
 export async function listOwnApplications(): Promise<ApplicantApplication[]> {
   const { client, user } = await requireApplicant();
-  const { data, error } = await client.from("applications").select(fields)
-    .eq("applicant_id", user.id).order("updated_at", { ascending: false });
+  const { data, error } = await client
+    .from("applications")
+    .select(fields)
+    .eq("applicant_id", user.id)
+    .order("updated_at", { ascending: false });
   if (error) throw new Error("Unable to load applications.");
   return applicationSchema.array().parse(data);
 }
 
-export async function getOwnApplication(id: string): Promise<ApplicantApplication | null> {
+export async function getOwnApplication(
+  id: string,
+): Promise<ApplicantApplication | null> {
   if (!z.uuid().safeParse(id).success) return null;
   const { client, user } = await requireApplicant();
-  const { data, error } = await client.from("applications").select(fields)
-    .eq("applicant_id", user.id).eq("id", id).maybeSingle();
+  const { data, error } = await client
+    .from("applications")
+    .select(fields)
+    .eq("applicant_id", user.id)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error("Unable to load application.");
   return data ? applicationSchema.parse(data) : null;
 }
 
-export async function getOwnApplicationForJob(jobId: string): Promise<ApplicantApplication | null> {
+export async function getOwnApplicationForJob(
+  jobId: string,
+): Promise<ApplicantApplication | null> {
   if (!z.uuid().safeParse(jobId).success) return null;
   const { client, user } = await requireApplicant();
-  const { data, error } = await client.from("applications").select(fields)
-    .eq("applicant_id", user.id).eq("job_id", jobId).maybeSingle();
+  const { data, error } = await client
+    .from("applications")
+    .select(fields)
+    .eq("applicant_id", user.id)
+    .eq("job_id", jobId)
+    .maybeSingle();
   if (error) throw new Error("Unable to load application.");
   return data ? applicationSchema.parse(data) : null;
 }

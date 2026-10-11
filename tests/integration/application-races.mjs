@@ -1,81 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { spawn } from "node:child_process";
+import { runSql, startSql } from "./support/sql-process.mjs";
 
 // Local-only integration check. Requires this project's running Supabase Docker stack.
-const container = "supabase_db_CS3227-2610-MP3";
 const userId = randomUUID();
 const hrId = randomUUID();
 const jobs = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
 const email = `race-${userId}@example.test`;
-
-function startSql(sql, appName = "") {
-  const args = ["exec"];
-  if (appName) args.push("-e", `PGAPPNAME=${appName}`);
-  args.push(
-    "-i",
-    container,
-    "psql",
-    "-U",
-    "postgres",
-    "-d",
-    "postgres",
-    "-X",
-    "-q",
-    "-A",
-    "-t",
-    "-v",
-    "ON_ERROR_STOP=1",
-    "-f",
-    "-",
-  );
-  const child = spawn("docker", args, {
-    windowsHide: true,
-  });
-  child.stdin.end(sql);
-  let output = "";
-  let errors = "";
-  let finished = false;
-  let exitCode;
-  child.stdout.on("data", (chunk) => {
-    output += chunk.toString();
-  });
-  child.stderr.on("data", (chunk) => {
-    errors += chunk.toString();
-  });
-  const done = new Promise((resolve, reject) => {
-    child.on("error", reject);
-    child.on("close", (code) => {
-      finished = true;
-      exitCode = code;
-      resolve({ code, output, errors });
-    });
-  });
-  return {
-    done,
-    get output() {
-      return output;
-    },
-    get errors() {
-      return errors;
-    },
-    get finished() {
-      return finished;
-    },
-    get exitCode() {
-      return exitCode;
-    },
-  };
-}
-
-async function runSql(sql, expectedExit = 0) {
-  const result = await startSql(sql).done;
-  if (result.code !== expectedExit) {
-    throw new Error(
-      `SQL exit ${result.code}, expected ${expectedExit}: ${result.errors.trim()}`,
-    );
-  }
-  return result;
-}
 
 async function waitForSleep(process, appName) {
   const deadline = Date.now() + 10_000;
@@ -157,7 +87,6 @@ try {
     select set_config('request.jwt.claim.sub', '${userId}', true);
     select public.save_applicant_profile('Synthetic Applicant', '+6591234567', null, null, null);
     commit;`);
-
   // One transaction holds the first submission and its job/advisory locks.
   const firstAppName = `race-first-submit-${userId}`;
   const first = startSql(

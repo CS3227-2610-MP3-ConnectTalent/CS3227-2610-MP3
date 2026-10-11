@@ -26,16 +26,24 @@ function publicClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
-    throw new Error("Supabase URL and publishable key are required to load jobs.");
+    throw new Error(
+      "Supabase URL and publishable key are required to load jobs.",
+    );
   }
 
   // The publishable key is subject to RLS. No privileged key is used for public reads.
   return createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
   });
 }
 
-export async function listPublishedJobs(category?: JobCategory): Promise<PublishedJob[]> {
+export async function listPublishedJobs(
+  category?: JobCategory,
+): Promise<PublishedJob[]> {
   let query = publicClient()
     .from("jobs")
     .select(publicFields)
@@ -45,7 +53,9 @@ export async function listPublishedJobs(category?: JobCategory): Promise<Publish
     query = query.eq("category", category);
   }
 
-  const { data, error } = await query.order("published_at", { ascending: false });
+  const { data, error } = await query.order("published_at", {
+    ascending: false,
+  });
 
   if (error) {
     throw new Error("Unable to load published jobs.", { cause: error });
@@ -54,7 +64,9 @@ export async function listPublishedJobs(category?: JobCategory): Promise<Publish
   return jobSchema.array().parse(data);
 }
 
-export async function getPublishedJob(id: string): Promise<PublishedJob | null> {
+export async function getPublishedJob(
+  id: string,
+): Promise<PublishedJob | null> {
   if (!z.uuid().safeParse(id).success) {
     return null;
   }

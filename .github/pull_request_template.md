@@ -19,8 +19,8 @@ Closes #<!-- resolved issue number; repeat Closes #N for each resolved issue -->
 <!-- Link tasks and actual handoffs. Name actual runs/tools/models when known; role skills alone do not prove separate agents or independent review. -->
 
 | Check / acceptance ID | Command or evidence link | Result (Passed / Failed / Not run / Blocked / N/A) and limits |
-| --- | --- | --- |
-| | | |
+| --------------------- | ------------------------ | ------------------------------------------------------------- |
+|                       |                          |                                                               |
 
 <!-- Explain Not run, Blocked and N/A; include failures and fixes/rechecks. -->
 

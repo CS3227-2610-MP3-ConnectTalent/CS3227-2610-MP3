@@ -36,3 +36,18 @@ export async function saveCompleteApplicantProfile(
     );
   }
 }
+
+export async function saveCompleteApplicantProfiles(
+  serviceRoleKey: string,
+  password: string,
+  profiles: Array<{ email: string; fullName: string }>,
+) {
+  for (const profile of profiles) {
+    await saveCompleteApplicantProfile(
+      serviceRoleKey,
+      profile.email,
+      password,
+      profile.fullName,
+    );
+  }
+}

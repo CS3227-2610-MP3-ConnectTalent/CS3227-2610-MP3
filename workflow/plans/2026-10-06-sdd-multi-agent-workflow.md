@@ -37,6 +37,7 @@
 ### Task 1: Split the canonical ProductSpec into capability specifications
 
 **Files:**
+
 - Modify: `workflow/ProductSpec.md`
 - Create: `workflow/specs/README.md`
 - Create: `workflow/specs/product-overview.md`
@@ -50,6 +51,7 @@
 - Create: `workflow/specs/deployment-and-operations.md`
 
 **Interfaces:**
+
 - Consumes: `workflow/ProductSpec.md` version 0.6 as the source baseline.
 - Produces: a stable overview/index and capability specs with stable IDs for use in change deltas, task checklists, and feature records.
 
@@ -62,6 +64,7 @@
 ### Task 2: Create change-packet templates and organize existing feature evidence
 
 **Files:**
+
 - Move: `workflow/FeatureRecordTemplate.md` → `workflow/templates/FeatureRecordTemplate.md`
 - Move: `workflow/BrowseJobListings.md` → `workflow/records/BrowseJobListings.md`
 - Create: `workflow/templates/ProposalTemplate.md`
@@ -76,6 +79,7 @@
 - Create: `workflow/records/SDD-Multi-Agent-Workflow.md`
 
 **Interfaces:**
+
 - Consumes: canonical modules from Task 1 and the existing Browse Job Listings record.
 - Produces: a repeatable `workflow/changes/<YYYY-MM-DD-short-name>/` packet with proposal, optional design, per-capability deltas, plan, checkbox tasks, and `record.md`; an archive procedure; and an evidence index for the existing feature.
 
@@ -92,6 +96,7 @@
 ### Task 3: Add GitHub issue/PR templates and establish workflow policy, skill catalog, and human gates
 
 **Files:**
+
 - Create: `.github/ISSUE_TEMPLATE/config.yml`
 - Create: `.github/ISSUE_TEMPLATE/feature_request.yml`
 - Create: `.github/ISSUE_TEMPLATE/bug_report.yml`
@@ -102,6 +107,7 @@
 - Create: `workflow/skills/README.md`
 
 **Interfaces:**
+
 - Consumes: spec index and template layout from Tasks 1–2; issue-first/PR-last lifecycle in the approved design; official Codex discovery path.
 - Produces: structured GitHub entry/exit templates and the team's process entry points and rules for approvals, roles, skill selection, handoffs, branch/PR/release integration, and evidence.
 
@@ -117,11 +123,13 @@
 ### Task 4: Define interaction-log coverage and record this setup session
 
 **Files:**
+
 - Modify: `logs/README.md`
 - Create: `logs/SessionSummaryTemplate.md`
 - Create: `logs/2026-10-06-sdd-agentic-workflow.md`
 
 **Interfaces:**
+
 - Consumes: user/agent interaction evidence available for the current session and the closeout rules from Task 3.
 - Produces: a repeatable dated summary format and an honest current-session record linked from the workflow setup feature record.
 
@@ -133,11 +141,13 @@
 ### Task 5: Update project-facing navigation and the developer guide
 
 **Files:**
+
 - Modify: `docs/DeveloperGuide.md`
 - Modify: `README.md`
 - Modify: `workflow/templates/TasksTemplate.md` (correct the pre-PR ordering conflict found during Task 5 source review)
 
 **Interfaces:**
+
 - Consumes: the specifications, process rules, catalog, and logging policy from Tasks 1–4.
 - Produces: the authoritative developer-facing documentation and a concise project-layout pointer.
 
@@ -152,6 +162,7 @@
 ### Task 6: Create Codex skills for the workflow stages
 
 **Files:**
+
 - Create under `.agents/skills/`:
   - `mp3-change-intake/SKILL.md`
   - `mp3-proposal-and-spec/SKILL.md`
@@ -163,6 +174,7 @@
   - `mp3-pr-submission/SKILL.md`
 
 **Interfaces:**
+
 - Consumes: the process, specs, templates, catalog, and developer-guide conventions from Tasks 1–5.
 - Produces: eight Codex-discoverable, instruction-only workflow skills with matching `mp3-` folder/frontmatter names and concise trigger descriptions.
 
@@ -174,6 +186,7 @@
 ### Task 7: Create Codex skills for the specialist-agent roles
 
 **Files:**
+
 - Create under `.agents/skills/`:
   - `mp3-product-analyst/SKILL.md`
   - `mp3-solution-architect/SKILL.md`
@@ -183,6 +196,7 @@
   - `mp3-integration-evidence-lead/SKILL.md`
 
 **Interfaces:**
+
 - Consumes: role policies in `workflow/AgentProcess.md`, the handoff template, and workflow skills from Task 6.
 - Produces: six Codex-discoverable specialist skills with distinct scopes and handoffs that guide work without pretending to create separate agent instances.
 
@@ -194,6 +208,7 @@
 ### Task 8: Review skills, documents, and complete the setup record
 
 **Files:**
+
 - Review: all Task 1–7 files and `workflow/design/2026-10-06-sdd-multi-agent-workflow.md`
 - Update: `workflow/records/SDD-Multi-Agent-Workflow.md`
 - Update: `workflow/skills/README.md`, `README.md`, and `docs/DeveloperGuide.md` to reflect present manifests while keeping runtime discovery unverified
@@ -201,6 +216,7 @@
 - Create at final closeout: `logs/2026-10-06-sdd-agentic-workflow.md`
 
 **Interfaces:**
+
 - Consumes: complete workflow assets and recorded findings.
 - Produces: a checked process-setup evidence record and the required final session log. This workflow setup has no product-behavior delta to sync or archive; the canonical v0.6 behavior is preserved in Task 1.
 
