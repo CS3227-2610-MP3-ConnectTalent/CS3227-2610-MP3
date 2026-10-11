@@ -1,0 +1,48 @@
+name: Vitest PR report
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: vitest-pr-report-${{ github.event.workflow_run.head_repository.full_name || github.event.workflow_run.id }}-${{ github.event.workflow_run.head_branch || github.event.workflow_run.id }}
+  queue: max
+
+jobs:
+  report:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      (github.event.workflow_run.path == '.github/workflows/ci.yml' ||
+       startsWith(github.event.workflow_run.path, '.github/workflows/ci.yml@'))
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - name: Check out the default branch reporter
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Download the exact CI run's Vitest reports
+        id: download-reports
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: vitest-reports
+          path: vitest-reports
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update the current pull request report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITEST_REPORT_PATH: vitest-reports
+        run: python scripts/ci/report_vitest_pr.py

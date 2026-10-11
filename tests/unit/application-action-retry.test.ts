@@ -50,6 +50,17 @@ function submission() {
   return form;
 }
 
+function draft() {
+  const form = new FormData();
+  form.set("jobId", jobId);
+  form.set("intent", "save");
+  form.set("full_name", "");
+  form.set("phone", "");
+  form.set("cover_letter", "");
+  form.set("revision", "");
+  return form;
+}
+
 function submittedEdit() {
   const form = new FormData();
   form.set("jobId", jobId);
@@ -161,4 +172,65 @@ it("retains inputs when both RPC and reconciliation transport fail", async () =>
   expect(result.values.cover_letter).toBe("Retried letter");
   expect(result.message).toContain("could not save");
   expect(result.message).not.toContain("diagnostic");
+});
+
+it("rejects malformed job ids, unsupported intents, and invalid revisions before writing", async () => {
+  const missingJob = new FormData();
+  await expect(updateApplication(initial, missingJob)).rejects.toThrow(
+    "REDIRECT:/applications?error=invalid",
+  );
+
+  const unsupported = submission();
+  unsupported.set("intent", "preview");
+  await expect(updateApplication(initial, unsupported)).resolves.toMatchObject({
+    message: "Choose Save draft or Submit application.",
+  });
+
+  const invalidRevision = submission();
+  invalidRevision.set("revision", "0");
+  await expect(
+    updateApplication(initial, invalidRevision),
+  ).resolves.toMatchObject({
+    message: expect.stringContaining("version is invalid"),
+  });
+  expect(rpc).not.toHaveBeenCalled();
+});
+
+it("saves an empty draft through the save RPC with a null initial revision", async () => {
+  rpc.mockResolvedValueOnce({ data: applicationId, error: null });
+  await expect(updateApplication(initial, draft())).rejects.toThrow(
+    `REDIRECT:/applications/${applicationId}`,
+  );
+  expect(rpc).toHaveBeenCalledWith("save_application_details_v3", {
+    p_job_id: jobId,
+    p_cover_letter: "",
+    p_full_name: "",
+    p_phone: null,
+    p_portfolio_url: null,
+    p_education: null,
+    p_work_experience: null,
+    p_expected_revision: null,
+  });
+});
+
+it("reconciles a committed save after a lost RPC response only when the complete draft matches", async () => {
+  rpc.mockRejectedValueOnce(new Error("response was lost"));
+  maybeSingle.mockResolvedValueOnce({
+    data: {
+      id: applicationId,
+      submission_state: "draft",
+      cover_letter: "",
+      full_name: "",
+      phone: null,
+      portfolio_url: null,
+      education: null,
+      work_experience: null,
+      revision: 1,
+    },
+    error: null,
+  });
+  await expect(updateApplication(initial, draft())).rejects.toThrow(
+    `REDIRECT:/applications/${applicationId}?notice=saved`,
+  );
+  expect(revalidatePath).toHaveBeenCalledWith("/applications");
 });

@@ -1,8 +1,10 @@
 # Active change packets
 
-No packets are currently pending implementation.
+No active change packets are pending at this time.
 
 ## Accepted and archived work
+
+Issues [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58) and [#59](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/59) were accepted by the user on 2026-10-11 and archived after closeout on 2026-10-12. The accepted work adds report-only 90% coverage reporting and weekly Dependabot version updates. The full Prettier gate passes after formatting the 187 previously unformatted files; hosted CI, Dependabot validation, and reporter rehearsal remain pending. See the [complete archived packet](../archive/2026-10-11-coverage-dependabot/record.md), [implementation summary](../../logs/2026-10-11-coverage-dependabot-implementation.md), [format closeout summary](../../logs/2026-10-12-coverage-format-closeout.md), and [PR preparation summary](../../logs/2026-10-12-coverage-dependabot-pr.md).
 
 Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission by Johnwz123 on 2026-10-10 after independent review and closeout. Its no-product-delta packet is [archived](../archive/2026-10-10-quality-gates/record.md), and PR #57 remains open; fresh checks are required after reconciling merged PR #56.
 
