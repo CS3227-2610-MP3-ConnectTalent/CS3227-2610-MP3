@@ -1,12 +1,12 @@
 # Active change packets
 
-## Active proposals
-
-No proposals are awaiting implementation. Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission and its complete packet is [archived](../archive/2026-10-10-quality-gates/record.md); the authorized PR is the remaining final action.
+No packets are currently pending implementation.
 
 ## Accepted and archived work
 
-Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission by Johnwz123 on 2026-10-10 after the independent review and requested closeout. The no-product-delta packet is [archived](../archive/2026-10-10-quality-gates/record.md); the PR is authorized and pending its final opening action. Hosted CI has not yet run for this branch.
+Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission by Johnwz123 on 2026-10-10 after independent review and closeout. Its no-product-delta packet is [archived](../archive/2026-10-10-quality-gates/record.md), and PR #57 remains open; fresh checks are required after reconciling merged PR #56.
+
+Issue [#55 CI test matrix](../archive/2026-10-10-ci-test-matrix/record.md) was accepted after independent review on 2026-10-10. Its tooling-only packet is archived, and PR #56 merged on 2026-10-11.
 
 [#53 first-upload retry follow-up](../archive/2026-10-10-first-upload-retry/record.md): Paul separately accepted with recorded limits on 10 October 2026. Complete packet archived; restores existing APP-007 without a canonical delta. Hosted testing and commit/push remain pending.
 

@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
+import { saveCompleteApplicantProfile } from "./support/profile-fixtures";
 
 const localAdminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 test.skip(
@@ -61,6 +62,12 @@ async function createJobUsers(
     .update({ role: "hr" })
     .eq("user_id", ids[0]);
   expect(error).toBeNull();
+  await saveCompleteApplicantProfile(
+    localAdminKey!,
+    applicantEmail,
+    password,
+    "Synthetic Job Applicant",
+  );
   return ids;
 }
 

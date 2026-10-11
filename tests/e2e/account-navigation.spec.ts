@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
+import { saveCompleteApplicantProfile } from "./support/profile-fixtures";
 
 const localAdminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 test.skip(!localAdminKey, "Needs a local-only TEST_SUPABASE_SERVICE_ROLE_KEY.");
@@ -62,7 +63,16 @@ async function createNavigationUsers(
     });
     expect(error).toBeNull();
     users.push({ id: data.user!.id, email, role });
-    if (role === "hr") await promoteNavigationUser(admin, data.user!.id);
+    if (role === "applicant") {
+      await saveCompleteApplicantProfile(
+        localAdminKey!,
+        email,
+        password,
+        "Synthetic Navigation Applicant",
+      );
+    } else {
+      await promoteNavigationUser(admin, data.user!.id);
+    }
   }
 }
 

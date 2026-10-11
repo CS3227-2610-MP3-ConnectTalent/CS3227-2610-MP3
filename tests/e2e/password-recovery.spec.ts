@@ -5,6 +5,7 @@ import {
   type APIRequestContext,
   type Page,
 } from "@playwright/test";
+import { saveCompleteApplicantProfile } from "./support/profile-fixtures";
 
 const localAdminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 test.skip(
@@ -126,6 +127,13 @@ async function createRecoveryUser(
       .update({ role })
       .eq("user_id", userId);
     expect(promotionError).toBeNull();
+  } else {
+    await saveCompleteApplicantProfile(
+      localAdminKey!,
+      email,
+      password,
+      "Synthetic Recovery Applicant",
+    );
   }
   return userId;
 }

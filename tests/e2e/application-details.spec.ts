@@ -1,18 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import {
+  setupContactFixture,
+  type ContactFixture,
+} from "./support/contact-fixtures";
 
 const adminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 test.skip(
   !adminKey,
   "Local synthetic contact-flow test requires the local admin key.",
 );
-
-import type { AdminClient } from "./support/admin-client";
-type ContactFixture = {
-  emails: [string, string, string];
-  password: string;
-  jobIds: [string, string];
-};
 
 test("Applicant contact drafts, validation, freeze and submitted-only HR review", async ({
   page,
@@ -36,7 +33,7 @@ async function runContactFlowScenario(page: Page, browser: Browser) {
   };
   const userIds: string[] = [];
   try {
-    await setupContactFixture(admin, fixture, userIds);
+    await setupContactFixture(admin, adminKey!, fixture, userIds);
     await signIn(page, fixture.emails[0], fixture.password, "applicant");
     await exerciseContactDraft(page, fixture.jobIds[0], fixture.emails[0]);
     await checkNoJavaScriptValidation(browser, fixture, fixture.jobIds[0]);
@@ -62,52 +59,6 @@ async function runContactFlowScenario(page: Page, browser: Browser) {
   }
 }
 
-async function setupContactFixture(
-  admin: AdminClient,
-  fixture: ContactFixture,
-  userIds: string[],
-) {
-  await createContactUsers(admin, fixture, userIds);
-  const { error } = await admin
-    .from("profiles")
-    .update({ role: "hr" })
-    .eq("user_id", userIds[1]);
-  expect(error).toBeNull();
-  await createContactJobs(admin, fixture.jobIds);
-}
-
-async function createContactUsers(
-  admin: AdminClient,
-  fixture: ContactFixture,
-  userIds: string[],
-) {
-  for (const email of fixture.emails) {
-    const { data, error } = await admin.auth.admin.createUser({
-      email,
-      password: fixture.password,
-      email_confirm: true,
-    });
-    expect(error).toBeNull();
-    userIds.push(data.user!.id);
-  }
-}
-
-async function createContactJobs(admin: AdminClient, jobIds: string[]) {
-  for (const id of jobIds) {
-    const { error } = await admin.from("jobs").insert({
-      id,
-      title: `Contact role ${id}`,
-      team: "Platform",
-      category: "engineering",
-      description: "Synthetic",
-      requirements: "Synthetic",
-      status: "published",
-      published_at: new Date().toISOString(),
-    });
-    expect(error).toBeNull();
-  }
-}
-
 async function signIn(
   page: Page,
   email: string,
@@ -130,13 +81,16 @@ async function exerciseContactDraft(page: Page, jobId: string, email: string) {
     "readonly",
     "",
   );
-  await page.getByLabel("Phone (optional)").fill("+65 5555 0101");
+  await page.getByLabel("Country code", { exact: true }).selectOption("SG");
+  await page.getByLabel("Phone number", { exact: true }).fill("85550101");
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
   await expect(page.getByText("Saved draft", { exact: true })).toBeVisible();
   await page.reload();
-  await expect(page.getByLabel("Full name")).toHaveValue("");
-  await expect(page.getByLabel("Phone (optional)")).toHaveValue(
-    "+65 5555 0101",
+  await expect(page.getByLabel("Full name")).toHaveValue(
+    "Synthetic Contact Applicant",
+  );
+  await expect(page.getByLabel("Phone number", { exact: true })).toHaveValue(
+    "85550101",
   );
   await rejectInvalidPortfolio(page);
   await generateApplicantDraft(page, jobId);
@@ -154,8 +108,8 @@ async function rejectInvalidPortfolio(page: Page) {
     "highlighted fields",
   );
   await expect(page.getByLabel("Full name")).toHaveValue("Synthetic Applicant");
-  await expect(page.getByLabel("Phone (optional)")).toHaveValue(
-    "+65 5555 0101",
+  await expect(page.getByLabel("Phone number", { exact: true })).toHaveValue(
+    "85550101",
   );
   await expect(page.getByLabel("Portfolio URL (optional)")).toHaveValue(
     "javascript:alert(1)",

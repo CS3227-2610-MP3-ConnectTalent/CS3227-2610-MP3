@@ -1,5 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  createReviewUsers,
+  type ReviewFixture,
+} from "./support/review-fixtures";
 
 const localAdminKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 test.skip(
@@ -8,17 +12,6 @@ test.skip(
 );
 
 import type { AdminClient } from "./support/admin-client";
-type ReviewFixture = {
-  password: string;
-  applicantEmail: string;
-  hrEmail: string;
-  otherEmail: string;
-  submittedJobId: string;
-  draftJobId: string;
-  submittedTitle: string;
-  draftTitle: string;
-  userIds: string[];
-};
 
 test("HR reviews only submitted applications and Applicant sees status without private notes", async ({
   page,
@@ -72,7 +65,7 @@ function createReviewFixture(): ReviewFixture {
 
 async function setupReviewFixture(admin: AdminClient, fixture: ReviewFixture) {
   await insertReviewJobs(admin, fixture);
-  await createReviewUsers(admin, fixture);
+  await createReviewUsers(admin, localAdminKey!, fixture);
 }
 
 async function insertReviewJobs(admin: AdminClient, fixture: ReviewFixture) {
@@ -92,24 +85,6 @@ async function insertReviewJobs(admin: AdminClient, fixture: ReviewFixture) {
     });
     expect(error).toBeNull();
   }
-}
-
-async function createReviewUsers(admin: AdminClient, fixture: ReviewFixture) {
-  const emails = [fixture.applicantEmail, fixture.hrEmail, fixture.otherEmail];
-  for (const email of emails) {
-    const { data, error } = await admin.auth.admin.createUser({
-      email,
-      password: fixture.password,
-      email_confirm: true,
-    });
-    expect(error).toBeNull();
-    if (data.user) fixture.userIds.push(data.user.id);
-  }
-  const { error } = await admin
-    .from("profiles")
-    .update({ role: "hr" })
-    .eq("user_id", fixture.userIds[1]);
-  expect(error).toBeNull();
 }
 
 async function signIn(

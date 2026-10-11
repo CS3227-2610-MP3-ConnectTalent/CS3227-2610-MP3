@@ -9,7 +9,9 @@ test("signup rejects different passwords before creating an account", async ({
   page,
 }) => {
   await page.goto("/auth/sign-up");
-  await expect(page.getByText(/not sent to Gmail/)).toBeVisible();
+  await expect(
+    page.getByText(/verification link before you can sign in/),
+  ).toBeVisible();
   const email = `mismatch-${Date.now()}@example.test`;
   await page.getByLabel("Email").fill(email);
   await page
@@ -77,6 +79,7 @@ async function runVerifiedApplicantScenario(
   await registerAccount(page, email, password);
   await rejectUnverifiedLogin(page, email, password);
   await confirmAccount(page, request, email);
+  await completeRequiredProfile(page, "Synthetic Applicant");
   await page.goto("/jobs/00000000-0000-4000-8000-000000000101");
   await page.getByRole("link", { name: "Apply for this role" }).click();
   await draftWithAI(page);
@@ -133,6 +136,16 @@ async function confirmAccount(
   )?.[0];
   expect(confirmationUrl).toBeTruthy();
   await page.goto(confirmationUrl!);
+  await expect(page).toHaveURL(/\/profile$/);
+}
+
+async function completeRequiredProfile(page: Page, fullName: string) {
+  await page.getByLabel("Full name", { exact: true }).fill(fullName);
+  await page.getByLabel("Country code", { exact: true }).selectOption("SG");
+  await page.getByLabel("Phone number", { exact: true }).fill("91234567");
+  await page.getByRole("button", { name: "Save profile", exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/applications");
   await expect(
     page.getByRole("heading", { name: "My applications" }),
   ).toBeVisible();
@@ -249,6 +262,7 @@ async function verifyOtherApplicantIsDenied(
   const secondEmail = `applicant-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`;
   await registerAccount(page, secondEmail, password);
   await confirmAccount(page, request, secondEmail);
+  await completeRequiredProfile(page, "Synthetic Applicant Two");
   const response = await page.goto(applicationUrl);
   expect(response?.status()).toBe(404);
   await expect(page.getByText("Original submitted letter")).toHaveCount(0);
