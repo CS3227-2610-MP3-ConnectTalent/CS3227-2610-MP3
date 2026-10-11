@@ -16,9 +16,9 @@ Keep a filled handoff in the change packet (for example `handoffs/T01-implemente
 
 ## Returned evidence
 
-| Artifact / file / commit | Observed result | Assumption or limitation | Consumer / human verification |
-| --- | --- | --- | --- |
-| <actual output or pending> | <command/review outcome, not inferred success> | <open question> | <name, decision/date/source> |
+| Artifact / file / commit   | Observed result                                | Assumption or limitation | Consumer / human verification |
+| -------------------------- | ---------------------------------------------- | ------------------------ | ----------------------------- |
+| <actual output or pending> | <command/review outcome, not inferred success> | <open question>          | <name, decision/date/source>  |
 
 ## Review independence and decision
 

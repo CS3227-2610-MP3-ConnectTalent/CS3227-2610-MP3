@@ -1,0 +1,27 @@
+# Dependency, build, and generated output
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+next-env.d.ts
+
+# Package-manager generated lockfile
+pnpm-lock.yaml
+
+# Existing project website is outside this change's approved scope
+docs/index.html
+
+# Preserve historical evidence and author-owned reflections
+logs/
+.superpowers/
+workflow/archive/
+workflow/records/
+.agents/skills/supabase/
+.agents/skills/supabase-postgres-best-practices/
+**/Reflections.md
+**/JohnReflections.md
+**/PaulReflections.md

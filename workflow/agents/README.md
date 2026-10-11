@@ -6,14 +6,14 @@ existing workflow and specialist skills. Profiles are standalone TOML files unde
 required `name`, `description`, and `developer_instructions` fields and links to
 the detailed procedure in `.agents/skills/`.
 
-| Profile name | Profile file | Skill(s) to follow | Default sandbox | Assignment |
-| --- | --- | --- | --- | --- |
-| `product_analyst` | `.codex/agents/product_analyst.toml` | `mp3-product-analyst`, plus `mp3-change-intake` or `mp3-proposal-and-spec` as appropriate | Read-only | Map the issue, Applicant/HR boundaries, IDs, scenarios, assumptions, and student decisions. |
-| `solution_architect` | `.codex/agents/solution_architect.toml` | `mp3-solution-architect`, `mp3-design-and-planning` | Read-only | Analyze alternatives, interfaces, data flow, authorization, failure, migration, and rollback. |
-| `implementer` | `.codex/agents/implementer.toml` | `mp3-implementer`, `mp3-tdd-implementation`, `mp3-systematic-debugging` | Workspace-write | Implement one approved bounded task and return actual files, checks, and limitations. |
-| `test_engineer` | `.codex/agents/test_engineer.toml` | `mp3-test-engineer`, `mp3-independent-verification` | Read-only | Challenge acceptance evidence and test quality; return findings without editing. |
-| `security_privacy_reviewer` | `.codex/agents/security_privacy_reviewer.toml` | `mp3-security-privacy-reviewer`, `mp3-independent-verification` | Read-only | Review authorization/RLS, secrets, AI boundaries, applicant data, and logs. |
-| `integration_evidence_lead` | `.codex/agents/integration_evidence_lead.toml` | `mp3-integration-evidence-lead`, `mp3-closeout-and-logging` | Read-only | Reconcile issue-to-PR evidence and report missing closeout gates. |
+| Profile name                | Profile file                                   | Skill(s) to follow                                                                        | Default sandbox | Assignment                                                                                    |
+| --------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------- |
+| `product_analyst`           | `.codex/agents/product_analyst.toml`           | `mp3-product-analyst`, plus `mp3-change-intake` or `mp3-proposal-and-spec` as appropriate | Read-only       | Map the issue, Applicant/HR boundaries, IDs, scenarios, assumptions, and student decisions.   |
+| `solution_architect`        | `.codex/agents/solution_architect.toml`        | `mp3-solution-architect`, `mp3-design-and-planning`                                       | Read-only       | Analyze alternatives, interfaces, data flow, authorization, failure, migration, and rollback. |
+| `implementer`               | `.codex/agents/implementer.toml`               | `mp3-implementer`, `mp3-tdd-implementation`, `mp3-systematic-debugging`                   | Workspace-write | Implement one approved bounded task and return actual files, checks, and limitations.         |
+| `test_engineer`             | `.codex/agents/test_engineer.toml`             | `mp3-test-engineer`, `mp3-independent-verification`                                       | Read-only       | Challenge acceptance evidence and test quality; return findings without editing.              |
+| `security_privacy_reviewer` | `.codex/agents/security_privacy_reviewer.toml` | `mp3-security-privacy-reviewer`, `mp3-independent-verification`                           | Read-only       | Review authorization/RLS, secrets, AI boundaries, applicant data, and logs.                   |
+| `integration_evidence_lead` | `.codex/agents/integration_evidence_lead.toml` | `mp3-integration-evidence-lead`, `mp3-closeout-and-logging`                               | Read-only       | Reconcile issue-to-PR evidence and report missing closeout gates.                             |
 
 ## How to use profiles
 
