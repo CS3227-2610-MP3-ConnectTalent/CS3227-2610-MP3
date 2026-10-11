@@ -190,6 +190,7 @@ export async function runApplicationWithdrawalJourney(
   await retryReplacement(page);
   await checkResponsiveWidths(page);
   await submitApplication(page, fixture);
+  await login(hr, fixture.emails[1], fixture);
   await createHrNote(hr, fixture);
   await verifyOtherApplicantCannotReadResume(other, fixture);
   await completeWithdrawalLifecycle(page, hr, admin, fixture);
