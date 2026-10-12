@@ -99,8 +99,8 @@ Expected: focused tests pass; the four totals improve without source exclusions.
 
 **Interfaces:**
 
-- Consumes: completed unit tests from Task 58-02 and current CI artifact name `vitest-reports`.
-- Produces: a job summary showing test counts, the four coverage metrics, and their status against 90%; existing JUnit/HTML/lcov/JSON artifacts remain uploaded with `if: always()`.
+- Consumes: completed unit tests from Task 58-02 and the attempt-scoped CI artifact `vitest-reports-${{ github.run_attempt }}`.
+- Produces: a job summary showing test counts, the four coverage metrics, and their status against 90%. CI uploads only `test-results/vitest-junit.xml` and `coverage/coverage-summary.json` with `if: always()`; HTML and LCOV reports are generated locally but are not uploaded.
 
 - [x] **Step 1: Keep below-target coverage nonblocking** — Vitest global thresholds remain unset; the PR report is informational.
 
@@ -114,7 +114,7 @@ Keep the JUnit test/failure/error/skipped counts. Show the four percentages, the
 
 Run: `pnpm test:unit:coverage`
 
-Expected: the suite passes when tests pass even if coverage is below 90%; `test-results/vitest-junit.xml`, `coverage/coverage-summary.json`, `coverage/lcov.info`, and `coverage/index.html` exist. Verify report status at just-below and at-target values; do not add a failing coverage threshold.
+Expected: the suite passes when tests pass even if coverage is below 90%. The local coverage run generates `test-results/vitest-junit.xml`, `coverage/coverage-summary.json`, `coverage/lcov.info`, and `coverage/index.html`; CI retains only the JUnit XML and coverage summary in its attempt-scoped artifact. Verify report status at just-below and at-target values; do not add a failing coverage threshold.
 
 ### Task 58-04: Build and test shared report parsing
 

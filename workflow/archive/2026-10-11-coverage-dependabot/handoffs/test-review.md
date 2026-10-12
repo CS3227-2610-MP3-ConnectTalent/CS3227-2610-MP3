@@ -33,3 +33,15 @@
   - The 187-file formatter failure is inherited and outside the changed-file set; it remains a repository/PR readiness gate.
 - Review result: no unresolved source-level test/reporting correctness finding; PR readiness remains open for the inherited format gate and hosted workflow/Dependabot evidence.
 - Human decision: implementation-plan approval is in `record.md`; separate acceptance of the completed implementation is pending.
+
+## PR review round-three recheck — 2026-10-12
+
+- Reviewed revision: `f5dbc2e406bf2e73bb98d3f15da8a56fcc5dfe56`, committed after the source/test inspection.
+- Reviewer: `/root/coverage_test_review`, separate read-only execution; no implementation edits or test authorship.
+- Scope: five current PR inline findings covering attempt-scoped artifact selection, partial artifact handling, malformed JSON integers, review evidence, and Renovate major-update grouping; additionally inspect JUnit false-green behavior and regression tests.
+- Findings verified by inspection: the branch names artifacts with `github.run_attempt` and passes the source attempt to the downloader; partial archives are accepted only when nonempty and composed of the two allowlisted files; JSON decoder `ValueError` is converted to `ReportError`; Renovate ignores both inherited grouping presets; and nested unknown JUnit testcase content is rejected.
+- Regression coverage present: stale/current attempt selection, one-file artifacts, empty archives, oversized response bodies despite understated metadata, huge JSON integers, unknown nested testcase content, Renovate config grouping, and stale-head updates to existing comments.
+- Reviewer execution: read-only source/test inspection; the reviewer did not run the local test suite or hosted workflows. The implementer had a prior 47-test helper-suite pass, but this session's fresh attempt failed before test startup because the Python uv trampoline could not spawn its child process.
+- Result: the five actionable review findings and nested-JUnit false-green case have implementation/test coverage by inspection. Hosted CI and the live report comment path remain unverified for the correction revision.
+- Separate unresolved security finding: PR-controlled report artifacts are not independently attested. Disclosing this does not authenticate the producer; the user has not yet decided whether that meets QG-AC-05. Keep that acceptance status pending.
+- Student acceptance: pending; no decision for this review round was supplied.
