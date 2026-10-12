@@ -36,6 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITEST_REPORT_PATH: vitest-reports
           VITEST_SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          VITEST_SOURCE_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         run: python scripts/ci/download_vitest_artifact.py
 
       - name: Update the current pull request report

@@ -137,6 +137,17 @@ class VitestReportsTests(unittest.TestCase):
         with self.assertRaises(ReportError):
             read_test_counts(path)
 
+    def test_rejects_unexpected_nested_testcase_content(self):
+        path = self.write(
+            "junit.xml",
+            '<testsuite tests="1" failures="0" errors="0" skipped="0">'
+            "<testcase><wrapper><failure /></wrapper></testcase>"
+            "</testsuite>",
+        )
+
+        with self.assertRaises(ReportError):
+            read_test_counts(path)
+
     def test_reads_all_four_finite_coverage_metrics(self):
         summary = {
             "total": {
@@ -162,6 +173,18 @@ class VitestReportsTests(unittest.TestCase):
                 path = self.write("coverage.json", content)
                 with self.assertRaises(ReportError):
                     read_coverage_metrics(path)
+
+    def test_rejects_coverage_with_an_integer_beyond_json_decoder_limit(self):
+        oversized_integer = "9" * 5000
+        path = self.write(
+            "coverage.json",
+            '{"total":{"lines":{"total":'
+            + oversized_integer
+            + ',"covered":0,"pct":0}}}',
+        )
+
+        with self.assertRaises(ReportError):
+            read_coverage_metrics(path)
 
     def test_rejects_non_finite_and_out_of_range_coverage(self):
         for percentage in ("NaN", "Infinity", -0.01, 100.01, None):

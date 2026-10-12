@@ -51,18 +51,20 @@ class FakeOpener:
 
 
 class DownloadVitestArtifactTests(unittest.TestCase):
-    def artifact_list(self, size=100):
+    def artifact_list(self, size=100, name="vitest-reports-1", extra_artifacts=None):
+        artifacts = [
+            {
+                "id": 23,
+                "name": name,
+                "expired": False,
+                "size_in_bytes": size,
+            }
+        ]
+        artifacts.extend(extra_artifacts or [])
         return json.dumps(
             {
-                "total_count": 1,
-                "artifacts": [
-                    {
-                        "id": 23,
-                        "name": "vitest-reports",
-                        "expired": False,
-                        "size_in_bytes": size,
-                    }
-                ],
+                "total_count": len(artifacts),
+                "artifacts": artifacts,
             }
         ).encode("utf-8")
 
@@ -92,6 +94,104 @@ class DownloadVitestArtifactTests(unittest.TestCase):
             )
         self.assertEqual(len(opener.requests), 2)
 
+    def test_selects_only_the_artifact_for_the_current_run_attempt(self):
+        junit = b'<testsuite tests="0" failures="0" />'
+        archive = make_archive([("test-results/vitest-junit.xml", junit)])
+        stale_attempt = {
+            "id": 22,
+            "name": "vitest-reports-1",
+            "expired": False,
+            "size_in_bytes": 100,
+        }
+        opener = FakeOpener(
+            [
+                FakeResponse(
+                    self.artifact_list(
+                        len(archive),
+                        name="vitest-reports-2",
+                        extra_artifacts=[stale_attempt],
+                    )
+                ),
+                FakeResponse(archive),
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            downloaded = download_reports(
+                "https://api.github.com",
+                "synthetic-token",
+                "org/repo",
+                42,
+                Path(temp_dir),
+                opener,
+                run_attempt=2,
+            )
+
+            self.assertTrue(downloaded)
+            self.assertEqual(
+                (Path(temp_dir) / "test-results" / "vitest-junit.xml").read_bytes(),
+                junit,
+            )
+
+        self.assertIn("name=vitest-reports-2", opener.requests[0][0].full_url)
+        self.assertIn("/actions/artifacts/23/zip", opener.requests[1][0].full_url)
+
+    def test_accepts_each_nonempty_subset_of_the_two_expected_reports(self):
+        reports = {
+            "test-results/vitest-junit.xml": b'<testsuite tests="0" />',
+            "coverage/coverage-summary.json": b'{"total":{}}',
+        }
+        for available_name, content in reports.items():
+            with self.subTest(available_name=available_name):
+                archive = make_archive([(available_name, content)])
+                opener = FakeOpener(
+                    [
+                        FakeResponse(self.artifact_list(len(archive))),
+                        FakeResponse(archive),
+                    ]
+                )
+
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    destination = Path(temp_dir)
+                    self.assertTrue(
+                        download_reports(
+                            "https://api.github.com",
+                            "synthetic-token",
+                            "org/repo",
+                            42,
+                            destination,
+                            opener,
+                        )
+                    )
+                    self.assertEqual(
+                        (destination / available_name).read_bytes(), content
+                    )
+                    absent_name = next(
+                        name for name in reports if name != available_name
+                    )
+                    self.assertFalse((destination / absent_name).exists())
+
+    def test_rejects_an_empty_report_artifact(self):
+        archive = make_archive([])
+        opener = FakeOpener(
+            [
+                FakeResponse(self.artifact_list(len(archive))),
+                FakeResponse(archive),
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaises(ArtifactError):
+                download_reports(
+                    "https://api.github.com",
+                    "synthetic-token",
+                    "org/repo",
+                    42,
+                    Path(temp_dir),
+                    opener,
+                )
+            self.assertEqual(list(Path(temp_dir).iterdir()), [])
+
     def test_rejects_oversized_archive_before_requesting_its_contents(self):
         opener = FakeOpener([FakeResponse(self.artifact_list(MAX_ARTIFACT_BYTES + 1))])
 
@@ -101,6 +201,28 @@ class DownloadVitestArtifactTests(unittest.TestCase):
             )
 
         self.assertEqual(len(opener.requests), 1)
+
+    def test_rejects_oversized_body_when_metadata_underreports_its_size(self):
+        oversized_body = b"x" * (MAX_ARTIFACT_BYTES + 1)
+        opener = FakeOpener(
+            [
+                FakeResponse(self.artifact_list(100)),
+                FakeResponse(oversized_body),
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(ArtifactError, "response exceeds the size limit"):
+                download_reports(
+                    "https://api.github.com",
+                    "synthetic-token",
+                    "org/repo",
+                    42,
+                    Path(temp_dir),
+                    opener,
+                )
+
+        self.assertEqual(len(opener.requests), 2)
 
     def test_rejects_archives_with_unexpected_files(self):
         archive = make_archive(

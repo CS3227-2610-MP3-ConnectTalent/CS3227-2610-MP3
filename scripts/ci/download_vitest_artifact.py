@@ -70,7 +70,7 @@ def _read_response(opener, url, token, maximum):
     return raw
 
 
-def _artifact_metadata(raw):
+def _artifact_metadata(raw, artifact_name):
     try:
         payload = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
@@ -81,7 +81,7 @@ def _artifact_metadata(raw):
     matches = [
         artifact
         for artifact in artifacts
-        if isinstance(artifact, dict) and artifact.get("name") == ARTIFACT_NAME
+        if isinstance(artifact, dict) and artifact.get("name") == artifact_name
     ]
     if not matches:
         return None
@@ -105,10 +105,13 @@ def _read_archive(archive_bytes):
     try:
         with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
             entries = archive.infolist()
-            if len(entries) != len(REPORT_FILES) or {
-                entry.filename for entry in entries
-            } != set(REPORT_FILES):
-                raise ArtifactError("Vitest artifact must contain only the two expected reports")
+            entry_names = [entry.filename for entry in entries]
+            if (
+                not entries
+                or len(set(entry_names)) != len(entry_names)
+                or not set(entry_names).issubset(REPORT_FILES)
+            ):
+                raise ArtifactError("Vitest artifact must contain a nonempty subset of the expected reports")
 
             reports = {}
             for entry in entries:
@@ -145,8 +148,10 @@ def _write_reports(reports, destination):
         target.write_bytes(content)
 
 
-def download_reports(api_url, token, repository, run_id, destination, opener=None):
-    """Fetch one named run artifact, validate its limits and write two report files."""
+def download_reports(
+    api_url, token, repository, run_id, destination, opener=None, run_attempt=1
+):
+    """Fetch one attempt-scoped run artifact and write its available reports."""
     parsed = urlparse(api_url or "")
     if parsed.scheme != "https" or not parsed.netloc:
         raise ArtifactError("GitHub API URL must use HTTPS")
@@ -158,14 +163,18 @@ def download_reports(api_url, token, repository, run_id, destination, opener=Non
         raise ArtifactError("GitHub repository is invalid")
     if isinstance(run_id, bool) or not isinstance(run_id, int) or run_id <= 0:
         raise ArtifactError("GitHub workflow run identifier is invalid")
+    if isinstance(run_attempt, bool) or not isinstance(run_attempt, int) or run_attempt <= 0:
+        raise ArtifactError("GitHub workflow run attempt is invalid")
 
     request_opener = opener or _open_github_request
     base_url = api_url.rstrip("/")
     repository_path = f"/repos/{repository}"
-    query = urlencode({"name": ARTIFACT_NAME, "per_page": 100})
+    artifact_name = f"{ARTIFACT_NAME}-{run_attempt}"
+    query = urlencode({"name": artifact_name, "per_page": 100})
     metadata_url = f"{base_url}{repository_path}/actions/runs/{run_id}/artifacts?{query}"
     artifact_id = _artifact_metadata(
-        _read_response(request_opener, metadata_url, token, MAX_METADATA_BYTES)
+        _read_response(request_opener, metadata_url, token, MAX_METADATA_BYTES),
+        artifact_name,
     )
     if artifact_id is None:
         return False
@@ -185,12 +194,19 @@ def main():
     api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
     destination = os.environ.get("VITEST_REPORT_PATH", "vitest-reports")
     raw_run_id = os.environ.get("VITEST_SOURCE_RUN_ID", "")
+    raw_run_attempt = os.environ.get("VITEST_SOURCE_RUN_ATTEMPT", "")
     try:
         run_id = int(raw_run_id)
     except (TypeError, ValueError) as error:
         raise ArtifactError("GitHub workflow run identifier is invalid") from error
-    if download_reports(api_url, token, repository, run_id, destination):
-        print("Downloaded and validated the two bounded Vitest reports.")
+    try:
+        run_attempt = int(raw_run_attempt)
+    except (TypeError, ValueError) as error:
+        raise ArtifactError("GitHub workflow run attempt is invalid") from error
+    if download_reports(
+        api_url, token, repository, run_id, destination, run_attempt=run_attempt
+    ):
+        print("Downloaded and validated the available bounded Vitest reports.")
     else:
         print("No Vitest report artifact exists for this CI run.")
     return 0

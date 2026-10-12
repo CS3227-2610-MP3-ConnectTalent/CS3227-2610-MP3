@@ -54,6 +54,13 @@ def _suite_count(suite, name, derived):
 
 def _suite_counts(suite):
     cases = suite.findall("testcase")
+    allowed_case_elements = {"failure", "error", "skipped", "system-out", "system-err"}
+    if any(
+        child.tag not in allowed_case_elements
+        for case in cases
+        for child in case
+    ):
+        raise ReportError("JUnit testcase contains an unexpected structure")
     derived = {
         "tests": len(cases),
         "failures": sum(bool(case.findall("failure")) for case in cases),
@@ -130,7 +137,7 @@ def read_coverage_metrics(summary_path):
             raw.decode("utf-8"),
             parse_constant=_reject_json_constants,
         )
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+    except (UnicodeDecodeError, ValueError) as error:
         raise ReportError("coverage JSON is malformed") from error
     if not isinstance(summary, dict) or not isinstance(summary.get("total"), dict):
         raise ReportError("coverage JSON has an unexpected structure")
