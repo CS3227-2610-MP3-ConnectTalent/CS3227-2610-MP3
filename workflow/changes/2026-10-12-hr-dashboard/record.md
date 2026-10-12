@@ -12,7 +12,7 @@ Date: 2026-10-12
 
 - Change ID/classification: 2026-10-12-hr-dashboard; behavior change
 - GitHub issue: [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68), open, enhancement, assigned to John Wong
-- Branch: feat/68-hr-dashboard from develop at 84761e1; no feature commits; PR pending
+- Branch: feat/68-hr-dashboard from develop at 84761e1; implementation commit `a238c41`; PR pending
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Delta: [proposed APP-009](specs/applications-and-review.md)
@@ -76,7 +76,7 @@ Limitations: aggregates read the existing HR job and submitted-application resul
 
 - Reviewer identity/independence: pending; the implementer did not perform or claim independent review.
 - Findings/resolutions: pending.
-- Human decisions: in-chat bounded design and implementation packet approved by John Wong on 2026-10-12; separate acceptance after independent review remains pending.
+- Human decisions: in-chat bounded design and implementation packet approved by John Wong on 2026-10-12. The latest user message says “It's been accepted. Please proceed.” Its stage (separate reviewer approval, student acceptance, or both) is awaiting clarification; T05/T06 remain unmarked.
 - User Guide update: completed in `docs/UserGuide.md`; dated session summary pending closeout.
 
 ## Session evidence index
