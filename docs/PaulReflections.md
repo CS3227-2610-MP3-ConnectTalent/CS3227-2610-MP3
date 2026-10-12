@@ -1,10 +1,12 @@
-# Paul Cheng’s reflection
+# Paul Cheng’s reflections
 
 ## My scope and the evidence behind this draft
 
-My recorded work covers the non-AI application pipeline: Applicant accounts, saved applications, password recovery, HR review/notes/status actions, HR job management, contact fields and role navigation. Our team split work by workflow and AI features, so I should explain my actual contribution rather than imply I personally implemented every AI safeguard. The [AI feature record](../workflow/archive/2026-10-09-soclaas-ai/record.md) identifies John’s work and its own decisions and limits.
+My recorded work covers the non-AI application pipeline: Applicant accounts, saved applications, password recovery, HR review/notes/status actions, HR job management, contact fields, role navigation, required profile onboarding, private profile/application résumés and retained withdrawal. Our team split work by workflow and AI features, so I should explain my actual contribution rather than imply I personally implemented every AI safeguard. The [AI feature record](../workflow/archive/2026-10-09-soclaas-ai/record.md) identifies John’s work and its own decisions and limits.
 
 The strongest evidence for my reflection is the [Applicant application packet](../workflow/archive/2026-10-07-applicant-applications/record.md), [HR review packet](../workflow/archive/2026-10-08-hr-application-review/record.md), [job-management packet](../workflow/archive/2026-10-09-hr-job-management/record.md), [contact-fields packet](../workflow/archive/2026-10-09-application-form-details/record.md) and [signup/navigation review](../workflow/archive/2026-10-09-signup-notice-navigation/record.md). These distinguish approval, implementation, review, local acceptance and release. I cannot substitute a polished UI or a merged PR for the missing hosted acceptance evidence.
+
+Later evidence includes [required-profile onboarding](../workflow/archive/2026-10-10-required-applicant-profile/record.md), [upload-before-save/profile files](../workflow/archive/2026-10-10-unsaved-profile-resume/record.md), [withdrawal](../workflow/archive/2026-10-10-application-form-withdrawal/record.md) and the [first-upload retry repair](../workflow/archive/2026-10-10-first-upload-retry/record.md). These additions must be included when describing my current contribution; earlier test counts still belong to their original revisions.
 
 ## 1. AI Security
 
@@ -16,6 +18,8 @@ The development process has its own surfaces: issue descriptions, repository doc
 
 My pipeline work also has ordinary security boundaries independent of prompt injection: direct URL access, forged form fields, role assignment, hidden drafts, private HR notes, retry behavior and concurrent job closure. An AI feature would still be unsafe if a correct summary were served to the wrong user.
 
+The later résumé work adds an untrusted-file surface: a filename or MIME type does not establish a safe PDF. The implementation bounds size to 1 MiB, parses structure in a constrained worker and keeps private files out of AI inputs. This is not malware scanning. Profile files and submitted application copies also have different ownership/lifetimes; sharing a mutable reference would undermine a frozen submission.
+
 ### Implemented safeguards and how they were tested
 
 The product uses server authorization and database RLS. Applicants read their own applications; HR reads submitted applications and private HR notes; HR must not read unsubmitted drafts. Public signup cannot grant HR access. These rules are exercised through denial cases and direct database requests, not only hidden buttons. The [HR review evidence](../workflow/archive/2026-10-08-hr-application-review/handoffs/independent-review.md) and [contact database tests](../supabase/tests/database/application_details.test.sql) make these boundaries reviewable.
@@ -25,6 +29,8 @@ The contact-fields change gave me a concrete data-minimization example. Full nam
 The AI implementation uses selected job/letter projections, bounded requests, output validation, escaped rendering and no model tools or database authority. HR still performs a separate status action. A prompt saying “shortlist this candidate” therefore has no direct status-write capability. These are team safeguards recorded in [SEC-003–007](../workflow/specs/security-and-privacy.md), not a claim that I personally authored them all.
 
 The contact packet records 206 local database checks, four concurrency cases and an independent SQL/URL review. Those counts refer to that revision. They are useful because they include denial, stale-write and failure cases, but they are not proof of every attack or deployed behavior. The AI record also preserves an observed factual summary error. Valid structure and prompt defenses do not guarantee factual accuracy, so HR must compare summaries with the actual letter.
+
+Current HR summary code validates sentence selections and renders excerpts from the supplied source; this reduces fabricated evidence but does not guarantee correct requirement coverage. In my workflow, withdrawal is another authority boundary: it retains submitted history while blocking new HR notes/status/AI processing. The [withdrawal review](../workflow/archive/2026-10-10-application-form-withdrawal/handoffs/independent-review.md) preserves the checks and limits. The denied-HR-action audit gap remains tracked in [#33](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/33); I should not describe security testing as complete audit coverage.
 
 ### Limits on product AI and development agents
 
@@ -48,7 +54,7 @@ The weakness is process overhead: repeated approval questions can make routine w
 
 Before implementation, a specification should state actors, permitted data/actions, the state lifecycle, field constraints, trust boundaries, failure behavior and observable acceptance criteria. “HR can review applications” is too vague unless it says whether drafts are visible, whether notes are private, which statuses exist and who changes them.
 
-For the contact change, the approved contract specifies a required name at submission, optional phone/HTTP(S) portfolio URL, verified email from Auth, private partial drafts, atomic saves, frozen submitted details and honest legacy missing-field display. These decisions prevent the implementer from choosing product policy while coding.
+For the original #39 contact change, the approved contract specified a required name at submission, optional phone/HTTP(S) portfolio URL, verified email from Auth, private partial drafts, atomic saves, frozen submitted details and honest legacy missing-field display. The later accepted #52 contract makes name, verified email and phone mandatory for profile completion and submission, adds country-code input and restricts incomplete signed-in Applicants to profile completion. Marking the original rule as historical avoids confusing it with the current contract.
 
 ### How I judge whether an agent can build from the spec
 
@@ -64,11 +70,15 @@ A change should identify stable requirement IDs, update the issue-linked delta, 
 
 The contact migration also revokes legacy write RPCs. This makes deployment coordination part of the design: locally correct code can still break old deployed clients if the database changes first. Hosted cutover is a remaining operation, not something a spec archive automatically completes.
 
+The résumé first requirement provides another example: uploading before Save draft needed a private persistence record, but it must not silently save typed application fields. The approved design separated attachment allocation from explicit text saving. Required-profile readiness then had to apply to both normal writes and file operations, while profile uploads themselves could remain available during onboarding. These dependencies are clearer in an explicit lifecycle contract than in isolated UI requests.
+
 ### Showing intent rather than matching wording
 
 The one-application rule needs a concurrent duplicate-submit test, not only a sequential form test. Job closure needs observed lock ordering and unchanged records when closure wins. Contact persistence needs a reload and a complete-field retry comparison, not simply an assertion that a Save button exists.
 
 Independent review revealed details that a happy-path interpretation missed: portfolio validation disagreement and an integration test missing the new required full name. A browser test also treated an already-visible “Saved draft” heading as evidence that a new save finished; reloading early produced a misleading persistence failure. Waiting for the actual response preserved the intended persistence assertion.
+
+The PR #54 bot finding exposed a different retry path: the first upload could allocate a pending draft but lose its response, leaving the browser with no revision. I approved a scoped repair that resolves only the current owner's selected-job revision on explicit Retry; a supplied stale revision is never upgraded. Six focused tests initially produced three intended failures, followed by nine passing focused tests. The browser regression allocated a real pending record, aborted the response and then retried without reloading, checking one draft and retained typed values. Its first cleanup assertion expected retired metadata, but the actual lifecycle had already advanced to a retained deleting tombstone; correcting the test did not require weakening the product guard. This shows why a test's expected internal state also needs review against the intended user outcome.
 
 My lesson is to test the user's durable outcome and authority boundaries. Tests that mirror implementation details or CSS classes are weaker than tests of saved data, denied access, frozen content and usable keyboard/mobile flows. I would improve future packets by writing failure and race scenarios alongside the initial happy path, not adding them only after review.
 
@@ -91,6 +101,8 @@ Agents should be evaluated by useful findings, reproducible checks and their han
 A handoff should include issue/requirement IDs, approved scope and baseline, relevant files, assumptions, actual commands/results, failures/fixes, remaining findings, independence and human decisions. It must say which tests were independently rerun and which were supplied by the implementer.
 
 This mattered when the contact reviewer passed a focused suite but did not rerun all browser/database checks. Describing everything as independently verified would exaggerate the evidence. A new task should receive enough context to verify claims without copying secrets or every unrelated conversation.
+
+For the retry follow-up, the separate reviewer independently reproduced the focused unit tests and checked source/static evidence; browser/typecheck/lint results remained implementer evidence. The final test-only cleanup correction was sent back for review. This is stronger traceability than saying a reviewer approved the feature without identifying the final diff and which evidence they actually reproduced.
 
 ### Where errors or malicious instructions can enter
 

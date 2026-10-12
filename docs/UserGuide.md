@@ -1,76 +1,175 @@
-# User Guide
+# ConnectTalent User Guide
 
-## Required profile onboarding — local #52 implementation
+ConnectTalent is a careers portal for **one employer per deployment**. Applicants browse jobs and manage applications; HR publishes jobs and reviews submissions. AI assistance is optional and does not make hiring decisions.
 
-The [#52 amendment](../workflow/archive/2026-10-10-required-applicant-profile/onboarding-amendment.md) is accepted locally with recorded limits and synced to canonical v1.7; hosted rollout remains pending. After verification or sign-in, an incomplete Applicant goes directly to **My profile**. Full name, verified email and phone are required. Email is read-only. Choose a country code and enter national digits, then **Save profile** to unlock Careers and applications. Other signed-in product pages redirect to profile until completion. Optional profile résumé upload, password recovery and Sign out remain available. Guests can still browse, and HR follows its usual flow. Existing incomplete Applicants must complete their profile to regain access to their retained applications; frozen records are not rewritten.
+## 1. Getting started
 
-## Profile and résumé
+### 1.1 Access the website
 
-The base profile/résumé feature is accepted locally with recorded limits; hosted deployment/migration remains pending. Applicant navigation includes **My profile**. Name and phone are required under #52; verified email is read-only. HTTP(S) portfolio, education and work experience remain optional. Education/work experience each allow up to 2,000characters. These values prefill only a new application without a saved draft. Editing your profile never changes an existing draft or submitted application. HR cannot browse profiles. You may optionally upload a private PDF résumé on **My profile** without saving the other fields. On an application, **Use profile résumé** explicitly copies it into that application. Later profile replacement/removal does not change that copy. Paul accepted these #53 additions locally with recorded limits; canonical v1.8 is synced and hosted rollout remains pending.
+- **Application:** [cs3227-mp3.vercel.app](https://cs3227-mp3.vercel.app/), supplied by the team for hosted access.
+- **Product/documentation website:** [GitHub Pages](https://cs3227-2610-mp3-connecttalent.github.io/CS3227-2610-MP3/). This is not the application login page.
+- **Local development:** usually [localhost:3000](http://localhost:3000); see [local setup](DeveloperGuide.md#2-getting-started).
 
-On a new or saved application, choose **Choose PDF résumé** and **Upload résumé**. Attachment is optional, PDF only and at most 1MiB (1,048,576 bytes). Encrypted or invalid PDFs are rejected. You can replace/remove the résumé before submission while the job is open. An invalid replacement preserves the existing attached file. Uploaded files are private and not sent to AI. **Download résumé** downloads the file; it is not displayed inline.
+Use a browser; no desktop installation is required. Local accounts do not automatically work on the hosted website.
 
-Explicit submission locks the letter, details, education/work experience and attachment. HR can then see the submitted background and download the résumé; HR cannot read draft files. Existing permitted downloads remain available after job closure. If an upload fails, **Retry upload** lets you recover a pending operation while preserving your last finalized résumé and typed letter. Retry appears only after an upload failure; there is no permanent cancellation button. If a network response is lost, reload to check which attachment was saved before trying again. Structural PDF validation is not malware scanning.
+**Verification status, 12 October 2026:** instructions were checked against current `develop` source and specifications. Authenticated hosted workflows were not verified in this review; the team must smoke-test the deployment before evaluator use.
 
-## Application form and withdrawal — local #49/#50 implementation
+### 1.2 Create and verify an Applicant account
 
-The AI experience notes and **Generate draft** control sit inside the application form beside the cover letter. Generation only fills the letter: it does not save or submit, and the notes are not saved as application fields. The résumé chooser and **Upload résumé**/**Replace résumé** are styled controls. You can upload before **Save draft**. A valid upload creates a private draft for the file without saving your typed form fields. The résumé section is below work experience and above AI drafting. **My applications** stays in the account header rather than repeating above the résumé.
+1. Choose **Create account**.
+2. Enter email, a password of 8–72 characters and the same password in **Confirm password**.
+3. Submit, then open the email verification link in the browser and on the host used for signup.
+4. Complete **My profile**.
 
-In **My applications**, choose **View application** to inspect a record. Withdrawal is available only inside the individual submitted application's detail page, rather than on the applications list. **Withdraw application** opens a confirmation. **Keep application** cancels without changing it. **Confirm withdrawal** permanently marks it **Withdrawn**, even if the job is closed. You cannot undo withdrawal or apply to the same job again. The submitted details, letter and résumé remain available to you as records.
+A password mismatch keeps the entered email available for correction. Eye controls show/hide passwords. Public signup creates an Applicant only. Local verification emails appear in [Mailpit](http://127.0.0.1:54324), not Gmail; hosted delivery depends on the team's email configuration.
 
-HR can read withdrawn submissions, existing notes/status history and authorized résumé downloads. HR cannot add notes, change status or request a new AI summary for them. Withdrawal does not delete application data or attachments. Paul accepted this implementation locally with recorded limits on 10 October 2026; hosted migration/testing remains pending in the [#49/#50 record](../workflow/archive/2026-10-10-application-form-withdrawal/record.md).
+### 1.3 Complete your profile
 
-Status: job browsing, Applicant applications, HR review/job management, password recovery and AI assistance are merged into `develop`. Consistent account navigation and logout passed local checks and independent review on `fix/36-role-navigation-logout`; Paul accepted with recorded limits on 2026-10-09; ACC-005 is synced to canonical v1.2 and the packet is archived. This branch is not a deployed release.
+An incomplete signed-in Applicant is directed to **My profile** and cannot use other product pages until completion. Profile file upload, password recovery and Sign out remain available.
 
-## Access
+| Field                       | Rule                                                                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Full name                   | Required; at most 120 characters.                                                                                                         |
+| Verified email              | Required; read-only, from verified Auth.                                                                                                  |
+| Phone number                | Required; choose a country calling code and enter national digits. The complete international number contains 7–15 digits, excluding `+`. |
+| Portfolio URL               | Optional; HTTP(S), no embedded credentials, at most 2,048 characters.                                                                     |
+| Education / Work experience | Optional; at most 2,000 characters each.                                                                                                  |
+| Résumé                      | Optional private PDF; see section 3.4.                                                                                                    |
 
-The shared account navigation appears on browsing, application and HR pages. Guests see **Sign in** and **Create account**. Verified Applicants see **Applicant**, **My profile** and **Sign out**; **My applications** appears after profile completion; HR sees **HR**, **Application review**, **Manage jobs** and **Sign out**. HR browsing public job details is not offered **Apply for this role**. Public signup creates an Applicant; HR accounts are assigned by an administrator as described below. An account without a verified supported role gets a generic **Signed in** indication and sign out without role dashboards. Account lookup failures withhold role controls.
+Choose **Save profile** to unlock Careers and applications. Uploading a file does not save typed profile fields or complete onboarding. Phone validation checks format, not reachability.
 
-Use **Sign out** in that navigation to return to guest browsing. If logout fails, the careers page displays a retry message; it does not claim the session ended. Successful logout requires signing in again before opening protected pages.
+### 1.4 Sign in, sign out and recover a password
 
-Follow the local Supabase and environment setup in the root `README.md`, then run `pnpm dev` and open <http://localhost:3000>. The demo uses neutral branding and does not require a company name. Use `localhost` consistently during signup and confirmation, since browser sessions are tied to that host.
+Both roles use **Sign in**. Use **Sign out** in the header when finished; if an error appears, retry rather than assuming the session ended.
 
-The home page shows published jobs. Use the category links to filter the list, then select a job card to see its title, team, description, and requirements. The local seed has published jobs in Engineering, Human Resources, and Sales, plus a draft Legal job and a closed Other job; the latter two are hidden from public browsing. No public app deployment or test accounts are available yet.
+For recovery, choose **Forgot password?**, enter email, open the recovery message in the requesting browser, enter matching new passwords of 8–72 characters, then sign in again. The request acknowledgement is the same for registered and unregistered addresses. Invalid/expired links require another request. Recovery preserves your role; local messages appear in Mailpit.
 
-To apply, select a published job and choose **Apply for this role**. Create an Applicant account with email, a password of at least eight characters, and the same password in **Confirm password**. A mismatch is rejected before signup, shows an error and keeps the entered email for correction. The eye controls on signup and sign-in reveal or hide passwords without submitting the form. Open the verification email before signing in. With local Supabase, confirmation messages appear in the [local mail viewer](http://127.0.0.1:54324) and are **not sent to Gmail**. A signed-in Applicant can save one private cover-letter draft per job and return to it later. Before submission, Applicants may edit the letter and optionally generate a SoCLaaS draft from up to 4,000 characters of experience notes. The generated text only fills the editable field; it does not save or submit the application. Check dates, skills and achievements before saving or submitting. The **Submit application** button submits explicitly. Cover letters have a 5,000-character limit. Submission freezes the letter. Contact HR to request a correction. **My applications** lists the signed-in Applicant's own drafts and submissions.
+## 2. Interface overview
 
-The local stack must have `auth.email.enable_confirmations = true` in `supabase/config.toml`; restart Supabase after changing it. No public app deployment or shared peer-test account is available yet.
+| Visitor              | Account navigation                                                            |
+| -------------------- | ----------------------------------------------------------------------------- |
+| Guest                | Sign in and Create account; public browsing.                                  |
+| Incomplete Applicant | My profile and Sign out; onboarding restrictions apply.                       |
+| Complete Applicant   | My profile, My applications and Sign out; Careers and applications available. |
+| HR                   | Application review, Manage jobs and Sign out.                                 |
 
-## Application details on the #39 branch
+Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards include category text as well as color. Layouts adapt to narrow screens. Access is enforced on the server too; opening a direct URL does not grant another role's permissions.
 
-The application form includes **Full name**, read-only **Verified email**, **Phone number** and **Portfolio URL (optional)** alongside the cover letter. Name and phone are required to submit; name has a 120-character limit. Choose a country code (Singapore +65 by default), then enter national digits only. The stored international phone contains + and 7–15 digits total; this checks format, not reachability. New forms prefill name, email and phone without AI. Portfolio allows up to 2,048 characters and must be an HTTP(S) address without embedded credentials. Empty optional fields are allowed. **Save draft** keeps incomplete application details private while the job remains open, after profile completion. Validation errors keep your typed values for correction.
+## 3. Applicant workflow
 
-**Submit application** shares the details and letter with HR and locks them. The recorded email comes from your verified account. Your application detail shows the submitted information, including after job closure. HR can see contact details only for submitted applications; it cannot edit them. Older submissions without these fields show **Not provided**. AI assistance uses the existing notes/letter and job requirements; it does not automatically receive these structured contact fields. Information you choose to type into notes or the letter remains part of that allowed AI input.
+### 3.1 Browse jobs
 
-This feature is implemented and independently reviewed locally on `feat/application-form-details`; local acceptance with recorded limits and pending hosted rollout are recorded in the [#39 packet](../workflow/archive/2026-10-09-application-form-details/record.md). Hosted migration needs a coordinated cutover; local availability does not imply a deployed release.
+Guests can browse; signed-in Applicants complete their profile first. Open **Careers**, use category links to filter, and open a job to read title, team, description and requirements. Choose **Apply for this role** and sign in if necessary. Draft/closed jobs are hidden publicly. HR is not offered Applicant apply controls.
 
-## Forgot password
+### 3.2 Complete and save an application
 
-From **Sign in**, choose **Forgot password?** and enter your account email. The page gives the same acknowledgement whether an account exists or not. In local development, open the reset message at <http://127.0.0.1:54324> and follow its link in the same browser. Enter and confirm a new password of 8 to 72 characters. After the update, sign in with the new password. An invalid or expired link sends you back to request another. This works for Applicant and HR accounts and does not change their roles. Hosted recovery depends on configured email delivery and the recovery callback URL in Supabase Auth.
+New forms prefill saved profile details without AI. Existing drafts take precedence; later profile edits do not overwrite them. The form includes contact details, optional portfolio/background, résumé and cover letter.
 
-## HR review in `develop`
+- **Save draft** persists a private record for later visits; HR cannot read it.
+- Draft application fields may be incomplete, but your account profile must be complete.
+- Submission requires full name, verified email, phone and a nonblank cover letter of at most **5,000 characters**.
+- Draft editing/submission requires a published job. Closure stops those writes; history remains readable.
+- There is at most **one application per Applicant per job**, including after withdrawal.
+- Validation feedback retains typed values. Saving or generating text does not submit.
 
-After an administrator promotes a verified, dedicated account to HR, sign in through the same **Sign in** page. The HR account opens **Application review** at `/hr/applications`. The list contains submitted applications only. Open an application to compare original and current cover letters, read private HR notes and status history, add a note of at most 2,000 characters, or change status through the separate **Update status** action. Status starts at **Submitted**; HR may select **In review**, **Shortlisted** or **Rejected** and change among those three later. A stale status form asks you to reload. Submitted applications remain reviewable after job closure. HR may also request a SoCLaaS summary of the submitted letter and published requirements; its evidence, missing-requirement and follow-up sections appear beside the original. Verify the summary against the letter. It does not rank or recommend applicants and cannot change status. Applicants see their own current status under **My applications**, without HR notes or status history.
+### 3.3 Optional AI drafting
 
-Public signup always creates an Applicant. There is no HR signup or role-switching control. A team administrator must provision hosted HR as described in the Developer Guide. For local teammate testing, the README describes a local-only synthetic HR seed command; it does not auto-login or provide a shared grader account. The HR review pages require the issue #9 database migration; a preview using the shared Development Supabase project may be unavailable until the team applies that reviewed migration. SoCLaaS requires server-side configuration as described in the root README; without it, the AI actions show a safe unavailable state.
+Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. Review any overwrite prompt; generation fills the editable letter, so verify all claims. It does not save or submit. Notes are used for that request, not stored as application fields.
 
-## HR job management on this branch
+Structured profile/contact fields and files are not automatically sent to AI. Personal information you deliberately type in notes/letters may be included. If generation fails or is usage-limited, retain/edit the existing letter and continue manually.
 
-After signing in as HR, choose **Manage jobs** from **Application review**, or open `/hr/jobs`. Choose **Create draft**, fill in the job title, team, category, description and requirements, then **Save draft**. You can reopen and edit a draft. Draft jobs stay hidden from public browsing. On the draft detail page, **Publish job** is a separate action that makes the fixed job visible and accepts applications. Published content cannot be edited. **Close job** is a separate action on a published job; the job then disappears from public browsing and stops accepting applications or edits to submitted cover letters. Applicants and HR can still read existing applications under their normal access rules. Closed jobs remain visible to HR and cannot be republished in this version. There is no job deletion or reopening action.
+### 3.4 Attach a résumé
 
-Local testing requires the #8 migration in addition to the earlier migrations. This feature has been checked locally; shared Development Supabase migration, preview testing and release are pending team operations.
+The résumé section is below work experience and above AI drafting. Choose **Choose PDF résumé**, select the file, then **Upload résumé** and wait for the download link. **Save draft is not a prerequisite.**
 
-## Planned roles
+- PDF only; maximum **1 MiB (1,048,576 bytes)**. Invalid/encrypted PDFs are rejected.
+- Upload is optional. It may create a private draft for the file without saving other typed fields.
+- Replace/remove is available before submission while the job is published. Invalid replacement preserves the prior finalized attachment.
+- After failure, **Retry upload** preserves typed text and reconciles interrupted first uploads without a full reload. If still uncertain, reload to inspect the saved attachment before further changes.
+- There is no permanent cancellation button. Downloads are private attachments, not public links or inline previews. Structural validation is not malware scanning.
 
-- **Applicant:** browse published openings, verify an account, save a private text draft, optionally generate a cover-letter draft before submission, submit and view an application. Submitted letters are frozen; correction requests go to HR.
-- **HR:** review submitted applications, write private notes, request a bounded SoCLaaS summary, and change status through a separate explicit action; manage jobs locally on this branch.
+**My profile** also allows optional private PDF upload. **Use profile résumé** explicitly copies it into the application. Later profile replacement/removal does not alter that copy. Files are not parsed for autofill or sent to AI.
 
-Both AI features are advisory. Applicants submit their own final text; HR makes every hiring decision.
+### 3.5 Submit and view
 
-## Role navigation and signup guidance (#40 integration)
+Choose **Submit application** when final. HR receives the submitted details, letter, background and file. Submission freezes them: you cannot edit after submission, even while the job remains open. Contact HR about corrections; no correction workflow is provided in this version.
 
-The careers header shows Sign in/Create account to guests. Signed-in Applicants see My profile and Sign out; My applications becomes available after required profile completion; HR sees Application review, Manage jobs and Sign out. A failed sign-out displays retry feedback. Signup keeps neutral email-verification guidance; local Mailpit instructions remain in the development guide, outside the signup screen. The [integration record](../workflow/archive/2026-10-09-signup-notice-navigation/record.md) records local verification and remaining hosted limits.
+In **My applications**, choose **View application** to see your own record and current status. Submitted history and permitted downloads remain available after closure. Older submissions lacking fields display **Not provided**.
 
-## Refreshed interface (#42 branch)
+### 3.6 Withdraw
 
-The careers page groups existing category links in a sidebar on desktop and a wrapping panel on mobile. Job cards show the actual category, team, title and description; View role opens the existing detail page. The dark account header retains role-specific links and Sign out. Sign-in and signup place the Careers link above a lavender information panel and form; these panels stack on mobile. Auth, application and HR pages use consistent panels and feedback styling; actions and permission rules are unchanged. This describes the locally tested UI branch, not a deployed release.
+Open the individual submitted application and choose **Withdraw application**. **Keep application** cancels; **Confirm withdrawal** proceeds. The list itself has status/View only.
+
+Withdrawal is permanent, works after closure and does not erase data/files. You cannot undo it or reapply to that job. Your submitted record remains readable as history.
+
+## 4. HR workflow
+
+### 4.1 HR access
+
+There is no public HR signup or role switch. An administrator assigns HR to a verified dedicated account without Applicant applications. Ask the team for authorized evaluator access; this guide publishes no shared password. Developers can use the [local-only HR seed](DeveloperGuide.md#23-local-hr-account).
+
+### 4.2 Manage jobs
+
+1. Open **Manage jobs**, then **Create draft**.
+2. Enter title, team, category, description and requirements; choose **Save draft**.
+3. Reopen to edit, then explicitly **Publish job** when ready.
+4. On a published job, choose **Close job** when applications should stop.
+
+All fields are required. Title allows 160 characters, team 120, description/requirements 10,000 each. Drafts are hidden from Applicants. Published/closed content is fixed. Closed jobs cannot be reopened, republished or deleted. Closure retains existing applications and allowed history/review/download/withdrawal access.
+
+### 4.3 Review applications
+
+Open **Application review**, then a submission. HR sees submitted applications and withdrawn history, never unsubmitted drafts or mutable private Applicant profiles/profile files.
+
+The detail contains submitted contacts/background, original/current letter sections, application résumé, private notes and status history. Current submissions are immutable; two letter sections do not enable editing.
+
+- **Add a note** / **Add note**: add-only, at most 2,000 characters, with author/time. Applicants cannot see notes.
+- **Change review status** / **Update status**: select **In review**, **Shortlisted** or **Rejected** as a separate human action.
+- **Submitted** is initial-only. HR can change among the other three without a required reason.
+- Reload after a stale-state rejection before retrying.
+
+### 4.4 Optional AI summary
+
+Choose **Summarize** or **Refresh summary** for advisory evidence, requirements not addressed and follow-up questions. Verify against the original letter and requirements. AI does not rank applicants or update status. Failure leaves letter/status unchanged.
+
+Withdrawn submissions remain readable but cannot receive new notes, status changes or AI summaries. Existing notes/history and authorized file downloads remain available.
+
+## 5. Lifecycle reference
+
+| State                              | Meaning / next actions                                                                                     |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Job: Draft                         | HR edits or publishes; publicly hidden.                                                                    |
+| Job: Published                     | Public, accepts drafts/submissions; HR may close. Content fixed.                                           |
+| Job: Closed                        | Publicly hidden; no new submissions/draft writes. History retained.                                        |
+| Application: Draft                 | Owner-only, editable while job published; HR cannot read it.                                               |
+| Application: Submitted             | Frozen Applicant content shared with HR; initial review status Submitted.                                  |
+| In review / Shortlisted / Rejected | Human-selected HR review status, visible to owner.                                                         |
+| Application: Withdrawn             | Terminal retained history; overrides displayed review status. No undo/reapplication/further HR processing. |
+
+Closing a job differs from withdrawing an application. Neither erases records or resets the one-application rule.
+
+## 6. Privacy and evaluator testing
+
+Applicants access their own records; HR accesses submitted snapshots and private review data. Use synthetic details/PDFs for tests. Do not share account credentials or upload another person's résumé.
+
+AI is limited to three requests per user per rolling minute and 24 provider requests per deployment per rolling minute across both features. Wait after a limit message. Structured contact/background fields and files are excluded from automatic AI payloads; deliberately supplied notes/letters remain AI input.
+
+For hosted smoke testing, use separate authorized Applicant/HR accounts: complete a profile; create/publish a synthetic job; save/upload/submit; review/note/change status; close; check history; withdraw; verify HR can read but cannot process the withdrawn record. Record the actual deployment and results. Source checks and earlier local tests do not prove this passed online.
+
+## 7. Troubleshooting and FAQ
+
+| Problem                               | What to do                                                                                                            |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| No local verification email           | Open Mailpit on port 54324; local emails do not go to Gmail.                                                          |
+| No hosted verification/recovery email | Check spam; ask the team to check delivery/redirects. Request a fresh expired link.                                   |
+| Every tab returns to My profile       | Save required name and formatted phone. File upload alone is not completion.                                          |
+| No HR navigation                      | Ask the administrator to check the role in the correct environment.                                                   |
+| Upload unavailable                    | Complete onboarding; use a valid PDF within 1 MiB on an editable published-job application. Report persistent errors. |
+| Interrupted upload                    | Retry upload; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                 |
+| Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                              |
+| Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                 |
+| No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                |
+| AI unavailable/limited                | Continue manually; wait after limits.                                                                                 |
+| Local login fails online              | Local, Development and Production databases have separate accounts.                                                   |
+
+See the [Developer Guide](DeveloperGuide.md) for setup/security/tests and [Reflections](Reflections.md) for individual work.

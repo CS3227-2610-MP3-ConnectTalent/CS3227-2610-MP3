@@ -4,6 +4,8 @@ No packets are currently pending implementation.
 
 ## Accepted and archived work
 
+Issue [#60 guides and reflection alignment](../archive/2026-10-12-guides-reflection-alignment/record.md) was separately accepted by Paul on 12 October 2026 with recorded limits after independent review. The complete documentation-only packet is archived with no canonical delta. Authenticated hosted checks and Paul's personal reflection verification remain open; no publication authorized.
+
 Issue [#51](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/51) was accepted for PR submission by Johnwz123 on 2026-10-10 after independent review and closeout. Its no-product-delta packet is [archived](../archive/2026-10-10-quality-gates/record.md), and PR #57 remains open; fresh checks are required after reconciling merged PR #56.
 
 Issue [#55 CI test matrix](../archive/2026-10-10-ci-test-matrix/record.md) was accepted after independent review on 2026-10-10. Its tooling-only packet is archived, and PR #56 merged on 2026-10-11.
