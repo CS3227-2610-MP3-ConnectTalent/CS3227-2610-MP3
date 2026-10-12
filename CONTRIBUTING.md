@@ -195,8 +195,17 @@ The Supabase workflow runs local database lint, pgTAP and integration races on t
 events, and also on its nightly 02:00 UTC schedule and manual dispatch. Critical
 Chromium journeys run on pull requests and branch pushes; the full Playwright suite
 runs nightly and on manual dispatch. CI starts a disposable local Supabase stack and
-generates its own fixture key. The app workflow publishes a job summary
-and downloadable Vitest artifacts; there is no coverage threshold. Repository
+generates its own fixture key. Unit-test failures fail CI. Coverage is reported
+against a 90% global target for lines, statements, branches, and functions, but it is
+informational and does not fail CI. After the trusted report workflow is present on
+the default branch, it reads the exact CI run's JUnit and coverage artifacts and
+updates one PR comment with the workflow result, test counts, and four percentages.
+It does not check out or execute PR code; missing or invalid reports are marked
+unavailable. Test counts and coverage come from artifacts supplied by the PR's CI
+run and are not an independent attestation. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub
+App is installed for this repository; Dependabot proposes weekly GitHub Actions
+updates. Minor/patch updates are grouped, major updates remain separate, and
+reviewers must approve changes; auto-merge is not configured. Repository
 administrators still need to require the desired status checks in GitHub branch
 protection settings.
 

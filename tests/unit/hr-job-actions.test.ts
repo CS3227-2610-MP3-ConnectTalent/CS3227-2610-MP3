@@ -90,3 +90,75 @@ it("uses distinct edit, publish and close RPCs", async () => {
     "close_hr_job",
   ]);
 });
+
+it("fails closed when creating a draft throws, returns an error, or returns an invalid id", async () => {
+  const rpc = vi
+    .fn()
+    .mockRejectedValueOnce(new Error("private transport detail"));
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  await expect(createHRJobDraft(form())).rejects.toThrow(
+    "REDIRECT:/hr/jobs/new?error=save",
+  );
+
+  rpc.mockResolvedValueOnce({
+    data: jobId,
+    error: { message: "private db detail" },
+  });
+  await expect(createHRJobDraft(form())).rejects.toThrow(
+    "REDIRECT:/hr/jobs/new?error=save",
+  );
+
+  rpc.mockResolvedValueOnce({ data: null, error: null });
+  await expect(createHRJobDraft(form())).rejects.toThrow(
+    "REDIRECT:/hr/jobs/new?error=save",
+  );
+  expect(JSON.stringify(vi.mocked(console.info).mock.calls)).not.toContain(
+    "private transport detail",
+  );
+});
+
+it("validates the job id and fields before editing", async () => {
+  const rpc = vi.fn();
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  await expect(editHRJobDraft(form({ jobId: "invalid" }))).rejects.toThrow(
+    "REDIRECT:/hr/jobs?error=invalid",
+  );
+  await expect(
+    editHRJobDraft(form({ title: "", description: "Build tools" })),
+  ).rejects.toThrow(`REDIRECT:/hr/jobs/${jobId}?error=invalid`);
+  expect(rpc).not.toHaveBeenCalled();
+});
+
+it("reports edit and transition RPC failures with a safe route-specific error", async () => {
+  const rpc = vi
+    .fn()
+    .mockResolvedValueOnce({ error: { message: "private edit detail" } })
+    .mockRejectedValueOnce(new Error("private publish detail"))
+    .mockResolvedValueOnce({ error: { message: "private close detail" } });
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+
+  await expect(editHRJobDraft(form())).rejects.toThrow(
+    `REDIRECT:/hr/jobs/${jobId}?error=save`,
+  );
+  await expect(publishHRJob(form())).rejects.toThrow(
+    `REDIRECT:/hr/jobs/${jobId}?error=transition`,
+  );
+  await expect(closeHRJob(form())).rejects.toThrow(
+    `REDIRECT:/hr/jobs/${jobId}?error=transition`,
+  );
+  expect(JSON.stringify(vi.mocked(console.info).mock.calls)).not.toContain(
+    "private publish detail",
+  );
+});
+
+it("rejects invalid identifiers before publish or close RPC calls", async () => {
+  const rpc = vi.fn();
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  await expect(publishHRJob(form({ jobId: "invalid" }))).rejects.toThrow(
+    "REDIRECT:/hr/jobs?error=invalid",
+  );
+  await expect(closeHRJob(form({ jobId: "invalid" }))).rejects.toThrow(
+    "REDIRECT:/hr/jobs?error=invalid",
+  );
+  expect(rpc).not.toHaveBeenCalled();
+});

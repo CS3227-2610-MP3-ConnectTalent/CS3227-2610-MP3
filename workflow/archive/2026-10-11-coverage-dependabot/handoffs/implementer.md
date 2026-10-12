@@ -1,0 +1,31 @@
+# Agent handoff: 2026-10-11-coverage-dependabot / issues #58 and #59 / implementer
+
+- Issues/task/dependencies: [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58), [#59](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/59); approved plans; coverage baseline task 58-01 complete.
+- Human accountable owner: pending issue triage; user approved implementation scope on 2026-10-11.
+- Assignment: Codex primary agent `/root`, inline implementation, 2026-10-11; implementation complete in the uncommitted worktree.
+- Goal and scope: add meaningful unit tests to reach 90% for lines, statements, branches, and functions in the existing source scope; keep coverage informational/nonblocking; add a safe updating PR report; configure weekly Dependabot version updates for npm/pnpm and GitHub Actions.
+- Allowed/excluded files: paths listed in `plan.md`, `dependabot-plan.md`, and `tasks.md`. Do not alter product behavior/specs, coverage source scope, repository branch settings, or external security-update settings.
+- Inputs supplied: `proposal.md`, `design.md`, `plan.md`, `dependabot-plan.md`, `tasks.md`, canonical no-product-delta boundary, baseline `c9678b6442326ebcf8a0ef3f653ac820966a8ad2`.
+- Acceptance IDs: QG-AC-01 through QG-AC-05; DEP-AC-01 and DEP-AC-02.
+- Interfaces/coordination: Task 58-04 parser functions are consumed by the job summary and Task 58-05 reporter; the Dependabot config task is independent. Separate read-only security and test reviewers were assigned after implementation; their handoffs are linked from `record.md`.
+- Required checks: `pnpm format:check`, `pnpm lint`, `pnpm exec next typegen`, `pnpm typecheck`, `pnpm test:unit:coverage`, Python CI-report tests, `pnpm build`, and applicable existing Supabase CI jobs. See approved plans for expected outcomes.
+- Required response: changed files/commit range, exact commands and results, coverage metrics, negative-path evidence, assumptions, environmental limits, and independent-review needs.
+- Stop/escalation conditions: product expectation changes, need to narrow coverage scope, authorization/privacy finding, unsafe artifact workflow, dependency mismatch, or unresolved test failure; accountable decision owner is the student/user.
+
+## Returned evidence
+
+| Artifact / file / commit                                                | Observed result                                                                                                                                                                 | Assumption or limitation                                                                                                             | Consumer / human verification                          |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Baseline `coverage-baseline.csv`                                        | Baseline run passed 32 files / 167 tests; lines 46.10%, statements 44.22%, branches 41.47%, functions 41.64%.                                                                   | Historical baseline, not final verification.                                                                                         | User and independent reviewers.                        |
+| `CI=true pnpm test:unit:coverage --reporter=dot`                        | Final full run passed 60 files / 334 tests; lines 94.80%, statements 93.89%, branches 90.05%, functions 94.63%.                                                                 | A separate reviewer run previously had one PDF input timeout; the isolated file and later full run passed. Local run, not hosted CI. | Implementer result; student acceptance pending.        |
+| `python -m unittest discover -s tests/ci -p "test_*.py" -v`             | Final helper suite passed 28 tests covering report parsing and mocked GitHub interactions.                                                                                      | Mocked APIs and synthetic artifacts; no live comment run.                                                                            | Implementer result; student acceptance pending.        |
+| [Security review](security-review.md) and [test review](test-review.md) | Separate reviewers completed findings, rechecks, and acceptance evidence review. No unresolved source finding; the 187-file format gate and hosted workflow checks remain open. | Reviews are read-only; no code was committed and no final head SHA exists.                                                           | Reviewer results; separate student acceptance pending. |
+| `pnpm format:check`                                                     | Failed on 187 unchanged repository files; focused changed-file formatting passes.                                                                                               | Existing CI format gate remains red pending resolution or explicit disposition.                                                      | Implementer result; student acceptance pending.        |
+
+## Review and decision
+
+- Implementer identity/range: Codex primary agent `/root`; baseline and current HEAD `c9678b6442326ebcf8a0ef3f653ac820966a8ad2`; implementation changes remain uncommitted in the worktree.
+- Reviewer identity/context: `/root/coverage_security_review` and `/root/coverage_test_review`; separate read-only reviewer executions.
+- Independence: implementation was inline; both reviewers worked separately and did not edit implementation files. See their linked handoffs for review scope and limits.
+- Findings and resolutions: workflow identity, artifact read bounds, cross-SHA report ordering, and concurrency queue risks were fixed and rechecked. The repository-wide format gate and hosted workflow/Dependabot behavior remain unverified or open as recorded in `record.md`.
+- Human decision: implementation authorized; acceptance remains pending.
