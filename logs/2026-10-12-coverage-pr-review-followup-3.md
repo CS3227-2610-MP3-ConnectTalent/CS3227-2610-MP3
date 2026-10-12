@@ -32,12 +32,12 @@ The new tests cover current-attempt artifact selection despite stale same-name a
 
 | Check | Result |
 | --- | --- |
-| `python -m unittest discover -s tests/ci -p "test_*.py" -v` | A run after these source fixes passed 47 helper tests. A fresh rerun in this session could not start: the configured `python.exe`/`python3.exe` uv trampoline returned `permission denied` before spawning Python, so this attempt executed no tests. |
+| `python -m unittest discover -s tests/ci -p "test_*.py" -v` | A local run after these source fixes passed 47 helper tests. A fresh rerun in this session could not start: the configured `python.exe`/`python3.exe` uv trampoline returned `permission denied` before spawning Python. GitHub CI run [38212731072](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38212731072) subsequently passed its `CI report helper tests` step on `f157c37`. |
 | `python -m compileall -q scripts/ci tests/ci` | Previously passed after the source edits. The combined fresh verification command stopped at Python startup before reaching compileall. |
-| `git diff --check` and staged-diff check | Both passed after source changes; re-run separately against the final evidence commit before reporting completion. |
+| `git diff --check` and staged-diff check | Both passed for the evidence commit before it was created; re-run separately after any final log amendment. |
 | Renovate JSON parsing | The new regression uses Python's JSON parser. A fresh PowerShell JSON parse is pending; no hosted Renovate validation is claimed. |
 | Formatter | Latest repository format check is blocked in this environment: pnpm/Node are unavailable through PATH and the direct Prettier attempts returned `EPERM`. Earlier repository formatting had passed before this review round. |
-| Hosted CI / report comment | Checks for prior head `e194ef4` do not validate the new commits. Re-fetch Actions, Supabase, and combined status for the pushed final SHA. Live `workflow_run` PR-comment behavior still requires the reporter workflow to be present on the default branch. |
+| Hosted CI / report comment | On pushed head `f157c37`, Actions CI run 38212731072 passed (format, lint, type generation, typecheck, unit tests, CI report helper tests, build, artifact upload and summary); Supabase CI run 38212731085 passed (database checks, integration race suites, and critical Chromium PR journeys; the scheduled/manual full suite was skipped); Vercel status passed. PR #61 was reported mergeable. The live `workflow_run` PR-comment path remains untested because its workflow must be present on the default branch. |
 | Merge conflicts | The previous sync commit resolved conflicts in `docs/DeveloperGuide.md`, `workflow/archive/README.md`, and `workflow/changes/README.md`. A fresh unmerged-path check is required for the final tree. |
 
 No application unit, integration, database, or browser tests were run specifically for these CI-helper and workflow corrections. Personal reflection files were not inspected or changed.
@@ -48,7 +48,7 @@ PR-supplied test and coverage artifacts are not independently attested; the repo
 
 ## Changed files and commits
 
-Code/config/tests changed in [`f5dbc2e`](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/f5dbc2e406bf2e73bb98d3f15da8a56fcc5dfe56): `.github/renovate.json`, `.github/workflows/ci.yml`, `.github/workflows/test-report.yml`, `scripts/ci/download_vitest_artifact.py`, `scripts/ci/vitest_reports.py`, and their CI-helper tests. Evidence changes: this summary, the archived plan/record, test-review handoff, and archive index. Push result, replies, resolution status, and final hosted checks are to be filled from actual post-action results before closeout.
+Code/config/tests were committed in [`f5dbc2e`](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/f5dbc2e406bf2e73bb98d3f15da8a56fcc5dfe56); the dated summaries, archived plan/record, test-review handoff, and archive index were committed and pushed in [`f157c37`](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/f157c372da5189ff5f10b5f60348f4f25aa78b30). All five comment threads were replied to and re-queried as resolved. CI, Supabase CI, and Vercel passed for `f157c37`; the current PR head was mergeable. The PR description now links this round-three summary, records the hosted checks, and replaces its inaccurate claim that the uploaded artifacts come from a trusted run with the actual PR-supplied/not-independently-attested boundary.
 
 ## Student verification
 
