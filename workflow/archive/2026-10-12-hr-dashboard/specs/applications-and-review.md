@@ -3,9 +3,9 @@
 - Change/issues/owner/status: `2026-10-12-hr-dashboard`; [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68); John Wong (`Johnwz123`); approved for implementation
 - Canonical file: [applications-and-review.md](../../../specs/applications-and-review.md)
 - Baseline: ProductSpec v1.8, commit `84761e1`; APP-003 and APP-008
-- Proposed baseline: v1.9, only if this delta is accepted
+- Accepted baseline: v1.9, synced on 2026-10-13
 - Dependencies/cross-capability IDs: [JMG-001/JMG-003](../../../specs/job-management.md), [SEC-001/SEC-002](../../../specs/security-and-privacy.md)
-- Approval: John Wong approved the packet in chat on 2026-10-12 (“Looks good, I approve. Please proceed.”); do not sync to canonical specs before separate student acceptance
+- Approval: John Wong approved the packet in chat on 2026-10-12 (“Looks good, I approve. Please proceed.”). On 2026-10-12 he confirmed it was fully approved and directed sync/archive/PR after being shown the known check results.
 
 ## ADDED
 
@@ -29,6 +29,7 @@ None.
 
 - [x] APP-009 is unused in the v1.8 canonical file; no existing ID is renumbered or retired.
 - [x] Every proposed rule and scenario approved by John Wong on 2026-10-12 before product implementation.
-- [ ] Independent review of the proposed behavior; pending.
-- [ ] If accepted, sync to canonical `applications-and-review.md`, update ProductSpec/spec index to v1.9, verify IDs and links, then archive the complete packet.
-- Sync commit/paths/decision evidence: pending; not yet synced.
+- [ ] Independent review execution evidence: not supplied; no reviewer identity, run, scope or findings are claimed.
+- [x] John Wong accepted the change for sync/archive on 2026-10-12 by stating it was fully approved after the known check results were presented.
+- [x] Synced APP-009 to canonical `applications-and-review.md`; ProductSpec/spec index updated to v1.9 on 2026-10-13; IDs and links verified before complete packet archive.
+- Sync commit/paths/decision evidence: closeout change is included in the `docs(workflow): sync and archive HR dashboard change` commit on `feat/68-hr-dashboard`; canonical destinations are listed above.

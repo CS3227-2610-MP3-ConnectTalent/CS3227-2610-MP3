@@ -30,3 +30,7 @@
 - Independence: No independent review has run in this execution. The implementer’s inspection is not represented as independent.
 - Findings and resolutions: Pending separate reviewer.
 - Human decision: Proposal/design/plan approved by John Wong on 2026-10-12. Latest user statement says “It's been accepted. Please proceed.” Clarification is pending on whether that refers to separate reviewer approval, student acceptance or both. Issue #68 currently has no comments containing reviewer evidence.
+
+## Closeout addendum — 2026-10-13
+
+John Wong stated on 2026-10-12 that the change was fully approved and directed sync/archive/PR after the known check results had been presented. This is recorded as the student acceptance decision. The message did not identify a separate reviewer or provide review run, scope or findings; no independent review execution is claimed. APP-009 was synced to canonical v1.9 and the packet archived on 2026-10-13. The known three critical E2E failures and repository-wide formatting failure remain documented in `record.md` and the dated closeout summary.

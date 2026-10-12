@@ -1,8 +1,8 @@
-# Active change packets
-
-Issue [#68 HR recruitment dashboard](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68) is triaged to John Wong and awaiting packet approval: [proposal, delta, design, plan, and record](2026-10-12-hr-dashboard/record.md). Product implementation has not started.
+# Change packet index
 
 ## Accepted and archived work
+
+Issue [#68 HR recruitment dashboard](../archive/2026-10-12-hr-dashboard/record.md) was fully approved by John Wong on 2026-10-12. APP-009 was synced to canonical v1.9 and the complete packet archived on 2026-10-13 with known local E2E/formatting failures and missing independent-review provenance explicitly recorded. Git publication and PR remain pending.
 
 Issues [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58) and [#59](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/59) were accepted by the user on 2026-10-11 and archived after closeout on 2026-10-12. The accepted work adds report-only 90% coverage reporting and weekly dependency updates: Renovate handles pnpm/npm after the Mend Renovate GitHub App is installed for this repository, while Dependabot handles GitHub Actions. The full Prettier gate passes after formatting the 187 previously unformatted files; hosted CI and the first hosted reporter run remain pending. See the [complete archived packet](../archive/2026-10-11-coverage-dependabot/record.md), [implementation summary](../../logs/2026-10-11-coverage-dependabot-implementation.md), [format closeout summary](../../logs/2026-10-12-coverage-format-closeout.md), and [PR preparation summary](../../logs/2026-10-12-coverage-dependabot-pr.md).
 

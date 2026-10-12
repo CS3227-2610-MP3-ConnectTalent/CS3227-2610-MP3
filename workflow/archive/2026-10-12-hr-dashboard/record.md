@@ -1,10 +1,10 @@
 # Feature record: HR recruitment dashboard
 
-Status: implementation and checks recorded; independent review and student acceptance pending
+Status: accepted by John Wong with recorded evidence limits; APP-009 synced to v1.9 and packet archived; push/PR pending
 
 Owner: John Wong (Johnwz123), confirmed on 2026-10-12
 
-Spec version: v1.8 baseline; proposed v1.9 if APP-009 is accepted
+Spec version: v1.8 baseline; accepted v1.9 synced on 2026-10-13
 
 Date: 2026-10-12
 
@@ -12,13 +12,13 @@ Date: 2026-10-12
 
 - Change ID/classification: 2026-10-12-hr-dashboard; behavior change
 - GitHub issue: [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68), open, enhancement, assigned to John Wong
-- Branch: feat/68-hr-dashboard from develop at 84761e1; implementation commit `a238c41`; PR pending
+- Branch: feat/68-hr-dashboard from develop at 84761e1; implementation commit `a238c41`, review-handoff commit `8f6e2af`; closeout commit recorded in Git history; PR pending
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Delta: [proposed APP-009](specs/applications-and-review.md)
 - Plan/tasks: [plan.md](plan.md), [tasks.md](tasks.md)
 - Implementer handoff: [implementer-handoff.md](implementer-handoff.md)
-- Archive: pending acceptance and canonical sync
+- Archive: `workflow/archive/2026-10-12-hr-dashboard/`; complete packet archived on 2026-10-13 after canonical sync
 
 ## Approval checklist
 
@@ -26,9 +26,9 @@ Date: 2026-10-12
 - [x] John Wong approved the bounded in-chat design on 2026-10-12 ("Looks good, please proceed.").
 - [x] John Wong approved proposal, APP-009 delta, design and plan in chat on 2026-10-12 (“Looks good, I approve. Please proceed.”).
 - [x] Implementation and checks recorded on 2026-10-12; critical E2E has three failures in existing non-dashboard journeys, detailed below.
-- [ ] Independent review complete; pending.
-- [ ] Separate student acceptance recorded; pending.
-- [ ] Canonical sync, archive, guide and dated summary complete; pending.
+- [ ] Independent review execution evidence supplied; reviewer identity, run, scope and findings were not included in the approval message or issue #68.
+- [x] John Wong confirmed full approval and directed sync/archive/PR on 2026-10-12 after the known check results had been presented.
+- [x] Canonical APP-009 sync to v1.9, ID/link verification, complete archive, guide update and dated summary completed on 2026-10-13.
 - [ ] Pre-PR closeout and issue-linked PR complete; pending.
 
 ## Requirement and acceptance criteria
@@ -43,7 +43,7 @@ Date: 2026-10-12
 
 ## Agent handoffs
 
-No subagent was dispatched. John Wong is the owner and proposed implementer. The [implementer handoff](implementer-handoff.md) supplies the T01-T04 evidence for a separate reviewer; reviewer execution remains pending.
+No subagent was dispatched. John Wong is the owner and proposed implementer. The [implementer handoff](implementer-handoff.md) supplies T01-T04 evidence. John later confirmed that the change was fully approved, but no independent reviewer identity, run, scope or findings were supplied; this record does not claim independent review execution.
 
 ## Implementation and tests
 
@@ -74,22 +74,22 @@ Limitations: aggregates read the existing HR job and submitted-application resul
 
 ## Review and decision
 
-- Reviewer identity/independence: pending; the implementer did not perform or claim independent review.
-- Findings/resolutions: pending.
-- Human decisions: in-chat bounded design and implementation packet approved by John Wong on 2026-10-12. The latest user message says “It's been accepted. Please proceed.” Its stage (separate reviewer approval, student acceptance, or both) is awaiting clarification; T05/T06 remain unmarked.
-- User Guide update: completed in `docs/UserGuide.md`; dated session summary pending closeout.
+- Reviewer identity/independence: no independent reviewer execution or identity/findings supplied in this session; the implementer did not perform or claim independent review.
+- Findings/resolutions: reviewer findings unavailable. Known validation outcomes remain: critical E2E 7 passed/3 failed, repository-wide `format:check` failed on 37 files, and changed-file formatting passed.
+- Human decision: John Wong stated on 2026-10-12, “John has approved it. It has been fully approved. Please proceed to sync and archive the changes and push the changes and open a PR.” Recorded as acceptance for sync/archive and the requested publication, with the check limitations above visible; the statement does not identify a separate reviewer or supply review findings.
+- User Guide update: completed in `docs/UserGuide.md`; closeout summary is [2026-10-13-hr-dashboard.md](../../../logs/2026-10-13-hr-dashboard.md).
 
 ## Session evidence index
 
 | Date/session       | Summary                    | Work                                                                                         | Status                                                                              |
 | ------------------ | -------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| 2026-10-12/current | Dated logs summary pending | Approved HR dashboard implementation; unit/build checks; local critical E2E; packet evidence | T00-T04 complete; separate review/acceptance, canonical sync/archive and PR pending |
+| 2026-10-12 implementation / 2026-10-13 closeout | [Closeout summary](../../../logs/2026-10-13-hr-dashboard.md) | Approved HR dashboard implementation; checks; John’s full-approval statement; v1.9 sync and packet archive | Acceptance and T07 closeout recorded; independent-review provenance remains unavailable; push/PR pending |
 
 ## Canonical sync and archive
 
-- Accepted delta/decision: pending; proposed APP-009 only
-- Canonical sync commit/files/version/date: pending; canonical files untouched
-- Sync verification: pending
-- Archive decision/date/path: pending
-- Navigation repairs after archive: pending
-- Outstanding work: separate review, student acceptance, canonical sync/archive, dated summary and PR closeout.
+- Accepted delta/decision: APP-009 accepted for sync/archive by John Wong on 2026-10-12 after the known checks were presented.
+- Canonical sync commit/files/version/date: v1.9 on 2026-10-13; `workflow/ProductSpec.md`, `workflow/specs/README.md`, `workflow/specs/applications-and-review.md`; closeout commit recorded in Git history.
+- Sync verification: APP-009 unique in canonical spec; requirement IDs and relative links passed the 13-file structural check. Prettier could not run for closeout Markdown (Node unavailable through the shim; Bun direct execution returned EPERM). The first staged `git diff --cached --check` found three extra blank lines at EOF; those were removed, and the rerun passed.
+- Archive decision/date/path: complete packet moved to `workflow/archive/2026-10-12-hr-dashboard/` on 2026-10-13 after sync.
+- Navigation repairs after archive: `workflow/changes/README.md`, `workflow/archive/README.md`, and dated log point to the archived record.
+- Outstanding work: push and issue-linked PR requested by John; no reviewer identity or independent findings are available to record; hosted checks, merge and release remain pending.

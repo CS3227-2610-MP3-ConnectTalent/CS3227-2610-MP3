@@ -2,7 +2,11 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.8, 10 October 2026**. Earlier change traces below preserve the accepted lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.9, 13 October 2026**. The accepted #68 HR recruitment dashboard adds APP-009 below; the [archived packet](../archive/2026-10-12-hr-dashboard/record.md) preserves the acceptance source and its evidence limits. Earlier change traces below preserve the accepted lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.9 accepted HR recruitment dashboard
+
+John Wong confirmed full approval on 12 October 2026 after the local implementation checks. APP-009 defines a read-only overview using the existing authorized HR data path; the dashboard excludes Applicant private data and keeps withdrawn applications separate from active review counts. Canonical sync completed on 13 October before archive. Independent reviewer identity/run/findings were not supplied in the recorded approval; known critical E2E and repository-wide formatting failures remain visible in the packet. Hosted validation and release remain separate.
 
 ## v1.8 accepted résumé-first/profile-file change
 

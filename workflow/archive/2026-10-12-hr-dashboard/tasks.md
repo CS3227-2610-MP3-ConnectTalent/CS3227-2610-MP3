@@ -2,7 +2,7 @@
 
 - Issue: [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68)
 - Plan/record: plan.md; record.md
-- Status/owner: implementation and checks recorded; independent review pending; John Wong
+- Status/owner: accepted with recorded evidence limits; closeout complete; push/PR pending; John Wong
 
 ## Before implementation
 
@@ -17,7 +17,7 @@
 
 ## Review and closeout
 
-- [ ] T05 — Separate reviewer execution checks final diff, acceptance, authorization and privacy. Depends on T04. Record reviewer context, independence, findings and rechecks.
-- [ ] T06 — John Wong records acceptance, rejection or conditions after review. Depends on T05.
-- [ ] T07 — Sync accepted APP-009 to canonical specs, verify IDs/links, archive packet, update guide and write dated session summary. Depends on T06.
+- [ ] T05 — Independent reviewer execution evidence is unavailable. John’s full-approval statement is recorded, but no separate reviewer identity/run/findings are claimed.
+- [x] T06 — John Wong confirmed full approval on 2026-10-12 after the known implementation check results were presented; acceptance is recorded with those limits.
+- [x] T07 — APP-009 synced to v1.9, IDs/links checked, packet archived, guide/indexes updated and dated summary written on 2026-10-13.
 - [ ] T08 — Complete closeout and open issue-linked PR to develop using the template, Conventional Commit title and Closes #68. PR creation ends contributor work; merge/release remain separate.
