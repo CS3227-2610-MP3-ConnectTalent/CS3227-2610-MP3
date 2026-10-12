@@ -85,3 +85,7 @@ This plan is independent from the coverage/report deliverable in [plan.md](plan.
 - [x] No product-spec sync was expected; the accepted packet was archived after documenting N/A.
 - Approval/date/source: approved in chat by user on 2026-10-11; inline implementation authorized.
 - Changes to this plan: if the user selects repository security-update or ruleset changes, return the affected design/plan for renewed approval.
+
+## Post-submission review amendment — 2026-10-12
+
+GitHub's current Dependabot support matrix lists pnpm through v10, while the repository is pinned to pnpm 12.8.1. The PR review follow-up therefore assigns npm/pnpm dependency updates to Renovate and leaves Dependabot responsible for GitHub Actions. Renovate is configured for weekly runs, grouped minor/patch updates, separate major updates, and a five-PR concurrency cap. The Mend Renovate GitHub App must be installed on this repository for the package updater to run. This adjustment preserves the repo's package-manager pin and was authorized as a correction to the valid PR review finding.

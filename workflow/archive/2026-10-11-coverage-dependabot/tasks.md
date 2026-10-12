@@ -35,3 +35,4 @@
 ## Post-submission (separate decisions)
 
 - [ ] T13 — Record later PR review, merge, first scheduled Dependabot update, deployment, or release only when each event occurs; none is implied by PR creation.
+- [x] T14 — Address the 2026-10-12 PR review: use Renovate for pnpm 12 package updates because Dependabot supports pnpm only through v10; retain Dependabot for GitHub Actions; correct the plan approval checkbox and link the post-submission evidence. The Renovate GitHub App still needs repository installation before package updates run.

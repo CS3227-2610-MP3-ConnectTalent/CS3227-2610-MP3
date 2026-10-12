@@ -28,3 +28,21 @@ The official [`davelosert/vitest-coverage-report-action`](https://github.com/dav
 ## Human decision
 
 The user asked to address the review comment, push the correction, resolve the thread, and asked whether to replace the reporter action. The correction was pushed and the thread resolved. The action was not substituted because its fork-safe workflow has the same default-branch trigger requirement; its documentation and the GitHub `workflow_run` event reference were checked on 2026-10-12.
+
+## Additional PR review round — 2026-10-12
+
+The PR was fetched at head `97cd2f38b93afb49f2e8abc3116e9dba8de3ff13`; three new unresolved inline threads were verified:
+
+- Comment `4244205136` correctly identified that Dependabot's documented pnpm support stops at v10 while the repository uses pnpm 12.8.1. The package-manager pin and its installation guidance remain unchanged. Renovate now owns npm/pnpm package updates, while Dependabot continues to cover GitHub Actions. The Mend Renovate GitHub App must be installed on this repository before weekly package update PRs can run.
+- Comment `4244205142` correctly identified a contradictory unchecked plan-approval box. The proposal now records the user's 2026-10-11 approval of both implementation plans, consistent with the plans and record.
+- Comment `4244205145` correctly identified the missing follow-up link. This post-submission session is now linked from the feature record and archive index; the archive still marks the original record as a pre-PR snapshot.
+
+## Verification for this review round
+
+- `ConvertFrom-Json` and focused assertions passed for the Renovate config: npm manager only, Monday schedule, five concurrent PRs, grouped minor/patch updates.
+- The archive record and archive index both resolve the new follow-up log link.
+- `git diff --check` passed.
+- Application tests were not run because this correction changes only updater configuration and evidence documents. `pnpm format:check` and a YAML parser could not run locally: Node/pnpm are unavailable in this shell, and the Python launcher was denied by the environment. Hosted CI is pending the push.
+- Renovate's hosted configuration run is not available until the Mend GitHub App is installed on the repository.
+
+Commit/push result, hosted CI recheck, and thread-resolution state will be added after those operations complete.

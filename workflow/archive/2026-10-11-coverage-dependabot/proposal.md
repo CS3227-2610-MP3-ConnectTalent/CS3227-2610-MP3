@@ -13,7 +13,7 @@
 
 The current unit-test workflow does not publish an updating PR comment containing both test counts and coverage. The team chose a 90% project-wide target for lines, statements, branches, and functions, with meaningful tests/refactoring to reach it; coverage below target will be reported but will not fail CI or act as a merge gate. Unit-test failures continue to fail CI. Whether a CI result is required for merge depends on repository settings, which this change does not modify. Separately, dependency changes are currently not proposed on a scheduled cadence.
 
-The work will improve meaningful unit coverage toward the four-metric target, report test results and coverage in one maintained PR comment, and configure weekly Dependabot version updates for pnpm dependencies and GitHub Actions. Coverage remains informational in CI.
+The work will improve meaningful unit coverage toward the four-metric target, report test results and coverage in one maintained PR comment, and configure weekly Renovate updates for pnpm/npm dependencies plus Dependabot updates for GitHub Actions. Coverage remains informational in CI.
 
 ## Goals, non-goals, and scope boundaries
 
@@ -23,10 +23,10 @@ The work will improve meaningful unit coverage toward the four-metric target, re
   - Keep JUnit and machine-readable coverage outputs as CI artifacts, including when tests fail, and preserve existing workflow summaries/artifacts.
   - Maintain one PR comment with unit-test counts/status and all four coverage metrics; update it on subsequent runs for the same PR.
   - Safely report fork and same-repository PR runs without checking out or executing PR code in a privileged workflow; unit-test failures continue to fail CI, with merge enforcement left to existing repository settings.
-  - Configure weekly Dependabot version updates for root pnpm dependencies and GitHub Actions; group minor/patch updates and leave major updates separate.
+  - Configure weekly Renovate version updates for root pnpm/npm dependencies and Dependabot version updates for GitHub Actions; group minor/patch updates and leave major updates separate.
 - Non-goals: product behavior or ProductSpec changes; integration/E2E coverage thresholds; changing test-suite ownership or triggers; automatic dependency merging; changing protected-branch settings; claiming security alerts/Dependabot security updates are enabled without checking repository settings.
 - Users/roles: repository contributors and maintainers; no Applicant or HR behavior or data changes.
-- Scope boundaries: Vitest configuration, unit tests and testable source refactoring, the existing unit-test CI workflow, a narrowly scoped reporter workflow/helper, `.github/dependabot.yml`, and only relevant contributor/CI documentation. Do not change unrelated test suites or historical decisions.
+- Scope boundaries: Vitest configuration, unit tests and testable source refactoring, the existing unit-test CI workflow, a narrowly scoped reporter workflow/helper, `.github/dependabot.yml`, `.github/renovate.json`, and only relevant contributor/CI documentation. Do not change unrelated test suites or historical decisions.
 
 ## Alternatives and dependencies
 
@@ -40,7 +40,7 @@ The work will improve meaningful unit coverage toward the four-metric target, re
 | Use a default-branch `workflow_run` reporter that reads artifacts only               | Supports a combined comment and fork PRs; requires careful treatment of artifacts and a narrowly write-capable token                   | Selected; no untrusted PR code is checked out or executed in the privileged workflow.                            |
 | Add Dependabot updates for every ecosystem                                           | Broader update coverage; unrelated ecosystems can create noise and exceed this change's scope                                          | Rejected; configure the actual project ecosystems only: npm (pnpm lockfile) and GitHub Actions.                  |
 
-- Assumptions: current Vitest coverage scope and report outputs are confirmed during implementation; root `pnpm-lock.yaml` is handled by Dependabot's npm ecosystem; the repository can run the approved reporter workflow on its default branch.
+- Assumptions: current Vitest coverage scope and report outputs are confirmed during implementation; root `pnpm-lock.yaml` is handled by Renovate's npm manager; the repository can run the approved reporter workflow on its default branch and the Mend Renovate App is installed for the repository.
 - Dependencies: issues #58 and #59; current `develop` baseline; GitHub Actions artifacts and comments; Vitest coverage output.
 - Risks: the four-metric 90% objective may expose substantial untested branching; tests can become brittle if written against internals; untrusted PR artifacts can target privileged reporting code; dependency PR volume can distract maintainers. Mitigate with behavior-focused tests, strict source-scope preservation, artifact/schema validation and PR/SHA correlation, and grouped minor/patch updates with a bounded open-PR count.
 - Open decisions: issue owner/triage remains pending; repository-level Dependabot security-update settings require separate verification by an authorized maintainer.
@@ -54,8 +54,8 @@ The work will improve meaningful unit coverage toward the four-metric target, re
 | QG-AC-03      | Issue #58; process-only                       | Given unit tests pass or fail, when CI completes, then JUnit and machine-readable coverage artifacts remain available and existing summaries are preserved.                                                                                      | Workflow artifact configuration and successful/failing-run evidence; implementer.                                   |
 | QG-AC-04      | Issue #58; process-only                       | Given a PR unit-test run completes, when its result and coverage artifacts are valid and associated with the current PR head, then one marked PR comment reports status/counts and all four coverage metrics and later runs update that comment. | Reporter behavior, permissions review, and PR run evidence for update and failure paths; implementer/reviewer.      |
 | QG-AC-05      | Issue #58; process-only                       | Given a fork PR, stale run, malformed/missing artifact, or ambiguous PR association, when the reporter runs, then it never executes PR code, never reports a false pass, and skips or reports unavailable using the documented safe behavior.    | Workflow security review and negative-path tests/rehearsal; reviewer.                                               |
-| DEP-AC-01     | Issue #59; process-only                       | Given the root pnpm project and GitHub Actions workflows, when weekly Dependabot version updates run, then minor/patch updates are grouped per ecosystem and major updates remain individually reviewable.                                       | Parsed configuration and GitHub config validation; implementer.                                                     |
-| DEP-AC-02     | Issue #59; process-only                       | Given Dependabot proposes updates, then the configuration bounds open update PR volume and does not auto-merge, ignore packages, or alter repository security settings.                                                                          | Configuration review and repository-settings evidence or explicit pending status; implementer/reviewer.             |
+| DEP-AC-01 | Issue #59; process-only | Given the root pnpm project and GitHub Actions workflows, when weekly Renovate/Dependabot version updates run, then minor/patch updates are grouped and major updates remain individually reviewable. | Validated Renovate/Dependabot configuration; hosted npm updates require Mend App installation.          |
+| DEP-AC-02 | Issue #59; process-only | Given Renovate or Dependabot proposes updates, then the configuration bounds open update PR volume and does not auto-merge, ignore packages, or alter repository security settings.                   | Configuration review and repository-settings evidence or explicit pending status; implementer/reviewer. |
 
 - Spec deltas: N/A; this is repository tooling and contributor-process work, with no product behavior changes.
 - Design: `design.md`; CI artifact trust and permission boundaries warrant a design.
@@ -65,8 +65,12 @@ The work will improve meaningful unit coverage toward the four-metric target, re
 ## Approval record
 
 - [x] User approved the initial proposal/design and revised the coverage policy in chat on 2026-10-11; approver identity/role is not independently recorded.
-- [ ] Implementation plan reviewed and approved before implementation.
+- [x] Implementation plan reviewed and approved before implementation; the user approved both `plan.md` and `dependabot-plan.md` for inline implementation in chat on 2026-10-11.
 - Decision/date/source: initial 90% four-metric objective and revised report-only coverage policy approved in this conversation on 2026-10-11; both implementation plans were then approved for inline execution on 2026-10-11.
 - Implementation acceptance/date/source: the user accepted the completed implementation in chat on 2026-10-11 with “I accept the completed implementation, please proceed”; no conditions were stated. This is separate from proposal and plan approval.
 - Approver identity/role: not independently recorded in this packet; issue owner/triage is pending.
-- Conditions: preserve all four 90% coverage objectives as report-only; continue adding meaningful tests toward the target; report only from validated artifacts; never execute PR code in the privileged reporter; keep Dependabot limited to pnpm/npm and GitHub Actions with weekly grouped minor/patch updates.
+- Conditions: preserve all four 90% coverage objectives as report-only; continue adding meaningful tests toward the target; report only from validated artifacts; never execute PR code in the privileged reporter; keep package updates within pnpm/npm and GitHub Actions, using Renovate for pnpm/npm and Dependabot for Actions with weekly grouped minor/patch updates.
+
+## Post-submission review amendment — 2026-10-12
+
+GitHub's current Dependabot support matrix does not include pnpm 12. The user authorized correcting the updater configuration during PR review: Renovate's npm manager handles pnpm 12 package files, and Dependabot continues to update GitHub Actions. Scheduled package updates depend on installing the Mend Renovate GitHub App on this repository. The package-manager pin remains pnpm 12.8.1.
