@@ -1,8 +1,10 @@
 # Active change packets
 
-No packets are currently pending implementation.
+No active change packets are pending at this time.
 
 ## Accepted and archived work
+
+Issues [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58) and [#59](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/59) were accepted by the user on 2026-10-11 and archived after closeout on 2026-10-12. The accepted work adds report-only 90% coverage reporting and weekly dependency updates: Renovate handles pnpm/npm after the Mend Renovate GitHub App is installed for this repository, while Dependabot handles GitHub Actions. The full Prettier gate passes after formatting the 187 previously unformatted files; hosted CI and the first hosted reporter run remain pending. See the [complete archived packet](../archive/2026-10-11-coverage-dependabot/record.md), [implementation summary](../../logs/2026-10-11-coverage-dependabot-implementation.md), [format closeout summary](../../logs/2026-10-12-coverage-format-closeout.md), and [PR preparation summary](../../logs/2026-10-12-coverage-dependabot-pr.md).
 
 Issue [#60 guides and reflection alignment](../archive/2026-10-12-guides-reflection-alignment/record.md) was separately accepted by Paul on 12 October 2026 with recorded limits after independent review. The complete documentation-only packet is archived with no canonical delta. Authenticated hosted checks and Paul's personal reflection verification remain open; no publication authorized.
 

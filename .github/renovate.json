@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "ignorePresets": ["group:monorepos", "group:recommended"],
+  "enabledManagers": ["npm"],
+  "schedule": ["before 6am on Monday"],
+  "timezone": "Asia/Singapore",
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "description": "Group npm minor and patch updates; leave majors individually reviewable.",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "npm minor and patch updates"
+    }
+  ]
+}

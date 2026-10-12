@@ -28,18 +28,24 @@ jobs:
         run: pnpm typecheck
       - name: Unit tests
         run: pnpm test:unit:coverage
-      - name: Add Vitest summary
+      - name: CI report helper tests
         if: always()
-        run: python scripts/ci/write-vitest-summary.py
+        run: python -m unittest discover -s tests/ci -p "test_*.py" -v
+      - name: Build
+        run: pnpm build
       - name: Upload Vitest reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: vitest-reports
+          name: vitest-reports-${{ github.run_attempt }}
           path: |
             test-results/vitest-junit.xml
-            coverage/
+            coverage/coverage-summary.json
           if-no-files-found: ignore
           retention-days: 14
-      - name: Build
-        run: pnpm build
+      # Capture job status only after the build and artifact upload have run.
+      - name: Add Vitest summary
+        if: always()
+        run: python scripts/ci/write-vitest-summary.py
+        env:
+          WORKFLOW_STATUS: ${{ job.status }}
