@@ -1,6 +1,6 @@
 # Feature record: coverage reporting and Dependabot
 
-Status: implementation independently reviewed and accepted by the user on 2026-10-11; packet archived on 2026-10-12 as pre-PR evidence; repository formatting and final local checks pass; hosted PR checks remain pending
+Status: original implementation independently reviewed and accepted by the user on 2026-10-11, before post-submission review corrections; round-three fixes are committed and pushed, with separate student verification pending; packet archived on 2026-10-12 as pre-PR evidence
 
 Owner: pending issue triage
 
@@ -25,7 +25,7 @@ Date: 2026-10-11
 - [x] User approved the written proposal/design, revised report-only coverage policy, and both implementation plans in chat on 2026-10-11; inline implementation is authorized.
 - [x] Implementation changes and scoped verification complete; the full-repository formatting gate passes, while hosted workflow checks remain pending as recorded below.
 - [x] Independent security and test reviews complete; findings and rechecks are recorded in the linked handoffs.
-- [x] Human acceptance recorded separately on 2026-10-11.
+- [x] Human acceptance recorded separately on 2026-10-11 for the original implementation before post-submission review corrections; round-three fixes have not received separate student acceptance.
 - [x] Relevant guide updates and both dated session logs complete.
 - [x] Pre-PR closeout complete: no product sync required; packet archived with links repaired.
 - [ ] Issue-linked PR submitted at archive time; this archived record is the pre-PR snapshot.
@@ -68,7 +68,7 @@ Known limitations: a separate reviewer CI-mode run timed out once in the existin
 
 Reviewer findings and fixes: separate security and test reviewers found risks in workflow identity, artifact byte bounds, stale cross-SHA report ordering, and workflow concurrency. Focused fixes and regressions were reviewed; see [security review](handoffs/security-review.md) and [test review](handoffs/test-review.md). The inherited repository-wide format failure was fixed during closeout and the full formatter gate now passes. No live comment, fork workflow, hosted Dependabot validation, or complete hosted CI run was observed.
 
-Human decision and date: written proposal/design and both implementation plans approved on 2026-10-11; the user separately accepted the completed implementation with “I accept the completed implementation, please proceed” on 2026-10-11. No conditions were stated.
+Human decision and date: written proposal/design and both implementation plans approved on 2026-10-11; the user separately accepted the implementation completed at that time with “I accept the completed implementation, please proceed” on 2026-10-11. This acceptance predates post-submission review corrections and does not record acceptance of those later fixes. No conditions were stated for the original implementation.
 
 Guide/reflection/log updates: README, CONTRIBUTING, Developer Guide, and dated session summaries updated. Personal reflection documents remain outside scope and are excluded from Prettier.
 
@@ -92,6 +92,8 @@ A separate security recheck also identified that test and coverage artifacts are
 ## PR review round three — 2026-10-12
 
 Fresh review of PR #61 found five unresolved comments ([4244946924](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/61#discussion_r4244946924), [4244946930](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/61#discussion_r4244946930), [4244946936](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/61#discussion_r4244946936), [4244946941](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/61#discussion_r4244946941), [4244946943](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/61#discussion_r4244946943)). Fixes cover attempt-scoped artifact selection, nonempty allowlisted partial artifacts, JSON decoder `ValueError`, Renovate preset grouping, and a nested-JUnit false-green regression found by the separate test reviewer. Code corrections are in `f5dbc2e`; evidence is in `f157c37`. Each of the five threads was replied to and re-queried as resolved. For `f157c37`, CI run 38212731072 and Supabase CI run 38212731085 passed; Vercel passed and PR #61 was mergeable. The CI job included format, lint, type generation, typecheck, unit tests, report-helper tests, and build. Supabase CI included database checks, integration race suites, and critical Chromium PR journeys; the scheduled/manual full browser suite was skipped. Details and remaining limits are in the [round 3 follow-up summary](../../../logs/2026-10-12-coverage-pr-review-followup-3.md) and [test-review handoff](handoffs/test-review.md). The QG-AC-05 provenance decision remains with the user.
+
+The 2026-10-11 student acceptance applies to the original implementation only; it predates the round-three post-submission fixes. The user authorized making and pushing the corrections, but has not separately accepted them. This distinction remains in the round-three summary and is not inferred from passing CI.
 
 ## Canonical sync and archive
 

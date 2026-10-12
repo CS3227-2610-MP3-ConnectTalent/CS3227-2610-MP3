@@ -50,6 +50,8 @@ PR-supplied test and coverage artifacts are not independently attested; the repo
 
 Code/config/tests were committed in [`f5dbc2e`](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/f5dbc2e406bf2e73bb98d3f15da8a56fcc5dfe56); the dated summaries, archived plan/record, test-review handoff, and archive index were committed and pushed in [`f157c37`](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/f157c372da5189ff5f10b5f60348f4f25aa78b30). All five comment threads were replied to and re-queried as resolved. CI, Supabase CI, and Vercel passed for `f157c37`; the current PR head was mergeable. The PR description now links this round-three summary, records the hosted checks, and replaces its inaccurate claim that the uploaded artifacts come from a trusted run with the actual PR-supplied/not-independently-attested boundary.
 
+A later inline review comment ([4245261512](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/61#discussion_r4245261512)) identified that the feature record's acceptance status could imply that 2026-10-11 acceptance covered post-submission corrections. The record now states that the original implementation was accepted before these corrections and that round-three student verification/acceptance remains pending. The user authorized the corrections and push; this is not recorded as a new acceptance decision.
+
 ## Student verification
 
 - Status: pending for the round-three corrections and unresolved QG-AC-05 disposition.
