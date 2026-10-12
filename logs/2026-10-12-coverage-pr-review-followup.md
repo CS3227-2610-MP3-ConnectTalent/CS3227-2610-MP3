@@ -45,4 +45,8 @@ The PR was fetched at head `97cd2f38b93afb49f2e8abc3116e9dba8de3ff13`; three new
 - Application tests were not run because this correction changes only updater configuration and evidence documents. `pnpm format:check` and a YAML parser could not run locally: Node/pnpm are unavailable in this shell, and the Python launcher was denied by the environment. Hosted CI is pending the push.
 - Renovate's hosted configuration run is not available until the Mend GitHub App is installed on the repository.
 
-Commit/push result, hosted CI recheck, and thread-resolution state will be added after those operations complete.
+- Commit `4f2e9e9edd46335ad7458e998e4d4ce005c1fff0` (`fix(deps): use Renovate for pnpm 12 updates`) was pushed to `chore/58-coverage-and-dependabot` and updated PR #61.
+- GitHub's Dependabot config validation passed with “All changes look good”; Vercel passed; Supabase Preview was skipped because this branch has no associated Supabase branch. The Actions API reported zero workflow runs for this SHA, so no new CI or Supabase CI result is claimed for this revision.
+- Review threads `PRRT_kwDOU4zYRs6rT4Do`, `PRRT_kwDOU4zYRs6rT4Dt`, and `PRRT_kwDOU4zYRs6rT4Dw` were each re-queried after resolution; all three returned `is_resolved: true`.
+- PR metadata reported `mergeable_state: dirty` at the time of review. No base sync or conflict resolution was performed in this review round.
+- Renovate's GitHub App installation remains required before weekly npm/pnpm package updates run.

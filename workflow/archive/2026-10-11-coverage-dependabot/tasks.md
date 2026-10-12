@@ -22,7 +22,8 @@
 - [x] T58-07b — Resolved the full `pnpm format:check` failure by formatting the 187 listed repository files; the follow-up repository-wide check passes.
 - [ ] T58-07c — Obtain PR CI results for the existing Supabase database, integration, and critical-browser jobs, and rehearse the PR comment workflow once available on the default branch. No hosted results are claimed.
 - [x] T59-03a — Dependabot config passes changed-file Prettier and static semantic review for the npm and GitHub Actions ecosystems, weekly schedules, grouped minor/patch updates, and five-PR caps.
-- [ ] T59-03b — Record GitHub's hosted Dependabot config check and repository security-update settings when accessible; observe the first scheduled update after merge. These are not available on this implementation branch.
+- [x] T59-03b — GitHub Dependabot config validation passed on commit `4f2e9e9`; repository security-update settings remain unverified and unchanged.
+- [ ] T59-03c — Observe the first Renovate pnpm/npm update after the Mend App is installed and PR #61 is merged.
 
 ## Review and closeout
 
@@ -34,5 +35,5 @@
 
 ## Post-submission (separate decisions)
 
-- [ ] T13 — Record later PR review, merge, first scheduled Dependabot update, deployment, or release only when each event occurs; none is implied by PR creation.
+- [ ] T13 — Record later PR review, merge, first scheduled Renovate/Dependabot update, deployment, or release only when each event occurs; none is implied by PR creation.
 - [x] T14 — Address the 2026-10-12 PR review: use Renovate for pnpm 12 package updates because Dependabot supports pnpm only through v10; retain Dependabot for GitHub Actions; correct the plan approval checkbox and link the post-submission evidence. The Renovate GitHub App still needs repository installation before package updates run.

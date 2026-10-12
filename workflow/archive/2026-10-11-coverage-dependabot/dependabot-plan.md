@@ -70,8 +70,8 @@ Expected: the file parses and matches repository formatting. Review the entries 
 
 - [x] Run Prettier on `.github/dependabot.yml` and the full `pnpm format:check`; the initial repository-wide check found 187 unformatted files, which were formatted, and the follow-up check passes.
 - [x] Verify the root pnpm lockfile is covered by the npm ecosystem and the workflow action references are covered by the GitHub Actions ecosystem.
-- [ ] Record whether GitHub's PR config check accepted the file. Separately record security-alert/security-update settings as verified or pending; do not change those settings here.
-- [ ] After merge, leave observation of the first scheduled update to a post-merge owner; this contributor plan ends at PR submission.
+- [x] GitHub's Dependabot config validation passed on commit `4f2e9e9`; repository security-alert/security-update settings remain unverified and unchanged.
+- [ ] After the Mend Renovate App is installed and the PR is merged, leave observation of the first scheduled package update to a post-merge owner; this contributor plan ends at PR submission.
 
 ## Integration and handoffs
 
