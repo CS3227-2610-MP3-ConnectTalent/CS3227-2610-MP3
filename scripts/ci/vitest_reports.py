@@ -46,7 +46,10 @@ def _suite_count(suite, name, derived):
     raw_value = suite.attrib[name]
     if not re.fullmatch(r"[0-9]{1,8}", raw_value):
         raise ReportError(f"JUnit {name} count must be a non-negative integer")
-    return _count(int(raw_value), name)
+    count = _count(int(raw_value), name)
+    if count != derived:
+        raise ReportError(f"JUnit {name} count does not match its test cases")
+    return count
 
 
 def _suite_counts(suite):
@@ -107,6 +110,9 @@ def read_test_counts(report_path):
             totals[name] += count
             if totals[name] > MAX_TEST_COUNT:
                 raise ReportError("aggregate JUnit counts exceed the accepted range")
+    if root.tag == "testsuites":
+        for name, count in totals.items():
+            _suite_count(root, name, count)
     return totals
 
 
@@ -134,12 +140,23 @@ def read_coverage_metrics(summary_path):
         item = summary["total"].get(name)
         if not isinstance(item, dict):
             raise ReportError(f"coverage JSON is missing {name}")
+        total = item.get("total")
+        covered = item.get("covered")
+        for field, value in (("total", total), ("covered", covered)):
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ReportError(f"coverage {name} {field} count must be a non-negative integer")
+        if covered > total:
+            raise ReportError(f"coverage {name} covered count exceeds its total")
         percentage = item.get("pct")
         if isinstance(percentage, bool) or not isinstance(percentage, (int, float)):
             raise ReportError(f"coverage {name} percentage must be numeric")
         percentage = float(percentage)
         if not math.isfinite(percentage) or not 0 <= percentage <= 100:
             raise ReportError(f"coverage {name} percentage is outside 0–100")
+        # Istanbul's summary reporter truncates percentages to two decimals.
+        expected = 100.0 if total == 0 else (covered * 10_000 // total) / 100
+        if percentage != expected:
+            raise ReportError(f"coverage {name} percentage does not match its counts")
         metrics[name] = percentage
     return metrics
 
@@ -169,6 +186,10 @@ def render_markdown(
         else "unknown"
     )
     lines = ["## Unit test and coverage report", f"**Workflow result:** `{status}`"]
+    lines.append(
+        "Report source: test counts and coverage are from artifacts supplied by this "
+        "PR's CI run; they are not independently attested."
+    )
     link = _safe_run_link(run_url)
     if link:
         lines.append(link)

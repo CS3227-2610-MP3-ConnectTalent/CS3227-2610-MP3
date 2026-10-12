@@ -65,17 +65,17 @@ Sign in as **local-hr@example.test** using your chosen password. [seed-local-hr.
 
 ### 2.4 Quality and build commands
 
-| Command                                        | What it checks / prerequisite                                                                               |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `pnpm format:check`                            | Prettier formatting. Use scoped `pnpm exec prettier --write <files>` for your owned edits.                  |
-| `pnpm lint`                                    | ESLint, Next rules and configured complexity/size limits.                                                   |
-| `pnpm exec next typegen` then `pnpm typecheck` | Generated route types and TypeScript; no database/browser proof.                                            |
-| `pnpm test:unit`                               | Vitest units.                                                                                               |
+| Command                                        | What it checks / prerequisite                                                                                   |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `pnpm format:check`                            | Prettier formatting. Use scoped `pnpm exec prettier --write <files>` for your owned edits.                      |
+| `pnpm lint`                                    | ESLint, Next rules and configured complexity/size limits.                                                       |
+| `pnpm exec next typegen` then `pnpm typecheck` | Generated route types and TypeScript; no database/browser proof.                                                |
+| `pnpm test:unit`                               | Vitest units.                                                                                                   |
 | `pnpm test:unit:coverage`                      | V8 text/HTML/LCOV/JSON coverage under `coverage/`; CI reports four metrics against an informational 90% target. |
-| `pnpm test:db`                                 | Local pgTAP database permissions/lifecycle tests; Supabase running with migrations.                         |
-| `pnpm test:integration`                        | Five local race suites for application, AI quota, withdrawal, profile résumé and first-upload coordination. |
-| `pnpm test:e2e:critical` / `pnpm test:e2e`     | Critical/all Chromium browser journeys; local services and fixtures required.                               |
-| `pnpm build` then `pnpm start`                 | Local production build/server, not deployment.                                                              |
+| `pnpm test:db`                                 | Local pgTAP database permissions/lifecycle tests; Supabase running with migrations.                             |
+| `pnpm test:integration`                        | Five local race suites for application, AI quota, withdrawal, profile résumé and first-upload coordination.     |
+| `pnpm test:e2e:critical` / `pnpm test:e2e`     | Critical/all Chromium browser journeys; local services and fixtures required.                                   |
+| `pnpm build` then `pnpm start`                 | Local production build/server, not deployment.                                                                  |
 
 Install the browser with `pnpm exec playwright install chromium`. Local browser suites use privileged synthetic fixtures; without `TEST_SUPABASE_SERVICE_ROLE_KEY`, relevant tests skip. A skipped test is not a pass. Unlike the HR seed command, plain Playwright does not load that key from `.env.local` automatically. In PowerShell, export only the needed local test value before running:
 
@@ -231,7 +231,7 @@ Useful evidence: [HR review](../workflow/archive/2026-10-08-hr-application-revie
 
 [ci.yml](../.github/workflows/ci.yml) runs format, lint, Next type generation, typecheck, Vitest coverage/JUnit summary/artifacts and build on PRs/pushes to develop/master. [supabase-checks.yml](../.github/workflows/supabase-checks.yml) uses disposable local Supabase for migration replay, database lint/tests and race suites; critical browser journeys run for PRs/pushes, with full browser runs nightly/manually. Generated local fixture credentials are masked; hosted production credentials are not used for these tests.
 
-[test-report.yml](../.github/workflows/test-report.yml) updates one PR comment with unit-test counts and line, statement, branch, and function coverage from the exact CI run. The 90% target is informational; coverage does not fail CI. Its default-branch reporter checks artifact size before download and validates the ZIP contains only the two bounded machine-readable reports before extracting them; it never checks out or executes PR code. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub App is installed for this repository. Dependabot handles weekly GitHub Actions updates. Minor/patch updates are grouped, major updates remain separate, and every update needs review; auto-merge is not configured.
+[test-report.yml](../.github/workflows/test-report.yml) updates one PR comment with unit-test counts and line, statement, branch, and function coverage from the exact CI run. The 90% target is informational; coverage does not fail CI. Test counts and coverage come from artifacts supplied by the PR's CI run, so the report is not an independent attestation of test execution or coverage. Its default-branch reporter checks artifact size before download and validates the ZIP contains only the two bounded machine-readable reports before extracting them; it never checks out or executes PR code. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub App is installed for this repository. Dependabot handles weekly GitHub Actions updates. Minor/patch updates are grouped, major updates remain separate, and every update needs review; auto-merge is not configured.
 
 [pages.yml](../.github/workflows/pages.yml) uploads `docs/` to GitHub Pages on master docs changes or manual dispatch. The site is static [index.html](index.html), not Docusaurus or the Next.js app. Preview it with `python -m http.server 8080 --directory docs` if Python is available; this is only the documentation site. GitHub Code review settings can add Codex review, but actual runs/findings and student verification must be recorded; AI review replaces neither CI nor human approval.
 

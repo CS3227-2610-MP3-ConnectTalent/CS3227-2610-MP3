@@ -222,6 +222,19 @@ def upsert_report_comment(api, issue_number, markdown, metadata):
         existing = _comment_metadata(comment.get("body"))
         if existing and not report_is_newer(metadata, existing):
             return False
+    current_pull_request = api.get_pull_request(issue_number)
+    current_head = (
+        current_pull_request.get("head")
+        if isinstance(current_pull_request, dict)
+        else None
+    )
+    if (
+        not isinstance(current_head, dict)
+        or current_pull_request.get("state") != "open"
+        or current_head.get("sha") != metadata["head_sha"]
+    ):
+        return False
+    if own_comments:
         api.update_issue_comment(comment["id"], body)
         return True
     api.create_issue_comment(issue_number, body)

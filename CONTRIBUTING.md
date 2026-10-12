@@ -201,9 +201,11 @@ informational and does not fail CI. After the trusted report workflow is present
 the default branch, it reads the exact CI run's JUnit and coverage artifacts and
 updates one PR comment with the workflow result, test counts, and four percentages.
 It does not check out or execute PR code; missing or invalid reports are marked
-unavailable. Dependabot proposes weekly root pnpm/npm and GitHub Actions version
-updates, grouping minor/patch updates and leaving major updates separate. Reviewers
-must approve dependency changes; auto-merge is not configured. Repository
+unavailable. Test counts and coverage come from artifacts supplied by the PR's CI
+run and are not an independent attestation. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub
+App is installed for this repository; Dependabot proposes weekly GitHub Actions
+updates. Minor/patch updates are grouped, major updates remain separate, and
+reviewers must approve changes; auto-merge is not configured. Repository
 administrators still need to require the desired status checks in GitHub branch
 protection settings.
 

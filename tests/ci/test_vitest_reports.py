@@ -29,8 +29,11 @@ class VitestReportsTests(unittest.TestCase):
         path = self.write(
             "junit.xml",
             '<testsuites tests="4" failures="1" errors="1" skipped="1">'
-            '<testsuite tests="2" failures="1" errors="0" skipped="0" />'
-            '<testsuite tests="2" failures="0" errors="1" skipped="1" />'
+            '<testsuite tests="2" failures="1" errors="0" skipped="0">'
+            '<testcase><failure /></testcase><testcase /></testsuite>'
+            '<testsuite tests="2" failures="0" errors="1" skipped="1">'
+            '<testcase><error /></testcase><testcase><skipped /></testcase>'
+            "</testsuite>"
             "</testsuites>",
         )
 
@@ -42,7 +45,10 @@ class VitestReportsTests(unittest.TestCase):
     def test_reads_suite_counts_from_testsuite_root(self):
         path = self.write(
             "junit.xml",
-            '<testsuite tests="4" failures="1" errors="0" skipped="2" />',
+            '<testsuite tests="4" failures="1" errors="0" skipped="2">'
+            '<testcase><failure /></testcase><testcase><skipped /></testcase>'
+            '<testcase><skipped /></testcase><testcase />'
+            "</testsuite>",
         )
 
         self.assertEqual(
@@ -108,20 +114,43 @@ class VitestReportsTests(unittest.TestCase):
                 with self.assertRaises(ReportError):
                     read_test_counts(path)
 
+    def test_rejects_declared_junit_counts_that_contradict_test_cases(self):
+        path = self.write(
+            "junit.xml",
+            '<testsuite tests="1" failures="0">'
+            "<testcase><failure /></testcase>"
+            "</testsuite>",
+        )
+
+        with self.assertRaises(ReportError):
+            read_test_counts(path)
+
+    def test_rejects_testsuites_aggregate_counts_that_contradict_child_suites(self):
+        path = self.write(
+            "junit.xml",
+            '<testsuites tests="1" failures="0">'
+            '<testsuite tests="1" failures="1">'
+            "<testcase><failure /></testcase>"
+            "</testsuite></testsuites>",
+        )
+
+        with self.assertRaises(ReportError):
+            read_test_counts(path)
+
     def test_reads_all_four_finite_coverage_metrics(self):
         summary = {
             "total": {
-                "lines": {"pct": 90.0},
-                "statements": {"pct": 91},
-                "branches": {"pct": 89.99},
-                "functions": {"pct": 100},
+                "lines": {"total": 1618, "covered": 1534, "pct": 94.8},
+                "statements": {"total": 1784, "covered": 1675, "pct": 93.89},
+                "branches": {"total": 1367, "covered": 1231, "pct": 90.05},
+                "functions": {"total": 485, "covered": 459, "pct": 94.63},
             }
         }
         path = self.write("coverage-summary.json", json.dumps(summary))
 
         self.assertEqual(
             read_coverage_metrics(path),
-            {"lines": 90.0, "statements": 91.0, "branches": 89.99, "functions": 100.0},
+            {"lines": 94.8, "statements": 93.89, "branches": 90.05, "functions": 94.63},
         )
 
     def test_missing_coverage_is_unavailable(self):
@@ -140,10 +169,32 @@ class VitestReportsTests(unittest.TestCase):
                 value = json.dumps(percentage) if isinstance(percentage, str) else percentage
                 summary = {
                     "total": {
-                        metric: {"pct": 90} for metric in ("lines", "statements", "branches", "functions")
+                        metric: {"total": 10, "covered": 9, "pct": 90}
+                        for metric in ("lines", "statements", "branches", "functions")
                     }
                 }
                 summary["total"]["branches"]["pct"] = value
+                path = self.write("coverage.json", json.dumps(summary))
+                with self.assertRaises(ReportError):
+                    read_coverage_metrics(path)
+
+    def test_rejects_coverage_metrics_with_invalid_counts_or_mismatched_percentages(self):
+        invalid_metrics = (
+            {"total": 100, "covered": 0, "pct": 100},
+            {"total": 10, "covered": 11, "pct": 100},
+            {"total": -1, "covered": 0, "pct": 0},
+            {"total": 10, "covered": True, "pct": 100},
+            {"total": 3, "covered": 1, "pct": 50},
+        )
+        for invalid_metric in invalid_metrics:
+            with self.subTest(metric=invalid_metric):
+                summary = {
+                    "total": {
+                        metric: {"total": 10, "covered": 9, "pct": 90}
+                        for metric in ("lines", "statements", "branches", "functions")
+                    }
+                }
+                summary["total"]["lines"] = invalid_metric
                 path = self.write("coverage.json", json.dumps(summary))
                 with self.assertRaises(ReportError):
                     read_coverage_metrics(path)
@@ -160,6 +211,8 @@ class VitestReportsTests(unittest.TestCase):
         self.assertIn("Lines | 90.00% | Meets target", markdown)
         self.assertIn("Statements | 89.99% | Below target", markdown)
         self.assertIn("report only", markdown.lower())
+        self.assertIn("artifacts supplied by this PR's CI run", markdown)
+        self.assertIn("not independently attested", markdown)
         self.assertIn("90%", markdown)
         self.assertIn("failure", markdown.lower())
 

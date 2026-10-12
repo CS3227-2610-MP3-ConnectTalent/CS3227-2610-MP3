@@ -72,12 +72,14 @@ class FakeApi:
         self.created = []
         self.updated = []
         self.lookup = None
+        self.pull_request_reads = 0
 
     def list_pull_requests_for_head(self, head_repository, head_branch):
         self.lookup = (head_repository, head_branch)
         return self.pull_requests
 
     def get_pull_request(self, number):
+        self.pull_request_reads += 1
         return next(
             (candidate for candidate in self.pull_requests if candidate.get("number") == number),
             {},
@@ -195,7 +197,7 @@ class ReportVitestPullRequestTests(unittest.TestCase):
                 json.dumps(
                     {
                         "total": {
-                            metric: {"pct": 90}
+                            metric: {"total": 10, "covered": 9, "pct": 90}
                             for metric in ("lines", "statements", "branches", "functions")
                         }
                     }
@@ -293,6 +295,19 @@ class ReportVitestPullRequestTests(unittest.TestCase):
         self.assertFalse(updated)
         self.assertEqual(api.updated, [])
         self.assertEqual(len(api.comments), 1)
+
+    def test_does_not_write_when_the_pr_head_changes_before_comment_update(self):
+        changed_head = pull_request(
+            head={"ref": "feature-branch", "sha": "b" * 40, "repo": {"full_name": REPOSITORY}}
+        )
+        api = FakeApi(pull_requests=[changed_head])
+
+        written = upsert_report_comment(api, 58, "stale report", run_metadata())
+
+        self.assertFalse(written)
+        self.assertEqual(api.pull_request_reads, 1)
+        self.assertEqual(api.created, [])
+        self.assertEqual(api.updated, [])
 
     def test_ignores_same_marker_written_by_another_user(self):
         api = FakeApi([{"id": 90, "body": make_comment_body("user", run_metadata()), "user": {"login": "contributor"}}])
