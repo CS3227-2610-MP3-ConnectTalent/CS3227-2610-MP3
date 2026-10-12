@@ -51,7 +51,7 @@ For recovery, choose **Forgot password?**, enter email, open the recovery messag
 | Guest                | Sign in and Create account; public browsing.                                  |
 | Incomplete Applicant | My profile and Sign out; onboarding restrictions apply.                       |
 | Complete Applicant   | My profile, My applications and Sign out; Careers and applications available. |
-| HR                   | Application review, Manage jobs and Sign out.                                 |
+| HR                   | Dashboard, Application review, Manage jobs and Sign out.                      |
 
 Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards include category text as well as color. Layouts adapt to narrow screens. Access is enforced on the server too; opening a direct URL does not grant another role's permissions.
 
@@ -107,6 +107,10 @@ Withdrawal is permanent, works after closure and does not erase data/files. You 
 ### 4.1 HR access
 
 There is no public HR signup or role switch. An administrator assigns HR to a verified dedicated account without Applicant applications. Ask the team for authorized evaluator access; this guide publishes no shared password. Developers can use the [local-only HR seed](DeveloperGuide.md#23-local-hr-account).
+
+### 4.2 HR dashboard
+
+Open **Dashboard** to see job totals by Draft, Published and Closed, submitted applications by review status, and a separate Withdrawn total. The per-job table includes jobs with no applications and closed jobs; choose a job title to open its details. Use **Manage jobs** or **Application review** to continue into the existing HR workflows. The dashboard is read-only and does not show applicant names, contact details, application text, HR notes or résumé information.
 
 ### 4.2 Manage jobs
 

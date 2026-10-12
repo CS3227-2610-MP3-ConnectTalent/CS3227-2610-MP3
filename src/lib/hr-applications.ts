@@ -8,6 +8,7 @@ const listItemSchema = z.object({
   withdrawn_by: z.uuid().nullable(),
   id: z.uuid(),
   applicant_id: z.uuid(),
+  job_id: z.uuid(),
   job_title: z.string(),
   submitted_at: z.string(),
   review_status: hrReviewStatusSchema,
@@ -49,7 +50,7 @@ export async function listSubmittedApplications() {
   const { data, error } = await client
     .from("applications")
     .select(
-      "withdrawn_at,withdrawn_by,id,applicant_id,job_title,submitted_at,review_status",
+      "withdrawn_at,withdrawn_by,id,applicant_id,job_id,job_title,submitted_at,review_status",
     )
     .eq("submission_state", "submitted")
     .order("submitted_at", { ascending: false });

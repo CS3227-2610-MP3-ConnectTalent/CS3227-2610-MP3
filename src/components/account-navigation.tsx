@@ -94,6 +94,9 @@ function ApplicantLinks({ incomplete }: { incomplete: boolean }) {
 function HRLinks() {
   return (
     <>
+      <Link href="/hr" className="underline">
+        Dashboard
+      </Link>
       <Link href="/hr/applications" className="underline">
         Application review
       </Link>

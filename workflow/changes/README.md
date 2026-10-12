@@ -1,6 +1,6 @@
 # Active change packets
 
-No active change packets are pending at this time.
+Issue [#68 HR recruitment dashboard](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68) is triaged to John Wong and awaiting packet approval: [proposal, delta, design, plan, and record](2026-10-12-hr-dashboard/record.md). Product implementation has not started.
 
 ## Accepted and archived work
 
