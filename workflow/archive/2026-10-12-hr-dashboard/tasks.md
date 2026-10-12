@@ -2,7 +2,7 @@
 
 - Issue: [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68)
 - Plan/record: plan.md; record.md
-- Status/owner: accepted with recorded evidence limits; closeout complete; push/PR pending; John Wong
+- Status/owner: accepted with recorded evidence limits; closeout complete; branch pushed; PR pending; John Wong
 
 ## Before implementation
 

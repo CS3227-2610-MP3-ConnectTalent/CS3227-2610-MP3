@@ -8,7 +8,7 @@
 - Evidence available and missing coverage: visible conversation, local worktree, issue #68 metadata/comments, implementation record and command results in the packet. No independent reviewer identity, run, scope or findings were supplied. No clean-baseline comparison exists for the three E2E failures.
 - GitHub issue: [#68 HR recruitment dashboard](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68).
 - Change packet and feature record: [archived packet](../workflow/archive/2026-10-12-hr-dashboard/record.md).
-- Branch and commits: `feat/68-hr-dashboard`, based on `84761e1`; implementation `a238c41`, handoff `8f6e2af`; sync/archive closeout commits are in branch history.
+- Branch and commits: `feat/68-hr-dashboard`, based on `84761e1`; implementation `a238c41`, handoff `8f6e2af`, sync/archive commit `9a70e93` pushed to origin on 2026-10-13.
 - PR: pending at summary preparation; user authorized opening to `develop` after push.
 - Related session summaries: implementation and review-handoff evidence is in the archived feature record and [implementer handoff](../workflow/archive/2026-10-12-hr-dashboard/implementer-handoff.md).
 
@@ -20,7 +20,7 @@
 | 2 / time unavailable | User → Codex | Approved proceeding with the HR dashboard and then the issue-linked design/implementation steps. | Issue #68 and its bounded packet were prepared; John Wong was assigned as owner after he requested that assignment. | John approved the proposal, delta, design and plan before implementation. |
 | 3 / time unavailable | User → Codex | Asked to continue through implementation and closeout, confirming the earlier approval. | HR dashboard implementation and checks were recorded; commits `a238c41` and `8f6e2af` were created. | Dashboard-specific journey passed; full critical E2E and repository-wide format checks retained their reported failures. |
 | 4 / time unavailable | Codex → user | Clarified that “accepted” did not identify an independent reviewer or distinguish review from student acceptance. | User stated on 2026-10-12 that John had approved the change and it was fully approved, and explicitly directed canonical sync, archive, push and PR. | Recorded this as John’s acceptance/approval attestation. The message did not supply a reviewer name or independent review artifact, so none is claimed. |
-| 5 / 2026-10-13 | Codex closeout | Synced APP-009, updated navigation/logs and prepared publication. | Canonical requirements advanced to v1.9; full packet archived at `workflow/archive/2026-10-12-hr-dashboard/`. | Push/PR remain pending until the final staged diff and commit are verified. |
+| 5 / 2026-10-13 | Codex closeout | Synced APP-009, updated navigation/logs and prepared publication. | Canonical requirements advanced to v1.9; full packet archived at `workflow/archive/2026-10-12-hr-dashboard/`. | Push of `9a70e93` succeeded; PR remains pending at summary preparation. |
 
 ## Tool and agent executions
 
@@ -34,7 +34,7 @@
 
 | Decision | Source / decision maker / date | Reason, scope and approved boundaries | Outstanding action / owner |
 | --- | --- | --- | --- |
-| Accept APP-009 for canonical sync and archive | John Wong, chat, 2026-10-12: stated “fully approved” and directed sync/archive/push/PR after check outcomes were presented. | Dashboard remains read-only and uses existing authorized server-side HR reads. Known test/format limits remain recorded. | John Wong authorized push and PR; publication execution pending in this pre-PR record. |
+| Accept APP-009 for canonical sync and archive | John Wong, chat, 2026-10-12: stated “fully approved” and directed sync/archive/push/PR after check outcomes were presented. | Dashboard remains read-only and uses existing authorized server-side HR reads. Known test/format limits remain recorded. | John Wong authorized push and PR; push of `9a70e93` completed; PR pending in this pre-PR record. |
 | Preserve independent-review evidence gap | Closeout record, 2026-10-13 | No separate reviewer identity, execution, scope, findings or rechecks were supplied; do not invent these. | Independent review evidence remains unavailable in the record. |
 | Sync accepted product delta | John’s approval; Codex closeout, 2026-10-13 | Add only APP-009; preserve APP-008 and prior requirements; advance ProductSpec to v1.9. | Hosted validation and release are separate. |
 
@@ -59,10 +59,11 @@
 | 2026-10-13 / closeout worktree | `bun --bun run prettier --check ...` and direct `bun --bun run node_modules/prettier/bin/prettier.cjs --check ...` | Blocked. The Windows shim failed because `node` is unavailable on PATH; Bun direct execution returned `EPERM` reading the local Prettier package. | Exact command results in this session | No formatter pass is claimed for the closeout Markdown; the earlier implementation changed-file formatting result remains recorded separately. |
 | 2026-10-13 / closeout worktree | PowerShell relative-link and requirement-index check across 13 Markdown files | Passed; all checked relative links resolve, canonical APP-009 occurs once, and the v1.9 index entry occurs once. | Exact command result in this session | Structural check only; not a Markdown formatter or application test. |
 | 2026-10-13 / closeout worktree | `git diff --cached --check` | Passed after trimming three extra blank lines found by the first staged check. | Final staged diff | Checks whitespace for the sync/archive closeout only; the first failure and correction are retained in this log. |
+| 2026-10-13 / origin | `git push -u origin feat/68-hr-dashboard` | Passed; created remote branch and set upstream at `9a70e93`. | Git output in this session | The final metadata commit follows this initial push and is pushed before PR creation. |
 
 ## Open work, blockers and limitations
 
-- Outstanding work and owner: push `feat/68-hr-dashboard` to `origin` and open the issue-linked PR to `develop`; authorized by John Wong, pending final local verification.
+- Outstanding work and owner: open the issue-linked PR from pushed `feat/68-hr-dashboard` to `develop`; authorized by John Wong, pending final pre-PR verification.
 - Blockers and missing evidence: no independent reviewer identity/run/findings in the available record; three critical E2E failures and repository-wide format failure remain unresolved and visible. No clean-baseline E2E comparison or hosted checks are available.
 - Review findings and disposition: separate review findings unavailable; implementer/self-checks are not represented as independent review.
 - Approval, acceptance, archive, PR, merge and deployment status: John’s full-approval statement recorded; APP-009 synced to v1.9; packet archived. PR pending. Merge, hosted validation and deployment not performed.

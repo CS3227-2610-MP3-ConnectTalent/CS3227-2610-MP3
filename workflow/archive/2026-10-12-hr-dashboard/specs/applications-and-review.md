@@ -32,4 +32,4 @@ None.
 - [ ] Independent review execution evidence: not supplied; no reviewer identity, run, scope or findings are claimed.
 - [x] John Wong accepted the change for sync/archive on 2026-10-12 by stating it was fully approved after the known check results were presented.
 - [x] Synced APP-009 to canonical `applications-and-review.md`; ProductSpec/spec index updated to v1.9 on 2026-10-13; IDs and links verified before complete packet archive.
-- Sync commit/paths/decision evidence: closeout change is included in the `docs(workflow): sync and archive HR dashboard change` commit on `feat/68-hr-dashboard`; canonical destinations are listed above.
+- Sync commit/paths/decision evidence: canonical sync is in commit `9a70e93` (`docs(workflow): sync and archive HR dashboard change`) on `feat/68-hr-dashboard`; canonical destinations are listed above.

@@ -1,6 +1,6 @@
 # Feature record: HR recruitment dashboard
 
-Status: accepted by John Wong with recorded evidence limits; APP-009 synced to v1.9 and packet archived; push/PR pending
+Status: accepted by John Wong with recorded evidence limits; APP-009 synced to v1.9 and packet archived; branch pushed, PR pending
 
 Owner: John Wong (Johnwz123), confirmed on 2026-10-12
 
@@ -12,7 +12,7 @@ Date: 2026-10-12
 
 - Change ID/classification: 2026-10-12-hr-dashboard; behavior change
 - GitHub issue: [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68), open, enhancement, assigned to John Wong
-- Branch: feat/68-hr-dashboard from develop at 84761e1; implementation commit `a238c41`, review-handoff commit `8f6e2af`; closeout commit recorded in Git history; PR pending
+- Branch: feat/68-hr-dashboard from develop at 84761e1; implementation commit `a238c41`, review-handoff commit `8f6e2af`, closeout commit `9a70e93`; branch pushed to origin on 2026-10-13; PR pending
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Delta: [proposed APP-009](specs/applications-and-review.md)
@@ -83,13 +83,13 @@ Limitations: aggregates read the existing HR job and submitted-application resul
 
 | Date/session       | Summary                    | Work                                                                                         | Status                                                                              |
 | ------------------ | -------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| 2026-10-12 implementation / 2026-10-13 closeout | [Closeout summary](../../../logs/2026-10-13-hr-dashboard.md) | Approved HR dashboard implementation; checks; John’s full-approval statement; v1.9 sync and packet archive | Acceptance and T07 closeout recorded; independent-review provenance remains unavailable; push/PR pending |
+| 2026-10-12 implementation / 2026-10-13 closeout | [Closeout summary](../../../logs/2026-10-13-hr-dashboard.md) | Approved HR dashboard implementation; checks; John’s full-approval statement; v1.9 sync and packet archive | Acceptance and T07 closeout recorded; branch push completed; independent-review provenance remains unavailable; PR pending |
 
 ## Canonical sync and archive
 
 - Accepted delta/decision: APP-009 accepted for sync/archive by John Wong on 2026-10-12 after the known checks were presented.
-- Canonical sync commit/files/version/date: v1.9 on 2026-10-13; `workflow/ProductSpec.md`, `workflow/specs/README.md`, `workflow/specs/applications-and-review.md`; closeout commit recorded in Git history.
+- Canonical sync commit/files/version/date: v1.9 sync commit `9a70e93` on 2026-10-13; `workflow/ProductSpec.md`, `workflow/specs/README.md`, `workflow/specs/applications-and-review.md`; closeout commit recorded in Git history.
 - Sync verification: APP-009 unique in canonical spec; requirement IDs and relative links passed the 13-file structural check. Prettier could not run for closeout Markdown (Node unavailable through the shim; Bun direct execution returned EPERM). The first staged `git diff --cached --check` found three extra blank lines at EOF; those were removed, and the rerun passed.
 - Archive decision/date/path: complete packet moved to `workflow/archive/2026-10-12-hr-dashboard/` on 2026-10-13 after sync.
 - Navigation repairs after archive: `workflow/changes/README.md`, `workflow/archive/README.md`, and dated log point to the archived record.
-- Outstanding work: push and issue-linked PR requested by John; no reviewer identity or independent findings are available to record; hosted checks, merge and release remain pending.
+- Outstanding work: open the issue-linked PR requested by John; no reviewer identity or independent findings are available to record; hosted checks, merge and release remain pending.
