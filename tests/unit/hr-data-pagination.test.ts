@@ -1,10 +1,19 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
-const auth = vi.hoisted(() => ({ requireHR: vi.fn() }));
+const auth = vi.hoisted(() => ({
+  requireApplicant: vi.fn(),
+  requireHR: vi.fn(),
+}));
 
+vi.mock("@/lib/auth", () => ({ requireApplicant: auth.requireApplicant }));
 vi.mock("@/lib/hr-auth", () => ({ requireHR: auth.requireHR }));
 
-import { listSubmittedApplications } from "@/lib/hr-applications";
+import { listOwnApplications } from "@/lib/applications";
+import {
+  listHRNotes,
+  listHRStatusEvents,
+  listSubmittedApplications,
+} from "@/lib/hr-applications";
 import { listHRJobs } from "@/lib/hr-jobs";
 
 type PageResponse = {
@@ -15,37 +24,56 @@ type QueryBuilder = {
   select: (...args: unknown[]) => QueryBuilder;
   eq: (...args: unknown[]) => QueryBuilder;
   order: (...args: unknown[]) => QueryBuilder;
-  range: (from: number, to: number) => Promise<PageResponse>;
+  gt: (field: string, value: string) => QueryBuilder;
+  limit: (count: number) => Promise<PageResponse>;
 };
 
 const actorId = "44000000-0000-4000-8000-000000000111";
 const jobId = "44000000-0000-4000-8000-000000000112";
+const applicationId = "44000000-0000-4000-8000-000000000113";
 
-function rowsByPage(rows: unknown[]) {
-  return new Map(
-    Array.from({ length: Math.ceil(rows.length / 500) }, (_, index) => {
-      const from = index * 500;
-      return [from, { data: rows.slice(from, from + 500), error: null }];
-    }),
-  );
-}
-
-function configureHRPages(pages: Map<number, PageResponse>) {
-  const ranges: Array<[number, number]> = [];
+function configurePages(rows: unknown[], failAfterId?: string) {
+  const cursors: Array<string | null> = [];
+  let activeCursor: string | null = null;
   const builder: QueryBuilder = {
     select: () => builder,
     eq: () => builder,
     order: () => builder,
-    range: async (from, to) => {
-      ranges.push([from, to]);
-      return pages.get(from) ?? { data: [], error: null };
+    gt: (_field, value) => {
+      activeCursor = value;
+      return builder;
+    },
+    limit: async (pageSize) => {
+      cursors.push(activeCursor);
+      if (activeCursor === failAfterId) {
+        return {
+          data: null,
+          error: { message: "synthetic later-page failure" },
+        };
+      }
+      const page = [...rows]
+        .filter((row) => {
+          const id = (row as { id: string }).id;
+          return activeCursor === null || id > activeCursor;
+        })
+        .sort((left, right) =>
+          (left as { id: string }).id.localeCompare(
+            (right as { id: string }).id,
+          ),
+        )
+        .slice(0, pageSize);
+      return { data: page, error: null };
     },
   };
-  auth.requireHR.mockResolvedValue({
-    client: { from: vi.fn(() => builder) },
-    user: { id: actorId },
-  });
-  return ranges;
+  const client = {
+    from: vi.fn(() => {
+      activeCursor = null;
+      return builder;
+    }),
+  };
+  auth.requireApplicant.mockResolvedValue({ client, user: { id: actorId } });
+  auth.requireHR.mockResolvedValue({ client, user: { id: actorId } });
+  return cursors;
 }
 
 function makeJobs(count: number) {
@@ -75,46 +103,98 @@ function makeApplications(count: number) {
   }));
 }
 
+function makeApplicantApplications(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    withdrawn_at: null,
+    withdrawn_by: null,
+    education: "Synthetic university",
+    work_experience: null,
+    full_name: "Synthetic Applicant",
+    submitted_email: "applicant@example.test",
+    phone: null,
+    portfolio_url: null,
+    id: `46000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    job_id: jobId,
+    job_title: "Synthetic job",
+    submission_state: "submitted",
+    cover_letter: "Synthetic letter",
+    original_submitted_letter: "Synthetic letter",
+    submitted_at: "2026-10-10T00:00:00Z",
+    updated_at: "2026-10-10T00:00:00Z",
+    revision: 1,
+    review_status: "in_review",
+  }));
+}
+
+function makeNotes(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `47000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    author_id: actorId,
+    body: `Synthetic note ${index + 1}`,
+    created_at: "2026-10-10T00:00:00Z",
+  }));
+}
+
+function makeStatusEvents(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `48000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    actor_id: actorId,
+    from_status: "submitted",
+    to_status: "in_review",
+    created_at: "2026-10-10T00:00:00Z",
+  }));
+}
+
 beforeEach(() => vi.clearAllMocks());
 
 it("loads all HR jobs when the collection spans multiple response pages", async () => {
   const jobs = makeJobs(501);
-  const ranges = configureHRPages(rowsByPage(jobs));
+  const cursors = configurePages(jobs);
 
   await expect(listHRJobs()).resolves.toHaveLength(501);
 
-  expect(ranges).toEqual([
-    [0, 499],
-    [500, 999],
-  ]);
+  expect(cursors).toEqual([null, jobs[499].id]);
 });
 
 it("loads all submitted applications when the collection spans multiple pages", async () => {
   const applications = makeApplications(501);
-  const ranges = configureHRPages(rowsByPage(applications));
+  const cursors = configurePages(applications);
 
   await expect(listSubmittedApplications()).resolves.toHaveLength(501);
 
-  expect(ranges).toEqual([
-    [0, 499],
-    [500, 999],
-  ]);
+  expect(cursors).toEqual([null, applications[499].id]);
 });
 
 it("fails the full HR application read when a later page fails", async () => {
   const applications = makeApplications(500);
-  const ranges = configureHRPages(
-    new Map([
-      [0, { data: applications, error: null }],
-      [500, { data: null, error: { message: "synthetic later-page failure" } }],
-    ]),
-  );
+  const cursors = configurePages(applications, applications[499].id);
 
   await expect(listSubmittedApplications()).rejects.toThrow(
     "Review data is unavailable",
   );
-  expect(ranges).toEqual([
-    [0, 499],
-    [500, 999],
-  ]);
+  expect(cursors).toEqual([null, applications[499].id]);
+});
+
+it("loads all Applicant applications through stable ID cursors", async () => {
+  const applications = makeApplicantApplications(501);
+  const cursors = configurePages(applications);
+
+  await expect(listOwnApplications()).resolves.toHaveLength(501);
+  expect(cursors).toEqual([null, applications[499].id]);
+});
+
+it("loads all HR notes through stable ID cursors", async () => {
+  const notes = makeNotes(501);
+  const cursors = configurePages(notes);
+
+  await expect(listHRNotes(applicationId)).resolves.toHaveLength(501);
+  expect(cursors).toEqual([null, notes[499].id]);
+});
+
+it("loads all HR status events through stable ID cursors", async () => {
+  const events = makeStatusEvents(501);
+  const cursors = configurePages(events);
+
+  await expect(listHRStatusEvents(applicationId)).resolves.toHaveLength(501);
+  expect(cursors).toEqual([null, events[499].id]);
 });

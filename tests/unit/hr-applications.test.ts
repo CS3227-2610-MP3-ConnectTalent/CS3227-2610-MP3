@@ -26,11 +26,13 @@ it("returns job IDs from the authorized submitted-application list query", async
     select: vi.fn(),
     eq: vi.fn(),
     order: vi.fn(),
-    range: vi.fn().mockResolvedValue({ data: [row], error: null }),
+    gt: vi.fn(),
+    limit: vi.fn().mockResolvedValue({ data: [row], error: null }),
   };
   builder.select.mockReturnValue(builder);
   builder.eq.mockReturnValue(builder);
   builder.order.mockReturnValue(builder);
+  builder.gt.mockReturnValue(builder);
   mocks.requireHR.mockResolvedValue({
     client: { from: () => builder },
   });
@@ -40,6 +42,7 @@ it("returns job IDs from the authorized submitted-application list query", async
   expect(builder.select).toHaveBeenCalledWith(
     expect.stringContaining("job_id"),
   );
-  expect(builder.range).toHaveBeenCalledWith(0, 499);
+  expect(builder.order).toHaveBeenCalledWith("id", { ascending: true });
+  expect(builder.limit).toHaveBeenCalledWith(500);
   expect(applications[0]).toMatchObject({ job_id: jobId });
 });

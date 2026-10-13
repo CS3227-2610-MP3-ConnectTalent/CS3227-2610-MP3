@@ -27,22 +27,24 @@ const jobId = "44000000-0000-4000-8000-000000000102";
 const applicationId = "44000000-0000-4000-8000-000000000103";
 
 let result: { data: unknown; error: { message: string } | null };
-let pagedResults: Map<number, typeof result>;
 let query: {
   select: ReturnType<typeof vi.fn<(fields: string) => void>>;
   eq: ReturnType<typeof vi.fn<(field: string, expected: unknown) => void>>;
   order: ReturnType<typeof vi.fn<(field: string, options: unknown) => void>>;
-  range: ReturnType<typeof vi.fn<(from: number, to: number) => void>>;
+  gt: ReturnType<typeof vi.fn<(field: string, value: string) => void>>;
+  limit: ReturnType<typeof vi.fn<(count: number) => void>>;
 };
 let client: { from: ReturnType<typeof vi.fn> };
 
-function configureQuery(
-  value: typeof result,
-  pages: Map<number, typeof result> = new Map(),
-) {
+function configureQuery(value: typeof result) {
   result = value;
-  pagedResults = pages;
-  query = { select: vi.fn(), eq: vi.fn(), order: vi.fn(), range: vi.fn() };
+  query = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    order: vi.fn(),
+    gt: vi.fn(),
+    limit: vi.fn(),
+  };
   const builder = () => ({
     select: (fields: string) => {
       query.select(fields);
@@ -56,9 +58,13 @@ function configureQuery(
       query.order(field, options);
       return builder();
     },
-    range: (from: number, to: number) => {
-      query.range(from, to);
-      return Promise.resolve(pagedResults.get(from) ?? result);
+    gt: (field: string, value: string) => {
+      query.gt(field, value);
+      return builder();
+    },
+    limit: (count: number) => {
+      query.limit(count);
+      return Promise.resolve(result);
     },
     maybeSingle: () => Promise.resolve(result),
   });
@@ -190,9 +196,8 @@ it("returns validated Applicant application lists and owner-scoped details", asy
   configureQuery({ data: [application], error: null });
   await expect(listOwnApplications()).resolves.toEqual([application]);
   expect(query.eq).toHaveBeenCalledWith("applicant_id", applicantId);
-  expect(query.order).toHaveBeenCalledWith("updated_at", { ascending: false });
-  expect(query.order).toHaveBeenCalledWith("id", { ascending: false });
-  expect(query.range).toHaveBeenCalledWith(0, 499);
+  expect(query.order).toHaveBeenCalledWith("id", { ascending: true });
+  expect(query.limit).toHaveBeenCalledWith(500);
 
   configureQuery({ data: application, error: null });
   await expect(getOwnApplication(applicationId)).resolves.toEqual(application);
@@ -217,8 +222,8 @@ it("lists and validates submitted HR applications, notes, events, and details", 
     expect.objectContaining({ id: applicationId, review_status: "in_review" }),
   ]);
   expect(query.eq).toHaveBeenCalledWith("submission_state", "submitted");
-  expect(query.order).toHaveBeenCalledWith("id", { ascending: false });
-  expect(query.range).toHaveBeenCalledWith(0, 499);
+  expect(query.order).toHaveBeenCalledWith("id", { ascending: true });
+  expect(query.limit).toHaveBeenCalledWith(500);
 
   configureQuery({ data: hrApplication, error: null });
   await expect(getSubmittedApplication(applicationId)).resolves.toMatchObject({
@@ -238,9 +243,8 @@ it("lists and validates submitted HR applications, notes, events, and details", 
     error: null,
   });
   await expect(listHRNotes(applicationId)).resolves.toHaveLength(1);
-  expect(query.order).toHaveBeenCalledWith("created_at", { ascending: true });
   expect(query.order).toHaveBeenCalledWith("id", { ascending: true });
-  expect(query.range).toHaveBeenCalledWith(0, 499);
+  expect(query.limit).toHaveBeenCalledWith(500);
 
   configureQuery({
     data: [
@@ -256,7 +260,7 @@ it("lists and validates submitted HR applications, notes, events, and details", 
   });
   await expect(listHRStatusEvents(applicationId)).resolves.toHaveLength(1);
   expect(query.order).toHaveBeenCalledWith("id", { ascending: true });
-  expect(query.range).toHaveBeenCalledWith(0, 499);
+  expect(query.limit).toHaveBeenCalledWith(500);
 });
 
 it("does not query HR application details for malformed identifiers", async () => {
@@ -267,9 +271,8 @@ it("does not query HR application details for malformed identifiers", async () =
 it("returns validated HR jobs and returns null for invalid or absent jobs", async () => {
   configureQuery({ data: [job], error: null });
   await expect(listHRJobs()).resolves.toEqual([job]);
-  expect(query.order).toHaveBeenCalledWith("created_at", { ascending: false });
-  expect(query.order).toHaveBeenCalledWith("id", { ascending: false });
-  expect(query.range).toHaveBeenCalledWith(0, 499);
+  expect(query.order).toHaveBeenCalledWith("id", { ascending: true });
+  expect(query.limit).toHaveBeenCalledWith(500);
 
   configureQuery({ data: job, error: null });
   await expect(getHRJob(jobId)).resolves.toEqual(job);

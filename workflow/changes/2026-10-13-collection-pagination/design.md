@@ -1,4 +1,4 @@
-# Design: complete collection reads with Supabase ranges
+# Design: complete collection reads with Supabase keyset pages
 
 - Issue: [#70](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/70)
 - Related: #68 / PR #69 HR dashboard; current branch `feat/68-hr-dashboard`
@@ -33,13 +33,13 @@ Single-row `maybeSingle()` reads, Storage download/upload/remove calls, AI gener
 
 ## Query behavior
 
-Add a shared server-side helper that calls a supplied ordered page query with inclusive 0-based offsets. Use a page size of 500, below the configured Data API cap of 1,000. Append each page and stop when a page is shorter than 500; if the row count is an exact multiple, request one empty terminal page. Propagate any page error so callers return their existing generic error and never a partial collection.
+Add a shared server-side helper that calls a supplied bounded query using an exclusive cursor on the immutable UUID primary key. Every page orders by `id ASC`, applies `id > lastId` after the first page, and limits the response to 500 rows, below the configured Data API cap of 1,000. Append each page and stop when a page is shorter than 500; if the row count is an exact multiple, request one empty terminal page. Validate that the cursor advances strictly and propagate any page error so callers return their existing generic error and never a partial collection.
 
-Every page uses a stable two-column order: its existing date column followed by unique `id` (same direction). Keep all existing filters, selects, RLS-scoped clients, schemas, and caller-facing return types. The public job reader continues using the publishable key and published-job filter.
+Keyset order is independent of the previous display order. After fetching and validating the full result set, restore each reader's established timestamp and ID ordering in memory. Keep all existing filters, authorization-scoped clients, schemas, and caller-facing return types. The public job reader continues using the publishable key and published-job filter; it selects `published_at` for restored ordering and strips it from the public return shape.
 
 ## Risks, failure, and rollback
 
-- Offset pagination can observe concurrent inserts/deletes between requests; deterministic ordering prevents tie instability, but it is not a database snapshot. The pages are request-local and read-only; no stronger snapshot or cross-request consistency guarantee is added.
+- Keyset pagination prevents insertions or deletions before the current ID cursor from shifting later page boundaries and duplicating/skipping previously existing rows. Separate HTTP requests still do not share a database snapshot; concurrent additions, deletions, or filter/status changes can make the read differ from any one instant.
 - Query cost grows with the number of pages. The 500-row bound keeps each response below the configured API cap.
 - Any later-page error rejects the whole read and follows current generic error handling.
 - Rollback is a code revert; there is no migration, persistent state, or API contract change.

@@ -11,7 +11,7 @@ The Supabase Data API limits each response to 1,000 rows. Several collection rea
 
 ## Goal and non-goals
 
-Fetch every row for existing collection reads in ordered, bounded pages while preserving the current full-list return value, caller behavior, validation, and role/RLS boundaries. Fail a read as a whole if any page fails.
+Fetch every row for existing collection reads in bounded keyset pages using stable UUID IDs while preserving the current display order, full-list return value, caller behavior, validation, and role/RLS boundaries. Fail a read as a whole if any page fails. Keyset pagination must not duplicate or skip an existing row when an earlier ID is inserted between page requests.
 
 This does not add collection API routes, alter API response shapes, add page controls, change authorization, add a database view/RPC, or paginate single-resource/detail/action endpoints.
 
@@ -19,10 +19,11 @@ This does not add collection API routes, alter API response shapes, add page con
 
 | ID        | Given / when / then                                                                                                                                         | Evidence                                                                               |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| PAG-AC-01 | Given more rows than one query page, when an existing collection read runs, then it returns every ordered row and requests all required ranges.             | Query-level tests crossing a page boundary for Applicant and HR reads and public jobs. |
+| PAG-AC-01 | Given more rows than one query page, when an existing collection read runs, then it returns every ordered row using stable ID cursors.                      | Query-level tests crossing a page boundary for Applicant and HR reads and public jobs. |
 | PAG-AC-02 | Given a result count exactly divisible by the page size, when it is fetched, then the reader makes a terminal empty-page request and returns each row once. | Shared pagination-helper unit test.                                                    |
 | PAG-AC-03 | Given a later page fails, when a collection read runs, then it fails without returning a partial result.                                                    | Shared pagination-helper test and safe caller error tests.                             |
 | PAG-AC-04 | Given an API route returns one resource, performs one action, or redirects, when audited, then no pagination is added.                                      | Route inventory in `api-audit.md` and existing endpoint tests.                         |
+| PAG-AC-05 | Given a lower ID is inserted between page requests, when keyset pagination continues, then previously fetched boundary rows are not repeated.               | Shared helper and public-job query tests simulate an insertion between pages.          |
 
 ## Approval and scope
 
