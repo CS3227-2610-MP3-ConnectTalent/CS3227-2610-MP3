@@ -1,8 +1,12 @@
-# Active change packets
+# Change packet index
 
-No active change packets are pending at this time.
+## Active follow-up work
+
+Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/70) is a post-submission follow-up on [PR #69](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/69). Its [packet](2026-10-13-collection-pagination/record.md) records the route/list-reader audit, pagination implementation, checks and pending independent review/student acceptance. The row-cap P2 and mutable-offset P2 were answered and resolved; the P1 final-keyset verification finding was also answered and resolved. This index entry corrects the stale statement that the dashboard P2 remains open. Independent review and post-change student acceptance are still pending.
 
 ## Accepted and archived work
+
+Issue [#68 HR recruitment dashboard](../archive/2026-10-12-hr-dashboard/record.md) was fully approved by John Wong on 2026-10-12. APP-009 was synced to canonical v1.9 and the complete packet archived on 2026-10-13 with known local E2E/formatting failures and missing independent-review provenance explicitly recorded. The feature branch is pushed; issue-linked PR status is tracked through #68.
 
 Issues [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58) and [#59](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/59) were accepted by the user on 2026-10-11 and archived after closeout on 2026-10-12. The accepted work adds report-only 90% coverage reporting and weekly dependency updates: Renovate handles pnpm/npm after the Mend Renovate GitHub App is installed for this repository, while Dependabot handles GitHub Actions. The full Prettier gate passes after formatting the 187 previously unformatted files; hosted CI and the first hosted reporter run remain pending. See the [complete archived packet](../archive/2026-10-11-coverage-dependabot/record.md), [implementation summary](../../logs/2026-10-11-coverage-dependabot-implementation.md), [format closeout summary](../../logs/2026-10-12-coverage-format-closeout.md), and [PR preparation summary](../../logs/2026-10-12-coverage-dependabot-pr.md).
 
