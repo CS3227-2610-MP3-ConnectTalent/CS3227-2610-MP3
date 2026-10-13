@@ -61,21 +61,24 @@ Changed files: `src/lib/supabase/pagination.ts`, `src/lib/jobs.ts`, `src/lib/app
 
 ## Keyset follow-up verification
 
-| Revision / environment                        | Command or check                                                                                         | Result and limits                                                                                                                           |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Before keyset correction / baseline `30f2c6b` | Focused `tests/unit/jobs-pagination.test.ts` regression with an inter-page insert                        | Failed as intended: expected 501 unique jobs but received 502, with a duplicated boundary row.                                              |
-| Final keyset source / Windows                 | Full Vitest suite                                                                                        | Passed: 66 files, 357 tests, including >500-row coverage for all six collection readers.                                                    |
-| Final keyset source / Windows                 | TypeScript `tsc --noEmit`; ESLint on changed TypeScript; Prettier changed-file check; `git diff --check` | All passed.                                                                                                                                 |
-| Final keyset source / Windows / Bun 1.3.13    | Next 16.3.8 production build                                                                             | Compiled and passed TypeScript, then failed during page-data collection because Bun could not load Next's bundled CommonJS runtime wrapper. |
+| Revision / environment                                                                | Command or check                                                                  | Result and limits                                                                                                                           |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Before keyset correction / baseline `30f2c6b`                                         | Focused `tests/unit/jobs-pagination.test.ts` regression with an inter-page insert | Failed as intended: expected 501 unique jobs but received 502, with a duplicated boundary row.                                              |
+| PR head `fecf053431375edd81294f2ffc230ea77174220d` / Windows; keyset source `9cfd0ab` | Full Vitest suite                                                                 | Re-run for the P1 review finding: 66 files and 357 tests passed, including >500-row coverage for all six collection readers.                |
+| PR head `fecf053431375edd81294f2ffc230ea77174220d` / Windows; keyset source `9cfd0ab` | TypeScript `tsc --noEmit`; ESLint on changed TypeScript                           | Re-run for the P1 review finding; both passed.                                                                                              |
+| PR head `fecf053431375edd81294f2ffc230ea77174220d` / Windows; keyset source `9cfd0ab` | Prettier changed-file check; `git diff --check`                                   | Re-run for the P1 review finding; both passed.                                                                                              |
+| Keyset source `9cfd0ab` / Windows / Bun 1.3.13                                        | Next 16.3.8 production build                                                      | Compiled and passed TypeScript, then failed during page-data collection because Bun could not load Next's bundled CommonJS runtime wrapper. |
 
 The public-jobs HTTP test verifies `id > cursor`, `id ASC`, no offset parameter, and no duplicate when a lower UUID is inserted between pages. HR and Applicant query tests verify cursor progression across 501-row result sets for each of the other five readers.
 
 Keyset pagination prevents offset boundary shifts, but the separate HTTP page requests do not share a database snapshot. Concurrent inserts, deletes, or filter/status changes may make the collected result differ from any single instant. No hosted/production behavior is claimed from local checks.
 
+The P1 verification request was addressed by rerunning the full suite and static checks at PR head `fecf053431375edd81294f2ffc230ea77174220d`; that revision contains the keyset source from `9cfd0ab` plus documentation-only closeout changes. The earlier 351-test result is explicitly limited to the superseded range-pagination revision `30f2c6b`.
+
 ## Review and decision
 
 - Reviewer identity and independence: pending; implementation self-review does not meet the independent-review gate.
-- Findings/resolutions: row-cap P2 fixed in `30f2c6b`; mutable-offset P2 fixed with stable UUID keysets in `9cfd0ab`. Both threads were answered and resolved on PR #69; separate independent review remains pending.
+- Findings/resolutions: row-cap P2 fixed in `30f2c6b`; mutable-offset P2 fixed with stable UUID keysets in `9cfd0ab`; final-keyset-verification P1 answered with fresh checks at `fecf053431375edd81294f2ffc230ea77174220d`. The P1 reply and thread resolution are the remaining PR follow-up action; separate independent review remains pending.
 - Human decision: implementation scope authorized by John's explicit request on 2026-10-13; post-change acceptance remains pending.
 - Documentation/reflection: route inventory and evidence packet only; no product guide change is required because user-visible list behavior and contracts are unchanged.
 
