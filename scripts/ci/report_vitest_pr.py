@@ -5,6 +5,7 @@ import os
 import re
 import sys
 from datetime import datetime
+from http.client import IncompleteRead
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
@@ -32,10 +33,36 @@ BOT_LOGIN = "github-actions[bot]"
 SUPPORTED_BASES = {"develop", "master"}
 TRUSTED_CI_WORKFLOW_PATH = ".github/workflows/ci.yml"
 HEX_SHA = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$", re.IGNORECASE)
+MAX_GITHUB_ERROR_BODY_BYTES = 8192
+MAX_GITHUB_ERROR_MESSAGE_CHARS = 240
 
 
 class GitHubApiError(RuntimeError):
     """Raised when a GitHub API read or comment write fails."""
+
+
+def _safe_github_error_message(error, token):
+    """Return only a short, redacted GitHub error message from an HTTP error."""
+    try:
+        raw = error.read(MAX_GITHUB_ERROR_BODY_BYTES + 1)
+    except (IncompleteRead, OSError, ValueError):
+        raw = b""
+    try:
+        payload = json.loads(raw[:MAX_GITHUB_ERROR_BODY_BYTES].decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return "GitHub returned an error response"
+    if not isinstance(payload, dict) or not isinstance(payload.get("message"), str):
+        return "GitHub returned an error response"
+
+    message = re.sub(r"[\x00-\x1f\x7f-\x9f]+", " ", payload["message"])
+    message = " ".join(message.split())
+    if token:
+        message = message.replace(token, "[redacted]")
+    if not message:
+        return "GitHub returned an error response"
+    if len(message) > MAX_GITHUB_ERROR_MESSAGE_CHARS:
+        message = f"{message[:MAX_GITHUB_ERROR_MESSAGE_CHARS].rstrip()}..."
+    return message
 
 
 def _positive_integer(value):
@@ -273,7 +300,15 @@ class GitHubApi:
         try:
             with self._opener(request, timeout=20) as response:
                 raw = response.read()
-        except (HTTPError, URLError, OSError, ValueError) as error:
+        except HTTPError as error:
+            try:
+                message = _safe_github_error_message(error, self._token)
+            finally:
+                error.close()
+            raise GitHubApiError(
+                f"GitHub API {method} request failed (HTTP {error.code}): {message}"
+            ) from error
+        except (URLError, OSError, ValueError) as error:
             raise GitHubApiError(f"GitHub API {method} request failed") from error
         if not raw:
             return {}

@@ -20,9 +20,11 @@ export async function uploadInitialResume(
   await page
     .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "valid, unencrypted PDF",
-  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "Choose a valid, unencrypted PDF résumé of at most 1 MiB.",
+    }),
+  ).toBeVisible();
   await page.getByLabel("Choose PDF résumé").setInputFiles({
     name: "synthetic.pdf",
     mimeType: "application/pdf",
@@ -126,9 +128,11 @@ export async function rejectInvalidReplacement(page: Page) {
   await page
     .getByRole("button", { name: "Replace résumé", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "valid, unencrypted PDF",
-  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "Choose a valid, unencrypted PDF résumé of at most 1 MiB.",
+    }),
+  ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
   ).toBeVisible();

@@ -77,9 +77,11 @@ async function prepareUnsavedApplication(
   await page
     .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "valid, unencrypted PDF",
-  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "Choose a valid, unencrypted PDF résumé of at most 1 MiB.",
+    }),
+  ).toBeVisible();
   const applications = await admin
     .from("applications")
     .select("id")
