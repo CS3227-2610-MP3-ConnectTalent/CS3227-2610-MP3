@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
+import { BackToOpenRoles } from "@/components/back-to-open-roles";
 import { getAccountNavigation } from "@/lib/account-navigation";
 import { categoryLabel } from "@/lib/job-categories";
 import { getPublishedJob } from "@/lib/jobs";
@@ -28,20 +29,7 @@ export default async function JobDetail({
 function JobDetailContent({ job, canApply }: { job: Job; canApply: boolean }) {
   return (
     <main className="page-shell mx-auto min-h-screen w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
-      <header className="mb-10 flex items-center justify-between gap-4 border-b pb-5">
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-        >
-          All roles
-        </Link>
-      </header>
-      <Link
-        href="/"
-        className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-      >
-        ← Back to open roles
-      </Link>
+      <BackToOpenRoles />
       <article className="mt-10">
         <JobHeading job={job} canApply={canApply} />
         <JobDescription title="About the role" text={job.description} />
