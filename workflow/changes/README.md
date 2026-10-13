@@ -2,7 +2,7 @@
 
 ## Active follow-up work
 
-Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/70) is a post-submission follow-up on [PR #69](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/69). Its [packet](2026-10-13-collection-pagination/record.md) records the route/list-reader audit, pagination implementation, checks and pending independent review/student acceptance. The P2 dashboard comment remains open until the pushed fix is replied to and resolved.
+Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/70) is a post-submission follow-up on [PR #69](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/69). Its [packet](2026-10-13-collection-pagination/record.md) records the route/list-reader audit, pagination implementation, checks and pending independent review/student acceptance. The row-cap P2 and mutable-offset P2 were answered and resolved; the P1 final-keyset verification finding was also answered and resolved. This index entry corrects the stale statement that the dashboard P2 remains open. Independent review and post-change student acceptance are still pending.
 
 ## Accepted and archived work
 

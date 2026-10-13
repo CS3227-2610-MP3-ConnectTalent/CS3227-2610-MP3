@@ -1,6 +1,6 @@
 # Feature record: complete collection reads
 
-Status: both pagination findings and the keyset-verification finding addressed; all three review threads resolved; independent review and post-change acceptance pending
+Status: pagination and keyset-verification findings addressed; stale index status corrected; independent review and post-change acceptance pending
 
 Owner: John Wong (Johnwz123)
 
@@ -11,7 +11,7 @@ Date: 2026-10-13
 
 - Change ID/classification: `2026-10-13-collection-pagination`; defect restoration / data-access pagination
 - GitHub issues: [#70](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/70); related [#68](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/68)
-- Branch/commits/PR: `feat/68-hr-dashboard`; baseline `18a022e`; pagination fix `30f2c6b`, keyset correction `9cfd0ab`, verification record `4c9cf64`; [PR #69](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/69)
+- Branch/commits/PR: `feat/68-hr-dashboard`; baseline `18a022e`; pagination fix `30f2c6b`, keyset correction `9cfd0ab`, verification record `4c9cf64`, review-resolution record `1900ed7`; [PR #69](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/69)
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: none; full existing collection results are preserved, with no new product behavior or response contract
@@ -27,7 +27,8 @@ Date: 2026-10-13
 - [ ] Independent review; not claimed by implementer.
 - [ ] Separate post-change human acceptance; pending.
 - [x] Dated session log and PR metadata updated; issue #70 is linked from PR #69.
-- [x] Replied to both P2 pagination reviews and the P1 keyset-verification review; all three threads are resolved.
+- [x] Replied to the row-cap P2, mutable-offset P2 and keyset-verification P1; those three threads are resolved.
+- [ ] Reconcile the stale dashboard P2 status in `workflow/changes/README.md` with the verified PR thread state.
 - [ ] Pre-PR closeout is not applicable to the already-open PR; this is post-submission follow-up work.
 - [x] Canonical delta sync: N/A because no new requirement or contract is introduced.
 
@@ -78,15 +79,15 @@ The P1 verification request was addressed by rerunning the full suite and static
 ## Review and decision
 
 - Reviewer identity and independence: pending; implementation self-review does not meet the independent-review gate.
-- Findings/resolutions: row-cap P2 fixed in `30f2c6b`; mutable-offset P2 fixed with stable UUID keysets in `9cfd0ab`; final-keyset-verification P1 answered with fresh checks at `fecf053431375edd81294f2ffc230ea77174220d`, documented in `4c9cf64`, and resolved on PR #69. Separate independent review remains pending.
+- Findings/resolutions: row-cap P2 fixed in `30f2c6b`; mutable-offset P2 fixed with stable UUID keysets in `9cfd0ab`; final-keyset-verification P1 answered with fresh checks at `fecf053431375edd81294f2ffc230ea77174220d`, documented in `4c9cf64`, and resolved on PR #69. A later P2 found the change index still claimed the dashboard comment was open; GitHub shows that thread resolved, and the index wording has now been corrected. Separate independent review remains pending.
 - Human decision: implementation scope authorized by John's explicit request on 2026-10-13; post-change acceptance remains pending.
 - Documentation/reflection: route inventory and evidence packet only; no product guide change is required because user-visible list behavior and contracts are unchanged.
 
 ## Session evidence index
 
-| Date/session                 | Summary log                                                                   | Work / decisions                                                                                  | Status                                                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| 2026-10-13 current follow-up | [session summary](../../../logs/2026-10-13-collection-pagination-followup.md) | Two pagination findings, one verification finding, endpoint/list-read audit and keyset correction | `30f2c6b`, `9cfd0ab` and `4c9cf64` pushed; all three threads resolved; independent review and acceptance pending |
+| Date/session                 | Summary log                                                                   | Work / decisions                                                                            | Status                                                                                                                             |
+| ---------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-13 current follow-up | [session summary](../../../logs/2026-10-13-collection-pagination-followup.md) | Pagination fixes, verification finding, stale index correction and endpoint/list-read audit | `30f2c6b`, `9cfd0ab`, `4c9cf64` and `1900ed7` pushed; follow-up review state documented; independent review and acceptance pending |
 
 ## Canonical sync and archive
 

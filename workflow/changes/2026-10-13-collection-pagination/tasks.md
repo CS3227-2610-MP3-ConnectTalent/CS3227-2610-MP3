@@ -20,6 +20,7 @@
 - [x] T06 — Added a failing inter-page insert regression for the new offset-pagination finding, switched all six readers to stable UUID keysets, restored their prior timestamp/ID display order, and updated issue/design evidence.
 - [x] T07 — Pushed keyset correction `9cfd0ab`, replied to and resolved the offset-pagination P2 thread, and updated PR #69 with both fixes and final check results.
 - [x] T08 — Re-ran the full suite and static checks for the keyset source at PR head `fecf053`, corrected the revision-specific evidence, pushed `4c9cf64`, updated the PR check table, and replied to and resolved the P1 verification thread.
+- [ ] T09 — Verified the actual PR review-thread state and corrected the stale dashboard-P2 statement in `workflow/changes/README.md`; push the correction, then reply to and resolve the new P2 thread.
 
 ## Gates and evidence
 
