@@ -131,6 +131,20 @@ async function checkRoleNavigation(
   for (const path of rolePaths(user.role, jobId, applicationId)) {
     await page.goto(path);
     await checkAccountControls(page, user);
+    if (path === "/profile" || path === "/hr/jobs") {
+      const back = page
+        .getByRole("main")
+        .getByRole("link", { name: "Back to open roles" });
+      await expect(back).toHaveCount(1);
+      await expect(back).toHaveAttribute("href", "/");
+      await expect(back).toHaveCSS("cursor", "pointer");
+      expect(await back.evaluate((link) => !link.previousElementSibling)).toBe(
+        true,
+      );
+    }
+    await expect(
+      page.getByRole("button", { name: "Sign out", exact: true }),
+    ).toHaveCSS("cursor", "pointer");
     if (path === "/jobs/" + jobId) await checkApplyLink(page, user.role);
     await checkResponsiveWidths(page);
   }
@@ -138,11 +152,12 @@ async function checkRoleNavigation(
 
 function rolePaths(role: Role, jobId: string, applicationId?: string) {
   if (role === "applicant")
-    return ["/", "/jobs/" + jobId, "/jobs/" + jobId + "/apply"];
+    return ["/", "/profile", "/jobs/" + jobId, "/jobs/" + jobId + "/apply"];
   if (!applicationId)
     throw new Error("Applicant fixture must exist before HR checks.");
   return [
     "/",
+    "/hr/jobs",
     "/jobs/" + jobId,
     "/hr/jobs/new",
     "/hr/jobs/00000000-0000-4000-8000-000000000104",

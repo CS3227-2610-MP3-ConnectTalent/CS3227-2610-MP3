@@ -86,6 +86,12 @@ export async function verifyRequiredProfileGuards(page: Page, email: string) {
     nav.getByRole("link", { name: "My profile", exact: true }),
   ).toBeVisible();
   await expect(page.locator('header a[href="/"]')).toHaveCount(0);
+  const back = page
+    .getByRole("main")
+    .getByRole("link", { name: "Back to open roles" });
+  await expect(back).toHaveAttribute("href", "/");
+  await back.click();
+  await expect(page).toHaveURL(/\/profile$/);
   await expect(page.getByLabel("Full name", { exact: true })).toHaveAttribute(
     "required",
     "",
