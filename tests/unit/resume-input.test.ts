@@ -61,7 +61,7 @@ it("accepts a valid PDF at exactly the byte limit", async () => {
     ).bytes.length,
   ).toBe(RESUME_MAX_BYTES);
 });
-it("rejects encrypted PDF metadata without ignoring encryption", async () => {
+it("rejects invalid encryption metadata", async () => {
   const doc = await PDFDocument.create();
   doc.addPage();
   doc.context.trailerInfo.Encrypt = doc.context.register(
@@ -72,5 +72,5 @@ it("rejects encrypted PDF metadata without ignoring encryption", async () => {
     validateResume(
       new File([bytes], "encrypted.pdf", { type: "application/pdf" }),
     ),
-  ).rejects.toThrow("unencrypted");
+  ).rejects.toMatchObject({ code: "RESUME_INVALID" });
 });

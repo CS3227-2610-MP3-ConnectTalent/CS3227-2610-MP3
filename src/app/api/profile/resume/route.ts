@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { resumeFailureStatus } from "@/lib/resume-errors";
 import { currentApplicant } from "@/lib/auth";
 import {
   downloadProfileResume,
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     return Response.json(resumeFailure(error), {
-      status: 400,
+      status: resumeFailureStatus(error),
       headers: resumeHeaders,
     });
   }

@@ -2,7 +2,11 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.9, 13 October 2026**. The accepted #68 HR recruitment dashboard adds APP-009 below; the [archived packet](../archive/2026-10-12-hr-dashboard/record.md) preserves the acceptance source and its evidence limits. Earlier change traces below preserve the accepted lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.10, 14 October 2026**. Accepted #76 modifies APP-007 PDF validation/error behavior, inherited by APP-006. Earlier change traces preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.10 accepted PDF validation and safe errors
+
+Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026 after local checks and independent review. APP-007 accepts encrypted PDFs openable without a password and rejects password-required files; safe messages/codes distinguish file rejection from validator unavailability/timeouts. APP-006 inherits these restrictions. Original bytes, size/privacy/authorization and snapshot rules remain. [Archived evidence](../archive/2026-10-13-resume-error-messages/record.md) records 85 primary unit checks, three development browser journeys, one production-server journey, build/trace checks and independent review. Hosted/Linux verification remains pending.
 
 ## v1.9 accepted HR recruitment dashboard
 

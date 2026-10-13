@@ -79,7 +79,7 @@ async function prepareUnsavedApplication(
     .click();
   await expect(
     page.getByRole("status").filter({
-      hasText: "Choose a valid, unencrypted PDF résumé of at most 1 MiB.",
+      hasText: "This PDF could not be read. Export a new PDF and try again.",
     }),
   ).toBeVisible();
   const applications = await admin

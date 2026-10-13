@@ -157,6 +157,10 @@ Withdrawal retains submitted rows/files and prior review history, adds owner/tim
 
 PDFs are optional, ≤1 MiB, validated structurally with filename/type/byte limits in a bounded worker. Buckets `application-resumes` and `profile-resumes` are private. User-session RLS/Storage controls downloads; browsers do not receive privileged keys or public/signed file URLs.
 
+The PDF.js parser accepts encrypted documents only when they open without a supplied password. It inspects page structure without rendering, extracting text or executing embedded actions; this is not malware scanning. Stored bytes remain unchanged. A Node worker retains the 3-second deadline and 64/16 MiB V8 heap limits (these are not a total process-memory cap), is terminated on every outcome, and does not forward parser diagnostics. `next.config.ts` traces the PDF.js modules and platform canvas dependency required during module loading.
+
+The three résumé upload endpoints share safe error codes and messages: empty/name/read failures return 400, oversized files 413, unsupported types 415, unreadable/password-required PDFs 422, validator unavailability 503 and timeout 504. Parser and infrastructure exceptions are not returned to users. File validation precedes Storage writes. New parser behavior and production tracing require hosted smoke testing before release.
+
 Mutation routes validate Origin/actor/target/input before narrowly privileged reserve → upload → finalize operations. First upload can allocate a blank owned draft without saving typed fields. Explicit profile reuse creates independent application bytes, not a mutable shared reference. Invalid files are rejected before allocation/recovery.
 
 Interrupted first-upload Retry resolves the owned persisted revision only when no client revision was supplied; explicit revisions retain stale-write checks. Current implementation splits this behavior into [application-resume-retry.ts](../src/lib/application-resume-retry.ts) and [application-resume-uploads.ts](../src/lib/application-resume-uploads.ts). See the [accepted repair evidence](../workflow/archive/2026-10-10-first-upload-retry/record.md).
@@ -263,7 +267,7 @@ Rollback should preserve submitted/withdrawn snapshots, private files, columns a
 ## 11. Acknowledgements and reuse
 
 - Next.js create-next-app generated the initial scaffold; React/TypeScript/Tailwind and shadcn/ui provide the app/UI foundations. Supabase CLI generated the local config; Auth/PostgreSQL/Storage provide shared services.
-- Zod, pdf-lib, libphonenumber-js and lucide-react support validation, bounded PDF parsing, calling-code metadata and icons. Checked-in country labels avoid runtime ICU differences; no SMS or identity verification is implied.
+- Zod, PDF.js (`pdfjs-dist`), libphonenumber-js and lucide-react support validation, bounded PDF parsing, calling-code metadata and icons. `pdf-lib` generates synthetic test PDFs. Checked-in country labels avoid runtime ICU differences; no SMS or identity verification is implied.
 - Vitest/V8, Playwright, pgTAP, ESLint/SonarJS and Prettier provide tests, reporting and static checks. The installed OpenAI SDK is used as the required SoCLaaS-compatible client.
 - This guide and the User Guide adapt the organization of the two user-supplied **NUSynapxe** guide templates (author/source URL not supplied). Their clinical content, native toolchain and toolkit process were not reused as this product's features. The team should add the original attribution if available.
 - The project's TDD guidance references Superpowers' red/green/refactor idea; this does not claim the Superpowers plugin was installed or used to host the app. See [CONTRIBUTING](../CONTRIBUTING.md) and archived process evidence.

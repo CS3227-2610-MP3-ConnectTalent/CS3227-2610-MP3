@@ -84,7 +84,7 @@ Structured profile/contact fields and files are not automatically sent to AI. Pe
 
 The résumé section is below work experience and above AI drafting. Choose **Choose PDF résumé**, select the file, then **Upload résumé** and wait for the download link. **Save draft is not a prerequisite.**
 
-- PDF only; maximum **1 MiB (1,048,576 bytes)**. Invalid/encrypted PDFs are rejected.
+- PDF only; maximum **1 MiB (1,048,576 bytes)**. The PDF must open without entering a password. Encrypted PDFs that open without a password are accepted; password-required or unreadable PDFs are rejected.
 - Upload is optional. It may create a private draft for the file without saving other typed fields.
 - Replace/remove is available before submission while the job is published. Invalid replacement preserves the prior finalized attachment.
 - After failure, **Retry upload** preserves typed text and reconciles interrupted first uploads without a full reload. If still uncertain, reload to inspect the saved attachment before further changes.
@@ -164,18 +164,23 @@ For hosted smoke testing, use separate authorized Applicant/HR accounts: complet
 
 ## 7. Troubleshooting and FAQ
 
-| Problem                               | What to do                                                                                                            |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| No local verification email           | Open Mailpit on port 54324; local emails do not go to Gmail.                                                          |
-| No hosted verification/recovery email | Check spam; ask the team to check delivery/redirects. Request a fresh expired link.                                   |
-| Every tab returns to My profile       | Save required name and formatted phone. File upload alone is not completion.                                          |
-| No HR navigation                      | Ask the administrator to check the role in the correct environment.                                                   |
-| Upload unavailable                    | Complete onboarding; use a valid PDF within 1 MiB on an editable published-job application. Report persistent errors. |
-| Interrupted upload                    | Retry upload; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                 |
-| Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                              |
-| Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                 |
-| No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                |
-| AI unavailable/limited                | Continue manually; wait after limits.                                                                                 |
-| Local login fails online              | Local, Development and Production databases have separate accounts.                                                   |
+| Problem                               | What to do                                                                                                                                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No local verification email           | Open Mailpit on port 54324; local emails do not go to Gmail.                                                                                                                              |
+| No hosted verification/recovery email | Check spam; ask the team to check delivery/redirects. Request a fresh expired link.                                                                                                       |
+| Every tab returns to My profile       | Save required name and formatted phone. File upload alone is not completion.                                                                                                              |
+| No HR navigation                      | Ask the administrator to check the role in the correct environment.                                                                                                                       |
+| File exceeds 1 MiB                    | Choose a smaller PDF.                                                                                                                                                                     |
+| PDF requires a password               | Upload a copy that opens without a password. The site does not accept PDF passwords.                                                                                                      |
+| PDF could not be read                 | Export a new PDF and retry.                                                                                                                                                               |
+| File type or filename rejected        | Select a `.pdf` file recognised as PDF; use a simple filename of at most 120 characters.                                                                                                  |
+| File could not be received completely | Select the file again and retry.                                                                                                                                                          |
+| PDF checking unavailable or timed out | Retry later. This is a server validation problem; the message does not mean your file is invalid. The failed upload does not replace your previous attachment or clear typed form fields. |
+| Interrupted upload                    | Retry upload; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                                                                                     |
+| Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                                                                                                  |
+| Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                                                                                     |
+| No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                                                                                    |
+| AI unavailable/limited                | Continue manually; wait after limits.                                                                                                                                                     |
+| Local login fails online              | Local, Development and Production databases have separate accounts.                                                                                                                       |
 
 See the [Developer Guide](DeveloperGuide.md) for setup/security/tests and [Reflections](Reflections.md) for individual work.

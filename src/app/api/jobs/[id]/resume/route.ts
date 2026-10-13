@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { resumeFailureStatus } from "@/lib/resume-errors";
 import { currentApplicant } from "@/lib/auth";
 import { getOwnApplicationForJob } from "@/lib/applications";
 import {
@@ -121,7 +122,7 @@ async function failedResumeResponse(error: unknown, jobId: string) {
   const current = await currentResultSafely(jobId);
   return Response.json(
     { ...resumeFailure(error), ...current },
-    { status: 400, headers: resumeHeaders },
+    { status: resumeFailureStatus(error), headers: resumeHeaders },
   );
 }
 

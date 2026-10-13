@@ -32,10 +32,14 @@ it("rejects a request without a body and cancels a stream once it exceeds the by
   const empty = new Request("https://careers.example.test/api/resume", {
     method: "POST",
   });
-  await expect(readResumeFile(empty)).rejects.toThrow("at most 1 MiB");
+  await expect(readResumeFile(empty)).rejects.toMatchObject({
+    code: "RESUME_EMPTY",
+  });
 
   const tooLarge = request(new Uint8Array(RESUME_MAX_BYTES + 1));
-  await expect(readResumeFile(tooLarge)).rejects.toThrow("at most 1 MiB");
+  await expect(readResumeFile(tooLarge)).rejects.toMatchObject({
+    code: "RESUME_TOO_LARGE",
+  });
 });
 
 it("uses private no-store download headers and encodes non-ASCII filenames", async () => {
@@ -74,5 +78,21 @@ it("preserves only recognized user-facing errors and hides unexpected messages",
   });
   expect(resumeFailure("unexpected string")).toEqual({
     error: "The résumé change could not be saved. Reload and try again.",
+  });
+});
+
+it("reports an interrupted stream without exposing its exception", async () => {
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      controller.error(new Error("private stream failure"));
+    },
+  });
+  const interrupted = new Request("http://localhost/api/resume", {
+    method: "POST",
+    body,
+    duplex: "half",
+  } as RequestInit);
+  await expect(readResumeFile(interrupted)).rejects.toMatchObject({
+    code: "RESUME_READ_FAILED",
   });
 });

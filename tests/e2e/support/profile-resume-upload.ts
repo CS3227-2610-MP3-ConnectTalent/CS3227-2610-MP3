@@ -22,7 +22,7 @@ export async function uploadInitialResume(
     .click();
   await expect(
     page.getByRole("status").filter({
-      hasText: "Choose a valid, unencrypted PDF résumé of at most 1 MiB.",
+      hasText: "This PDF could not be read. Export a new PDF and try again.",
     }),
   ).toBeVisible();
   await page.getByLabel("Choose PDF résumé").setInputFiles({
@@ -130,7 +130,7 @@ export async function rejectInvalidReplacement(page: Page) {
     .click();
   await expect(
     page.getByRole("status").filter({
-      hasText: "Choose a valid, unencrypted PDF résumé of at most 1 MiB.",
+      hasText: "This PDF could not be read. Export a new PDF and try again.",
     }),
   ).toBeVisible();
   await expect(

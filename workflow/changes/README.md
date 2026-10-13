@@ -6,6 +6,8 @@ Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTale
 
 ## Accepted and archived work
 
+Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76) was separately accepted by Paul with recorded limits on 14 October 2026. APP-007 synced to v1.10 before the [complete packet](../archive/2026-10-13-resume-error-messages/record.md) was archived. Hosted/Linux testing and Git publication remain pending.
+
 Issue [#74 return navigation and cursors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/74) was separately accepted by Paul with recorded limits on 13 October 2026. The [complete packet](../archive/2026-10-13-navigation-cursors/record.md) preserves independent review and local checks. Canonical delta N/A; publication and hosted/accessibility verification remain pending.
 
 Issue [#71 scheduled Playwright stability](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/71) is in PR #73 with issue-specific commits after review. The [complete packet](../archive/2026-10-13-scheduled-e2e-stability/record.md) and [issue-specific closeout](../../logs/2026-10-13-scheduled-e2e-closeout.md) record the hydration-ready input correction, bounded assertion timeout, final 20/20 suite, and reviewer limits. Hosted scheduled confirmation remains follow-up evidence.

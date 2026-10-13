@@ -1,6 +1,8 @@
 # Product specification
 
-Current baseline: **1.9**, dated **13 October 2026** (accepted #68 HR recruitment dashboard; v1.8 résumé before Save draft/private profile files, #52 required onboarding and prior withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+Current baseline: **1.10**, dated **14 October 2026** (accepted #76 password-aware PDF validation and safe errors; #68 HR dashboard, v1.8 résumé-first/profile files, required onboarding and withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+
+Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026. APP-007 now accepts structurally valid PDFs that open without a password, rejects password-required documents, and distinguishes safe file errors from validation service failures/timeouts. APP-006 inherits the same file rules. The [accepted packet](archive/2026-10-13-resume-error-messages/record.md) preserves tests, independent review and the hosted/Linux verification limit. No deployment or release is implied.
 
 John Wong confirmed the HR dashboard was fully approved on 12 October 2026 after the recorded local checks; canonical sync and archive completed on 13 October. APP-009 adds a read-only HR overview with per-job and status counts through existing authorized reads. The [archived #68 packet](archive/2026-10-12-hr-dashboard/record.md) preserves the stated acceptance, known E2E/formatting failures, and the fact that independent reviewer identity and findings were not supplied. Sync/archive does not establish hosted validation, merge, or release.
 
