@@ -12,6 +12,8 @@ ConnectTalent is a careers portal for **one employer per deployment**. Applicant
 
 Use a browser; no desktop installation is required. Local accounts do not automatically work on the hosted website.
 
+Job details, **My profile** and **Manage jobs** have a **Back to open roles** link at the top. Applicants with an incomplete profile remain on **My profile** until they save the required details.
+
 **Verification status, 12 October 2026:** instructions were checked against current `develop` source and specifications. Authenticated hosted workflows were not verified in this review; the team must smoke-test the deployment before evaluator use.
 
 ### 1.2 Create and verify an Applicant account

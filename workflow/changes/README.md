@@ -6,6 +6,8 @@ Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTale
 
 ## Accepted and archived work
 
+Issue [#74 return navigation and cursors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/74) was separately accepted by Paul with recorded limits on 13 October 2026. The [complete packet](../archive/2026-10-13-navigation-cursors/record.md) preserves independent review and local checks. Canonical delta N/A; publication and hosted/accessibility verification remain pending.
+
 Issue [#71 scheduled Playwright stability](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/71) is in PR #73 with issue-specific commits after review. The [complete packet](../archive/2026-10-13-scheduled-e2e-stability/record.md) and [issue-specific closeout](../../logs/2026-10-13-scheduled-e2e-closeout.md) record the hydration-ready input correction, bounded assertion timeout, final 20/20 suite, and reviewer limits. Hosted scheduled confirmation remains follow-up evidence.
 
 Issue [#72 Vitest PR report comments](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/72) has an issue-focused diagnostic commit in PR #73 and a [complete archived packet](../archive/2026-10-13-vitest-pr-report/record.md). The PR references #72 without closing it; hosted API cause and comment create/update verification remain open until the changed reporter reaches the default branch and a later report run exercises it.
