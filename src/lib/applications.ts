@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { requireApplicant } from "@/lib/auth";
 import { hrReviewStatusSchema } from "@/lib/hr-input";
+import { fetchAllPages, sortByTimestampAndId } from "@/lib/supabase/pagination";
 
 const applicationSchema = z.object({
   withdrawn_at: z.string().nullable(),
@@ -31,13 +32,24 @@ const fields =
 
 export async function listOwnApplications(): Promise<ApplicantApplication[]> {
   const { client, user } = await requireApplicant();
-  const { data, error } = await client
-    .from("applications")
-    .select(fields)
-    .eq("applicant_id", user.id)
-    .order("updated_at", { ascending: false });
-  if (error) throw new Error("Unable to load applications.");
-  return applicationSchema.array().parse(data);
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("applications")
+        .select(fields)
+        .eq("applicant_id", user.id);
+      if (afterId !== null) query = query.gt("id", afterId);
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+  } catch {
+    throw new Error("Unable to load applications.");
+  }
+  return sortByTimestampAndId(
+    applicationSchema.array().parse(data),
+    (application) => application.updated_at,
+    false,
+  );
 }
 
 export async function getOwnApplication(

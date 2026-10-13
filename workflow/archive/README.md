@@ -50,3 +50,7 @@ Rejected, withdrawn or superseded packets may be archived with their actual disp
 - [x] Accepted product deltas synced and verified before archive, or documented no-product-delta / rejected disposition.
 - [x] Complete packet and historical evidence preserved without fabricated approvals or results.
 - [x] Archive path, current indexes and relative links checked; every session log remains linked.
+
+## 2026-10-13 HR dashboard
+
+The complete [#68 HR dashboard packet](2026-10-12-hr-dashboard/record.md) was archived after APP-009 synced to canonical v1.9. John Wong confirmed full approval on 2026-10-12; independent-review provenance and known local E2E/formatting failures remain recorded. See the [closeout summary](../../logs/2026-10-13-hr-dashboard.md).

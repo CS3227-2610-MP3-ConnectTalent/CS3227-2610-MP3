@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { JOB_CATEGORIES, type JobCategory } from "./job-categories";
+import { fetchAllPages, sortByTimestampAndId } from "./supabase/pagination";
 
 const categoryValues = JOB_CATEGORIES.map((category) => category.value) as [
   JobCategory,
@@ -19,7 +20,9 @@ const jobSchema = z.object({
 
 export type PublishedJob = z.infer<typeof jobSchema>;
 
-const publicFields = "id,title,team,category,description,requirements";
+const publishedJobRowSchema = jobSchema.extend({ published_at: z.string() });
+const publicFields =
+  "id,title,team,category,description,requirements,published_at";
 
 function publicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -44,24 +47,28 @@ function publicClient() {
 export async function listPublishedJobs(
   category?: JobCategory,
 ): Promise<PublishedJob[]> {
-  let query = publicClient()
-    .from("jobs")
-    .select(publicFields)
-    .eq("status", "published");
+  const client = publicClient();
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("jobs")
+        .select(publicFields)
+        .eq("status", "published");
 
-  if (category) {
-    query = query.eq("category", category);
-  }
+      if (category) query = query.eq("category", category);
+      if (afterId !== null) query = query.gt("id", afterId);
 
-  const { data, error } = await query.order("published_at", {
-    ascending: false,
-  });
-
-  if (error) {
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+  } catch (error) {
     throw new Error("Unable to load published jobs.", { cause: error });
   }
-
-  return jobSchema.array().parse(data);
+  return sortByTimestampAndId(
+    publishedJobRowSchema.array().parse(data),
+    (row) => row.published_at,
+    false,
+  ).map((row) => jobSchema.parse(row));
 }
 
 export async function getPublishedJob(
