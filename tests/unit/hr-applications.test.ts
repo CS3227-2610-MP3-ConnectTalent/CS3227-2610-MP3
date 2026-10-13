@@ -22,15 +22,24 @@ it("returns job IDs from the authorized submitted-application list query", async
     withdrawn_by: null,
     review_status: "submitted",
   };
-  const order = vi.fn().mockResolvedValue({ data: [row], error: null });
-  const eq = vi.fn().mockReturnValue({ order });
-  const select = vi.fn().mockReturnValue({ eq });
+  const builder = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    order: vi.fn(),
+    range: vi.fn().mockResolvedValue({ data: [row], error: null }),
+  };
+  builder.select.mockReturnValue(builder);
+  builder.eq.mockReturnValue(builder);
+  builder.order.mockReturnValue(builder);
   mocks.requireHR.mockResolvedValue({
-    client: { from: () => ({ select }) },
+    client: { from: () => builder },
   });
 
   const applications = await listSubmittedApplications();
 
-  expect(select).toHaveBeenCalledWith(expect.stringContaining("job_id"));
+  expect(builder.select).toHaveBeenCalledWith(
+    expect.stringContaining("job_id"),
+  );
+  expect(builder.range).toHaveBeenCalledWith(0, 499);
   expect(applications[0]).toMatchObject({ job_id: jobId });
 });

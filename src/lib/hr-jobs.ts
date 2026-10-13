@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { requireHR } from "@/lib/hr-auth";
 import { JOB_CATEGORIES, type JobCategory } from "@/lib/job-categories";
+import { fetchAllPages } from "@/lib/supabase/pagination";
 
 const categories = JOB_CATEGORIES.map((category) => category.value) as [
   JobCategory,
@@ -24,11 +25,19 @@ const fields =
 
 export async function listHRJobs(): Promise<HRJob[]> {
   const { client } = await requireHR();
-  const { data, error } = await client
-    .from("jobs")
-    .select(fields)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error("Jobs are temporarily unavailable.");
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((from, to) =>
+      client
+        .from("jobs")
+        .select(fields)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, to),
+    );
+  } catch {
+    throw new Error("Jobs are temporarily unavailable.");
+  }
   return hrJobSchema.array().parse(data);
 }
 

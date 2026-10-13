@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { JOB_CATEGORIES, type JobCategory } from "./job-categories";
+import { fetchAllPages } from "./supabase/pagination";
 
 const categoryValues = JOB_CATEGORIES.map((category) => category.value) as [
   JobCategory,
@@ -44,23 +45,25 @@ function publicClient() {
 export async function listPublishedJobs(
   category?: JobCategory,
 ): Promise<PublishedJob[]> {
-  let query = publicClient()
-    .from("jobs")
-    .select(publicFields)
-    .eq("status", "published");
+  const client = publicClient();
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((from, to) => {
+      let query = client
+        .from("jobs")
+        .select(publicFields)
+        .eq("status", "published");
 
-  if (category) {
-    query = query.eq("category", category);
-  }
+      if (category) query = query.eq("category", category);
 
-  const { data, error } = await query.order("published_at", {
-    ascending: false,
-  });
-
-  if (error) {
+      return query
+        .order("published_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, to);
+    });
+  } catch (error) {
     throw new Error("Unable to load published jobs.", { cause: error });
   }
-
   return jobSchema.array().parse(data);
 }
 

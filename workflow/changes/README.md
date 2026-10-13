@@ -1,5 +1,9 @@
 # Change packet index
 
+## Active follow-up work
+
+Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/70) is a post-submission follow-up on [PR #69](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/69). Its [packet](2026-10-13-collection-pagination/record.md) records the route/list-reader audit, pagination implementation, checks and pending independent review/student acceptance. The P2 dashboard comment remains open until the pushed fix is replied to and resolved.
+
 ## Accepted and archived work
 
 Issue [#68 HR recruitment dashboard](../archive/2026-10-12-hr-dashboard/record.md) was fully approved by John Wong on 2026-10-12. APP-009 was synced to canonical v1.9 and the complete packet archived on 2026-10-13 with known local E2E/formatting failures and missing independent-review provenance explicitly recorded. The feature branch is pushed; issue-linked PR status is tracked through #68.
