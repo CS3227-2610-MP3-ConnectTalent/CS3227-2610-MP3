@@ -2,7 +2,10 @@ import json
 import os
 import tempfile
 import unittest
+from http.client import IncompleteRead
+from io import BytesIO
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
 from unittest.mock import Mock
 
@@ -368,6 +371,63 @@ class ReportVitestPullRequestTests(unittest.TestCase):
 
         with self.assertRaises(GitHubApiError):
             api.list_issue_comments(58)
+
+    def test_github_http_error_reports_bounded_message_without_secrets_or_body(self):
+        token = "synthetic-token"
+        body = json.dumps(
+            {
+                "message": f"Resource not accessible: {token}\n\x9b[{'x' * 500}",
+                "debug": "full-response-body-sentinel",
+            }
+        ).encode("utf-8")
+        error = HTTPError(
+            "https://api.github.com/repos/org/repo/issues/58/comments",
+            403,
+            "Forbidden",
+            {"X-Sensitive": "request-header-sentinel"},
+            BytesIO(body),
+        )
+        opener = Mock(side_effect=error)
+        api = GitHubApi(token, REPOSITORY, "https://api.github.com", opener)
+
+        with self.assertRaises(GitHubApiError) as raised:
+            api.create_issue_comment(58, "synthetic comment")
+
+        message = str(raised.exception)
+        self.assertIn("POST", message)
+        self.assertIn("HTTP 403", message)
+        self.assertIn("Resource not accessible: [redacted]", message)
+        self.assertNotIn(token, message)
+        self.assertNotIn("\n", message)
+        self.assertNotIn("\r", message)
+        self.assertNotIn("\x9b", message)
+        self.assertNotIn("request-header-sentinel", message)
+        self.assertNotIn("synthetic comment", message)
+        self.assertNotIn("full-response-body-sentinel", message)
+        self.assertLessEqual(len(message), 320)
+        self.assertTrue(error.fp.closed)
+
+    def test_github_http_error_handles_incomplete_response_body(self):
+        response = Mock()
+        response.read.side_effect = IncompleteRead(b'{"message":', 100)
+        error = HTTPError(
+            "https://api.github.com/repos/org/repo/issues/58/comments",
+            502,
+            "Bad Gateway",
+            {},
+            response,
+        )
+        api = GitHubApi(
+            "synthetic-token", REPOSITORY, "https://api.github.com", Mock(side_effect=error)
+        )
+
+        with self.assertRaises(GitHubApiError) as raised:
+            api.create_issue_comment(58, "synthetic comment")
+
+        self.assertIn("HTTP 502", str(raised.exception))
+        self.assertIn("GitHub returned an error response", str(raised.exception))
+        self.assertNotIn("synthetic comment", str(raised.exception))
+        response.close.assert_called_once_with()
 
 
 if __name__ == "__main__":

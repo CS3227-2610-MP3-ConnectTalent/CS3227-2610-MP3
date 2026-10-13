@@ -215,7 +215,10 @@ async function saveDraftAndReload(page: Page) {
 }
 
 async function submitApplication(page: Page) {
-  await page.getByLabel("Cover letter").fill("Original submitted letter");
+  await expect(page.locator('form[data-hydrated="true"]')).toBeVisible();
+  const coverLetter = page.getByLabel("Cover letter");
+  await coverLetter.fill("Original submitted letter");
+  await expect(coverLetter).toHaveValue("Original submitted letter");
   await page.getByLabel("Full name").fill("Synthetic Applicant");
   await page.getByRole("button", { name: "Submit application" }).click();
   await expect(
