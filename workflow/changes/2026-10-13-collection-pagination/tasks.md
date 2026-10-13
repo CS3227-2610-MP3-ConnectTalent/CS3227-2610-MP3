@@ -16,7 +16,7 @@
 - [x] T02 — Add the shared range-page reader and deterministic pagination to all six collection functions.
 - [x] T03 — Cover helper page boundaries and later-page errors; verify public jobs, Applicant, and HR list query integrations.
 - [x] T04 — Complete the route and collection-read audit; record exact checks and limits in `api-audit.md` and the record.
-- [ ] T05 — Commit and push to the existing PR branch, reply to and resolve the P2 thread, and update PR metadata to include issue #70.
+- [x] T05 — Pushed implementation commit `30f2c6b` to the existing PR branch, replied to and resolved the P2 thread, and updated PR #69 to link issue #70 and record checks/limits.
 
 ## Gates and evidence
 
