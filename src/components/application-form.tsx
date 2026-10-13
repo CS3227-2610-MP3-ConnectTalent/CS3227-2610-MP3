@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useSyncExternalStore } from "react";
 import { updateApplication } from "@/app/applications/actions";
 import { ApplicantAiDraft } from "@/components/applicant-ai-draft";
 import { ApplicationContactDetails } from "@/components/application-contact-details";
@@ -35,7 +35,16 @@ type Props = {
   profileResume?: ResumeMetadata | null;
 };
 
+const subscribeToHydration = () => () => {};
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
+
 export function ApplicationForm(props: Props) {
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot,
+  );
   const initial = createInitialState(props.details, props.value);
   const [state, formAction, pending] = useActionState(
     updateApplication,
@@ -61,6 +70,7 @@ export function ApplicationForm(props: Props) {
       attachment={attachment}
       setAttachment={setAttachment}
       onAttachmentPending={setAttachmentPending}
+      hydrated={hydrated}
       coverLetter={coverLetter}
       setCoverLetter={setCoverLetter}
     />
@@ -111,6 +121,7 @@ type DraftProps = Props & {
   state: ApplicationFormState;
   formAction: (formData: FormData) => void;
   pending: boolean;
+  hydrated: boolean;
   attachment: Attachment;
   setAttachment: (value: Attachment) => void;
   onAttachmentPending: (value: boolean) => void;
@@ -121,7 +132,11 @@ type DraftProps = Props & {
 function ApplicationDraftForm(props: DraftProps) {
   return (
     <div className="mt-8 space-y-5">
-      <form action={props.formAction} className="form-surface space-y-5">
+      <form
+        action={props.formAction}
+        className="form-surface space-y-5"
+        data-hydrated={props.hydrated ? "true" : undefined}
+      >
         <input type="hidden" name="jobId" value={props.jobId} />
         <input
           type="hidden"
