@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; review fixes were pushed to open PR #80 as `a5b1348`, and all five review threads were replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; review fixes were pushed to open PR #80 as `a5b1348` and `48b6922`, and all eight review threads were replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -12,6 +12,7 @@ Date: 2026-10-14
 - Change ID/classification: `2026-10-14-vitest-coverage-action`; CI/reporting tooling defect.
 - GitHub issue: [#72](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/72); related accepted contract [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58).
 - Branch: `fix/72-vitest-coverage-action`.
+- Latest review-fix commit: `48b69220e863d9a606718c5d693b1a9fe7a1f1dc`.
 - Pull request: [#80](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80), open against `develop`.
 - Proposal: [proposal.md](proposal.md).
 - Design: [design.md](design.md).
@@ -74,6 +75,16 @@ All five unresolved review findings were assessed as valid. The follow-up adds a
 
 After `a5b1348` was pushed, CI run [#38513939941](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38513939941) and Supabase CI [#38513939995](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38513939995) passed, including Database checks, Playwright Chromium, and integration race suites. The associated reporter run [#38514026387](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38514026387) still checked out the current `develop` workflow and failed in the old Python reporter; it therefore does not exercise the pushed upstream-action workflow.
 
+## Additional PR review follow-up (2026-10-14)
+
+The user asked to align the reporter with the upstream action's example and address three new PR comments. The action README's fork configuration uses the separate `workflow_run` reporter and requires that workflow to be present on the default branch. The new reporter keeps that trust boundary and continues to use the upstream action as its renderer. The upstream writer's source selects the first comment matching its marker without checking authorship, so the workflow now uses a repository-specific marker, selects only bot-owned report comments, and skips publication on an exact non-bot marker collision rather than changing a user's comment.
+
+The report job now handles all eight documented completed workflow conclusions. It restores a small artifact-only downloader that caps the compressed ZIP at 8 MiB, inspects ZIP entries before extraction, accepts only the two expected coverage JSON files, and caps each file at 2 MiB. It does not parse or render coverage or post comments; `davelosert/vitest-coverage-report-action@v2` remains the renderer. The user-authorized fix was pushed as [48b6922](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/48b69220e863d9a606718c5d693b1a9fe7a1f1dc), and the PR description was updated.
+
+CI [#38521659229](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38521659229) and Supabase CI [#38521659201](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38521659201) passed on `48b6922`. The latest Vitest report run [#38521767060](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38521767060) still checked out `develop` at `1613e38`; its old downloader rejected the coverage-only artifact and its old reporter received HTTP 403. It did not run the new action/helper, so hosted publication is still unverified. Local Python/YAML parsing was unavailable because the Python shim could not spawn its child process; `actionlint` and Node were also unavailable. `git diff --check` passed.
+
+All three new review threads ([4267013890](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267013890), [4267013898](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267013898), [4267013904](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267013904)) were replied to and resolved after the commit was pushed. The five earlier threads remain resolved. See the [additional PR review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md) for full evidence and limitations. PR #80 remains open; no merge or issue closure is included.
+
 ## Session evidence index
 
 | Date / session | Summary log link | Work / decisions covered | Verification status / missing coverage |
@@ -81,6 +92,7 @@ After `a5b1348` was pushed, CI run [#38513939941](https://github.com/CS3227-2610
 | 2026-10-14 / action migration | [Implementation summary](../../../logs/2026-10-14-vitest-coverage-action-implementation.md) | Replace custom Vitest report with upstream action under issue #72 | Static evidence and independent review recorded; YAML parser and hosted verification pending |
 | 2026-10-14 / closeout | [Closeout summary](../../../logs/2026-10-14-vitest-coverage-action-closeout.md) | Record student acceptance, no-product sync, archive and PR preparation | Accepted with hosted report verification pending; static closeout checks recorded |
 | 2026-10-14 / PR review follow-up | [Review follow-up summary](../../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md) | Diagnose the missing hosted coverage comment and address five PR review threads | Fixes pushed as `a5b1348`; all five threads replied to and resolved; CI and Supabase CI passed; hosted action verification remains pending after the workflow reaches `develop` |
+| 2026-10-14 / additional PR review | [Additional review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md) | Follow the upstream workflow pattern and address three new review comments | Fix pushed as `48b6922`; all eight threads resolved; CI and Supabase CI passed; hosted report still runs old `develop` workflow and remains unverified |
 
 ## Canonical sync and archive
 
