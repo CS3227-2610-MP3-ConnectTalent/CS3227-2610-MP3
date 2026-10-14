@@ -63,6 +63,10 @@ Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards i
 
 Guests can browse; signed-in Applicants complete their profile first. Open **Careers**, use category links to filter, and open a job to read title, team, description and requirements. Choose **Apply for this role** and sign in if necessary. Draft/closed jobs are hidden publicly. HR is not offered Applicant apply controls.
 
+Use **Search open roles** to find a phrase in a job's title, team, description or requirements. Matching ignores case and repeated whitespace; the whole phrase must appear in one field. Search and category filters work together. Use up to 100 characters; punctuation is treated literally.
+
+Results update after a short pause (300 ms). Press Enter or choose **Search** to apply immediately. **Clear search** removes only the phrase; **All roles** removes only the category. The address keeps both filters for sharing, refreshing and browser Back/Forward. Without JavaScript, choose **Search** to submit the form. If no roles match, try a different phrase or category; invalid searches show guidance without results.
+
 ### 3.2 Complete and save an application
 
 New forms prefill saved profile details without AI. Existing drafts take precedence; later profile edits do not overwrite them. The form includes contact details, optional portfolio/background, résumé and cover letter.
