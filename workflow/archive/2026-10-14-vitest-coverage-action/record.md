@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; all twelve PR #80 review threads currently known have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; all thirteen PR #80 review threads have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -12,7 +12,7 @@ Date: 2026-10-14
 - Change ID/classification: `2026-10-14-vitest-coverage-action`; CI/reporting tooling defect.
 - GitHub issue: [#72](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/72); related accepted contract [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58).
 - Branch: `fix/72-vitest-coverage-action`.
-- Latest workflow implementation commit: [b632f53](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/b632f536353ebdc6f974781e79a6fc264f195dd8). The archive corrections are in [cb3ba43](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/cb3ba43ba98e84318a7cae273467e149b3a7b900).
+- Latest workflow implementation commit: [846e109](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/846e109), which adds PR-head revalidation around report publication. Earlier implementation and archive corrections are retained in the review history below.
 - Pull request: [#80](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80), open against `develop`.
 - Proposal: [proposal.md](proposal.md).
 - Design: [design.md](design.md).
@@ -121,3 +121,9 @@ PR comment [4267792260](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-
 Local verification: `python -m unittest discover -s tests/ci -p "test_*.py" -v` passed all 14 tests, including the existing Renovate test, and `git diff --check` passed. GitHub CI [#38541255840](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38541255840) passed on `a18298e`; Supabase CI [#38541255596](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38541255596) was still in progress at the time of this record. The review comment was answered and resolved after the fix was pushed; a post-mutation thread fetch showed all twelve known review threads resolved.
 
 The report comment itself remains unverified: `workflow_run` uses the default-branch workflow, so a future PR CI completion after this workflow reaches `develop` must exercise the upstream action. PR #80 remains open and unmerged; no separate acceptance of this latest follow-up was recorded.
+
+## Fifth PR review follow-up: PR-head race (2026-10-14)
+
+Review comment [4269047250](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4269047250) identified that a new push could move the PR head after preflight but before either the upstream action or the unavailable-status writer published. Commit [846e109](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/846e109) adds a fresh PR-head check immediately before the action, checks again in the postcondition, and has the fallback replace a report with an explicit superseded status when a moved head is observed. The unavailable-status writer also checks before and after its writes and suppresses or corrects publication if the head moved. When the run is already stale and no bot report comment exists, it does not create one.
+
+The archived acceptance criterion and tasks now record this adjustment. `git diff --check` and `git diff --cached --check` passed. Local YAML parsing and workflow execution were not performed. GitHub reported Vercel success for `846e109`; the workflow-run lookup returned no GitHub Actions runs at query time. A fresh PR thread fetch after the reply and resolution found all thirteen inline threads resolved. The documented [comment-update endpoint](https://docs.github.com/en/rest/issues/comments#update-an-issue-comment) takes a comment ID and replacement body but no PR-head SHA precondition, so the narrow race between a final head read and a write remains; any movement observed by the post-write check is corrected. See the [head-race review summary](../../../logs/2026-10-14-vitest-coverage-action-head-race-review.md).
