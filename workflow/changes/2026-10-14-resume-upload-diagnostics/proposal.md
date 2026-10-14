@@ -3,9 +3,9 @@
 - Change ID: 2026-10-14-resume-upload-diagnostics
 - Issues: [#76](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76), [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77)
 - Owner: Paul
-- Status: approved and accepted by Paul in chat on 2026-10-14; independent review and final verification remain pending
+- Status: approved and accepted by Paul in chat on 2026-10-14; T05 independent review is complete; focused revised-timeout tests pass under Bun; hosted upload verification remains pending
 - Date: 2026-10-14
-- Baseline: ProductSpec v1.10
+- Approval baseline: ProductSpec v1.10; current integrated canonical baseline: ProductSpec v1.11
 - Affected capabilities: `workflow/specs/applications-and-review.md`, APP-006/APP-007; SEC-009 privacy boundary
 - Classification: defect restoration follow-up; behavior and server diagnostics; no new product requirement
 
@@ -31,7 +31,7 @@ Local uploads time out in the PDF worker with the existing 3-second budget. On t
 - Assumptions: Preview logs correspond to the user's failed requests; the approved `prepare_application_resume` RPC contract is the intended access boundary.
 - Dependencies: Issue #76 and existing Supabase functions/migrations; no schema change.
 - Risks: logging sensitive data; mitigated by static operation/stage labels, SQLSTATE/status allowlists, elapsed time and random reference only. Retrying must continue through the existing recovery RPC.
-- Open decisions: none for the bounded implementation; independent review, revised-timeout test execution and hosted verification remain pending after Paul's recorded acceptance.
+- Open decisions: none for the bounded implementation. T05 independent review and Paul's acceptance are recorded; a fresh hosted upload smoke and the post-fix full CI run remain pending.
 
 ## Acceptance evidence and artifacts
 

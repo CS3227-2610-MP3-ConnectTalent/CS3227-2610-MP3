@@ -1,6 +1,6 @@
 # Applications and review
 
-Baseline: ProductSpec v1.10, 14 October 2026 (accepted #76 password-aware PDF validation and safe errors; HR dashboard, résumé-first/profile files, required onboarding and withdrawal preserved).
+Baseline: ProductSpec v1.11, 14 October 2026 (integrated #76 password-aware PDF validation and safe errors with #78 public job search; HR dashboard, résumé-first/profile files, required onboarding and withdrawal preserved).
 
 Canonical ownership, notes and status permissions are in [SEC-001 / SEC-002](security-and-privacy.md).
 

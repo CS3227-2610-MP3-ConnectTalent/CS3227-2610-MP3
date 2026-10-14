@@ -1,8 +1,8 @@
 # Design: résumé upload failure diagnostics and recovery
 
 - Change ID/issues: `2026-10-14-resume-upload-diagnostics`; #76 and PR #77
-- Owner/status/date: Paul; approved; 5-second timeout revision implemented, verification pending; 2026-10-14
-- Inputs: approved follow-up proposal; no canonical delta; ProductSpec v1.10, APP-006/APP-007, SEC-009
+- Owner/status/date: Paul; approved and accepted; T05 independent review complete; focused revised-timeout tests pass under Bun; hosted upload verification pending; 2026-10-14
+- Inputs: approved follow-up proposal; no canonical delta; approved against ProductSpec v1.10 and integrated in v1.11; APP-006/APP-007, SEC-009
 - Scope and components: `src/lib/resume-pdf-check.ts`, `src/lib/application-resume-uploads.ts`, `src/lib/resume-errors.ts`, `src/lib/resume-request.ts`, and focused unit tests.
 
 ## Decisions and alternatives
@@ -27,13 +27,13 @@ No authorization policy or RLS changes. The existing service-only security-defin
 
 ## Failure behavior
 
-| Failure / input                                                              | Observable outcome / state guarantees                                                                                             | Verification         |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| Parser startup, PDF loading, or page iteration exceeds the 5-second deadline | Existing safe timeout message/status; server log records fixed phase and elapsed time; worker is terminated                       | UPLOAD-DIAG-AC-01    |
-| Prepare RPC returns `23505` for the one-pending constraint                   | Safe 409 code/message directs the Applicant to the existing Retry upload recovery action; internal log is correlated by reference | UPLOAD-DIAG-AC-03    |
-| Other RPC error or malformed response                                        | Safe temporary preparation failure with reference and 503; raw upstream data remains private                                      | UPLOAD-DIAG-AC-03    |
-| RPC returns `ready`                                                          | No duplicate Storage write; the operation is already finalized                                                                    | UPLOAD-DIAG-AC-02    |
-| RPC returns `pending` with malformed path/shape                              | Fail closed before Storage, log only a safe invalid-response category and reference                                               | UPLOAD-DIAG-AC-02/03 |
+| Failure / input                                                              | Observable outcome / state guarantees                                                                                                      | Verification         |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| Parser startup, PDF loading, or page iteration exceeds the 5-second deadline | Existing safe timeout message/status; server log records fixed phase and elapsed time; worker is terminated                                | UPLOAD-DIAG-AC-01    |
+| Prepare RPC returns `23505` for the one-pending constraint                   | Safe 409 code/message directs the Applicant to the available retry action for a file upload or profile copy; internal log uses a reference | UPLOAD-DIAG-AC-03    |
+| Other RPC error or malformed response                                        | Safe temporary preparation failure with reference and 503; raw upstream data remains private                                               | UPLOAD-DIAG-AC-03    |
+| RPC returns `ready`                                                          | No duplicate Storage write; the operation is already finalized                                                                             | UPLOAD-DIAG-AC-02    |
+| RPC returns `pending` with malformed path/shape                              | Fail closed before Storage, log only a safe invalid-response category and reference                                                        | UPLOAD-DIAG-AC-02/03 |
 
 ## Migration and backward compatibility
 
@@ -41,10 +41,10 @@ No database migration or environment change. This consumes the current RPC JSON 
 
 ## Rollout and rollback
 
-No production deployment. PR Preview verification needs a fresh deployment after separate review/acceptance and publication gates. Rollback is reverting the scoped source change; no data migration is involved. Any existing stale pending object is handled by the existing Retry recovery flow and cleanup RPC.
+No production deployment. A Vercel Preview deployment is Ready, but a synthetic upload smoke was skipped and upload success remains unverified. Rollback is reverting the scoped source change; no data migration is involved. Any existing stale pending object is handled by the existing retry recovery flow and cleanup RPC.
 
 ## Review and unresolved decisions
 
 - [x] Interface, requirement, privacy, failure and no-migration impacts assessed.
-- Findings/owner/resolution: independent review pending.
-- Human approval: Paul approved the original scope and the 5-second bounded timeout revision in chat on 2026-10-14, then accepted the implementation in chat on 2026-10-14. Independent review and runtime verification remain pending.
+- Findings/owner/resolution: T05 independent review completed; no blocking source defect was found, and the reviewer confirmed the added RPC-level tests cover the P0001 classifier mappings. The three later PR review comments were addressed in this follow-up; no independent re-review of these latest corrections is recorded.
+- Human approval: Paul approved the original scope and the 5-second bounded timeout revision in chat on 2026-10-14, then accepted the implementation in chat on 2026-10-14. The focused revised-timeout tests pass under Bun; the hosted upload smoke remains unverified.
