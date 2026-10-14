@@ -2,11 +2,15 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.10, 14 October 2026**. Accepted #76 modifies APP-007 PDF validation/error behavior, inherited by APP-006. Earlier change traces preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 14 October 2026**. This integrated baseline preserves the separately accepted #76 PDF validation/error behavior (APP-007, inherited by APP-006) and #78 public job search (JOB-004). The archived packets preserve their separate approval sources, reviews and limits. Earlier change traces preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
-## v1.10 accepted PDF validation and safe errors
+## v1.11 accepted PDF validation and safe errors (#76)
 
 Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026 after local checks and independent review. APP-007 accepts encrypted PDFs openable without a password and rejects password-required files; safe messages/codes distinguish file rejection from validator unavailability/timeouts. APP-006 inherits these restrictions. Original bytes, size/privacy/authorization and snapshot rules remain. [Archived evidence](../archive/2026-10-13-resume-error-messages/record.md) records 85 primary unit checks, three development browser journeys, one production-server journey, build/trace checks and independent review. Hosted/Linux verification remains pending.
+
+## v1.11 accepted public job search (#78)
+
+Paul accepted #78 with recorded limits on 14 October 2026 after local checks and a separate review. JOB-004 defines literal, normalized search of published job fields, combined category filtering, a 100-character input boundary, 300 ms debounce and URL/history behavior. [The complete archived packet](../archive/2026-10-14-job-listing-search/record.md) records independent review, a fixed navigation-bookkeeping finding, meaningful tests and hosted/accessibility limits. Canonical sync preceded archive; no hosted rollout or release claim follows.
 
 ## v1.9 accepted HR recruitment dashboard
 
