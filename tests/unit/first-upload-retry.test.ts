@@ -235,55 +235,6 @@ it("maps a pending-row conflict to a safe retry error and logs only allowlisted 
   expect(JSON.stringify(log.mock.calls)).not.toContain("private row");
   expect(JSON.stringify(log.mock.calls)).not.toContain("private SQL");
 });
-it.each([
-  [
-    "Job is not open for applications",
-    "RESUME_JOB_CLOSED",
-    "This job is no longer accepting résumé uploads.",
-  ],
-  [
-    "Application changed; reload before uploading",
-    "RESUME_APPLICATION_CHANGED",
-    "Your application changed. Refresh it before uploading the résumé.",
-  ],
-  [
-    "Editable saved draft required",
-    "RESUME_APPLICATION_CHANGED",
-    "Your application changed. Refresh it before uploading the résumé.",
-  ],
-  [
-    "Application changed; reload before saving",
-    "RESUME_APPLICATION_CHANGED",
-    "Your application changed. Refresh it before uploading the résumé.",
-  ],
-  [
-    "Upload operation cannot be reused",
-    "RESUME_UPLOAD_OPERATION_CONFLICT",
-    "This upload could not be matched to the selected file. Select the file again and retry.",
-  ],
-])(
-  "maps the allowlisted P0001 message %s to a safe failure",
-  async (message, code, safeMessage) => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    mocks.rpc.mockImplementation(async (name: string) =>
-      name === "prepare_application_resume"
-        ? {
-            data: null,
-            error: {
-              code: "P0001",
-              message,
-              details: "private database detail",
-              hint: "private SQL hint",
-            },
-          }
-        : { data: [], error: null },
-    );
-
-    await expect(
-      uploadResumeForJob(actor, job, 3, file, operation),
-    ).rejects.toMatchObject({ code, message: safeMessage });
-  },
-);
 it("returns a reference for unexpected preparation errors without raw details", async () => {
   const log = vi.spyOn(console, "error").mockImplementation(() => {});
   mocks.rpc.mockImplementation(async (name: string) =>

@@ -128,7 +128,7 @@ function ResumeFilePicker({
   );
 }
 
-function ResumeActionButtons({
+const ResumeActionButtons = ({
   file,
   pending,
   attachment,
@@ -146,42 +146,58 @@ function ResumeActionButtons({
   uploadFailed: boolean;
   profileCopyRetryAvailable: boolean;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
-}) {
-  return (
-    <div className="flex flex-wrap gap-3">
-      <UploadButton
+}) => (
+  <div className="flex flex-wrap gap-3">
+    <UploadButton
+      pending={pending}
+      hasFile={Boolean(file)}
+      hasAttachment={Boolean(attachment)}
+      onClick={() => void onChange("upload")}
+    />
+    {attachment && (
+      <SecondaryActionButton
         pending={pending}
-        hasFile={Boolean(file)}
-        hasAttachment={Boolean(attachment)}
-        onClick={() => void onChange("upload")}
+        label="Remove résumé"
+        onClick={() => void onChange("remove")}
       />
-      {attachment && (
-        <RemoveButton
-          pending={pending}
-          onClick={() => void onChange("remove")}
-        />
-      )}
-      {!profileMode && profileResume && !profileCopyRetryAvailable && (
-        <UseProfileButton
-          pending={pending}
-          onClick={() => void onChange("profile")}
-        />
-      )}
-      {uploadFailed && file && (
-        <RetryButton
-          pending={pending}
-          label="Retry upload"
-          onClick={() => void onChange("upload", true)}
-        />
-      )}
-      {profileCopyRetryAvailable && !profileMode && profileResume && (
-        <RetryButton
-          pending={pending}
-          label="Retry profile copy"
-          onClick={() => void onChange("profile", true)}
-        />
-      )}
-    </div>
+    )}
+    <ProfileResumeAction
+      pending={pending}
+      profileMode={profileMode}
+      profileResume={profileResume}
+      retryAvailable={profileCopyRetryAvailable}
+      onChange={onChange}
+    />
+    {uploadFailed && file && (
+      <SecondaryActionButton
+        pending={pending}
+        label="Retry upload"
+        onClick={() => void onChange("upload", true)}
+      />
+    )}
+  </div>
+);
+
+function ProfileResumeAction({
+  pending,
+  profileMode,
+  profileResume,
+  retryAvailable,
+  onChange,
+}: {
+  pending: boolean;
+  profileMode: boolean;
+  profileResume: ResumeMetadata | null;
+  retryAvailable: boolean;
+  onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
+}) {
+  if (profileMode || !profileResume) return null;
+  return (
+    <SecondaryActionButton
+      pending={pending}
+      label={retryAvailable ? "Retry profile copy" : "Use profile résumé"}
+      onClick={() => void onChange("profile", retryAvailable)}
+    />
   );
 }
 
@@ -208,45 +224,7 @@ function UploadButton({
   );
 }
 
-function RemoveButton({
-  pending,
-  onClick,
-}: {
-  pending: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={onClick}
-      className="rounded-lg border px-4 py-2"
-    >
-      Remove résumé
-    </button>
-  );
-}
-
-function UseProfileButton({
-  pending,
-  onClick,
-}: {
-  pending: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={onClick}
-      className="rounded-lg border px-4 py-2"
-    >
-      Use profile résumé
-    </button>
-  );
-}
-
-function RetryButton({
+function SecondaryActionButton({
   pending,
   label,
   onClick,
