@@ -22,7 +22,7 @@ The action reports coverage, not JUnit test totals. This follow-up therefore cha
   - Grant only the required job-level `pull-requests: write`, alongside `actions: read` for artifact download and `contents: read` for default-branch checkout.
   - Download only the triggering CI run's attempt-scoped artifact.
   - Generate JSON summary and per-file coverage data, including when Vitest tests fail, while keeping failing tests as CI failures.
-  - Remove the custom Python report/downloader/summary implementation and its focused tests.
+  - Remove the custom Python coverage parser, PR comment writer, summary writer, and their focused tests. Retain only a narrow artifact-only downloader that enforces size and ZIP-entry limits before the upstream action parses coverage.
   - Keep the report workflow on the default branch and do not check out or execute PR code.
 - Non-goals: change application behavior, Supabase workflows, test selection, the 90% target, or repository-wide token defaults; retain JUnit totals in the PR comment.
 - Users/roles: contributors and PR reviewers; no Applicant/HR data or permissions are involved.
@@ -47,7 +47,9 @@ The action reports coverage, not JUnit test totals. This follow-up therefore cha
 | VCA-AC-01 | #72; process-only CI criterion | Given a completed PR CI run, when the trusted report workflow runs, then it downloads only `vitest-reports-${{ github.event.workflow_run.run_attempt }}` from that exact run and invokes the upstream v2 action. | Workflow/YAML static review and hosted run; implementer then reviewer |
 | VCA-AC-02 | #72; least-privilege process criterion | Given the privileged report job, when it posts the coverage comment, then only that job has `pull-requests: write`, with `actions: read` and `contents: read`; no PR code is checked out or executed. | Permission and source-flow review; implementer then reviewer |
 | VCA-AC-03 | #72; coverage behavior | Given unit tests pass or fail after starting Vitest, when the report action runs, then overall coverage metrics are available, the 90% indicators remain informational, and unit-test failures still fail CI. | Config/workflow inspection and hosted report run; reviewer and student |
-| VCA-AC-04 | #72; scope cleanup | Given the action-based implementation, when maintainers inspect CI/docs, then no custom Python PR reporter, artifact downloader, summary writer, or their dedicated tests remain, and documentation describes coverage-only PR output. | Repository-wide reference scan, diff review, static checks; implementer then reviewer |
+| VCA-AC-04 | #72; scope cleanup | Given the action-based implementation, when maintainers inspect CI/docs, then no custom Python coverage parser, PR comment writer, summary writer, or their dedicated tests remain; the only retained Python helper bounds and extracts the exact coverage artifact before the upstream action parses and renders it, and documentation describes coverage-only PR output. | Repository-wide reference scan, helper/workflow source review, diff review, static checks; implementer then reviewer |
+
+**Post-approval scope adjustment (2026-10-14):** the initial approved proposal called for removing the artifact downloader too. Review comment [4267499600](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267499600) correctly identified that the upstream action extracts the untrusted artifact before parsing it. The subsequent user-authorized PR review fixes retained a bounded downloader that checks the compressed response and ZIP entries, and limits each extracted JSON file. It does not parse coverage, render the report, or write comments. This narrows the custom implementation to an input-boundary helper and records the final state accurately.
 
 - Spec deltas: N/A; CI/report tooling only, no product behavior changes.
 - Design: [design.md](design.md).
@@ -59,4 +61,4 @@ The action reports coverage, not JUnit test totals. This follow-up therefore cha
 - [x] Scope, issue criteria, affected IDs, alternatives, design, and plan approved before implementation.
 - Approver: user / accountable student Johnwz123.
 - Decision/date/source: approved on 2026-10-14 in this ChatGPT conversation: “switch to use davelosert/vitest-coverage-report-action@v2 instead and give it the necessary `pull-request: write` it needs, and then remove and clean up our custom implementation.” The GitHub permission key will use the platform spelling `pull-requests: write`.
-- Conditions: keep permission job-scoped, preserve exact attempt-scoped artifact download, remove custom implementation, record the intentional loss of JUnit totals from PR comments, and keep hosted verification/student acceptance separate.
+- Conditions: keep permission job-scoped, preserve exact attempt-scoped artifact download, remove the custom coverage parser/comment writer/summary writer, record the intentional loss of JUnit totals from PR comments, and keep hosted verification/student acceptance separate. The bounded artifact-only helper was retained as a post-approval review fix, as recorded above.
