@@ -12,7 +12,7 @@ Date: 2026-10-14
 
 - Change ID/classification: `2026-10-14-resume-upload-diagnostics`; behavior defect restoration and safe diagnostics
 - GitHub issues: [#76](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76); follow-up to [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77)
-- Branch/commits/PR: existing `fix/76-resume-validation-errors`, baseline `e5d6ca5`, PR #77 targets `develop`; this accepted follow-up is being published to the existing branch. Isolated worktree creation was denied by the sandbox earlier in the session.
+- Branch/commits/PR: `fix/76-resume-validation-errors`, baseline `e5d6ca5`, PR #77 targets `develop`. Follow-up commits `53d96de` and `35e2f5c` are published; current develop integration commit `790b482` reconciles the accepted #76/#78 documentation conflicts. This review-fix follow-up is in progress.
 - Proposal/design/plan/tasks/review handoff: [proposal.md](proposal.md), [design.md](design.md), [plan.md](plan.md), [tasks.md](tasks.md), [T05 independent review](handoffs/T05-independent-review.md)
 - Deltas: none; restores APP-007 and preserves SEC-009.
 - Baseline: ProductSpec v1.10, 2026-10-14; previous #76 packet [archived](../../archive/2026-10-13-resume-error-messages/record.md)
@@ -25,7 +25,7 @@ Date: 2026-10-14
 - [ ] Implementation and relevant local checks complete; earlier implementation checks passed, but the approved timeout revision still needs executable verification.
 - [x] Independent review completed; the reviewer confirmed the added classifier cases cover the P3 gap. Revised-timeout test execution and hosted Preview verification remain pending.
 - [x] Paul accepted the implementation in chat on 2026-10-14: “I accept the changes. Please proceed.” Acceptance is separate from runtime and hosted verification, which remain pending.
-- [x] Session implementation summary recorded at [2026-10-14 log](../../../logs/2026-10-14-resume-upload-diagnostics.md); pre-PR closeout pending.
+- [x] Implementation and post-submission review/conflict notes are recorded in the [implementation log](../../../logs/2026-10-14-resume-upload-diagnostics.md) and [PR review follow-up log](../../../logs/2026-10-14-resume-upload-pr-review-fix.md).
 - [x] Accepted implementation was committed and pushed to PR #77 as `53d96def9d5343f2490d265cfbb2ee3ae6cbf1a1`; its Vercel Preview deployment reported Ready.
 - [ ] Hosted Preview upload verification remains incomplete. The synthetic smoke was skipped at Paul's direction after browser policy blocked the extension-settings page; no test file was uploaded and no browser permission was changed.
 - [x] No canonical delta: current APP-007 already covers safe failure categories, raw-detail privacy and pre-storage rejection.
@@ -44,7 +44,7 @@ The implementer is this Codex session. T05 was dispatched to `/root/resume_uploa
 
 ## Implementation and tests
 
-Changed files: `src/lib/application-resume-uploads.ts`, `src/lib/resume-errors.ts`, `src/lib/resume-request.ts`, `src/lib/resume-pdf-check.ts`, `src/components/resume-panel-actions.ts`; focused unit tests in `tests/unit/first-upload-retry.test.ts`, `job-resume-route.test.ts`, `resume-lifecycle.test.ts`, `resume-panel-actions.test.ts`, `resume-worker-errors.test.ts`, and new `resume-preparation-errors.test.ts`; this packet and `logs/2026-10-14-resume-upload-diagnostics.md`.
+Changed files: initial implementation: `src/lib/application-resume-uploads.ts`, `src/lib/resume-errors.ts`, `src/lib/resume-request.ts`, `src/lib/resume-pdf-check.ts`, `src/components/resume-panel-actions.ts`; focused unit tests in `tests/unit/first-upload-retry.test.ts`, `job-resume-route.test.ts`, `resume-lifecycle.test.ts`, `resume-panel-actions.test.ts`, `resume-worker-errors.test.ts`, and new `resume-preparation-errors.test.ts`. Post-submission review follow-up also changes `src/lib/profile-resumes.ts`, `docs/DeveloperGuide.md`, this packet, `workflow/changes/README.md`, `workflow/archive/README.md`, `workflow/ProductSpec.md`, and `workflow/specs/README.md`.
 
 TDD: before implementation, focused regression tests reported eight intended behavior failures against the old upload/worker handling. The UI reference-code assertion was also run red before its implementation. Only synthetic PDFs were used. Hosted logs reviewed read-only on 2026-10-14 show `prepare_application_resume` 200 followed by a direct GET of `application_resume_objects` returning 403/Postgres SQLSTATE 42501; later prepare requests fail with 409/SQLSTATE 23505 on `resume_one_pending`. No file data, filename, row IDs, keys or database values are recorded. This identifies the first failure as a denied direct table read and later retries as a still-pending upload conflict. A fresh Preview upload has not yet been tested.
 
@@ -66,11 +66,13 @@ Known limits: the user's local PDF has not been inspected or uploaded; its speci
 
 - Reviewer identity/independence: `/root/resume_upload_review` returned a separate read-only test-engineer review against baseline `e5d6ca5f3c46471e373418a7e48d0cd0dda486b2`; follow-up reviewed the new test cases. The implementer's self-review does not count as independent.
 - Findings/resolutions: no blocking source defect. P2 UPLOAD-DIAG-AC-01 remains: revised 5-second regression and fresh Preview smoke not run. P3 UPLOAD-DIAG-AC-03: missing tests for allowlisted `P0001` messages were added for job closed, all three application-changed/draft messages, and operation reuse; reviewer follow-up confirmed they exercise every current mapping. Reviewer could not run Vitest because `pnpm` is unavailable; `git diff --check` passed.
+- Post-submission PR review on `53d96de` raised three P2 threads: the Developer Guide's stale deadline, the missing active-packet index entry, and loss of typed validator errors during profile retry cleanup. The guide/index/status were corrected; the profile retry now rethrows `ResumeValidationError` after best-effort cancellation/cleanup so the existing route mapping can return 503/504. No targeted profile retry test was run in this follow-up. Thread replies/resolution are recorded in the dated PR review follow-up log after publication.
 - Human decisions: original proposal/design/plan and bounded 5-second revision approved; Paul accepted the implementation in chat on 2026-10-14. Runtime and hosted Preview verification remain pending and are not implied by acceptance.
 - Documentation/reflection: implementation summary in dated log; broader closeout and any canonical sync remain pending.
 
 ## Canonical sync and archive
 
 - No new canonical behavior delta; APP-007/SEC-009 already govern.
-- Sync verification/archive pending the revised timeout test and hosted Preview smoke closeout gates.
-- Outstanding work: run the revised timeout regression and focused upload tests when Node/pnpm are available; publish an authorized revision to trigger a fresh Preview; perform a synthetic hosted smoke; then PR-last closeout and archive.
+- The integrated develop baseline is v1.11 and retains the separately accepted #76 APP-007 and #78 JOB-004 changes; this follow-up introduces no additional product-spec delta.
+- Archive remains pending the revised timeout regression and hosted Preview smoke closeout gates.
+- Outstanding work: run the revised timeout regression and focused upload tests when Node/pnpm are available; the synthetic hosted smoke was skipped at Paul's direction; complete evidence closeout before archiving.

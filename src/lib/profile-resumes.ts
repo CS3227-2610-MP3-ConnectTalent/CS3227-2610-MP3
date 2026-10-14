@@ -5,6 +5,7 @@ import {
   resumeMutationClient,
   type ResumeMetadata,
 } from "./application-resumes";
+import { ResumeValidationError } from "./resume-errors";
 import { validateResume } from "./resume-input";
 const bucket = "profile-resumes";
 const metadata = z.object({
@@ -128,9 +129,18 @@ async function uploadAndFinalizeProfileResume(
   try {
     await storeOrVerifyProfileUpload(client, path, valid);
     await finalizeProfileUpload(client, actor, operation);
-  } catch {
-    await cancelProfileUpload(client, actor, operation);
-    await cleanup(actor);
+  } catch (error) {
+    try {
+      await cancelProfileUpload(client, actor, operation);
+    } catch {
+      // Cancellation is best effort; retain the original failure for the route.
+    }
+    try {
+      await cleanup(actor);
+    } catch {
+      // Cleanup is best effort; retain the original failure for the route.
+    }
+    if (error instanceof ResumeValidationError) throw error;
     throw new Error(
       "We could not confirm the upload. Reload to check your saved résumé.",
     );
