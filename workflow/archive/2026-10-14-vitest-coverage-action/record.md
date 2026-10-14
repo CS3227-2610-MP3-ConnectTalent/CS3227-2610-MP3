@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; review fixes were pushed to open PR #80, and all ten review threads currently known have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; the first ten PR #80 review threads were replied to and resolved, and a third follow-up addresses a newly arrived malformed-report finding. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -43,7 +43,7 @@ Implementation assignment and evidence: [T01/T02 implementer handoff](handoffs/T
 
 Changed files: `.github/workflows/ci.yml`, `.github/workflows/test-report.yml`, `vitest.config.ts`, `README.md`, `CONTRIBUTING.md`, the `workflow/changes/` packet/index, removal of `scripts/ci/report_vitest_pr.py`, `scripts/ci/vitest_reports.py`, `scripts/ci/write-vitest-summary.py`, `tests/ci/test_download_vitest_artifact.py`, `tests/ci/test_report_vitest_pr.py`, and `tests/ci/test_vitest_reports.py`, plus restoration of `scripts/ci/download_vitest_artifact.py` as a bounded artifact-only helper during PR review.
 
-Commands/results: see [T01/T02 implementer handoff](handoffs/T01-T02-implementer.md) and the later review summaries below. Static workflow/config inspection confirms the job-level `actions: read`, `contents: read`, `pull-requests: write`, exact triggering run ID and run-attempt artifact name, default-branch-only checkout, JSON paths, `reportOnFailure: true`, removal of the custom parser/comment writer/summary writer and their dedicated tests, and retention of one bounded artifact-only downloader. The later helper review inspected the exact file allowlist and ZIP/file size gates, but no local automated helper tests were run. `git diff --check` passed. Full YAML parsing was unavailable locally because the Python shim failed to spawn its child process with permission denied; `actionlint` and Node are not installed. Application tests were not run; this is a config/docs-only change.
+Commands/results: see [T01/T02 implementer handoff](handoffs/T01-T02-implementer.md) and the later review summaries below. Static workflow/config inspection confirms the job-level `actions: read`, `contents: read`, `pull-requests: write`, exact triggering run ID and run-attempt artifact name, default-branch-only checkout, JSON paths, `reportOnFailure: true`, removal of the custom parser/comment writer/summary writer and their dedicated tests, and retention of one bounded artifact-only downloader. The workflow now catches upstream action and publication-check failures, replaces any older report with an unavailable status, and fails the report job. The helper review inspected the exact file allowlist and ZIP/file size gates, but no local automated helper tests were run. `git diff --check` passed. Full YAML parsing was unavailable locally because the Python shim failed to spawn its child process with permission denied; `actionlint` and Node are not installed. Application tests were not run; this is a config/docs-only change.
 
 Application tests: N/A for this workflow/configuration and documentation-only change. Unit-test pass/fail behavior remains unchanged; static checks and later hosted workflow evidence are relevant.
 
@@ -91,7 +91,11 @@ Two additional threads arrived after the prior documentation push. Review commen
 
 Review comment [4267499600](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267499600) was valid. The archived proposal and record incorrectly stated that all downloader code had been removed. VCA-AC-04 and the record now distinguish the removed report parser/comment writer/summary writer from the retained bounded artifact-only extractor. The proposal also records that this helper was a post-approval security hardening adjustment. The workflow still uses the upstream action as its only coverage parser and renderer.
 
-These updates are documented in the [further review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md). All ten known inline review threads are now recorded as resolved after their replies; PR #80 remains open and hosted publication remains unverified until the workflow reaches `develop`.
+These updates are documented in the [further review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md). At that point, ten known inline review threads had been replied to and resolved; the later malformed-report finding is documented below. PR #80 remains open and hosted publication remains unverified until the workflow reaches `develop`.
+
+## Third PR review follow-up (2026-10-14)
+
+Review comment [4267555527](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267555527) identified that malformed `coverage-summary.json` passes ZIP/name/size checks and makes the upstream action fail parsing before it updates the prior comment. The report and publication-verification steps now continue long enough for a final failure handler to replace the prior bot report with an unavailable status; it then marks the report job failed. This preserves the upstream action as the parser and renderer while preventing stale coverage from remaining visible after an action failure. The fix is included in the current PR branch; hosted report behavior remains pending until this workflow is available on `develop` and a later PR run exercises it.
 
 ## Session evidence index
 
@@ -100,7 +104,7 @@ These updates are documented in the [further review summary](../../../logs/2026-
 | 2026-10-14 / action migration | [Implementation summary](../../../logs/2026-10-14-vitest-coverage-action-implementation.md) | Replace custom Vitest report with upstream action under issue #72 | Static evidence and independent review recorded; YAML parser and hosted verification pending |
 | 2026-10-14 / closeout | [Closeout summary](../../../logs/2026-10-14-vitest-coverage-action-closeout.md) | Record student acceptance, no-product sync, archive and PR preparation | Accepted with hosted report verification pending; static closeout checks recorded |
 | 2026-10-14 / PR review follow-up | [Review follow-up summary](../../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md) | Diagnose the missing hosted coverage comment and address five PR review threads | Fixes pushed as `a5b1348`; all five threads replied to and resolved; CI and Supabase CI passed; hosted action verification remains pending after the workflow reaches `develop` |
-| 2026-10-14 / additional PR review | [Additional review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md) | Follow the upstream workflow pattern and address three new review comments | Workflow fix pushed as `48b6922`; the next two comments corrected marker-source analysis and archive evidence; all ten known threads resolved; hosted report still runs old `develop` workflow and remains unverified |
+| 2026-10-14 / additional PR review | [Additional review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md) | Follow the upstream workflow pattern and address the subsequent review batches | Workflow fix pushed as `48b6922`; later batches corrected marker-source analysis, archive evidence, and stale-report handling after action parse/publication failures; hosted report still requires a post-`develop` PR run |
 
 ## Canonical sync and archive
 

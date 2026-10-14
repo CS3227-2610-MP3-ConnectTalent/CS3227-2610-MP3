@@ -200,62 +200,6 @@ jobs:
           VITEST_SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
           VITEST_SOURCE_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
 
-      - name: Replace stale coverage with an unavailable status
-        if: >-
-          steps.preflight.outputs.should-report == 'true' &&
-          (steps.preflight.outputs.artifact-available != 'true' ||
-           steps.preflight.outputs.marker-collision == 'true' ||
-           steps.download.outcome == 'failure')
-        uses: actions/github-script@v7
-        env:
-          PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
-          ARTIFACT_TOO_LARGE: ${{ steps.preflight.outputs.artifact-too-large }}
-          MARKER_COLLISION: ${{ steps.preflight.outputs.marker-collision }}
-          DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const prNumber = Number(process.env.PR_NUMBER);
-            const run = context.payload.workflow_run;
-            const marker = '<!-- vitest-coverage-report-marker-connecttalent -->';
-            const downloadFailed = process.env.DOWNLOAD_OUTCOME === 'failure';
-            const markerCollision = process.env.MARKER_COLLISION === 'true';
-            const artifactTooLarge = process.env.ARTIFACT_TOO_LARGE === 'true';
-            const reason = markerCollision
-              ? 'A non-bot PR comment uses the reserved coverage marker, so publication was skipped to leave that comment untouched.'
-              : downloadFailed
-                ? 'The attempt-scoped coverage artifact could not be safely downloaded or validated.'
-                : artifactTooLarge
-                  ? 'The attempt-scoped coverage artifact exceeds the 8 MiB compressed-size limit.'
-                  : 'No usable attempt-scoped coverage artifact was available.';
-            const body = `⚠️ Vitest coverage is unavailable. ${reason} See the [CI run](${run.html_url}) for its result.\n\n${marker}`;
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner,
-              repo,
-              issue_number: prNumber,
-              per_page: 100,
-            });
-            const existing = comments.find((comment) =>
-              comment.body?.includes(marker) && comment.user?.login === 'github-actions[bot]'
-            );
-            const written = existing
-              ? await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
-              : await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
-            const commentId = existing?.id || written.data?.id;
-            const { data: verification } = await github.rest.issues.getComment({
-              owner,
-              repo,
-              comment_id: commentId,
-            });
-            if (!verification.body?.includes(marker) || !verification.body.includes('Vitest coverage is unavailable')) {
-              core.setFailed('Could not verify the unavailable-coverage PR comment.');
-              return;
-            }
-            core.info(`Updated PR #${prNumber} with the current unavailable-coverage status.`);
-            if (downloadFailed || artifactTooLarge || markerCollision) {
-              core.setFailed('The coverage report could not be safely published.');
-            }
-
       - name: Record the publication baseline
         id: publication-baseline
         if: >-
@@ -268,11 +212,13 @@ jobs:
           script: core.setOutput('started-at', new Date().toISOString());
 
       - name: Report Vitest coverage
+        id: report
         if: >-
           steps.preflight.outputs.should-report == 'true' &&
           steps.preflight.outputs.artifact-available == 'true' &&
           steps.preflight.outputs.marker-collision != 'true' &&
           steps.download.outcome == 'success'
+        continue-on-error: true
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           name: connecttalent
@@ -282,11 +228,14 @@ jobs:
           threshold-icons: '{"0": "🔴", "90": "🟢"}'
 
       - name: Verify the action wrote the current PR report
+        id: verify
         if: >-
           steps.preflight.outputs.should-report == 'true' &&
           steps.preflight.outputs.artifact-available == 'true' &&
           steps.preflight.outputs.marker-collision != 'true' &&
-          steps.download.outcome == 'success'
+          steps.download.outcome == 'success' &&
+          steps.report.outcome == 'success'
+        continue-on-error: true
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
@@ -326,3 +275,69 @@ jobs:
               return;
             }
             core.info(`Verified the coverage report comment on PR #${prNumber}.`);
+
+      - name: Replace stale coverage with an unavailable status
+        if: >-
+          steps.preflight.outputs.should-report == 'true' &&
+          (steps.preflight.outputs.artifact-available != 'true' ||
+           steps.preflight.outputs.marker-collision == 'true' ||
+           steps.download.outcome == 'failure' ||
+           steps.report.outcome == 'failure' ||
+           steps.verify.outcome == 'failure')
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
+          ARTIFACT_TOO_LARGE: ${{ steps.preflight.outputs.artifact-too-large }}
+          MARKER_COLLISION: ${{ steps.preflight.outputs.marker-collision }}
+          DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
+          REPORT_OUTCOME: ${{ steps.report.outcome }}
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = Number(process.env.PR_NUMBER);
+            const run = context.payload.workflow_run;
+            const marker = '<!-- vitest-coverage-report-marker-connecttalent -->';
+            const downloadFailed = process.env.DOWNLOAD_OUTCOME === 'failure';
+            const markerCollision = process.env.MARKER_COLLISION === 'true';
+            const artifactTooLarge = process.env.ARTIFACT_TOO_LARGE === 'true';
+            const reportFailed = process.env.REPORT_OUTCOME === 'failure';
+            const verifyFailed = process.env.VERIFY_OUTCOME === 'failure';
+            const reason = markerCollision
+              ? 'A non-bot PR comment uses the reserved coverage marker, so publication was skipped to leave that comment untouched.'
+              : downloadFailed
+                ? 'The attempt-scoped coverage artifact could not be safely downloaded or validated.'
+                : artifactTooLarge
+                  ? 'The attempt-scoped coverage artifact exceeds the 8 MiB compressed-size limit.'
+                  : reportFailed
+                    ? 'The upstream coverage action could not parse or publish this artifact.'
+                    : verifyFailed
+                      ? 'The upstream coverage action did not create or update the expected report comment.'
+                      : 'No usable attempt-scoped coverage artifact was available.';
+            const body = `⚠️ Vitest coverage is unavailable. ${reason} See the [CI run](${run.html_url}) for its result.\n\n${marker}`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) =>
+              comment.body?.includes(marker) && comment.user?.login === 'github-actions[bot]'
+            );
+            const written = existing
+              ? await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
+              : await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+            const commentId = existing?.id || written.data?.id;
+            const { data: verification } = await github.rest.issues.getComment({
+              owner,
+              repo,
+              comment_id: commentId,
+            });
+            if (!verification.body?.includes(marker) || !verification.body.includes('Vitest coverage is unavailable')) {
+              core.setFailed('Could not verify the unavailable-coverage PR comment.');
+              return;
+            }
+            core.info(`Updated PR #${prNumber} with the current unavailable-coverage status.`);
+            if (downloadFailed || artifactTooLarge || markerCollision || reportFailed || verifyFailed) {
+              core.setFailed('The coverage report could not be safely published.');
+            }
