@@ -209,6 +209,33 @@ it("copies the Applicant's selected profile résumé into the selected job draft
   );
 });
 
+it("resolves the current saved revision for an explicit profile-copy retry", async () => {
+  mocks.downloadProfileResume.mockResolvedValueOnce({
+    info: { filename: "profile.pdf" },
+    bytes: new Blob(["synthetic profile PDF"]),
+  });
+  const retried = await POST(
+    post({
+      "x-resume-intent": "profile",
+      "x-resume-operation": operation,
+      "x-profile-resume": sourceId,
+      "x-application-revision": "2",
+      "x-resume-retry": "true",
+    }),
+    context(),
+  );
+
+  expect(retried.status).toBe(200);
+  expect(mocks.uploadResumeForJob).toHaveBeenLastCalledWith(
+    actor,
+    jobId,
+    null,
+    expect.any(File),
+    operation,
+    true,
+  );
+});
+
 it("rejects unknown intents and invalid non-empty revisions", async () => {
   const invalidRevision = await POST(
     post({ "x-application-revision": "2.5", "x-resume-intent": "remove" }),

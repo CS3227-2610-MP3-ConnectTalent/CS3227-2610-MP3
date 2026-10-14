@@ -75,7 +75,10 @@ async function updateResume(request: Request, context: UploadContext) {
   }
   if (intent !== "upload" && intent !== "profile")
     throw new Error("Choose an upload action.");
-  return uploadResume(request, context, revision, intent);
+  const retry = request.headers.get("x-resume-retry") === "true";
+  // A profile copy may commit before its response is lost; resolve that retry's revision server-side.
+  const retryRevision = intent === "profile" && retry ? null : revision;
+  return uploadResume(request, context, retryRevision, intent, retry);
 }
 
 function readRevision(request: Request) {
@@ -91,6 +94,7 @@ async function uploadResume(
   context: UploadContext,
   revision: number | null,
   intent: "upload" | "profile",
+  retry: boolean,
 ) {
   const operation = request.headers.get("x-resume-operation");
   if (!z.uuid().safeParse(operation).success)
@@ -102,7 +106,7 @@ async function uploadResume(
     revision,
     file,
     operation!,
-    request.headers.get("x-resume-retry") === "true",
+    retry,
   );
 }
 
