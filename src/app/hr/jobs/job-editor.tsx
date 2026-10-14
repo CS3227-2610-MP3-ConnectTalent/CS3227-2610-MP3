@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 import type { HRJob } from "@/lib/hr-jobs";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 
 export function JobEditor({
   job,
@@ -16,12 +17,11 @@ export function JobEditor({
       <JobIdentityFields job={job} />
       <JobCategoryField job={job} />
       <JobDescriptionFields job={job} />
-      <button
-        type="submit"
+      <PendingSubmitButton
+        label="Save draft"
+        pendingLabel="Saving draft…"
         className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground"
-      >
-        Save draft
-      </button>
+      />
     </form>
   );
 }
