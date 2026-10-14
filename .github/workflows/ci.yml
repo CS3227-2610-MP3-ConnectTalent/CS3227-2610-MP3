@@ -28,9 +28,9 @@ jobs:
         run: pnpm typecheck
       - name: Unit tests
         run: pnpm test:unit:coverage
-      - name: Renovate config tests
+      - name: CI utility tests
         if: always()
-        run: python -m unittest discover -s tests/ci -p "test_renovate_config.py" -v
+        run: python -m unittest discover -s tests/ci -p "test_*.py" -v
       - name: Build
         run: pnpm build
       - name: Upload Vitest reports

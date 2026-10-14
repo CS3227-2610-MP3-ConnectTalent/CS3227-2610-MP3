@@ -146,7 +146,9 @@ def _write_reports(reports, destination):
         target.write_bytes(content)
 
 
-def download_reports(api_url, token, repository, run_id, run_attempt, destination):
+def download_reports(
+    api_url, token, repository, run_id, run_attempt, destination, *, opener=None
+):
     """Fetch one attempt-scoped artifact and write only bounded coverage JSON."""
     parsed = urlparse(api_url or "")
     if parsed.scheme != "https" or not parsed.netloc:
@@ -162,7 +164,8 @@ def download_reports(api_url, token, repository, run_id, run_attempt, destinatio
     if isinstance(run_attempt, bool) or not isinstance(run_attempt, int) or run_attempt <= 0:
         raise ArtifactError("GitHub workflow run attempt is invalid")
 
-    opener = _open_github_request
+    if opener is None:
+        opener = _open_github_request
     base_url = api_url.rstrip("/")
     repository_path = f"/repos/{repository}"
     artifact_name = f"{ARTIFACT_NAME}-{run_attempt}"
