@@ -11,7 +11,8 @@ import {
   JobFilterController,
   type JobFilters,
 } from "@/lib/job-filter-controller";
-import { parseJobSearch } from "@/lib/job-search";
+import { isJobCategory } from "@/lib/job-categories";
+import { invalidJobSearchKey, parseJobSearch } from "@/lib/job-search";
 
 export function useJobListingFilters(initial: JobFilters) {
   const router = useRouter();
@@ -57,10 +58,19 @@ export function useJobListingFilters(initial: JobFilters) {
 function filtersFromLocation(): JobFilters {
   const params = new URLSearchParams(window.location.search);
   const values = params.getAll("q");
-  const parsed = parseJobSearch(values.length > 1 ? values : values[0]);
+  const rawQuery = values.length > 1 ? values : values[0];
+  const categories = params.getAll("category");
+  const rawCategory = categories.length > 1 ? categories : categories[0];
+  const parsed = parseJobSearch(rawQuery);
+  const invalidCategory =
+    rawCategory !== undefined && !isJobCategory(rawCategory);
   return {
     query: parsed.query,
-    invalid: parsed.invalid || params.getAll("category").length > 1,
-    category: params.get("category") ?? undefined,
+    invalid: parsed.invalid || invalidCategory,
+    invalidKey:
+      parsed.invalid || invalidCategory
+        ? invalidJobSearchKey(rawCategory, rawQuery)
+        : undefined,
+    category: typeof rawCategory === "string" ? rawCategory : undefined,
   };
 }

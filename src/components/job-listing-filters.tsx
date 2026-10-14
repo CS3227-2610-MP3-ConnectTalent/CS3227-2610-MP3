@@ -29,6 +29,7 @@ export function JobListingFilters({
 }) {
   const { filters, controller, pending } = useJobListingFilters(initial);
   const invalid = parseJobSearch(filters.query).invalid;
+  const loading = pending || filters.historyPending === true;
   return (
     <div className="grid items-start gap-7 lg:grid-cols-[230px_minmax(0,1fr)]">
       <CategorySidebar
@@ -43,12 +44,14 @@ export function JobListingFilters({
           invalid={invalid}
         />
         <p role="status" className="text-sm text-muted-foreground">
-          {pending ? "Updating roles…" : ""}
+          {loading ? "Updating roles…" : ""}
         </p>
         {invalid ? (
           <p role="alert">{JOB_SEARCH_ERROR}</p>
         ) : (
-          <div aria-busy={pending}>{children}</div>
+          <div aria-busy={loading}>
+            {filters.historyPending ? null : children}
+          </div>
         )}
       </div>
     </div>

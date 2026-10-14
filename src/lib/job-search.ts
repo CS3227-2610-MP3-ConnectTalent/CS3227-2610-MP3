@@ -5,6 +5,11 @@ export const JOB_SEARCH_DELAY = 300;
 export const JOB_SEARCH_ERROR =
   "Use one search phrase of at most 100 characters without control characters.";
 
+/** Distinguishes malformed history destinations while their server results load. */
+export function invalidJobSearchKey(category: unknown, query: unknown) {
+  return `invalid:${JSON.stringify([category ?? null, query ?? null])}`;
+}
+
 export function normalizeJobSearch(value: string) {
   return value.trim().replace(/\s+/gu, " ");
 }

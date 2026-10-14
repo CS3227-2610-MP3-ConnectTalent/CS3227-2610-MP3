@@ -4,10 +4,14 @@ export type JobFilters = {
   query: string;
   category?: string;
   invalid?: boolean;
+  invalidKey?: string;
+  historyPending?: boolean;
 };
 type Navigate = (url: string, replace: boolean) => void;
 const filterKey = (value: JobFilters) =>
-  value.invalid ? "invalid" : jobSearchUrl(value.query, value.category);
+  value.invalid
+    ? (value.invalidKey ?? "invalid")
+    : jobSearchUrl(value.query, value.category);
 
 /** Coordinates local typing with route acknowledgements; never holds job data. */
 export class JobFilterController {
@@ -18,6 +22,7 @@ export class JobFilterController {
   private timer?: ReturnType<typeof setTimeout>;
   private composing = false;
   private editing = false;
+  private historyTarget?: string;
 
   constructor(
     initial: JobFilters,
@@ -73,6 +78,7 @@ export class JobFilterController {
     if (url === this.confirmed && this.requested === undefined) return;
     // Next supersedes earlier navigations; they may never acknowledge.
     this.requested = url;
+    if (this.historyTarget !== undefined) this.historyTarget = url;
     this.navigate(url, replace);
   }
 
@@ -88,6 +94,16 @@ export class JobFilterController {
 
   confirm(next: JobFilters) {
     const url = filterKey(next);
+    if (this.historyTarget !== undefined) {
+      if (url !== this.historyTarget) return;
+      this.historyTarget = undefined;
+      this.confirmed = url;
+      this.requested = undefined;
+      this.update(
+        this.editing ? { ...this.state, historyPending: undefined } : next,
+      );
+      return;
+    }
     if (url === this.requested) {
       this.confirmed = url;
       this.requested = undefined;
@@ -102,6 +118,7 @@ export class JobFilterController {
     this.leave();
     this.requested = undefined;
     this.confirmed = filterKey(next);
-    this.update(next);
+    this.historyTarget = filterKey(next);
+    this.update({ ...next, historyPending: true });
   }
 }

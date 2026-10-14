@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { JobFilterController } from "@/lib/job-filter-controller";
+import {
+  JobFilterController,
+  type JobFilters,
+} from "@/lib/job-filter-controller";
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
@@ -86,6 +89,53 @@ it("does not erase newer typing when an older request completes", () => {
   expect(controller.getSnapshot().query).toBe("people");
 });
 
+it("history restoration waits for matching results before clearing pending", () => {
+  const controller = new JobFilterController({ query: "software" }, vi.fn());
+  controller.restore({ query: "", invalid: true });
+  expect(controller.getSnapshot()).toEqual({
+    query: "",
+    invalid: true,
+    historyPending: true,
+  });
+  controller.confirm({ query: "software" });
+  expect(controller.getSnapshot().historyPending).toBe(true);
+  controller.confirm({ query: "", invalid: true });
+  expect(controller.getSnapshot()).toEqual({ query: "", invalid: true });
+});
+
+it("does not accept an old invalid response for a different invalid history URL", () => {
+  const old = {
+    query: "",
+    category: "bogus",
+    invalid: true,
+    invalidKey: 'invalid:["bogus",null]',
+  } as JobFilters;
+  const destination = {
+    query: "",
+    invalid: true,
+    invalidKey: 'invalid:[null,["software","people"]]',
+  } as JobFilters;
+  const controller = new JobFilterController(old, vi.fn());
+  controller.restore(destination);
+  controller.confirm(old);
+  expect(controller.getSnapshot().historyPending).toBe(true);
+  controller.confirm(destination);
+  expect(controller.getSnapshot()).toEqual(destination);
+});
+
+it("a newer search supersedes a pending history restoration", () => {
+  const navigate = vi.fn();
+  const controller = new JobFilterController({ query: "software" }, navigate);
+  controller.restore({ query: "sales" });
+  controller.edit("recruitment");
+  controller.go();
+  controller.confirm({ query: "sales" });
+  expect(controller.getSnapshot().historyPending).toBe(true);
+  controller.confirm({ query: "recruitment" });
+  expect(controller.getSnapshot()).toEqual({ query: "recruitment" });
+  expect(navigate).toHaveBeenCalledExactlyOnceWith("/?q=recruitment", false);
+});
+
 it("history restoration and leaving cancel stale timers", () => {
   const navigate = vi.fn();
   const controller = new JobFilterController({ query: "software" }, navigate);
@@ -96,6 +146,7 @@ it("history restoration and leaving cancel stale timers", () => {
   expect(controller.getSnapshot()).toEqual({
     query: "sales",
     category: "sales",
+    historyPending: true,
   });
   controller.edit("new");
   controller.leave();

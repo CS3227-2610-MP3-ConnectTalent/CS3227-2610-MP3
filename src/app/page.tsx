@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { isJobCategory } from "@/lib/job-categories";
-import { parseJobSearch } from "@/lib/job-search";
+import { invalidJobSearchKey, parseJobSearch } from "@/lib/job-search";
 import { listPublishedJobs } from "@/lib/jobs";
 import { JobListingFilters } from "@/components/job-listing-filters";
 import { JobResults } from "@/components/job-listing-results";
@@ -33,6 +33,10 @@ export default async function Home({
         initial={{
           query: search.query,
           invalid: search.invalid || invalidCategory,
+          invalidKey:
+            search.invalid || invalidCategory
+              ? invalidJobSearchKey(rawCategory, q)
+              : undefined,
           category: typeof rawCategory === "string" ? rawCategory : undefined,
         }}
         invalidCategory={invalidCategory}

@@ -59,6 +59,31 @@ test("explicit Search, All roles, refresh and back/forward restore filters", asy
   ).toBeVisible();
 });
 
+test("history transition hides stale cards and announces pending results", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .getByRole("searchbox", { name: "Search open roles" })
+    .fill("software");
+  await expect(page).toHaveURL(/q=software/);
+  await page.getByRole("link", { name: "Clear search", exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator("a.job-card").first()).toBeVisible();
+  await page.evaluate(() => {
+    history.pushState(null, "", "/?q=software&q=people");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  });
+  await expect(page).toHaveURL(/q=software&q=people/);
+  await expect(
+    page.getByRole("status").filter({ hasText: "Updating roles" }),
+  ).toBeVisible();
+  await expect(page.locator("a.job-card")).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("alert")).toContainText("Use one search phrase");
+  await expect(page.locator("a.job-card")).toHaveCount(0);
+});
+
 test("debounce replaces history and composition waits until completed", async ({
   page,
 }) => {
