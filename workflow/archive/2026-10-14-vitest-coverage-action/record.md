@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; all eleven PR #80 review threads currently known have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; all twelve PR #80 review threads currently known have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -113,3 +113,11 @@ Review comment [4267555527](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3
 - Archive decision/date/path: accepted and archived on 2026-10-14 at `workflow/archive/2026-10-14-vitest-coverage-action/`.
 - Navigation repairs after moving: packet links and active/archive indexes updated and checked on 2026-10-14.
 - Outstanding work: after integration, verify hosted comment creation/update and close issue #72 only when that evidence is available.
+
+## Fourth PR review follow-up (2026-10-14)
+
+PR comment [4267792260](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267792260) correctly identified that the retained artifact downloader's trust boundary had lost its regression tests. Commit [a18298e](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/a18298ea4e42b97bb2a34e58278c7d8b8d3bd7c9) restores an injectable opener and `tests/ci/test_download_vitest_artifact.py`. The suite covers attempt-scoped artifact selection, metadata and downloaded ZIP size limits, decompressed report limits, exact path allowlisting, duplicate entries, ZIP and destination symlinks, and same-host/cross-host redirect authorization. `.github/workflows/ci.yml` now discovers all `tests/ci/test_*.py` utility tests instead of only the Renovate test. VCA-AC-04 and the approved proposal were updated to distinguish removed parser/comment-writer tests from retained downloader boundary tests.
+
+Local verification: `python -m unittest discover -s tests/ci -p "test_*.py" -v` passed all 14 tests, including the existing Renovate test, and `git diff --check` passed. GitHub CI [#38541255840](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38541255840) passed on `a18298e`; Supabase CI [#38541255596](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38541255596) was still in progress at the time of this record. The review comment was answered and resolved after the fix was pushed; a post-mutation thread fetch showed all twelve known review threads resolved.
+
+The report comment itself remains unverified: `workflow_run` uses the default-branch workflow, so a future PR CI completion after this workflow reaches `develop` must exercise the upstream action. PR #80 remains open and unmerged; no separate acceptance of this latest follow-up was recorded.
