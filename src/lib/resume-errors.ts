@@ -49,7 +49,7 @@ const preparationFailures = {
   RESUME_UPLOAD_PENDING: {
     status: 409,
     message:
-      "A previous résumé upload is still pending. Use Retry upload to recover it, or refresh the application to check its status.",
+      "A previous résumé change is still pending. Use Retry below to recover it.",
   },
   RESUME_JOB_CLOSED: {
     status: 409,

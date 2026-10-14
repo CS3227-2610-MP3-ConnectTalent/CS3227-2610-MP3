@@ -12,6 +12,8 @@ export function useResumePanelActions(props: ResumePanelProps) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [uploadFailed, setUploadFailed] = useState(false);
+  const [profileCopyRetryAvailable, setProfileCopyRetryAvailable] =
+    useState(false);
   const [attachment, setAttachment] = useState(props.resume);
   const state = {
     file,
@@ -19,11 +21,13 @@ export function useResumePanelActions(props: ResumePanelProps) {
     pending,
     message,
     uploadFailed,
+    profileCopyRetryAvailable,
     attachment,
     setOperation,
     setPending,
     setMessage,
     setUploadFailed,
+    setProfileCopyRetryAvailable,
     setAttachment,
   };
   const change = (intent: ResumeIntent, retry = false) =>
@@ -32,6 +36,7 @@ export function useResumePanelActions(props: ResumePanelProps) {
     setFile(next);
     setOperation(crypto.randomUUID());
     setUploadFailed(false);
+    setProfileCopyRetryAvailable(false);
     setMessage("");
   };
   return { ...state, selectFile, change };
@@ -43,11 +48,13 @@ type ActionState = {
   pending: boolean;
   message: string;
   uploadFailed: boolean;
+  profileCopyRetryAvailable: boolean;
   attachment: ResumeMetadata | null;
   setOperation: (value: string) => void;
   setPending: (value: boolean) => void;
   setMessage: (value: string) => void;
   setUploadFailed: (value: boolean) => void;
+  setProfileCopyRetryAvailable: (value: boolean) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
 };
 
@@ -69,13 +76,18 @@ async function performResumeChange(
     await sendResumeRequest(props, state, intent, retry, operation);
   } catch {
     state.setUploadFailed(intent === "upload");
-    state.setMessage(
-      "We could not confirm the change. Reload to check your saved résumé.",
-    );
+    state.setProfileCopyRetryAvailable(intent === "profile");
+    state.setMessage(interruptedChangeMessage(intent));
   } finally {
     finishRequest(props, state);
     refresh();
   }
+}
+
+function interruptedChangeMessage(intent: ResumeIntent) {
+  if (intent === "profile")
+    return "Profile résumé status is unclear. Use Retry profile copy below.";
+  return "We could not confirm the change. Reload to check your saved résumé.";
 }
 
 function canChange(
@@ -102,6 +114,7 @@ function startRequest(props: ResumePanelProps, state: ActionState) {
   props.onPending?.(true);
   state.setMessage("");
   state.setUploadFailed(false);
+  state.setProfileCopyRetryAvailable(false);
 }
 
 function finishRequest(props: ResumePanelProps, state: ActionState) {
@@ -187,6 +200,11 @@ async function applyResponse(
     revision: typeof result.revision === "number" ? result.revision : undefined,
   });
   state.setUploadFailed(intent === "upload" && !response.ok);
+  state.setProfileCopyRetryAvailable(
+    intent === "profile" &&
+      !response.ok &&
+      result.code === "RESUME_UPLOAD_PENDING",
+  );
   state.setMessage(
     responseMessage(response.ok, result.error, result.reference),
   );

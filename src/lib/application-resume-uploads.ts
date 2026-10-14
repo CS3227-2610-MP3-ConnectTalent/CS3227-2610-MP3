@@ -33,6 +33,7 @@ export async function uploadApplicationResume(
   operation: string = randomUUID(),
   retry = false,
 ) {
+  const normalizedOperation = normalizeOperation(operation);
   const validated = await validateResume(file);
   const client = resumeMutationClient();
   if (retry) await recoverPendingJobResume(client, actor, job, revision);
@@ -41,14 +42,14 @@ export async function uploadApplicationResume(
     actor,
     job,
     revision,
-    operation,
+    normalizedOperation,
     validated,
   );
   await finishPreparedJobResume(
     client,
     actor,
     job,
-    operation,
+    normalizedOperation,
     validated,
     prepared,
   );
@@ -125,6 +126,7 @@ export async function uploadResumeForJob(
   operation: string,
   retry = false,
 ) {
+  const normalizedOperation = normalizeOperation(operation);
   const validated = await validateResume(file);
   const client = resumeMutationClient();
   const expectedRevision = await resolveRetryRevision(
@@ -141,14 +143,14 @@ export async function uploadResumeForJob(
     actor,
     job,
     expectedRevision,
-    operation,
+    normalizedOperation,
     validated,
   );
   await finishPreparedJobResume(
     client,
     actor,
     job,
-    operation,
+    normalizedOperation,
     validated,
     prepared,
   );
@@ -187,7 +189,8 @@ async function prepareJobResume(
   }
   if (
     !prepared.success ||
-    prepared.data.object_path !== `${prepared.data.id}/${operation}.pdf`
+    prepared.data.object_path !==
+      `${prepared.data.id.toLowerCase()}/${operation}.pdf`
   ) {
     const reference = randomUUID();
     logPreparationFailure(
@@ -202,6 +205,12 @@ async function prepareJobResume(
     );
   }
   return prepared.data;
+}
+
+function normalizeOperation(operation: string) {
+  const parsed = z.uuid().safeParse(operation);
+  if (!parsed.success) throw new Error("Choose the file again.");
+  return parsed.data.toLowerCase();
 }
 
 async function finishPreparedJobResume(

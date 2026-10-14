@@ -25,6 +25,7 @@ export function ResumePanel(props: ResumePanelProps) {
         pending={state.pending}
         attachment={state.attachment}
         uploadFailed={state.uploadFailed}
+        profileCopyRetryAvailable={state.profileCopyRetryAvailable}
         onSelect={state.selectFile}
         onChange={state.change}
       />
@@ -62,6 +63,7 @@ function ResumeEditor({
   pending,
   attachment,
   uploadFailed,
+  profileCopyRetryAvailable,
   onSelect,
   onChange,
 }: {
@@ -70,6 +72,7 @@ function ResumeEditor({
   pending: boolean;
   attachment: ResumeMetadata | null;
   uploadFailed: boolean;
+  profileCopyRetryAvailable: boolean;
   onSelect: (file: File | null) => void;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
 }) {
@@ -85,6 +88,7 @@ function ResumeEditor({
         profileResume={props.profileResume ?? null}
         profileMode={props.profileMode ?? false}
         uploadFailed={uploadFailed}
+        profileCopyRetryAvailable={profileCopyRetryAvailable}
         onChange={onChange}
       />
     </div>
@@ -131,6 +135,7 @@ function ResumeActionButtons({
   profileResume,
   profileMode,
   uploadFailed,
+  profileCopyRetryAvailable,
   onChange,
 }: {
   file: File | null;
@@ -139,6 +144,7 @@ function ResumeActionButtons({
   profileResume: ResumeMetadata | null;
   profileMode: boolean;
   uploadFailed: boolean;
+  profileCopyRetryAvailable: boolean;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
 }) {
   return (
@@ -155,7 +161,7 @@ function ResumeActionButtons({
           onClick={() => void onChange("remove")}
         />
       )}
-      {!profileMode && profileResume && (
+      {!profileMode && profileResume && !profileCopyRetryAvailable && (
         <UseProfileButton
           pending={pending}
           onClick={() => void onChange("profile")}
@@ -164,7 +170,15 @@ function ResumeActionButtons({
       {uploadFailed && file && (
         <RetryButton
           pending={pending}
+          label="Retry upload"
           onClick={() => void onChange("upload", true)}
+        />
+      )}
+      {profileCopyRetryAvailable && !profileMode && profileResume && (
+        <RetryButton
+          pending={pending}
+          label="Retry profile copy"
+          onClick={() => void onChange("profile", true)}
         />
       )}
     </div>
@@ -234,9 +248,11 @@ function UseProfileButton({
 
 function RetryButton({
   pending,
+  label,
   onClick,
 }: {
   pending: boolean;
+  label: string;
   onClick: () => void;
 }) {
   return (
@@ -246,7 +262,7 @@ function RetryButton({
       onClick={onClick}
       className="rounded-lg border px-4 py-2 disabled:opacity-50"
     >
-      Retry upload
+      {label}
     </button>
   );
 }
