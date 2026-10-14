@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; the first ten PR #80 review threads were replied to and resolved, and a third follow-up addresses a newly arrived malformed-report finding. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; all eleven PR #80 review threads currently known have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -12,7 +12,7 @@ Date: 2026-10-14
 - Change ID/classification: `2026-10-14-vitest-coverage-action`; CI/reporting tooling defect.
 - GitHub issue: [#72](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/72); related accepted contract [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58).
 - Branch: `fix/72-vitest-coverage-action`.
-- Latest implementation commit: `48b69220e863d9a606718c5d693b1a9fe7a1f1dc`; subsequent review documentation commits are linked from the session summaries.
+- Latest workflow implementation commit: [b632f53](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/b632f536353ebdc6f974781e79a6fc264f195dd8). The archive corrections are in [cb3ba43](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/cb3ba43ba98e84318a7cae273467e149b3a7b900).
 - Pull request: [#80](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80), open against `develop`.
 - Proposal: [proposal.md](proposal.md).
 - Design: [design.md](design.md).
@@ -95,7 +95,7 @@ These updates are documented in the [further review summary](../../../logs/2026-
 
 ## Third PR review follow-up (2026-10-14)
 
-Review comment [4267555527](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267555527) identified that malformed `coverage-summary.json` passes ZIP/name/size checks and makes the upstream action fail parsing before it updates the prior comment. The report and publication-verification steps now continue long enough for a final failure handler to replace the prior bot report with an unavailable status; it then marks the report job failed. This preserves the upstream action as the parser and renderer while preventing stale coverage from remaining visible after an action failure. The fix is included in the current PR branch; hosted report behavior remains pending until this workflow is available on `develop` and a later PR run exercises it.
+Review comment [4267555527](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4267555527) identified that malformed `coverage-summary.json` passes ZIP/name/size checks and makes the upstream action fail parsing before it updates the prior comment. The report and publication-verification steps now continue long enough for a final failure handler to replace the prior bot report with an unavailable status; it then marks the report job failed. This preserves the upstream action as the parser and renderer while preventing stale coverage from remaining visible after an action failure. The fix was pushed in [b632f53](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/b632f536353ebdc6f974781e79a6fc264f195dd8). The comment was answered and its thread resolved; the final thread fetch showed all eleven known threads resolved. Hosted report behavior remains pending until this workflow is available on `develop` and a later PR run exercises it.
 
 ## Session evidence index
 
