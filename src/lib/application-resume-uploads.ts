@@ -11,6 +11,10 @@ import {
   cleanupApplicationResume,
   resumeMutationClient,
 } from "./application-resume-storage";
+import {
+  ResumeUploadPreparationError,
+  type ResumePreparationErrorCode,
+} from "./resume-errors";
 
 type MutationClient = ReturnType<typeof resumeMutationClient>;
 type ValidatedResume = Awaited<ReturnType<typeof validateResume>>;
@@ -30,41 +34,24 @@ export async function uploadApplicationResume(
   retry = false,
 ) {
   const validated = await validateResume(file);
-  return uploadValidatedApplicationResume(
-    actor,
-    job,
-    revision,
-    validated,
-    operation,
-    retry,
-  );
-}
-
-async function uploadValidatedApplicationResume(
-  actor: string,
-  job: string,
-  revision: number,
-  validated: ValidatedResume,
-  operation: string,
-  retry: boolean,
-) {
   const client = resumeMutationClient();
-  const args = uploadArguments(actor, job, revision, operation);
-  const existing = await getExistingUpload(client, operation);
-  if (existing?.state === "ready")
-    return reconcileExistingUpload(client, existing, actor, validated, args);
-  if (retry) await recoverPendingUpload(client, actor, job, revision);
-  const objectPath = await reserveUpload(client, args, validated);
-  await uploadAndFinalize(
+  if (retry) await recoverPendingJobResume(client, actor, job, revision);
+  const prepared = await prepareJobResume(
     client,
     actor,
     job,
-    objectPath,
-    validated.bytes,
+    revision,
     operation,
-    args,
+    validated,
   );
-  await cleanupApplicationResume(actor, job);
+  await finishPreparedJobResume(
+    client,
+    actor,
+    job,
+    operation,
+    validated,
+    prepared,
+  );
 }
 
 function uploadArguments(
@@ -79,87 +66,6 @@ function uploadArguments(
     p_revision: revision,
     p_operation: operation,
   };
-}
-
-async function getExistingUpload(client: MutationClient, operation: string) {
-  const { data, error } = await client
-    .from("application_resume_objects")
-    .select("id,applicant_id,filename,sha256,byte_size,state")
-    .eq("id", operation)
-    .maybeSingle();
-  if (error)
-    throw new Error(
-      "We could not check the previous upload. Reload and try again.",
-    );
-  return data;
-}
-
-async function reconcileExistingUpload(
-  client: MutationClient,
-  existing: NonNullable<Awaited<ReturnType<typeof getExistingUpload>>>,
-  actor: string,
-  validated: ValidatedResume,
-  args: UploadArguments,
-) {
-  if (!matchesExistingUpload(existing, actor, validated))
-    throw new Error(
-      "Choose the same PDF to retry this operation, or choose a new file.",
-    );
-  const { error } = await client.rpc("finalize_application_resume", args);
-  if (error)
-    throw new Error(
-      "We could not reconcile the upload. Reload to check the saved résumé.",
-    );
-}
-
-function matchesExistingUpload(
-  existing: NonNullable<Awaited<ReturnType<typeof getExistingUpload>>>,
-  actor: string,
-  validated: ValidatedResume,
-) {
-  return (
-    existing.applicant_id === actor &&
-    existing.sha256 === validated.sha256 &&
-    existing.filename === validated.filename &&
-    existing.byte_size === validated.bytes.length
-  );
-}
-
-async function recoverPendingUpload(
-  client: MutationClient,
-  actor: string,
-  job: string,
-  revision: number,
-) {
-  const { error } = await client.rpc("recover_pending_application_resume", {
-    p_actor: actor,
-    p_job: job,
-    p_revision: revision,
-  });
-  if (error)
-    throw new Error("Reload the saved draft before retrying this upload.");
-  await cleanupApplicationResume(actor, job);
-}
-
-async function reserveUpload(
-  client: MutationClient,
-  args: UploadArguments,
-  validated: ValidatedResume,
-) {
-  const { data: objectPath, error } = await client.rpc(
-    "reserve_application_resume",
-    {
-      ...args,
-      p_filename: validated.filename,
-      p_size: validated.bytes.length,
-      p_sha256: validated.sha256,
-    },
-  );
-  if (error || typeof objectPath !== "string")
-    throw new Error(
-      "Save the latest draft and use Retry upload if an earlier upload was interrupted.",
-    );
-  return objectPath;
 }
 
 async function uploadAndFinalize(
@@ -238,15 +144,14 @@ export async function uploadResumeForJob(
     operation,
     validated,
   );
-  if (prepared.state === "pending")
-    await uploadValidatedApplicationResume(
-      actor,
-      job,
-      prepared.revision,
-      validated,
-      operation,
-      false,
-    );
+  await finishPreparedJobResume(
+    client,
+    actor,
+    job,
+    operation,
+    validated,
+    prepared,
+  );
 }
 
 async function prepareJobResume(
@@ -270,10 +175,105 @@ async function prepareJobResume(
     .object({
       id: z.uuid(),
       revision: z.number().int().positive(),
+      object_path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/i),
       state: z.enum(["ready", "pending"]),
     })
     .safeParse(data);
-  if (error || !prepared.success)
-    throw new Error("Reload the application before retrying this upload.");
+  if (error) {
+    const code = preparationCode(error);
+    const reference = randomUUID();
+    logPreparationFailure(reference, code, error);
+    throw new ResumeUploadPreparationError(code, reference);
+  }
+  if (
+    !prepared.success ||
+    prepared.data.object_path !== `${prepared.data.id}/${operation}.pdf`
+  ) {
+    const reference = randomUUID();
+    logPreparationFailure(
+      reference,
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      undefined,
+      "invalid_response",
+    );
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      reference,
+    );
+  }
   return prepared.data;
+}
+
+async function finishPreparedJobResume(
+  client: MutationClient,
+  actor: string,
+  job: string,
+  operation: string,
+  validated: ValidatedResume,
+  prepared: Awaited<ReturnType<typeof prepareJobResume>>,
+) {
+  if (prepared.state === "ready") return;
+  const args = uploadArguments(actor, job, prepared.revision, operation);
+  await uploadAndFinalize(
+    client,
+    actor,
+    job,
+    prepared.object_path,
+    validated.bytes,
+    operation,
+    args,
+  );
+  await cleanupApplicationResume(actor, job);
+}
+
+function preparationCode(error: unknown): ResumePreparationErrorCode {
+  const details = asRecord(error);
+  if (details?.code === "23505") return "RESUME_UPLOAD_PENDING";
+  if (details?.code !== "P0001") return "RESUME_UPLOAD_PREPARATION_FAILED";
+  switch (details.message) {
+    case "Job is not open for applications":
+      return "RESUME_JOB_CLOSED";
+    case "Application changed; reload before uploading":
+    case "Editable saved draft required":
+    case "Application changed; reload before saving":
+      return "RESUME_APPLICATION_CHANGED";
+    case "Upload operation cannot be reused":
+      return "RESUME_UPLOAD_OPERATION_CONFLICT";
+    default:
+      return "RESUME_UPLOAD_PREPARATION_FAILED";
+  }
+}
+
+function logPreparationFailure(
+  reference: string,
+  code: ResumePreparationErrorCode,
+  error: unknown,
+  category = "rpc_error",
+) {
+  const details = asRecord(error);
+  const sqlState =
+    typeof details?.code === "string" && /^[A-Z0-9]{5}$/.test(details.code)
+      ? details.code
+      : undefined;
+  const status =
+    typeof details?.status === "number" &&
+    Number.isInteger(details.status) &&
+    details.status >= 100 &&
+    details.status <= 599
+      ? details.status
+      : undefined;
+  console.error("resume_upload_prepare_failed", {
+    reference,
+    stage: "prepare_application_resume",
+    code,
+    category,
+    ...(sqlState ? { sqlState } : {}),
+    ...(status ? { upstreamStatus: status } : {}),
+  });
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null;
 }

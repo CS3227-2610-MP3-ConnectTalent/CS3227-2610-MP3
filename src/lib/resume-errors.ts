@@ -45,12 +45,51 @@ const failures = {
   },
 } as const;
 
+const preparationFailures = {
+  RESUME_UPLOAD_PENDING: {
+    status: 409,
+    message:
+      "A previous résumé upload is still pending. Use Retry upload to recover it, or refresh the application to check its status.",
+  },
+  RESUME_JOB_CLOSED: {
+    status: 409,
+    message: "This job is no longer accepting résumé uploads.",
+  },
+  RESUME_APPLICATION_CHANGED: {
+    status: 409,
+    message:
+      "Your application changed. Refresh it before uploading the résumé.",
+  },
+  RESUME_UPLOAD_OPERATION_CONFLICT: {
+    status: 409,
+    message:
+      "This upload could not be matched to the selected file. Select the file again and retry.",
+  },
+  RESUME_UPLOAD_PREPARATION_FAILED: {
+    status: 503,
+    message:
+      "We could not prepare this résumé upload. Try again later and share the reference code if the problem continues.",
+  },
+} as const;
+
+export type ResumePreparationErrorCode = keyof typeof preparationFailures;
+
 export type ResumeErrorCode = keyof typeof failures;
 
 export class ResumeValidationError extends Error {
   constructor(readonly code: ResumeErrorCode) {
     super(failures[code].message);
     this.name = "ResumeValidationError";
+  }
+}
+
+export class ResumeUploadPreparationError extends Error {
+  constructor(
+    readonly code: ResumePreparationErrorCode,
+    readonly reference: string,
+  ) {
+    super(preparationFailures[code].message);
+    this.name = "ResumeUploadPreparationError";
   }
 }
 
@@ -61,6 +100,21 @@ export function resumeValidationFailure(error: unknown) {
   return { code: error.code, error: failure.message, status: failure.status };
 }
 
+export function resumeUploadPreparationFailure(error: unknown) {
+  if (!(error instanceof ResumeUploadPreparationError)) return null;
+  const failure = preparationFailures[error.code];
+  return {
+    code: error.code,
+    error: failure.message,
+    reference: error.reference,
+    status: failure.status,
+  };
+}
+
 export function resumeFailureStatus(error: unknown) {
-  return resumeValidationFailure(error)?.status ?? 400;
+  return (
+    resumeValidationFailure(error)?.status ??
+    resumeUploadPreparationFailure(error)?.status ??
+    400
+  );
 }

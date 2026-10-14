@@ -37,6 +37,22 @@ beforeEach(() => {
   mocks.update.mockReturnValue({
     eq: () => ({ eq: () => Promise.resolve({ error: null }) }),
   });
+  mocks.rpc.mockImplementation(
+    async (name: string, args: { p_operation?: string } = {}) =>
+      name === "prepare_application_resume"
+        ? {
+            data: {
+              id: "44000000-0000-4000-8000-000000000301",
+              revision: 1,
+              object_path: `44000000-0000-4000-8000-000000000301/${args.p_operation}.pdf`,
+              state: "pending",
+            },
+            error: null,
+          }
+        : name === "claim_resume_cleanup"
+          ? { data: [], error: null }
+          : { error: null },
+  );
 });
 it("keeps cleanup tombstones retryable when cancel/delete happens before upload completes", async () => {
   let resolveUpload!: (value: { error: null }) => void;
@@ -46,11 +62,21 @@ it("keeps cleanup tombstones retryable when cancel/delete happens before upload 
         resolveUpload = resolve;
       }),
   );
-  const key =
-    "44000000-0000-4000-8000-000000000101/44000000-0000-4000-8000-000000000201.pdf";
+  let key = "";
   mocks.rpc.mockImplementation(async (name: string) => {
-    if (name === "reserve_application_resume")
-      return { data: key, error: null };
+    if (name === "prepare_application_resume") {
+      const operation = mocks.rpc.mock.calls.at(-1)?.[1].p_operation;
+      key = `44000000-0000-4000-8000-000000000301/${operation}.pdf`;
+      return {
+        data: {
+          id: "44000000-0000-4000-8000-000000000301",
+          revision: 1,
+          object_path: key,
+          state: "pending",
+        },
+        error: null,
+      };
+    }
     if (name === "finalize_application_resume")
       return { error: { message: "canceled" } };
     if (name === "claim_resume_cleanup")
@@ -77,18 +103,19 @@ it("keeps cleanup tombstones retryable when cancel/delete happens before upload 
 });
 it("reconciles a repeated HTTP operation without another Storage upload", async () => {
   const operation = "44000000-0000-4000-8000-000000000201";
-  mocks.existing.mockResolvedValue({
-    data: {
-      id: operation,
-      applicant_id: "actor",
-      filename: "synthetic.pdf",
-      sha256: "a".repeat(64),
-      byte_size: 1,
-      state: "ready",
-    },
-    error: null,
-  });
-  mocks.rpc.mockResolvedValue({ data: operation, error: null });
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "prepare_application_resume"
+      ? {
+          data: {
+            id: "44000000-0000-4000-8000-000000000301",
+            revision: 1,
+            object_path: `44000000-0000-4000-8000-000000000301/${operation}.pdf`,
+            state: "ready",
+          },
+          error: null,
+        }
+      : { error: null },
+  );
   await uploadApplicationResume(
     "actor",
     "job",
@@ -98,19 +125,22 @@ it("reconciles a repeated HTTP operation without another Storage upload", async 
   );
   expect(mocks.upload).not.toHaveBeenCalled();
   expect(mocks.rpc).toHaveBeenCalledWith(
-    "finalize_application_resume",
-    expect.objectContaining({
-      p_operation: operation,
-      p_actor: "actor",
-      p_job: "job",
-    }),
+    "prepare_application_resume",
+    expect.objectContaining({ p_operation: operation }),
   );
+  expect(mocks.existing).not.toHaveBeenCalled();
 });
 it("recovers an owned stale pending upload only on explicit retry", async () => {
   mocks.rpc.mockImplementation(async (name: string) =>
-    name === "reserve_application_resume"
+    name === "prepare_application_resume"
       ? {
-          data: "44000000-0000-4000-8000-000000000101/44000000-0000-4000-8000-000000000201.pdf",
+          data: {
+            id: "44000000-0000-4000-8000-000000000301",
+            revision: 1,
+            object_path:
+              "44000000-0000-4000-8000-000000000301/44000000-0000-4000-8000-000000000201.pdf",
+            state: "pending",
+          },
           error: null,
         }
       : name === "claim_resume_cleanup"
@@ -131,4 +161,16 @@ it("recovers an owned stale pending upload only on explicit retry", async () => 
     p_revision: 1,
   });
   expect(mocks.upload).toHaveBeenCalledTimes(1);
+});
+
+it("does not select résumé-object rows during application upload preparation", async () => {
+  const operation = "44000000-0000-4000-8000-000000000201";
+  await uploadApplicationResume(
+    "actor",
+    "job",
+    1,
+    new File(["synthetic"], "synthetic.pdf"),
+    operation,
+  );
+  expect(mocks.existing).not.toHaveBeenCalled();
 });

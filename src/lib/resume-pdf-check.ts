@@ -1,5 +1,6 @@
 import "server-only";
 import { createRequire } from "node:module";
+import { performance } from "node:perf_hooks";
 import { Worker } from "node:worker_threads";
 import { pathToFileURL } from "node:url";
 import { ResumeValidationError } from "./resume-errors";
@@ -8,7 +9,9 @@ import { ResumeValidationError } from "./resume-errors";
 // Parse page structure only, with no rendering, text extraction or actions.
 const workerSource = `
   const { parentPort, workerData } = require('node:worker_threads');
+  const reportPhase = phase => parentPort.postMessage({ type: 'phase', phase });
   async function inspect(pdfjs) {
+    reportPhase('document-load');
     const task = pdfjs.getDocument({
       data: workerData.bytes, verbosity: 0, stopAtErrors: true,
       enableXfa: false, useWorkerFetch: false, useWasm: false,
@@ -17,6 +20,7 @@ const workerSource = `
     });
     try {
       const doc = await task.promise;
+      reportPhase('page-structure');
       if (doc.numPages < 1) return 'invalid';
       for (let page = 1; page <= doc.numPages; page++) {
         await doc.getPage(page);
@@ -29,9 +33,12 @@ const workerSource = `
     }
   }
   async function run() {
-    const pdfjs = await import(workerData.library);
+    reportPhase('parser-import');
+    const [pdfjs, parser] = await Promise.all([
+      import(workerData.library), import(workerData.parser)
+    ]);
     // Preload the parser so a missing runtime module is a service failure.
-    globalThis.pdfjsWorker = await import(workerData.parser);
+    globalThis.pdfjsWorker = parser;
     return inspect(pdfjs);
   }
   run().then(result => parentPort.postMessage(result))
@@ -76,6 +83,8 @@ function resultError(result: unknown) {
 
 export async function checkPdf(bytes: Uint8Array) {
   const worker = startPdfWorker(bytes);
+  const startedAt = performance.now();
+  let phase = "worker-startup";
   await new Promise<void>((resolve, reject) => {
     let settled = false;
     const finish = (error: ResumeValidationError | null) => {
@@ -88,14 +97,47 @@ export async function checkPdf(bytes: Uint8Array) {
       else resolve();
     };
     const timer = setTimeout(() => {
+      console.warn("resume_pdf_check_timeout", {
+        phase,
+        elapsedMs: Math.round(performance.now() - startedAt),
+      });
       finish(new ResumeValidationError("RESUME_VALIDATION_TIMEOUT"));
-    }, 3000);
-    worker.once("message", (result: unknown) => finish(resultError(result)));
-    worker.once("error", () =>
-      finish(new ResumeValidationError("RESUME_VALIDATOR_UNAVAILABLE")),
-    );
-    worker.once("exit", () =>
-      finish(new ResumeValidationError("RESUME_VALIDATOR_UNAVAILABLE")),
-    );
+    }, 5_000);
+    worker.on("message", (result: unknown) => {
+      if (isPhaseMessage(result)) {
+        phase = result.phase;
+        return;
+      }
+      if (result === "unavailable")
+        logWorkerUnavailable(phase, "worker_result_unavailable");
+      finish(resultError(result));
+    });
+    worker.once("error", () => {
+      if (!settled) logWorkerUnavailable(phase, "worker_error");
+      finish(new ResumeValidationError("RESUME_VALIDATOR_UNAVAILABLE"));
+    });
+    worker.once("exit", () => {
+      if (!settled) logWorkerUnavailable(phase, "worker_exit");
+      finish(new ResumeValidationError("RESUME_VALIDATOR_UNAVAILABLE"));
+    });
   });
+}
+
+function isPhaseMessage(
+  value: unknown,
+): value is { type: "phase"; phase: string } {
+  if (typeof value !== "object" || value === null) return false;
+  const message = value as Record<string, unknown>;
+  if (message.type !== "phase") return false;
+  if (
+    message.phase === "parser-import" ||
+    message.phase === "document-load" ||
+    message.phase === "page-structure"
+  )
+    return true;
+  return false;
+}
+
+function logWorkerUnavailable(phase: string, category: string) {
+  console.error("resume_pdf_check_unavailable", { phase, category });
 }

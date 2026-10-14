@@ -4,10 +4,13 @@ const mocks = vi.hoisted(() => ({
   lookup: vi.fn(),
   eq: vi.fn(),
   validate: vi.fn(),
+  upload: vi.fn(),
+  storageFrom: vi.fn(),
 }));
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
     rpc: mocks.rpc,
+    storage: { from: mocks.storageFrom },
     from: () => {
       const query = {
         select: () => query,
@@ -38,13 +41,24 @@ beforeEach(() => {
     filename: "synthetic.pdf",
     sha256: "a".repeat(64),
   });
+  mocks.storageFrom.mockReturnValue({ upload: mocks.upload });
+  mocks.upload.mockResolvedValue({ error: null });
   mocks.lookup.mockResolvedValue({ data: { revision: 3 }, error: null });
-  mocks.rpc.mockImplementation(async (name: string) =>
-    name === "prepare_application_resume"
-      ? { data: { id: actor, revision: 3, state: "ready" }, error: null }
-      : name === "claim_resume_cleanup"
-        ? { data: [], error: null }
-        : { data: null, error: null },
+  mocks.rpc.mockImplementation(
+    async (name: string, args: { p_operation?: string } = {}) =>
+      name === "prepare_application_resume"
+        ? {
+            data: {
+              id: actor,
+              revision: 3,
+              object_path: `${actor}/${args.p_operation}.pdf`,
+              state: "ready",
+            },
+            error: null,
+          }
+        : name === "claim_resume_cleanup"
+          ? { data: [], error: null }
+          : { data: null, error: null },
   );
 });
 it("resolves only the owned job revision and recovers before preparing a retry", async () => {
@@ -107,6 +121,198 @@ it("does not prepare after the database rejects recovery for a changed or frozen
     "prepare_application_resume",
     expect.anything(),
   );
+});
+it("uploads using the object path returned by prepare without selecting its private table", async () => {
+  const path = `${actor}/${operation}.pdf`;
+  mocks.rpc.mockImplementation(async (name: string) => {
+    if (name === "prepare_application_resume")
+      return {
+        data: { id: actor, revision: 3, object_path: path, state: "pending" },
+        error: null,
+      };
+    if (name === "reserve_application_resume")
+      return {
+        data: null,
+        error: { code: "42501", message: "private detail" },
+      };
+    if (name === "claim_resume_cleanup") return { data: [], error: null };
+    return { data: null, error: null };
+  });
+
+  await uploadResumeForJob(actor, job, 3, file, operation);
+
+  expect(mocks.storageFrom).toHaveBeenCalledWith("application-resumes");
+  expect(mocks.upload).toHaveBeenCalledWith(path, expect.any(Uint8Array), {
+    contentType: "application/pdf",
+    upsert: false,
+  });
+  expect(mocks.rpc).toHaveBeenCalledWith(
+    "finalize_application_resume",
+    expect.objectContaining({ p_actor: actor, p_job: job, p_revision: 3 }),
+  );
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
+    "reserve_application_resume",
+    expect.anything(),
+  );
+  expect(mocks.lookup).not.toHaveBeenCalled();
+});
+it("does not upload again when prepare confirms the operation is already ready", async () => {
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "prepare_application_resume"
+      ? {
+          data: {
+            id: actor,
+            revision: 3,
+            object_path: `${actor}/${operation}.pdf`,
+            state: "ready",
+          },
+          error: null,
+        }
+      : { data: null, error: null },
+  );
+
+  await uploadResumeForJob(actor, job, 3, file, operation);
+
+  expect(mocks.upload).not.toHaveBeenCalled();
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
+    "finalize_application_resume",
+    expect.anything(),
+  );
+});
+it("rejects a preparation path that does not match its application and operation", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "prepare_application_resume"
+      ? {
+          data: {
+            id: actor,
+            revision: 3,
+            object_path: `${job}/${operation}.pdf`,
+            state: "pending",
+          },
+          error: null,
+        }
+      : { data: [], error: null },
+  );
+
+  await expect(
+    uploadResumeForJob(actor, job, 3, file, operation),
+  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
+  expect(mocks.upload).not.toHaveBeenCalled();
+});
+it("maps a pending-row conflict to a safe retry error and logs only allowlisted diagnostics", async () => {
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "prepare_application_resume"
+      ? {
+          data: null,
+          error: {
+            code: "23505",
+            status: 409,
+            message: "private database message",
+            details: "private row detail",
+            hint: "private SQL hint",
+          },
+        }
+      : { data: [], error: null },
+  );
+
+  await expect(
+    uploadResumeForJob(actor, job, 3, file, operation),
+  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PENDING" });
+
+  expect(log).toHaveBeenCalledWith(
+    "resume_upload_prepare_failed",
+    expect.objectContaining({
+      stage: "prepare_application_resume",
+      code: "RESUME_UPLOAD_PENDING",
+      category: "rpc_error",
+      sqlState: "23505",
+      upstreamStatus: 409,
+    }),
+  );
+  expect(JSON.stringify(log.mock.calls)).not.toContain("private database");
+  expect(JSON.stringify(log.mock.calls)).not.toContain("private row");
+  expect(JSON.stringify(log.mock.calls)).not.toContain("private SQL");
+});
+it.each([
+  [
+    "Job is not open for applications",
+    "RESUME_JOB_CLOSED",
+    "This job is no longer accepting résumé uploads.",
+  ],
+  [
+    "Application changed; reload before uploading",
+    "RESUME_APPLICATION_CHANGED",
+    "Your application changed. Refresh it before uploading the résumé.",
+  ],
+  [
+    "Editable saved draft required",
+    "RESUME_APPLICATION_CHANGED",
+    "Your application changed. Refresh it before uploading the résumé.",
+  ],
+  [
+    "Application changed; reload before saving",
+    "RESUME_APPLICATION_CHANGED",
+    "Your application changed. Refresh it before uploading the résumé.",
+  ],
+  [
+    "Upload operation cannot be reused",
+    "RESUME_UPLOAD_OPERATION_CONFLICT",
+    "This upload could not be matched to the selected file. Select the file again and retry.",
+  ],
+])(
+  "maps the allowlisted P0001 message %s to a safe failure",
+  async (message, code, safeMessage) => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mocks.rpc.mockImplementation(async (name: string) =>
+      name === "prepare_application_resume"
+        ? {
+            data: null,
+            error: {
+              code: "P0001",
+              message,
+              details: "private database detail",
+              hint: "private SQL hint",
+            },
+          }
+        : { data: [], error: null },
+    );
+
+    await expect(
+      uploadResumeForJob(actor, job, 3, file, operation),
+    ).rejects.toMatchObject({ code, message: safeMessage });
+  },
+);
+it("returns a reference for unexpected preparation errors without raw details", async () => {
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "prepare_application_resume"
+      ? {
+          data: null,
+          error: {
+            code: "42501",
+            status: 403,
+            message: "private permission detail",
+            details: "private database row",
+            hint: "private SQL hint",
+          },
+        }
+      : { data: [], error: null },
+  );
+
+  await expect(
+    uploadResumeForJob(actor, job, 3, file, operation),
+  ).rejects.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    message: expect.stringContaining("share the reference code"),
+    reference: expect.stringMatching(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    ),
+  });
+  expect(JSON.stringify(log.mock.calls)).not.toContain("private permission");
+  expect(JSON.stringify(log.mock.calls)).not.toContain("private database");
+  expect(JSON.stringify(log.mock.calls)).not.toContain("private SQL");
 });
 it("rejects invalid PDFs before lookup or allocation", async () => {
   mocks.validate.mockRejectedValue(new Error("Choose a valid PDF"));

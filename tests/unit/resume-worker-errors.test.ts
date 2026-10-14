@@ -14,6 +14,8 @@ import { validateResume } from "@/lib/resume-input";
 let worker: EventEmitter & { terminate: ReturnType<typeof vi.fn> };
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  vi.spyOn(console, "error").mockImplementation(() => {});
   worker = Object.assign(new EventEmitter(), {
     terminate: vi.fn().mockResolvedValue(0),
   });
@@ -51,10 +53,16 @@ it.each(["error", "exit"])(
   },
 );
 
-it("times out once and ignores late worker completion", async () => {
+it("allows the worker five seconds before timeout and ignores late completion", async () => {
   const pending = validateResume(file()).catch((error) => error);
+  let settled = false;
+  void pending.then(() => {
+    settled = true;
+  });
   await vi.waitFor(() => expect(mocks.start).toHaveBeenCalled());
   await vi.advanceTimersByTimeAsync(3000);
+  expect(settled).toBe(false);
+  await vi.advanceTimersByTimeAsync(2000);
   await expect(pending).resolves.toMatchObject({
     code: "RESUME_VALIDATION_TIMEOUT",
   });
@@ -62,6 +70,36 @@ it("times out once and ignores late worker completion", async () => {
   worker.emit("exit", 1);
   expect(worker.terminate).toHaveBeenCalledOnce();
   expect(vi.getTimerCount()).toBe(0);
+});
+
+it("logs only the safe worker phase and elapsed time on timeout", async () => {
+  const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const pending = validateResume(file()).catch((error) => error);
+  await vi.waitFor(() => expect(mocks.start).toHaveBeenCalled());
+  worker.emit("message", {
+    type: "phase",
+    phase: "document-load",
+    privateDocumentText: "must not be logged",
+  });
+  await vi.advanceTimersByTimeAsync(5000);
+
+  await expect(pending).resolves.toMatchObject({
+    code: "RESUME_VALIDATION_TIMEOUT",
+  });
+  expect(warning).toHaveBeenCalledWith(
+    "resume_pdf_check_timeout",
+    expect.objectContaining({
+      phase: "document-load",
+      elapsedMs: expect.any(Number),
+    }),
+  );
+  expect(JSON.stringify(warning.mock.calls)).not.toContain(
+    "privateDocumentText",
+  );
+  expect(JSON.stringify(warning.mock.calls)).not.toContain(
+    "must not be logged",
+  );
+  expect(worker.terminate).toHaveBeenCalledOnce();
 });
 
 it.each(["unavailable", { unexpected: "private parser detail" }])(
@@ -86,4 +124,5 @@ it("terminates a successful worker and ignores subsequent exit", async () => {
   await expect(pending).resolves.toMatchObject({ filename: "synthetic.pdf" });
   expect(worker.terminate).toHaveBeenCalledOnce();
   expect(vi.getTimerCount()).toBe(0);
+  expect(console.error).not.toHaveBeenCalled();
 });

@@ -1,0 +1,14 @@
+# Tasks: résumé upload failure diagnostics and recovery
+
+- [x] T01a: Add red tests for job upload using validated RPC object path; safe pending conflict and unexpected RPC failure codes/messages/reference; ensure raw error details are absent.
+- [x] T01b: Add red worker timeout phase/timing test and ensure phase message does not settle the worker result.
+- [x] T02: Implement parallel parser imports and phase/timing diagnostics under the original worker limits.
+- [ ] T02a: Apply the approved 5-second deadline; update the timeout regression boundary and verify the 3-to-5-second behavior. Source/test edits are present; executable verification is blocked because Node and pnpm are unavailable in this shell.
+- [x] T03: Implement prepared job-upload path, RPC failure classification, safe logs and response mapping.
+- [x] T04: Run focused tests, static checks, typecheck/build as feasible for the original implementation; capture actual output.
+- [ ] T04a: Rerun focused worker/PDF tests and relevant static checks after the timeout revision; currently blocked because Node and pnpm are unavailable in this shell.
+- [x] T05: Separate read-only review returned no blocking source defect. Its P3 gap for exact `P0001` classifier messages is covered by RPC-level cases in `first-upload-retry.test.ts`; independent follow-up confirmed the coverage. Reviewer could not run Vitest because `pnpm` is unavailable.
+- [x] T06: Paul accepted the implementation in chat on 2026-10-14; independent review is complete, while runtime and hosted verification remain separate pending gates.
+- [ ] T07: Hosted Preview retry/synthetic smoke after publication; pending; no settings changes.
+
+T01 regression tests failed against the original implementation for the intended missing behavior; the red run and green reruns are recorded in `record.md`. T02–T04 were implemented and checked under the original 3-second deadline. T02a updates the deadline to 5 seconds and adjusts the regression test, but its red/green test run is blocked by missing Node/pnpm in the current shell. Paul accepted the implementation in chat on 2026-10-14 before the planned independent review. The PDF suite was rerun alone previously after a concurrent check run caused three cases to hit the 3-second timeout. Independent review found no blocking source defect and confirmed the classifier test gap is resolved; revised-timeout test execution and a fresh hosted Preview smoke remain pending.

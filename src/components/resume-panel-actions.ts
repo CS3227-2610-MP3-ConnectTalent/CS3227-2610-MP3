@@ -187,16 +187,29 @@ async function applyResponse(
     revision: typeof result.revision === "number" ? result.revision : undefined,
   });
   state.setUploadFailed(intent === "upload" && !response.ok);
-  state.setMessage(responseMessage(response.ok, result.error));
+  state.setMessage(
+    responseMessage(response.ok, result.error, result.reference),
+  );
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function responseMessage(ok: boolean, error: unknown) {
+function responseMessage(ok: boolean, error: unknown, reference: unknown) {
   if (ok) return "Résumé change saved. Review the attachment below.";
-  return typeof error === "string"
-    ? error
-    : "Résumé change could not be saved.";
+  const message =
+    typeof error === "string" ? error : "Résumé change could not be saved.";
+  return isReferenceCode(reference)
+    ? `${message} Reference code: ${reference}`
+    : message;
+}
+
+function isReferenceCode(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value,
+    )
+  );
 }

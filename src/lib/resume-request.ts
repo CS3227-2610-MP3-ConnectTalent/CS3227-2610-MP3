@@ -3,6 +3,7 @@ import { RESUME_MAX_BYTES } from "./resume-input";
 import {
   ResumeValidationError,
   resumeValidationFailure,
+  resumeUploadPreparationFailure,
 } from "./resume-errors";
 export const resumeHeaders = {
   "Cache-Control": "private, no-store",
@@ -71,6 +72,13 @@ export function resumeDownload(bytes: Blob, filename: string) {
 export function resumeFailure(error: unknown) {
   const validation = resumeValidationFailure(error);
   if (validation) return { error: validation.error, code: validation.code };
+  const preparation = resumeUploadPreparationFailure(error);
+  if (preparation)
+    return {
+      error: preparation.error,
+      code: preparation.code,
+      reference: preparation.reference,
+    };
   const message =
     error instanceof Error &&
     /^(Choose|Reload|Save the latest|We could not|Résumé)/.test(error.message)
