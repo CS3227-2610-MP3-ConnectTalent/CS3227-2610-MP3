@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; all thirteen PR #80 review threads have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; all sixteen PR #80 review threads have been replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -12,7 +12,7 @@ Date: 2026-10-14
 - Change ID/classification: `2026-10-14-vitest-coverage-action`; CI/reporting tooling defect.
 - GitHub issue: [#72](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/72); related accepted contract [#58](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/58).
 - Branch: `fix/72-vitest-coverage-action`.
-- Latest workflow implementation commit: [846e109](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/846e109), which adds PR-head revalidation around report publication. Earlier implementation and archive corrections are retained in the review history below.
+- Latest workflow implementation commit: [433293f](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/433293f), which rechecks reserved-marker ownership immediately before report publication. Earlier implementation and archive corrections are retained in the review history below.
 - Pull request: [#80](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80), open against `develop`.
 - Proposal: [proposal.md](proposal.md).
 - Design: [design.md](design.md).
@@ -105,6 +105,8 @@ Review comment [4267555527](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3
 | 2026-10-14 / closeout | [Closeout summary](../../../logs/2026-10-14-vitest-coverage-action-closeout.md) | Record student acceptance, no-product sync, archive and PR preparation | Accepted with hosted report verification pending; static closeout checks recorded |
 | 2026-10-14 / PR review follow-up | [Review follow-up summary](../../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md) | Diagnose the missing hosted coverage comment and address five PR review threads | Fixes pushed as `a5b1348`; all five threads replied to and resolved; CI and Supabase CI passed; hosted action verification remains pending after the workflow reaches `develop` |
 | 2026-10-14 / additional PR review | [Additional review summary](../../../logs/2026-10-14-vitest-coverage-action-additional-pr-review.md) | Follow the upstream workflow pattern and address the subsequent review batches | Workflow fix pushed as `48b6922`; later batches corrected marker-source analysis, archive evidence, and stale-report handling after action parse/publication failures; hosted report still requires a post-`develop` PR run |
+| 2026-10-14 / PR-head race review | [Head-race review summary](../../../logs/2026-10-14-vitest-coverage-action-head-race-review.md) | Recheck the PR head around report publication and close review comment 4269047250 | Fix pushed as `846e109`; all thirteen then-known threads were resolved; hosted report remains pending default-branch integration |
+| 2026-10-14 / marker and design review | [Marker/design review summary](../../../logs/2026-10-14-vitest-coverage-action-marker-and-design-review.md) | Recheck marker ownership, correct archived failure behavior, and assess three new review threads | Fix pushed as `433293f`; all sixteen threads are resolved; local diff checks passed; workflow YAML/runtime remains unverified |
 
 ## Canonical sync and archive
 
@@ -127,3 +129,13 @@ The report comment itself remains unverified: `workflow_run` uses the default-br
 Review comment [4269047250](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4269047250) identified that a new push could move the PR head after preflight but before either the upstream action or the unavailable-status writer published. Commit [846e109](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/846e109) adds a fresh PR-head check immediately before the action, checks again in the postcondition, and has the fallback replace a report with an explicit superseded status when a moved head is observed. The unavailable-status writer also checks before and after its writes and suppresses or corrects publication if the head moved. When the run is already stale and no bot report comment exists, it does not create one.
 
 The archived acceptance criterion and tasks now record this adjustment. `git diff --check` and `git diff --cached --check` passed. Local YAML parsing and workflow execution were not performed. GitHub reported Vercel success for `846e109`; the workflow-run lookup returned no GitHub Actions runs at query time. A fresh PR thread fetch after the reply and resolution found all thirteen inline threads resolved. The documented [comment-update endpoint](https://docs.github.com/en/rest/issues/comments#update-an-issue-comment) takes a comment ID and replacement body but no PR-head SHA precondition, so the narrow race between a final head read and a write remains; any movement observed by the post-write check is corrected. See the [head-race review summary](../../../logs/2026-10-14-vitest-coverage-action-head-race-review.md).
+
+## Sixth PR review follow-up: marker ownership and archived failure behavior (2026-10-14)
+
+Review comment [4269299144](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4269299144) was valid: the action's v2 writer selects the first marker-matching comment without checking its author, while preflight checked for user-owned marker collisions before the artifact download. Commit [433293f](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/433293f) adds a fresh marker ownership check in the step immediately before the action and skips the action on a collision. The fallback continues to update only bot-authored comments. The action performs its write internally, so a small race remains between this check and its lookup; this limit is recorded in the proposal and inline reply.
+
+Review comment [4269299156](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4269299156) correctly found the archived design table was inconsistent with VCA-AC-03 and the workflow. The table now describes unavailable-status replacement for missing artifacts and the report-job failure behavior for malformed input or failed publication checks.
+
+Review comment [4269299167](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/80#discussion_r4269299167) said the T06 log target was absent. The log had already been added and pushed in [a0932b8](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/a0932b8); the comment was answered with that evidence and resolved without another code change.
+
+`git diff --check` and `git diff --cached --check` passed for `433293f`. A local YAML parser could not be run because the available Python environment has no PyYAML module; `actionlint`, Node, Ruby, and `yq` were unavailable. Vercel was pending and no GitHub Actions run was returned for `433293f` at query time. After all three threads were answered and resolved, the final GraphQL thread read found all sixteen PR #80 inline threads resolved. See the [marker ownership and design review summary](../../../logs/2026-10-14-vitest-coverage-action-marker-and-design-review.md).
