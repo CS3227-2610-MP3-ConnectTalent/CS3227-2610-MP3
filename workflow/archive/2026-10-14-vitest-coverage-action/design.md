@@ -26,9 +26,9 @@ The report job receives `actions: read` for cross-run artifact download, `conten
 | Failure / adversarial input | Observable outcome / state guarantees | Verification |
 | --- | --- | --- |
 | Unit tests fail after starting Vitest | Vitest exits nonzero; `reportOnFailure` writes coverage; artifact upload still runs; CI remains failed | VCA-AC-03; hosted run |
-| CI fails before coverage output exists | Attempt artifact may be absent; the report workflow fails at download and produces no new comment | Workflow review and hosted failure-path evidence |
-| Artifact is missing, malformed, or contains unexpected paths | Upstream action may fail to parse/report; source artifact remains untrusted and never executed | Independent action/workflow review; hosted report run |
-| Report API rejects the token | Report job surfaces the action error; no broader token permissions are introduced automatically | Hosted report job logs, sanitized and reviewed |
+| CI fails before coverage output exists | The attempt artifact may be absent; the report workflow replaces the prior bot report with an unavailable status. An ordinary absent artifact does not independently fail the report job. | Workflow review and hosted failure-path evidence |
+| Artifact is malformed or contains unexpected paths | The bounded downloader rejects unexpected paths; a malformed report that reaches the action is replaced by an unavailable status and the report job fails. | Independent action/workflow review; hosted report run |
+| Report API rejects the token | The upstream action may warn and return; the report postcondition fails, the fallback writes an unavailable status, and the report job fails. No broader token permissions are introduced automatically. | Hosted report job logs, sanitized and reviewed |
 | Fork PR run | Read-only CI can run; trusted default-branch workflow may write only its PR comment after matching the triggering run | Workflow event filter and hosted run |
 
 ## Migration and backward compatibility

@@ -226,7 +226,22 @@ jobs:
         with:
           script: |
             core.setOutput('head-current', 'unknown');
+            core.setOutput('marker-collision', 'unknown');
             const { owner, repo } = context.repo;
+            const marker = '<!-- vitest-coverage-report-marker-connecttalent -->';
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: Number(process.env.PR_NUMBER),
+              per_page: 100,
+            });
+            const markerCollision = comments.some((comment) =>
+              comment.body?.includes(marker) && comment.user?.login !== 'github-actions[bot]'
+            );
+            core.setOutput('marker-collision', String(markerCollision));
+            if (markerCollision) {
+              core.info('A non-bot comment now uses the reserved coverage marker; the action will be skipped.');
+            }
             const { data: pr } = await github.rest.pulls.get({
               owner,
               repo,
@@ -246,7 +261,8 @@ jobs:
           steps.preflight.outputs.marker-collision != 'true' &&
           steps.download.outcome == 'success' &&
           steps.action-head.outcome == 'success' &&
-          steps.action-head.outputs.head-current == 'true'
+          steps.action-head.outputs.head-current == 'true' &&
+          steps.action-head.outputs.marker-collision == 'false'
         continue-on-error: true
         uses: davelosert/vitest-coverage-report-action@v2
         with:
@@ -330,6 +346,7 @@ jobs:
            steps.preflight.outputs.marker-collision == 'true' ||
            steps.download.outcome == 'failure' ||
            steps.action-head.outcome == 'failure' ||
+           steps.action-head.outputs.marker-collision == 'true' ||
            steps.action-head.outputs.head-current == 'false' ||
            steps.report.outcome == 'failure' ||
            steps.verify.outcome == 'failure')
@@ -342,6 +359,7 @@ jobs:
           DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
           ACTION_HEAD_OUTCOME: ${{ steps.action-head.outcome }}
           ACTION_HEAD_CURRENT: ${{ steps.action-head.outputs.head-current }}
+          ACTION_MARKER_COLLISION: ${{ steps.action-head.outputs.marker-collision }}
           REPORT_OUTCOME: ${{ steps.report.outcome }}
           VERIFY_OUTCOME: ${{ steps.verify.outcome }}
         with:
@@ -354,7 +372,8 @@ jobs:
             const downloadFailed = process.env.DOWNLOAD_OUTCOME === 'failure';
             const actionHeadFailed = process.env.ACTION_HEAD_OUTCOME === 'failure';
             const actionHeadMoved = process.env.ACTION_HEAD_CURRENT === 'false';
-            const markerCollision = process.env.MARKER_COLLISION === 'true';
+            const markerCollision = process.env.MARKER_COLLISION === 'true' ||
+              process.env.ACTION_MARKER_COLLISION === 'true';
             const artifactTooLarge = process.env.ARTIFACT_TOO_LARGE === 'true';
             const reportFailed = process.env.REPORT_OUTCOME === 'failure';
             const verifyFailed = process.env.VERIFY_OUTCOME === 'failure';
