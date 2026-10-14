@@ -15,7 +15,10 @@ vi.mock("@/lib/jobs", () => ({
 vi.mock("@/lib/account-navigation", () => ({
   getAccountNavigation: mocks.getAccountNavigation,
 }));
-vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
+vi.mock("next/navigation", () => ({
+  notFound: mocks.notFound,
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
 vi.mock("next/link", async () => {
   const React = await import("react");
   return {
@@ -59,7 +62,7 @@ it("renders filtered jobs, selected category, singular counts, and sign-out feed
   expect(html).toContain("Software Engineer");
   expect(html).toContain("Digital Products");
   expect(html).toContain('href="/?category=engineering" aria-current="page"');
-  expect(mocks.listPublishedJobs).toHaveBeenCalledWith("engineering");
+  expect(mocks.listPublishedJobs).toHaveBeenCalledWith("engineering", "");
 });
 
 it("renders empty results, plural counts, and clears the selected category", async () => {
@@ -87,6 +90,16 @@ it.each(["unknown", ["engineering"]])(
     expect(mocks.listPublishedJobs).not.toHaveBeenCalled();
   },
 );
+
+it.each([
+  { q: ["software", "sales"] },
+  { q: "a".repeat(101) },
+  { q: "bad\u0000query" },
+])("does not read jobs for invalid search %j", async ({ q }) => {
+  const html = await home({ q });
+  expect(html).toContain("Use one search phrase of at most 100 characters");
+  expect(mocks.listPublishedJobs).not.toHaveBeenCalled();
+});
 
 it("renders an unavailable public job as not found", async () => {
   mocks.getPublishedJob.mockResolvedValue(null);

@@ -4,6 +4,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-14 public job search](2026-10-14-job-listing-search/record.md): Paul separately accepted #78 with recorded limits; JOB-004 synced to canonical v1.10 before archive. [Independent review](2026-10-14-job-listing-search/handoffs/independent-review.md) found a P2 that was fixed and rechecked. [Intake](../../logs/2026-10-14-job-search-intake.md) and [implementation](../../logs/2026-10-14-job-search-implementation.md) summaries. Hosted/accessibility checks and release remain pending.
+
 - [2026-10-13 return navigation and cursors](2026-10-13-navigation-cursors/record.md): Paul separately accepted #74 with recorded limits. ACC-005/006 preserved; canonical delta N/A. Complete packet archived; hosted/accessibility and Git publication pending. [Independent review](2026-10-13-navigation-cursors/independent-review.md), [session summary](../../logs/2026-10-13-navigation-cursors.md).
 
 - [2026-10-13 scheduled Playwright stability](2026-10-13-scheduled-e2e-stability/record.md): PR #73 contains the issue-focused E2E correction; the final review-corrected local suite passed 20/20 in 10.3 minutes with no skips. Product sync is N/A. Hosted scheduled confirmation remains follow-up evidence. See the [independent review](2026-10-13-scheduled-e2e-stability/handoffs/T04-independent-review.md) and [issue-specific closeout](../../logs/2026-10-13-scheduled-e2e-closeout.md).

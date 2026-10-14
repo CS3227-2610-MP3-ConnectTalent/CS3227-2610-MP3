@@ -106,6 +106,18 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
+it("finds a text match beyond the first public database page", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+  const requests: RequestDetails[] = [];
+  const initialJobs = makeJobs(501);
+  initialJobs[500].requirements = "Unique final-page requirement";
+  vi.stubGlobal("fetch", createPagedFetch(initialJobs, requests));
+  const jobs = await listPublishedJobs("engineering", "final-page");
+  expect(jobs.map((row) => row.id)).toEqual([initialJobs[500].id]);
+  expect(requests).toHaveLength(2);
+});
+
 it("loads all published jobs without offset duplicates when an earlier ID is inserted", async () => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");

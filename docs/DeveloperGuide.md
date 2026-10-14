@@ -145,6 +145,10 @@ flowchart LR
 
 `auth.getUser()` verifies identity; database `profiles.role` supplies controlled role assignment, not editable user metadata. Incomplete Applicants have a restricted verified session for `/profile`; proxy redirects and server guards deny other product operations until readiness. SQL also checks profile/submission fields, independently of hidden controls. Guest browsing and verified HR remain separate.
 
+Public job search (`JOB-004`, #78) validates the single `q` URL parameter on the server, normalizes whitespace, and limits it to 100 Unicode characters. [job-search.ts](../src/lib/job-search.ts) matches a literal case-insensitive phrase against public title/team/description/requirements. The existing publishable-key reader fetches every published/category page before filtering; search text is never inserted into PostgREST expressions. Sorting and onboarding guards are preserved. This retains the existing all-row read cost; debounce is not rate limiting.
+
+[JobListingFilters](../src/components/job-listing-filters.tsx) renders a native GET form and category links. Its [controller](../src/lib/job-filter-controller.ts) coordinates a 300 ms debounce, composition, immediate actions and history restoration; the [hook](../src/components/use-job-listing-filters.ts) connects it to the Next router. Automatic updates replace history; explicit changes push. Server-rendered results remain separate from client controls. No database migration, dependency or hosted setting is required. Local implementation evidence is in the [#78 record](../workflow/archive/2026-10-14-job-listing-search/record.md); hosted validation remains pending.
+
 ### 5.2 Data and lifecycle
 
 [supabase/migrations](../supabase/migrations) defines jobs, role profiles, Applicant profiles, applications, HR notes/status events, file lifecycle metadata and AI invocation/audit metadata. Unique owner/job constraints enforce one application. Supabase Auth owns account identity; submitted email is snapshotted from verified Auth, not browser input.

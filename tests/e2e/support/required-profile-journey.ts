@@ -136,6 +136,7 @@ async function redirectIncompleteApplicant(page: Page, jobId: string) {
   for (const path of [
     "/",
     "/?category=engineering",
+    "/?category=engineering&q=software",
     `/jobs/${jobId}`,
     `/jobs/${jobId}/apply`,
     "/applications",
