@@ -1,6 +1,8 @@
 # Product specification
 
-Current baseline: **1.9**, dated **13 October 2026** (accepted #68 HR recruitment dashboard; v1.8 résumé before Save draft/private profile files, #52 required onboarding and prior withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+Current baseline: **1.10**, dated **14 October 2026** (accepted #78 public job search; v1.9 HR recruitment dashboard, v1.8 résumé before Save draft/private profile files, #52 required onboarding and prior withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+
+Paul separately accepted #78 on 14 October 2026 with recorded hosted and accessibility limits after independent review. JOB-004 adds literal public job text search with combined category filtering, URL restoration, debouncing and safe invalid-query feedback. The [accepted packet](archive/2026-10-14-job-listing-search/record.md) records checks, the fixed review finding and pending hosted validation. Canonical sync and archive do not establish PR merge or deployment.
 
 John Wong confirmed the HR dashboard was fully approved on 12 October 2026 after the recorded local checks; canonical sync and archive completed on 13 October. APP-009 adds a read-only HR overview with per-job and status counts through existing authorized reads. The [archived #68 packet](archive/2026-10-12-hr-dashboard/record.md) preserves the stated acceptance, known E2E/formatting failures, and the fact that independent reviewer identity and findings were not supplied. Sync/archive does not establish hosted validation, merge, or release.
 
@@ -20,7 +22,7 @@ The canonical requirements now live in the capability specifications below. The 
 | ------------------------------------------------------ | --------------------------------------------------------------- | --- |
 | Product boundary, actors, scope and non-goals          | [Product overview](specs/product-overview.md)                   | OVR |
 | Signup and role assignment                             | [Accounts and roles](specs/accounts-and-roles.md)               | ACC |
-| Public browsing, category filtering and details        | [Public job listings](specs/public-job-listings.md)             | JOB |
+| Public browsing, category/text filtering and details   | [Public job listings](specs/public-job-listings.md)             | JOB |
 | HR job lifecycle                                       | [Job management](specs/job-management.md)                       | JMG |
 | Applications and HR review                             | [Applications and review](specs/applications-and-review.md)     | APP |
 | Applicant-controlled AI drafting                       | [Applicant AI draft](specs/applicant-ai-draft.md)               | AID |

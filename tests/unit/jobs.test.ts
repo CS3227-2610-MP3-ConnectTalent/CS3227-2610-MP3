@@ -71,3 +71,78 @@ it("rejects unknown category values before a database query", () => {
   expect(isJobCategory("engineering,legal")).toBe(false);
   expect(isJobCategory(["engineering", "legal"])).toBe(false);
 });
+
+it("rejects overlong search before client configuration or network access", async () => {
+  const fetch = vi.fn();
+  vi.stubGlobal("fetch", fetch);
+  await expect(listPublishedJobs(undefined, "a".repeat(101))).rejects.toThrow(
+    "Invalid job search.",
+  );
+  expect(fetch).not.toHaveBeenCalled();
+});
+
+it("wraps reader failure in a generic job-loading error", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: "private diagnostic" }), {
+        status: 400,
+      }),
+    ),
+  );
+  await expect(listPublishedJobs(undefined, "software")).rejects.toThrow(
+    "Unable to load published jobs.",
+  );
+});
+
+it.each([
+  "software ENGINEER",
+  " digital   products ",
+  "accessible web",
+  "TYPESCRIPT",
+])(
+  "searches public fields using a normalized literal phrase: %s",
+  async (phrase) => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    vi.stubGlobal(
+      "fetch",
+      createFetchMock(
+        (url) => {
+          expect(url.searchParams.get("status")).toBe("eq.published");
+          expect(url.searchParams.get("category")).toBe("eq.engineering");
+          expect(url.searchParams.has("or")).toBe(false);
+        },
+        [
+          publicJobRow,
+          {
+            ...publicJobRow,
+            id: "00000000-0000-4000-8000-000000000102",
+            title: "Unrelated",
+            team: "Other",
+            description: "None",
+            requirements: "None",
+          },
+        ],
+      ),
+    );
+    await expect(listPublishedJobs("engineering", phrase)).resolves.toEqual([
+      job,
+    ]);
+  },
+);
+
+it.each(["%", "_", "(title.ilike.*)", "software typescript"])(
+  "does not treat %s as query syntax or separate terms",
+  async (phrase) => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    vi.stubGlobal(
+      "fetch",
+      createFetchMock(() => {}, [publicJobRow]),
+    );
+    await expect(listPublishedJobs(undefined, phrase)).resolves.toEqual([]);
+  },
+);

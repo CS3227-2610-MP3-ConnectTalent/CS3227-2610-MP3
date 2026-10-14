@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { JOB_CATEGORIES, type JobCategory } from "./job-categories";
 import { fetchAllPages, sortByTimestampAndId } from "./supabase/pagination";
+import { matchesJobSearch, parseJobSearch } from "./job-search";
 
 const categoryValues = JOB_CATEGORIES.map((category) => category.value) as [
   JobCategory,
@@ -46,7 +47,10 @@ function publicClient() {
 
 export async function listPublishedJobs(
   category?: JobCategory,
+  search?: string,
 ): Promise<PublishedJob[]> {
+  const { query: phrase, invalid } = parseJobSearch(search);
+  if (invalid) throw new Error("Invalid job search.");
   const client = publicClient();
   let data: unknown[];
   try {
@@ -68,7 +72,9 @@ export async function listPublishedJobs(
     publishedJobRowSchema.array().parse(data),
     (row) => row.published_at,
     false,
-  ).map((row) => jobSchema.parse(row));
+  )
+    .map((row) => jobSchema.parse(row))
+    .filter((row) => matchesJobSearch(row, phrase));
 }
 
 export async function getPublishedJob(

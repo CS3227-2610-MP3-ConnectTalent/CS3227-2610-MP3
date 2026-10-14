@@ -2,7 +2,11 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.9, 13 October 2026**. The accepted #68 HR recruitment dashboard adds APP-009 below; the [archived packet](../archive/2026-10-12-hr-dashboard/record.md) preserves the acceptance source and its evidence limits. Earlier change traces below preserve the accepted lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.10, 14 October 2026**. The accepted #78 public search adds JOB-004 below; the [archived packet](../archive/2026-10-14-job-listing-search/record.md) preserves the acceptance source, reviewer finding and limits. Earlier change traces below preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.10 accepted public job search
+
+Paul accepted #78 with recorded limits on 14 October 2026 after local checks and a separate review. JOB-004 defines literal, normalized search of published job fields, combined category filtering, a 100-character input boundary, 300 ms debounce and URL/history behavior. [The complete archived packet](../archive/2026-10-14-job-listing-search/record.md) records independent review, a fixed navigation-bookkeeping finding, meaningful tests and hosted/accessibility limits. Canonical sync preceded archive; no hosted rollout or release claim follows.
 
 ## v1.9 accepted HR recruitment dashboard
 
