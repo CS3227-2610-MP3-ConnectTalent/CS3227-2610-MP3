@@ -2,7 +2,7 @@
 
 Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Archiving preserves evidence; it does not grant implementation, merge, deployment or student acceptance approval.
 
-- [2026-10-14 Vitest coverage report action](2026-10-14-vitest-coverage-action/record.md): Johnwz123 accepted the implementation after independent review on 2026-10-14. CI/reporting only; canonical product sync is N/A. The packet records the coverage-only output decision and static evidence; hosted comment verification remains pending after the workflow reaches the default branch. PR submission follows this closeout.
+- [2026-10-14 Vitest coverage report action](2026-10-14-vitest-coverage-action/record.md): Johnwz123 accepted the implementation after independent review on 2026-10-14; PR #80 is open with a documented review-fix follow-up. CI/reporting only; canonical product sync is N/A. Hosted comment verification remains pending until the updated workflow reaches the default branch. See the [post-submission review summary](../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md).
 
 Archived packets:
 

@@ -202,7 +202,9 @@ the default branch, `davelosert/vitest-coverage-report-action@v2` reads the exac
 CI run's attempt-scoped coverage artifact and updates a PR coverage comment. The
 report workflow checks out only the default branch and does not execute PR code;
 coverage data comes from the PR's CI run and is not an independent attestation.
-Test totals remain in the CI job logs and are not included in the coverage comment.
+It resolves one current PR, skips stale CI runs, replaces the comment with an
+unavailable status when no artifact exists, and checks that the action wrote the
+coverage comment. Test totals remain in the CI job logs and are not included in the coverage comment.
 Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub
 App is installed for this repository; Dependabot proposes weekly GitHub Actions
 updates. Minor/patch updates are grouped, major updates remain separate, and
