@@ -189,8 +189,8 @@ sequence. `test:db` uses Supabase's database test runner. These commands require
 project's local Supabase stack; fixture-cleanup tests use its local service-role key.
 Never link or reset a hosted project for these checks.
 
-The app workflow runs lint, Next.js type generation, typecheck, unit tests with JUnit
-and coverage reports, and build on pull requests and pushes to `develop`/`master`.
+The app workflow runs lint, Next.js type generation, typecheck, unit tests with
+coverage reports, and build on pull requests and pushes to `develop`/`master`.
 The Supabase workflow runs local database lint, pgTAP and integration races on those
 events, and also on its nightly 02:00 UTC schedule and manual dispatch. Critical
 Chromium journeys run on pull requests and branch pushes; the full Playwright suite
@@ -198,11 +198,12 @@ runs nightly and on manual dispatch. CI starts a disposable local Supabase stack
 generates its own fixture key. Unit-test failures fail CI. Coverage is reported
 against a 90% global target for lines, statements, branches, and functions, but it is
 informational and does not fail CI. After the trusted report workflow is present on
-the default branch, it reads the exact CI run's JUnit and coverage artifacts and
-updates one PR comment with the workflow result, test counts, and four percentages.
-It does not check out or execute PR code; missing or invalid reports are marked
-unavailable. Test counts and coverage come from artifacts supplied by the PR's CI
-run and are not an independent attestation. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub
+the default branch, `davelosert/vitest-coverage-report-action@v2` reads the exact
+CI run's attempt-scoped coverage artifact and updates a PR coverage comment. The
+report workflow checks out only the default branch and does not execute PR code;
+coverage data comes from the PR's CI run and is not an independent attestation.
+Test totals remain in the CI job logs and are not included in the coverage comment.
+Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub
 App is installed for this repository; Dependabot proposes weekly GitHub Actions
 updates. Minor/patch updates are grouped, major updates remain separate, and
 reviewers must approve changes; auto-merge is not configured. Repository
