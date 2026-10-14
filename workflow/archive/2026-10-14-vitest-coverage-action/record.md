@@ -1,6 +1,6 @@
 # Feature record: Vitest coverage report action
 
-Status: accepted by Johnwz123 on 2026-10-14 and archived; PR #80 is open with review follow-up in progress. Hosted verification remains open until the updated workflow runs from the default branch.
+Status: accepted by Johnwz123 on 2026-10-14 and archived; review fixes were pushed to open PR #80 as `a5b1348`, and all five review threads were replied to and resolved. Hosted verification remains open until the updated workflow runs from the default branch.
 
 Owner: Johnwz123. Scope approved by the user on 2026-10-14.
 
@@ -72,13 +72,15 @@ The user requested investigation of the missing PR coverage comment and authoriz
 
 All five unresolved review findings were assessed as valid. The follow-up adds an explicit unique-PR association and newest-run guard, marks coverage unavailable when the exact artifact is missing, checks that the upstream action actually created or updated its marker comment, and updates the stale Developer Guide description. The upstream action remains responsible for rendering the coverage report. See the [PR review follow-up summary](../../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md) for the full thread mapping, changed files, check results, and commit.
 
+After `a5b1348` was pushed, CI run [#38513939941](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38513939941) and Supabase CI [#38513939995](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38513939995) passed, including Database checks, Playwright Chromium, and integration race suites. The associated reporter run [#38514026387](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/actions/runs/38514026387) still checked out the current `develop` workflow and failed in the old Python reporter; it therefore does not exercise the pushed upstream-action workflow.
+
 ## Session evidence index
 
 | Date / session | Summary log link | Work / decisions covered | Verification status / missing coverage |
 | --- | --- | --- | --- |
 | 2026-10-14 / action migration | [Implementation summary](../../../logs/2026-10-14-vitest-coverage-action-implementation.md) | Replace custom Vitest report with upstream action under issue #72 | Static evidence and independent review recorded; YAML parser and hosted verification pending |
 | 2026-10-14 / closeout | [Closeout summary](../../../logs/2026-10-14-vitest-coverage-action-closeout.md) | Record student acceptance, no-product sync, archive and PR preparation | Accepted with hosted report verification pending; static closeout checks recorded |
-| 2026-10-14 / PR review follow-up | [Review follow-up summary](../../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md) | Diagnose the missing hosted coverage comment and address five PR review threads | Source fixes and push are in progress; hosted verification still requires the updated workflow on `develop` |
+| 2026-10-14 / PR review follow-up | [Review follow-up summary](../../../logs/2026-10-14-vitest-coverage-action-pr-review-followup.md) | Diagnose the missing hosted coverage comment and address five PR review threads | Fixes pushed as `a5b1348`; all five threads replied to and resolved; CI and Supabase CI passed; hosted action verification remains pending after the workflow reaches `develop` |
 
 ## Canonical sync and archive
 
@@ -86,4 +88,4 @@ All five unresolved review findings were assessed as valid. The follow-up adds a
 - Canonical sync: N/A.
 - Archive decision/date/path: accepted and archived on 2026-10-14 at `workflow/archive/2026-10-14-vitest-coverage-action/`.
 - Navigation repairs after moving: packet links and active/archive indexes updated and checked on 2026-10-14.
-- Outstanding work: complete the authorized PR review follow-up; after integration, verify hosted comment creation/update and close issue #72 only when that evidence is available.
+- Outstanding work: after integration, verify hosted comment creation/update and close issue #72 only when that evidence is available.
