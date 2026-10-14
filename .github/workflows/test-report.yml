@@ -211,13 +211,42 @@ jobs:
         with:
           script: core.setOutput('started-at', new Date().toISOString());
 
+      - name: Revalidate the PR head immediately before reporting
+        id: action-head
+        if: >-
+          steps.preflight.outputs.should-report == 'true' &&
+          steps.preflight.outputs.artifact-available == 'true' &&
+          steps.preflight.outputs.marker-collision != 'true' &&
+          steps.download.outcome == 'success'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          script: |
+            core.setOutput('head-current', 'unknown');
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: Number(process.env.PR_NUMBER),
+            });
+            const current = pr.state === 'open' && pr.head?.sha === process.env.RUN_HEAD_SHA;
+            core.setOutput('head-current', String(current));
+            if (!current) {
+              core.info('The PR head moved or the PR closed before report publication; the action will be skipped.');
+            }
+
       - name: Report Vitest coverage
         id: report
         if: >-
           steps.preflight.outputs.should-report == 'true' &&
           steps.preflight.outputs.artifact-available == 'true' &&
           steps.preflight.outputs.marker-collision != 'true' &&
-          steps.download.outcome == 'success'
+          steps.download.outcome == 'success' &&
+          steps.action-head.outcome == 'success' &&
+          steps.action-head.outputs.head-current == 'true'
         continue-on-error: true
         uses: davelosert/vitest-coverage-report-action@v2
         with:
@@ -239,6 +268,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           PRIOR_COMMENT_ID: ${{ steps.preflight.outputs.prior-comment-id }}
           PRIOR_COMMENT_UPDATED_AT: ${{ steps.preflight.outputs.prior-comment-updated-at }}
           PUBLICATION_STARTED_AT: ${{ steps.publication-baseline.outputs.started-at }}
@@ -246,7 +276,17 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const prNumber = Number(process.env.PR_NUMBER);
+            const runHeadSha = process.env.RUN_HEAD_SHA;
             const marker = '<!-- vitest-coverage-report-marker-connecttalent -->';
+            core.setOutput('head-current', 'false');
+            const getPr = () => github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const isCurrentHead = (pr) => pr.state === 'open' && pr.head?.sha === runHeadSha;
+
+            const { data: beforeRead } = await getPr();
+            if (!isCurrentHead(beforeRead)) {
+              core.setFailed('The PR head moved while the coverage action was publishing.');
+              return;
+            }
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner,
               repo,
@@ -274,6 +314,13 @@ jobs:
               core.setFailed('The marked PR comment was not created or updated by this coverage run.');
               return;
             }
+
+            const { data: afterRead } = await getPr();
+            if (!isCurrentHead(afterRead)) {
+              core.setFailed('The PR head moved before the report postcondition completed.');
+              return;
+            }
+            core.setOutput('head-current', 'true');
             core.info(`Verified the coverage report comment on PR #${prNumber}.`);
 
       - name: Replace stale coverage with an unavailable status
@@ -282,14 +329,19 @@ jobs:
           (steps.preflight.outputs.artifact-available != 'true' ||
            steps.preflight.outputs.marker-collision == 'true' ||
            steps.download.outcome == 'failure' ||
+           steps.action-head.outcome == 'failure' ||
+           steps.action-head.outputs.head-current == 'false' ||
            steps.report.outcome == 'failure' ||
            steps.verify.outcome == 'failure')
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           ARTIFACT_TOO_LARGE: ${{ steps.preflight.outputs.artifact-too-large }}
           MARKER_COLLISION: ${{ steps.preflight.outputs.marker-collision }}
           DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
+          ACTION_HEAD_OUTCOME: ${{ steps.action-head.outcome }}
+          ACTION_HEAD_CURRENT: ${{ steps.action-head.outputs.head-current }}
           REPORT_OUTCOME: ${{ steps.report.outcome }}
           VERIFY_OUTCOME: ${{ steps.verify.outcome }}
         with:
@@ -297,37 +349,118 @@ jobs:
             const { owner, repo } = context.repo;
             const prNumber = Number(process.env.PR_NUMBER);
             const run = context.payload.workflow_run;
+            const runHeadSha = process.env.RUN_HEAD_SHA;
             const marker = '<!-- vitest-coverage-report-marker-connecttalent -->';
             const downloadFailed = process.env.DOWNLOAD_OUTCOME === 'failure';
+            const actionHeadFailed = process.env.ACTION_HEAD_OUTCOME === 'failure';
+            const actionHeadMoved = process.env.ACTION_HEAD_CURRENT === 'false';
             const markerCollision = process.env.MARKER_COLLISION === 'true';
             const artifactTooLarge = process.env.ARTIFACT_TOO_LARGE === 'true';
             const reportFailed = process.env.REPORT_OUTCOME === 'failure';
             const verifyFailed = process.env.VERIFY_OUTCOME === 'failure';
             const reason = markerCollision
               ? 'A non-bot PR comment uses the reserved coverage marker, so publication was skipped to leave that comment untouched.'
-              : downloadFailed
-                ? 'The attempt-scoped coverage artifact could not be safely downloaded or validated.'
-                : artifactTooLarge
-                  ? 'The attempt-scoped coverage artifact exceeds the 8 MiB compressed-size limit.'
-                  : reportFailed
-                    ? 'The upstream coverage action could not parse or publish this artifact.'
-                    : verifyFailed
-                      ? 'The upstream coverage action did not create or update the expected report comment.'
-                      : 'No usable attempt-scoped coverage artifact was available.';
-            const body = `⚠️ Vitest coverage is unavailable. ${reason} See the [CI run](${run.html_url}) for its result.\n\n${marker}`;
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner,
-              repo,
-              issue_number: prNumber,
-              per_page: 100,
-            });
-            const existing = comments.find((comment) =>
-              comment.body?.includes(marker) && comment.user?.login === 'github-actions[bot]'
-            );
+              : actionHeadMoved
+                ? 'The PR head moved before this report could be published; this run is superseded.'
+                : actionHeadFailed
+                  ? 'The PR head could not be revalidated immediately before the coverage action.'
+                  : downloadFailed
+                    ? 'The attempt-scoped coverage artifact could not be safely downloaded or validated.'
+                    : artifactTooLarge
+                      ? 'The attempt-scoped coverage artifact exceeds the 8 MiB compressed-size limit.'
+                      : reportFailed
+                        ? 'The upstream coverage action could not parse or publish this artifact.'
+                        : verifyFailed
+                          ? 'The upstream coverage action did not create or update the expected report comment.'
+                          : 'No usable attempt-scoped coverage artifact was available.';
+            const getPr = () => github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const isCurrentHead = (pr) => pr.state === 'open' && pr.head?.sha === runHeadSha;
+            const listMarkedBotComments = async () => {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number: prNumber,
+                per_page: 100,
+              });
+              return comments.filter((comment) =>
+                comment.body?.includes(marker) && comment.user?.login === 'github-actions[bot]'
+              );
+            };
+            const unavailableBody = `⚠️ Vitest coverage is unavailable. ${reason} See the [CI run](${run.html_url}) for its result.\n\n${marker}`;
+            const supersededBody = (headSha) =>
+              `ℹ️ Vitest coverage report was superseded because the PR head moved from \`${runHeadSha}\` to \`${headSha || 'a closed PR'}\`. This run's coverage is withheld until CI completes for the current head. See the [CI run](${run.html_url}).\n\n${marker}`;
+            const initialPr = (await getPr()).data;
+            const initiallyCurrent = isCurrentHead(initialPr);
+            const markedComments = await listMarkedBotComments();
+            if (markedComments.length > 1) {
+              core.setFailed('The PR has more than one bot-owned marked Vitest coverage comment.');
+              return;
+            }
+            const existing = markedComments[0];
+
+            if (!initiallyCurrent) {
+              if (existing) {
+                const { data: immediatelyBeforeWrite } = await getPr();
+                if (!isCurrentHead(immediatelyBeforeWrite)) {
+                  await github.rest.issues.updateComment({
+                    owner,
+                    repo,
+                    comment_id: existing.id,
+                    body: supersededBody(immediatelyBeforeWrite.head?.sha),
+                  });
+                  const { data: afterWrite } = await getPr();
+                  if (isCurrentHead(afterWrite)) {
+                    core.info('The PR head returned to this run SHA; the superseded status may be replaced by a later report.');
+                  }
+                }
+              }
+              core.info('The source run is superseded; no current coverage or unavailable report was published.');
+              return;
+            }
+
+            const { data: beforeWrite } = await getPr();
+            if (!isCurrentHead(beforeWrite)) {
+              if (existing) {
+                const { data: immediatelyBeforeWrite } = await getPr();
+                if (!isCurrentHead(immediatelyBeforeWrite)) {
+                  await github.rest.issues.updateComment({
+                    owner,
+                    repo,
+                    comment_id: existing.id,
+                    body: supersededBody(immediatelyBeforeWrite.head?.sha),
+                  });
+                  const { data: afterWrite } = await getPr();
+                  if (isCurrentHead(afterWrite)) {
+                    core.info('The PR head returned to this run SHA after the superseded status was written.');
+                  }
+                }
+              }
+              core.info('The PR head moved before the unavailable-status write; coverage publication was suppressed.');
+              return;
+            }
+
             const written = existing
-              ? await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
-              : await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+              ? await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body: unavailableBody })
+              : await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: unavailableBody });
             const commentId = existing?.id || written.data?.id;
+            const { data: afterWrite } = await getPr();
+            if (!isCurrentHead(afterWrite)) {
+              const { data: immediatelyBeforeUndo } = await getPr();
+              if (!isCurrentHead(immediatelyBeforeUndo)) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: commentId,
+                  body: supersededBody(immediatelyBeforeUndo.head?.sha),
+                });
+                const { data: afterUndo } = await getPr();
+                if (isCurrentHead(afterUndo)) {
+                  core.info('The PR head returned to this run SHA after the superseded status replaced the unavailable status.');
+                }
+              }
+              core.info('The PR head moved during the unavailable-status write; replaced it with a superseded status.');
+              return;
+            }
             const { data: verification } = await github.rest.issues.getComment({
               owner,
               repo,
@@ -338,6 +471,6 @@ jobs:
               return;
             }
             core.info(`Updated PR #${prNumber} with the current unavailable-coverage status.`);
-            if (downloadFailed || artifactTooLarge || markerCollision || reportFailed || verifyFailed) {
+            if (downloadFailed || artifactTooLarge || markerCollision || actionHeadFailed || reportFailed || verifyFailed) {
               core.setFailed('The coverage report could not be safely published.');
             }
