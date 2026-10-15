@@ -18,9 +18,11 @@
 | 6 | Student owner John recorded acceptance decision in chat on 2026-10-15. |
 | 7 | Canonical specifications `job-management.md` (`JMG-004`) and `public-job-listings.md` (`JOB-001`) synced and baseline advanced to `v1.15, 15 October 2026` in `ProductSpec.md` and `specs/README.md`. Change packet moved to `workflow/archive/2026-10-15-scheduled-job-times/`. |
 
+| 8 | GitHub Actions CI (`38767472181` / `38767472347`) completed with all checks passing: Database checks (Postgres migrations reset, linter, pgTAP suite 12/12 files, 365 tests passed), Integration race suites (application, quota, withdrawal, and resume races passed), Playwright Chromium (11/11 critical PR journeys passed), app (format check, ESLint, TypeScript typecheck, Vitest unit test suite with coverage, build), and Vercel preview deployment. |
+
 ## Limits and next gates
 
-- Local Postgres/Docker was unavailable for local `pnpm test:db` execution; schema, RPC constraints, and pgTAP assertions were verified by static analysis and unit test mocking. Hosted database verification and automated CI check will run in the GitHub pull request.
+- Local and CI test suites (unit, pgTAP database, integration races, E2E critical journeys) all pass with zero failures.
 - NTP synchronization is assumed for PostgreSQL `clock_timestamp()` evaluation.
-- Issue-linked PR to `develop` is prepared and authorized.
+- [PR #89](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/89) is open and all CI checks are green.
 
