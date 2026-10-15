@@ -49,7 +49,7 @@ const preparationFailures = {
   RESUME_UPLOAD_PENDING: {
     status: 409,
     message:
-      "A previous résumé change is still pending. Use Retry below to recover it.",
+      "A previous résumé change is still pending. Press Upload résumé again to recover it.",
   },
   RESUME_JOB_CLOSED: {
     status: 409,
@@ -64,6 +64,16 @@ const preparationFailures = {
     status: 409,
     message:
       "This upload could not be matched to the selected file. Select the file again and retry.",
+  },
+  RESUME_UPLOAD_OPERATION_RETIRED: {
+    status: 409,
+    message:
+      "This upload attempt ended. Press Upload résumé again to retry this selected file.",
+  },
+  RESUME_UPLOAD_PERSISTENCE_FAILED: {
+    status: 503,
+    message:
+      "We could not save this résumé. Try again later and share the reference code if the problem continues.",
   },
   RESUME_UPLOAD_PREPARATION_FAILED: {
     status: 503,
@@ -93,6 +103,15 @@ export class ResumeUploadPreparationError extends Error {
   }
 }
 
+export class ResumeUploadOperationRetiredError extends Error {
+  readonly code = "RESUME_UPLOAD_OPERATION_RETIRED" as const;
+
+  constructor() {
+    super(preparationFailures.RESUME_UPLOAD_OPERATION_RETIRED.message);
+    this.name = "ResumeUploadOperationRetiredError";
+  }
+}
+
 // Re-read the allowlist rather than returning a possibly modified Error.message.
 export function resumeValidationFailure(error: unknown) {
   if (!(error instanceof ResumeValidationError)) return null;
@@ -111,10 +130,17 @@ export function resumeUploadPreparationFailure(error: unknown) {
   };
 }
 
+export function resumeUploadOperationRetiredFailure(error: unknown) {
+  if (!(error instanceof ResumeUploadOperationRetiredError)) return null;
+  const failure = preparationFailures.RESUME_UPLOAD_OPERATION_RETIRED;
+  return { code: error.code, error: failure.message, status: failure.status };
+}
+
 export function resumeFailureStatus(error: unknown) {
   return (
     resumeValidationFailure(error)?.status ??
     resumeUploadPreparationFailure(error)?.status ??
+    resumeUploadOperationRetiredFailure(error)?.status ??
     400
   );
 }

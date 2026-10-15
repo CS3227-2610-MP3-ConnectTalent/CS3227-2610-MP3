@@ -3,6 +3,7 @@ import { RESUME_MAX_BYTES } from "./resume-input";
 import {
   ResumeValidationError,
   resumeValidationFailure,
+  resumeUploadOperationRetiredFailure,
   resumeUploadPreparationFailure,
 } from "./resume-errors";
 export const resumeHeaders = {
@@ -79,6 +80,8 @@ export function resumeFailure(error: unknown) {
       code: preparation.code,
       reference: preparation.reference,
     };
+  const retired = resumeUploadOperationRetiredFailure(error);
+  if (retired) return { error: retired.error, code: retired.code };
   const message =
     error instanceof Error &&
     /^(Choose|Reload|Save the latest|We could not|Résumé)/.test(error.message)

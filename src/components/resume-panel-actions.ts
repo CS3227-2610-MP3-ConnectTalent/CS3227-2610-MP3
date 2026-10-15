@@ -147,7 +147,7 @@ async function performResumeChange(
 function interruptedChangeMessage(intent: ResumeIntent) {
   if (intent === "profile")
     return "Profile résumé status is unclear. Use Retry profile copy below.";
-  return "We could not confirm the change. Reload to check your saved résumé.";
+  return "We could not confirm the change. Press Upload résumé again to retry, or reload to check whether it saved.";
 }
 
 function canChange(
@@ -252,6 +252,13 @@ async function applyResponse(
 ) {
   const result: unknown = await response.json();
   if (!isObject(result)) throw new Error("Invalid résumé response.");
+  if (
+    props.profileMode &&
+    intent === "upload" &&
+    result.code === "RESUME_UPLOAD_OPERATION_RETIRED"
+  ) {
+    state.setOperation(crypto.randomUUID());
+  }
   if ("resume" in result)
     state.setAttachment(result.resume as ResumeMetadata | null);
   props.onChange?.({

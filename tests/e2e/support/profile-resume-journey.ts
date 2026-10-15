@@ -103,9 +103,9 @@ async function submitAndCheckResumeFrozen(
   await expect(
     page.getByText("Submitted application", { exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Replace résumé" }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Upload résumé" })).toHaveCount(
+    0,
+  );
   const response = await page.request.post(
     "/api/applications/" + applicationId + "/resume",
     {

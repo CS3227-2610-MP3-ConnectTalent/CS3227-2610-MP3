@@ -1,11 +1,16 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { currentApplicant } from "./auth";
 import {
   resumeMutationClient,
   type ResumeMetadata,
 } from "./application-resumes";
-import { ResumeValidationError } from "./resume-errors";
+import {
+  ResumeUploadOperationRetiredError,
+  ResumeUploadPreparationError,
+  ResumeValidationError,
+} from "./resume-errors";
 import { validateResume } from "./resume-input";
 const bucket = "profile-resumes";
 const metadata = z.object({
@@ -72,7 +77,12 @@ export async function uploadProfileResume(
 ) {
   const valid = await validateResume(file);
   const client = resumeMutationClient();
-  if (retry) await retireProfileResume(actor, expected, true);
+  if (retry) {
+    const state = await profileUploadState(client, actor, operation);
+    if (state === "retired" || state === "deleting")
+      throw new ResumeUploadOperationRetiredError();
+    if (!state) await retireProfileResume(actor, expected, true);
+  }
   const path = await reserveProfileResume(
     client,
     actor,
@@ -80,7 +90,7 @@ export async function uploadProfileResume(
     expected,
     valid,
   );
-  if (await isReadyProfileUpload(client, operation)) return;
+  if (await isReadyProfileUpload(client, actor, operation)) return;
   await uploadAndFinalizeProfileResume(client, actor, operation, path, valid);
   await cleanup(actor);
 }
@@ -102,21 +112,42 @@ async function reserveProfileResume(
   });
   if (error || typeof path !== "string")
     throw new Error(
-      "Reload your profile or use Retry upload if an earlier upload was interrupted.",
+      "Reload your profile or press Upload résumé again if an earlier upload was interrupted.",
     );
   return path;
 }
 
 async function isReadyProfileUpload(
   client: ReturnType<typeof resumeMutationClient>,
+  actor: string,
   operation: string,
 ) {
-  const { data: existing } = await client
+  const existing = await profileUploadState(client, actor, operation);
+  return existing === "ready";
+}
+
+async function profileUploadState(
+  client: ReturnType<typeof resumeMutationClient>,
+  actor: string,
+  operation: string,
+) {
+  const { data: existing, error } = await client
     .from("profile_resume_objects")
     .select("state")
     .eq("id", operation)
+    .eq("applicant_id", actor)
     .maybeSingle();
-  return existing?.state === "ready";
+  if (error) throw new Error("Reload your profile before changing the résumé.");
+  if (!existing) return null;
+  if (
+    existing.state !== "pending" &&
+    existing.state !== "ready" &&
+    existing.state !== "retired" &&
+    existing.state !== "deleting"
+  ) {
+    throw new Error("Reload your profile before changing the résumé.");
+  }
+  return existing.state;
 }
 
 async function uploadAndFinalizeProfileResume(
@@ -141,8 +172,14 @@ async function uploadAndFinalizeProfileResume(
       // Cleanup is best effort; retain the original failure for the route.
     }
     if (error instanceof ResumeValidationError) throw error;
-    throw new Error(
-      "We could not confirm the upload. Reload to check your saved résumé.",
+    const reference = randomUUID();
+    console.error("resume_upload_persistence_failed", {
+      reference,
+      stage: "profile_storage_or_finalize",
+    });
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PERSISTENCE_FAILED",
+      reference,
     );
   }
 }

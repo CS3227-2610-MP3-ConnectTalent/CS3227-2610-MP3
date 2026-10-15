@@ -105,18 +105,19 @@ export async function replaceRemoveAndReupload(
   pdf: Buffer,
 ) {
   await rejectInvalidReplacement(page);
-  await uploadReplacement(page, "replacement.pdf", pdf, "Replace résumé");
+  await uploadReplacement(page, "replacement.pdf", pdf);
   const oldObject = await admin.storage
     .from("application-resumes")
     .download(originalObjectPath);
   expect(oldObject.error).not.toBeNull();
+  page.once("dialog", (dialog) => dialog.accept());
   await page
-    .getByRole("button", { name: "Remove résumé", exact: true })
+    .getByRole("button", { name: "Delete résumé", exact: true })
     .click();
   await expect(
     page.getByText("No résumé attached.", { exact: true }),
   ).toBeVisible();
-  await uploadReplacement(page, "synthetic.pdf", pdf, "Upload résumé");
+  await uploadReplacement(page, "synthetic.pdf", pdf);
 }
 
 export async function rejectInvalidReplacement(page: Page) {
@@ -126,7 +127,7 @@ export async function rejectInvalidReplacement(page: Page) {
     buffer: Buffer.from("invalid replacement"),
   });
   await page
-    .getByRole("button", { name: "Replace résumé", exact: true })
+    .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   await expect(
     page.getByRole("status").filter({
@@ -138,18 +139,15 @@ export async function rejectInvalidReplacement(page: Page) {
   ).toBeVisible();
 }
 
-export async function uploadReplacement(
-  page: Page,
-  name: string,
-  pdf: Buffer,
-  actionName: "Upload résumé" | "Replace résumé",
-) {
+export async function uploadReplacement(page: Page, name: string, pdf: Buffer) {
   await page.getByLabel("Choose PDF résumé").setInputFiles({
     name,
     mimeType: "application/pdf",
     buffer: pdf,
   });
-  await page.getByRole("button", { name: actionName, exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload résumé", exact: true })
+    .click();
   await expect(
     page.getByRole("link", { name: `Download résumé: ${name}` }),
   ).toBeVisible();

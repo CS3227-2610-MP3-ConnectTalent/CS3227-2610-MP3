@@ -92,8 +92,8 @@ The résumé section is below work experience and above AI drafting. Choose **Ch
 
 - PDF only; maximum **1 MiB (1,048,576 bytes)**. The PDF must open without entering a password. Encrypted PDFs that open without a password are accepted; password-required or unreadable PDFs are rejected.
 - Upload is optional. It may create a private draft for the file without saving other typed fields.
-- Replace/remove is available before submission while the job is published. Invalid replacement preserves the prior finalized attachment.
-- After failure, **Retry upload** preserves typed text and reconciles interrupted first uploads without a full reload. If still uncertain, reload to inspect the saved attachment before further changes.
+- Before submission, choose another PDF and press **Upload résumé** to replace the attachment. Choose **Delete résumé** to remove it; deletion asks for confirmation. Invalid replacements preserve the prior finalized attachment.
+- After an upload failure, press **Upload résumé** again to retry the selected file while preserving typed text. If the outcome is uncertain, reload to inspect the saved attachment before making further changes.
 - There is no permanent cancellation button. Downloads are private attachments, not public links or inline previews. Structural validation is not malware scanning.
 
 **My profile** also allows optional private PDF upload. **Use profile résumé** explicitly copies it into the application. Later profile replacement/removal does not alter that copy. Files are not parsed for autofill or sent to AI.
@@ -182,7 +182,7 @@ For hosted smoke testing, use separate authorized Applicant/HR accounts: complet
 | File type or filename rejected        | Select a `.pdf` file recognised as PDF; use a simple filename of at most 120 characters.                                                                                                  |
 | File could not be received completely | Select the file again and retry.                                                                                                                                                          |
 | PDF checking unavailable or timed out | Retry later. This is a server validation problem; the message does not mean your file is invalid. The failed upload does not replace your previous attachment or clear typed form fields. |
-| Interrupted upload                    | Retry upload; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                                                                                     |
+| Interrupted upload                    | Press Upload résumé again to retry the selected file; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                                             |
 | Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                                                                                                  |
 | Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                                                                                     |
 | No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                                                                                    |

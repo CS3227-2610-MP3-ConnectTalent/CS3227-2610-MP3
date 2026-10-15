@@ -17,7 +17,7 @@ it("returns a safe recovery conflict with a reference and HTTP 409", () => {
   expect(resumeFailure(error)).toEqual({
     code: "RESUME_UPLOAD_PENDING",
     error:
-      "A previous résumé change is still pending. Use Retry below to recover it.",
+      "A previous résumé change is still pending. Press Upload résumé again to recover it.",
     reference,
   });
 });

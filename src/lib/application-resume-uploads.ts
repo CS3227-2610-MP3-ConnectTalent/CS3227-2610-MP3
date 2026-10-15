@@ -2,10 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { validateResume } from "./resume-input";
-import {
-  prepareWithPendingRecovery,
-  recoverPendingJobResume,
-} from "./application-resume-retry";
+import { prepareWithPendingRecovery } from "./application-resume-retry";
 import {
   applicationResumeBucket,
   cleanupApplicationResume,
@@ -36,14 +33,21 @@ export async function uploadApplicationResume(
   const normalizedOperation = normalizeOperation(operation);
   const validated = await validateResume(file);
   const client = resumeMutationClient();
-  if (retry) await recoverPendingJobResume(client, actor, job, revision);
-  const prepared = await prepareJobResume(
+  const prepared = await prepareWithPendingRecovery(
     client,
     actor,
     job,
     revision,
-    normalizedOperation,
-    validated,
+    retry,
+    () =>
+      prepareJobResume(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        validated,
+      ),
   );
   await finishPreparedJobResume(
     client,
@@ -52,6 +56,7 @@ export async function uploadApplicationResume(
     normalizedOperation,
     validated,
     prepared,
+    retry,
   );
 }
 
@@ -75,7 +80,6 @@ async function uploadAndFinalize(
   job: string,
   objectPath: string,
   bytes: Uint8Array,
-  operation: string,
   args: UploadArguments,
   retry = false,
 ) {
@@ -83,14 +87,19 @@ async function uploadAndFinalize(
     await uploadObject(client, objectPath, bytes, retry);
     await finalizeApplicationUpload(client, args);
   } catch {
-    await client.rpc("cancel_application_resume", {
-      p_actor: actor,
-      p_job: job,
-      p_operation: operation,
+    try {
+      await cleanupApplicationResume(actor, job);
+    } catch {
+      // Cleanup is best effort; keep the persistence failure response safe.
+    }
+    const reference = randomUUID();
+    console.error("resume_upload_persistence_failed", {
+      reference,
+      stage: "application_storage_or_finalize",
     });
-    await cleanupApplicationResume(actor, job);
-    throw new Error(
-      "We could not confirm the upload. Reload to check which résumé was saved. Your application text has not been changed.",
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PERSISTENCE_FAILED",
+      reference,
     );
   }
 }
@@ -232,7 +241,6 @@ async function finishPreparedJobResume(
     job,
     prepared.object_path,
     validated.bytes,
-    operation,
     args,
     retry,
   );

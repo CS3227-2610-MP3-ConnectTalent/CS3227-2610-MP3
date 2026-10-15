@@ -41,7 +41,7 @@ async function verifyEncryptionMessages(page: Page) {
       r.request().method() === "POST",
   );
   await page
-    .getByRole("button", { name: "Replace résumé", exact: true })
+    .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   expect((await response).status()).toBe(422);
   await expect(
@@ -72,7 +72,7 @@ async function verifyOutageFeedback(page: Page) {
     { times: 1 },
   );
   await page
-    .getByRole("button", { name: "Replace résumé", exact: true })
+    .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   await expect(
     page
@@ -85,7 +85,9 @@ async function verifyOutageFeedback(page: Page) {
   await expect(page.getByLabel("Full name", { exact: true })).toHaveValue(
     "Unsaved name retained",
   );
-  await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload résumé", exact: true })
+    .click();
   await expect(
     page.getByRole("link", { name: "Download résumé: aes-128-open.pdf" }),
   ).toBeVisible();

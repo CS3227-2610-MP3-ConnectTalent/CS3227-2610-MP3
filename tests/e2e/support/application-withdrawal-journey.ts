@@ -63,7 +63,7 @@ async function uploadInitialResume(page: Page, fixture: WithdrawalFixture) {
     page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
   ).toBeVisible({ timeout: 30_000 });
   await expect(
-    page.getByRole("button", { name: "Retry upload", exact: true }),
+    page.getByRole("button", { name: "Upload résumé", exact: true }),
   ).toHaveCount(0);
 }
 
@@ -102,15 +102,17 @@ async function requestReplacement(page: Page, fixture: WithdrawalFixture) {
     .fill("Synthetic unsaved letter retained during upload");
   await choosePdf(page, "replacement.pdf", fixture.pdf);
   await page
-    .getByRole("button", { name: "Replace résumé", exact: true })
+    .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Retry upload", exact: true }),
+    page.getByRole("button", { name: "Upload résumé", exact: true }),
   ).toBeVisible();
 }
 
 async function retryReplacement(page: Page) {
-  await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload résumé", exact: true })
+    .click();
   await expect(
     page.getByRole("link", { name: "Download résumé: replacement.pdf" }),
   ).toBeVisible();

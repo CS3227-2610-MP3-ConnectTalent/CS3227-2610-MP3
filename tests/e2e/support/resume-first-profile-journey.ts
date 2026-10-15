@@ -121,7 +121,7 @@ async function interruptInitialUpload(
     .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Retry upload", exact: true }),
+    page.getByRole("button", { name: "Upload résumé", exact: true }),
   ).toBeVisible();
   return operation;
 }
@@ -138,7 +138,9 @@ async function retryInitialUpload(
       request.url().endsWith(`/api/jobs/${fixture.jobId}/resume`) &&
       request.headers()["x-resume-retry"] === "true",
   );
-  await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload résumé", exact: true })
+    .click();
   const headers = (await retryRequest).headers();
   expect(headers["x-application-revision"]).toBe("");
   expect(headers["x-resume-operation"]).not.toBe(interruptedOperation);
@@ -233,8 +235,9 @@ async function submitAndRemoveProfileResume(
     page.getByText("Submitted application", { exact: true }),
   ).toBeVisible();
   await page.goto("/profile");
+  page.once("dialog", (dialog) => dialog.accept());
   await page
-    .getByRole("button", { name: "Remove résumé", exact: true })
+    .getByRole("button", { name: "Delete résumé", exact: true })
     .click();
   await expect(
     page.getByText("No résumé attached.", { exact: true }),
