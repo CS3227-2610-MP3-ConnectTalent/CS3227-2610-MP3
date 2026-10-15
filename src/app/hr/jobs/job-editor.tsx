@@ -8,7 +8,7 @@ function toDatetimeLocal(iso?: string | null): string {
   if (!iso) return "";
   try {
     const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
+    if (Number.isNaN(d.getTime())) return "";
     const pad = (n: number) => String(n).padStart(2, "0");
     const year = d.getFullYear();
     const month = pad(d.getMonth() + 1);

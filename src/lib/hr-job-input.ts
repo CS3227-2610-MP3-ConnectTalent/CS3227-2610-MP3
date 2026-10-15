@@ -14,14 +14,14 @@ function parseOptionalDatetime(val: unknown): string | null | undefined {
   const trimmed = val.trim();
   if (trimmed === "") return null;
   const d = new Date(trimmed);
-  if (isNaN(d.getTime())) return undefined;
+  if (Number.isNaN(d.getTime())) return undefined;
   return d.toISOString();
 }
 
 const optionalDatetimeSchema = z.custom<string | null>(
   (val) =>
     val === null ||
-    (typeof val === "string" && !isNaN(new Date(val).getTime())),
+    (typeof val === "string" && !Number.isNaN(new Date(val).getTime())),
 );
 
 const jobFieldsSchema = z

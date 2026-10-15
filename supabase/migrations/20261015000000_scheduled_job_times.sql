@@ -17,6 +17,12 @@ create policy "Published jobs are publicly readable"
     and (closes_at is null or closes_at > clock_timestamp())
   );
 
+drop function if exists public.create_hr_job_draft(text, text, text, text, text);
+drop function if exists public.edit_hr_job_draft(uuid, text, text, text, text, text);
+drop function if exists private.create_hr_job_draft(text, text, text, text, text);
+drop function if exists private.edit_hr_job_draft(uuid, text, text, text, text, text);
+drop function if exists private.validate_hr_job_fields(text, text, text, text, text);
+
 create or replace function private.validate_hr_job_fields(
   p_title text, p_team text, p_category text, p_description text, p_requirements text,
   p_opens_at timestamptz default null, p_closes_at timestamptz default null
@@ -132,24 +138,19 @@ declare
   v_user_id uuid := public.require_verified_applicant();
   v_job public.jobs%rowtype;
   v_existing public.applications%rowtype;
-  v_email text;
-  v_name text := nullif(application_private.trim_field(p_full_name), '');
-  v_phone text := nullif(application_private.normalize_phone(p_phone), '');
-  v_url text := nullif(application_private.trim_field(p_portfolio_url), '');
   v_id uuid;
+  v_email text;
+  v_name text := application_private.trim_field(coalesce(p_full_name, ''));
+  v_phone text := nullif(application_private.trim_field(p_phone), '');
+  v_url text := nullif(application_private.trim_field(p_portfolio_url), '');
 begin
-  if p_submit then
-    if v_name is null or v_phone is null then raise exception 'Full name and phone are required to submit' using errcode = '22023'; end if;
-    if p_cover_letter is null or char_length(pg_catalog.btrim(p_cover_letter)) = 0 or char_length(p_cover_letter) > 5000 then
-      raise exception 'Enter a cover letter of at most 5,000 characters' using errcode = '22023';
-    end if;
-  else
-    if p_cover_letter is not null and char_length(p_cover_letter) > 5000 then
-      raise exception 'Enter a cover letter of at most 5,000 characters' using errcode = '22023';
-    end if;
+  if p_cover_letter is null or char_length(p_cover_letter) > 5000
+    or (p_submit and char_length(application_private.trim_field(p_cover_letter)) = 0) then
+    raise exception 'Enter a cover letter of at most 5,000 characters' using errcode = '22023';
   end if;
-  if v_name is not null and (char_length(v_name) > 120 or v_name ~ '[[:cntrl:]]') then
-    raise exception 'Enter a full name of at most 120 characters' using errcode = '22023';
+  if char_length(v_name) > 120 or coalesce(p_full_name, '') ~ '[[:cntrl:]]'
+    or (p_submit and v_name = '') then
+    raise exception 'Enter a valid full name' using errcode = '22023';
   end if;
   if char_length(v_phone) > 40 or p_phone ~ '[[:cntrl:]]' then
     raise exception 'Enter a valid phone' using errcode = '22023';
@@ -157,9 +158,7 @@ begin
   if p_portfolio_url ~ '[[:cntrl:]]' or not application_private.valid_portfolio_url(v_url) then
     raise exception 'Enter a valid portfolio URL' using errcode = '22023';
   end if;
-  if not application_private.valid_background(p_education) or not application_private.valid_background(p_work_experience) then
-    raise exception 'Enter background of at most 2,000 characters' using errcode = '22023';
-  end if;
+  if not application_private.valid_background(p_education) or not application_private.valid_background(p_work_experience) then raise exception 'Enter background of at most 2,000 characters' using errcode='22023'; end if;
   if p_submit then
     select email into v_email from auth.users where id = v_user_id and email_confirmed_at is not null;
     if v_email is null or v_email = '' then raise exception 'Verified account email required' using errcode = '42501'; end if;
