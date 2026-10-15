@@ -7,6 +7,7 @@ import {
   publishHRJob,
 } from "@/app/hr/jobs/actions";
 import { JobEditor } from "@/app/hr/jobs/job-editor";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { categoryLabel } from "@/lib/job-categories";
 import { requireHR } from "@/lib/hr-auth";
 import { getHRJob } from "@/lib/hr-jobs";
@@ -137,9 +138,11 @@ function DraftJobActions({ job }: { job: Job }) {
         </p>
         <form action={publishHRJob}>
           <input type="hidden" name="jobId" value={job.id} />
-          <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">
-            Publish job
-          </button>
+          <PendingSubmitButton
+            label="Publish job"
+            pendingLabel="Publishing job…"
+            className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+          />
         </form>
       </section>
     </>
@@ -175,9 +178,11 @@ function CloseJobSection({ jobId }: { jobId: string }) {
       </p>
       <form action={closeHRJob}>
         <input type="hidden" name="jobId" value={jobId} />
-        <button className="rounded-lg border px-4 py-2 font-medium">
-          Close job
-        </button>
+        <PendingSubmitButton
+          label="Close job"
+          pendingLabel="Closing job…"
+          className="rounded-lg border px-4 py-2 font-medium"
+        />
       </form>
     </section>
   );

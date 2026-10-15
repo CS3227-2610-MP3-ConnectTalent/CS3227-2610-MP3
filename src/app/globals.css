@@ -334,6 +334,28 @@
   }
 }
 @layer base {
+  /* Use the hand cursor for actions, preserving text-entry and disabled states. */
+  :is(
+      button,
+      a[href],
+      [role="button"],
+      select,
+      input[type="submit"],
+      input[type="button"],
+      input[type="reset"],
+      input[type="checkbox"],
+      input[type="radio"]
+    ):not(:disabled):not([aria-disabled="true"]):not([data-disabled]) {
+    cursor: pointer;
+  }
+  input[type="file"]:not(:disabled)::file-selector-button {
+    cursor: pointer;
+  }
+  :is(button, select, input):disabled,
+  :is(button, a[href], [role="button"])[aria-disabled="true"],
+  :is(button, a[href], [role="button"])[data-disabled] {
+    cursor: not-allowed;
+  }
   :focus-visible {
     outline: 3px solid #9571df;
     outline-offset: 3px;

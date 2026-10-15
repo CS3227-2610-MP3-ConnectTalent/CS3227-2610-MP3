@@ -2,12 +2,14 @@ import { z } from "zod";
 
 import { requireHR } from "@/lib/hr-auth";
 import { hrReviewStatusSchema } from "@/lib/hr-input";
+import { fetchAllPages, sortByTimestampAndId } from "@/lib/supabase/pagination";
 
 const listItemSchema = z.object({
   withdrawn_at: z.string().nullable(),
   withdrawn_by: z.uuid().nullable(),
   id: z.uuid(),
   applicant_id: z.uuid(),
+  job_id: z.uuid(),
   job_title: z.string(),
   submitted_at: z.string(),
   review_status: hrReviewStatusSchema,
@@ -46,15 +48,26 @@ export type HRApplication = z.infer<typeof detailSchema>;
 
 export async function listSubmittedApplications() {
   const { client } = await requireHR();
-  const { data, error } = await client
-    .from("applications")
-    .select(
-      "withdrawn_at,withdrawn_by,id,applicant_id,job_title,submitted_at,review_status",
-    )
-    .eq("submission_state", "submitted")
-    .order("submitted_at", { ascending: false });
-  if (error) throw new Error("Review data is unavailable.");
-  return listItemSchema.array().parse(data);
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("applications")
+        .select(
+          "withdrawn_at,withdrawn_by,id,applicant_id,job_id,job_title,submitted_at,review_status",
+        )
+        .eq("submission_state", "submitted");
+      if (afterId !== null) query = query.gt("id", afterId);
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+  } catch {
+    throw new Error("Review data is unavailable.");
+  }
+  return sortByTimestampAndId(
+    listItemSchema.array().parse(data),
+    (application) => application.submitted_at,
+    false,
+  );
 }
 
 export async function getSubmittedApplication(id: string) {
@@ -74,22 +87,44 @@ export async function getSubmittedApplication(id: string) {
 
 export async function listHRNotes(applicationId: string) {
   const { client } = await requireHR();
-  const { data, error } = await client
-    .from("application_notes")
-    .select("id,author_id,body,created_at")
-    .eq("application_id", applicationId)
-    .order("created_at", { ascending: true });
-  if (error) throw new Error("Review data is unavailable.");
-  return noteSchema.array().parse(data);
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("application_notes")
+        .select("id,author_id,body,created_at")
+        .eq("application_id", applicationId);
+      if (afterId !== null) query = query.gt("id", afterId);
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+  } catch {
+    throw new Error("Review data is unavailable.");
+  }
+  return sortByTimestampAndId(
+    noteSchema.array().parse(data),
+    (note) => note.created_at,
+    true,
+  );
 }
 
 export async function listHRStatusEvents(applicationId: string) {
   const { client } = await requireHR();
-  const { data, error } = await client
-    .from("application_status_events")
-    .select("id,actor_id,from_status,to_status,created_at")
-    .eq("application_id", applicationId)
-    .order("created_at", { ascending: true });
-  if (error) throw new Error("Review data is unavailable.");
-  return statusEventSchema.array().parse(data);
+  let data: unknown[];
+  try {
+    data = await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("application_status_events")
+        .select("id,actor_id,from_status,to_status,created_at")
+        .eq("application_id", applicationId);
+      if (afterId !== null) query = query.gt("id", afterId);
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+  } catch {
+    throw new Error("Review data is unavailable.");
+  }
+  return sortByTimestampAndId(
+    statusEventSchema.array().parse(data),
+    (event) => event.created_at,
+    true,
+  );
 }

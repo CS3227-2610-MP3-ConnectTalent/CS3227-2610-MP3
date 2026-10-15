@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getPublishedJob: vi.fn(),
   getAccountNavigation: vi.fn(),
   notFound: vi.fn(),
+  linkPending: false,
 }));
 
 vi.mock("@/lib/jobs", () => ({
@@ -15,12 +16,16 @@ vi.mock("@/lib/jobs", () => ({
 vi.mock("@/lib/account-navigation", () => ({
   getAccountNavigation: mocks.getAccountNavigation,
 }));
-vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
+vi.mock("next/navigation", () => ({
+  notFound: mocks.notFound,
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
 vi.mock("next/link", async () => {
   const React = await import("react");
   return {
     default: ({ href, children, ...props }: Record<string, unknown>) =>
       React.createElement("a", { href, ...props }, children as React.ReactNode),
+    useLinkStatus: () => ({ pending: mocks.linkPending }),
   };
 });
 
@@ -41,6 +46,7 @@ beforeEach(() => {
   mocks.listPublishedJobs.mockResolvedValue([job]);
   mocks.getPublishedJob.mockResolvedValue(job);
   mocks.getAccountNavigation.mockResolvedValue({ kind: "guest" });
+  mocks.linkPending = false;
   mocks.notFound.mockImplementation(() => {
     throw new Error("not-found");
   });
@@ -59,7 +65,7 @@ it("renders filtered jobs, selected category, singular counts, and sign-out feed
   expect(html).toContain("Software Engineer");
   expect(html).toContain("Digital Products");
   expect(html).toContain('href="/?category=engineering" aria-current="page"');
-  expect(mocks.listPublishedJobs).toHaveBeenCalledWith("engineering");
+  expect(mocks.listPublishedJobs).toHaveBeenCalledWith("engineering", "");
 });
 
 it("renders empty results, plural counts, and clears the selected category", async () => {
@@ -88,6 +94,16 @@ it.each(["unknown", ["engineering"]])(
   },
 );
 
+it.each([
+  { q: ["software", "sales"] },
+  { q: "a".repeat(101) },
+  { q: "bad\u0000query" },
+])("does not read jobs for invalid search %j", async ({ q }) => {
+  const html = await home({ q });
+  expect(html).toContain("Use one search phrase of at most 100 characters");
+  expect(mocks.listPublishedJobs).not.toHaveBeenCalled();
+});
+
 it("renders an unavailable public job as not found", async () => {
   mocks.getPublishedJob.mockResolvedValue(null);
   await expect(
@@ -114,3 +130,14 @@ it.each([
     expect(html).toContain("TypeScript and testing experience.");
   },
 );
+
+it("announces a waiting Apply navigation for a guest", async () => {
+  mocks.linkPending = true;
+  const element = await JobDetail({ params: Promise.resolve({ id: job.id }) });
+  const html = renderToStaticMarkup(element);
+
+  expect(html).toContain(`href="/jobs/${job.id}/apply"`);
+  expect(html).toContain("Apply for this role");
+  expect(html).toContain("Opening application…");
+  expect(html).toContain('role="status"');
+});

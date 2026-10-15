@@ -168,5 +168,22 @@ it("returns a safe client error when upload operation metadata or the service is
   expect(failure.status).toBe(400);
   await expect(failure.json()).resolves.toMatchObject({
     error: "Reload your profile.",
+    resume: metadata,
   });
+});
+
+it("omits resume payload safely if current metadata lookup fails during error handling", async () => {
+  mocks.uploadProfileResume.mockRejectedValueOnce(
+    new Error("Synthetic upload failure"),
+  );
+  mocks.getProfileResume.mockRejectedValueOnce(
+    new Error("Synthetic lookup failure"),
+  );
+  const failure = await POST(
+    post({ "x-resume-intent": "upload", "x-resume-operation": actor }),
+  );
+  expect(failure.status).toBe(400);
+  const body = (await failure.json()) as Record<string, unknown>;
+  expect(body.error).toBe("Synthetic upload failure");
+  expect("resume" in body).toBe(false);
 });

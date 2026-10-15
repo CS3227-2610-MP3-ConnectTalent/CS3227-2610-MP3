@@ -1,0 +1,14 @@
+# Session summary: 15 October 2026 — PR #85 conflict resolution
+
+- Student owner: Paul Cheng
+- Issue and PR: [#83](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/83), [PR #85](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/85)
+- Branch: `feat/83-navigation-loading`; local no-commit merge of `origin/develop` `0595ec4` (merged PR #82) into PR head `ed81ca7`
+- Packet: [accepted #83 record](../workflow/archive/2026-10-15-navigation-loading/record.md) and [View role follow-up](../workflow/archive/2026-10-15-view-role-loading/record.md)
+
+Paul asked the root execution to resolve PR #85's conflicts after GitHub marked it unmergeable. The root fetched the latest `develop` and began `git merge --no-commit --no-ff origin/develop`. Git reported six content conflicts: one Auth-page unit test and five canonical/index Markdown files. The unrelated untracked profile packet was left untouched.
+
+The Auth test retains both the existing password-reset notice assertion and PR #82's idle pending-status assertions. The canonical product overview retains OVR-004 from PR #82 and OVR-005 from PR #85, including View role. JOB-004 remains in the public-job spec. The independent v1.11 baselines of #81 and #83 and the #83 View role follow-up are reconciled as branch v1.13; current indexes retain links to both accepted packets. A public-job spec header was aligned with v1.13. No new Applicant/HR policy or database change was introduced.
+
+The first combined unit run failed two pending-action form cases because its `next/link` mock lacked `useLinkStatus`; a focused mock addition fixed this. The focused Auth, pending-action and navigation unit cases passed 15/15; the full coverage run passed 402/402 with 88.23% branch coverage. Typecheck and the production build passed. The first combined browser run passed the eight job-search and five navigation cases plus the no-JavaScript sign-in case; its delayed sign-in case failed because `getByRole("status")` matched both the Careers link and submit status. Narrowing that assertion to “Signing in” made the pending-action browser file pass 2/2 on rerun. The local Python CI utility tests could not start because the Windows Python launcher was access denied; GitHub CI remains the check for them. A repository-wide local lint run was interrupted after it remained idle while traversing this workspace; scoped lint and formatting checks passed. Hosted preview and full accessibility checks remain pending.
+
+A separate read-only reviewer found no blocking code or specification conflict. The reviewer identified a stale Developer Guide baseline and an unchecked historical PR-opening task; both were corrected in this local resolution. The reviewer did not rerun the reported tests. No merge commit, push, PR merge or deployment has been performed by this session.

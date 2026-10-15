@@ -15,10 +15,12 @@ vi.mock("@/lib/auth", () => ({ currentApplicant: mocks.currentApplicant }));
 vi.mock("@/lib/application-resumes", () => ({
   resumeMutationClient: () => mocks.client,
 }));
-vi.mock("@/lib/resume-input", () => ({ validateResume: mocks.validateResume }));
+vi.mock("@/lib/resume-input", () => ({
+  validateResume: mocks.validateResume,
+  readResumeInput: vi.fn(async () => valid),
+}));
 
 import {
-  downloadProfileResume,
   getProfileResume,
   retireProfileResume,
   uploadProfileResume,
@@ -67,7 +69,9 @@ beforeEach(() => {
         }),
         eq: vi.fn(() => builder),
         maybeSingle: vi.fn(async () =>
-          fields === "state" ? mocks.readyResult : mocks.profileResult,
+          fields === "state" || fields === "resume_id"
+            ? mocks.readyResult
+            : mocks.profileResult,
         ),
       };
       return builder;
@@ -101,44 +105,13 @@ it("returns no profile résumé for a guest or missing row and validates a saved
 
 it("hides profile resume metadata lookup errors and invalid persisted metadata", async () => {
   setProfileResult(null, { message: "synthetic query error" });
-  await expect(getProfileResume()).rejects.toThrow(
-    "Résumé information is temporarily unavailable.",
-  );
+  await expect(getProfileResume()).rejects.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+  });
   setProfileResult({ ...resumeInfo, byte_size: 0 });
-  await expect(getProfileResume()).rejects.toThrow();
-});
-
-it("downloads only the current expected profile attachment", async () => {
-  mocks.currentApplicant.mockResolvedValueOnce(null);
-  await expect(downloadProfileResume()).resolves.toBeNull();
-
-  setProfileResult(resumeInfo);
-  await expect(
-    downloadProfileResume("44000000-0000-4000-8000-000000000999"),
-  ).resolves.toBeNull();
-  const bytes = new Blob(["synthetic resume"]);
-  const bucket = mocks.storageBucket as {
-    download: ReturnType<typeof vi.fn>;
-  };
-  bucket.download.mockResolvedValueOnce({ data: bytes, error: null });
-  await expect(downloadProfileResume(operation)).resolves.toEqual({
-    info: resumeInfo,
-    bytes,
+  await expect(getProfileResume()).rejects.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
   });
-});
-
-it("returns null for missing storage objects and storage errors", async () => {
-  setProfileResult(resumeInfo);
-  const result = await downloadProfileResume();
-  expect(result).toBeNull();
-  const bucket = mocks.storageBucket as {
-    download: ReturnType<typeof vi.fn>;
-  };
-  bucket.download.mockResolvedValueOnce({
-    data: new Blob(),
-    error: { message: "missing" },
-  });
-  await expect(downloadProfileResume()).resolves.toBeNull();
 });
 
 it("retires the expected profile résumé and cleans only valid owned storage paths", async () => {
@@ -194,6 +167,19 @@ it("reserves, uploads, finalizes, and cleans an ordinary profile résumé", asyn
 });
 
 it("uses explicit retry to retire pending profile state before reserving again", async () => {
+  let reserved = 0;
+  mocks.rpc.mockImplementation(async (name: string) => {
+    if (name === "reserve_profile_resume") {
+      reserved += 1;
+      if (reserved === 1)
+        return { data: null, error: { code: "23505", message: "pending" } };
+      return { data: objectPath, error: null };
+    }
+    if (name === "claim_profile_resume_cleanup")
+      return { data: mocks.cleanupData, error: null };
+    return { data: null, error: null };
+  });
+
   await uploadProfileResume(
     actor,
     new File(["synthetic PDF"], "synthetic.pdf"),
@@ -213,7 +199,7 @@ it("uses explicit retry to retire pending profile state before reserving again",
 });
 
 it("does not upload a repeated operation already marked ready", async () => {
-  setReadyResult({ state: "ready" });
+  setReadyResult({ resume_id: operation });
   await uploadProfileResume(
     actor,
     new File(["synthetic PDF"], "synthetic.pdf"),
@@ -275,7 +261,7 @@ it("rejects mismatched stored bytes and cancels upload state after storage/final
       operation,
       null,
     ),
-  ).rejects.toThrow("We could not confirm the upload.");
+  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PERSISTENCE_FAILED" });
   expect(mocks.rpc).toHaveBeenCalledWith("cancel_profile_resume", {
     p_actor: actor,
     p_operation: operation,
@@ -292,5 +278,5 @@ it("rejects mismatched stored bytes and cancels upload state after storage/final
       operation,
       null,
     ),
-  ).rejects.toThrow("Reload your profile or use Retry upload");
+  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
 });

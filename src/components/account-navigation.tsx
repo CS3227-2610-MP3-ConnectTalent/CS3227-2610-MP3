@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 import { getAccountNavigation } from "@/lib/account-navigation";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 
 type Account = Awaited<ReturnType<typeof getAccountNavigation>>;
 type SignedInAccount = Extract<Account, { kind: "signed-in" }>;
@@ -62,9 +63,11 @@ function SignedInMenu({ account }: { account: SignedInAccount }) {
       )}
       {account.role === "hr" && <HRLinks />}
       <form action={signOut}>
-        <button type="submit" className="rounded-lg border px-3 py-1.5">
-          Sign out
-        </button>
+        <PendingSubmitButton
+          label="Sign out"
+          pendingLabel="Signing out…"
+          className="rounded-lg border px-3 py-1.5"
+        />
       </form>
     </>
   );
@@ -94,6 +97,9 @@ function ApplicantLinks({ incomplete }: { incomplete: boolean }) {
 function HRLinks() {
   return (
     <>
+      <Link href="/hr" className="underline">
+        Dashboard
+      </Link>
       <Link href="/hr/applications" className="underline">
         Application review
       </Link>

@@ -20,28 +20,56 @@ export async function uploadInitialResume(
   await page
     .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "valid, unencrypted PDF",
-  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "This PDF could not be read. Export a new PDF and try again.",
+    }),
+  ).toBeVisible();
   await page.getByLabel("Choose PDF résumé").setInputFiles({
     name: "synthetic.pdf",
     mimeType: "application/pdf",
     buffer: pdf,
+  });
+  const operation = await uploadWithHeldRequest(page);
+  await expect(
+    page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
+  ).toBeVisible();
+  expect(operation).toBeTruthy();
+  return operation!;
+}
+
+async function uploadWithHeldRequest(page: Page) {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/**/resume", async (route) => {
+    if (
+      route.request().method() === "POST" &&
+      route.request().headers()["x-resume-intent"] === "upload"
+    )
+      await gate;
+    await route.continue();
   });
   const request = page.waitForRequest(
     (item) =>
       item.url().endsWith("/resume") &&
       item.headers()["x-resume-intent"] === "upload",
   );
-  await page
-    .getByRole("button", { name: "Upload résumé", exact: true })
-    .click();
+  try {
+    await page
+      .getByRole("button", { name: "Upload résumé", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Uploading résumé…" }),
+    ).toBeDisabled();
+    await expect(page.getByLabel("Choose PDF résumé")).toBeDisabled();
+  } finally {
+    release();
+  }
   const operation = (await request).headers()["x-resume-operation"];
-  await expect(
-    page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
-  ).toBeVisible();
-  expect(operation).toBeTruthy();
-  return operation!;
+  await page.unroute("**/api/**/resume");
+  return operation;
 }
 
 export async function verifyResumeDownloadAndRetry(
@@ -103,18 +131,19 @@ export async function replaceRemoveAndReupload(
   pdf: Buffer,
 ) {
   await rejectInvalidReplacement(page);
-  await uploadReplacement(page, "replacement.pdf", pdf, "Replace résumé");
+  await uploadReplacement(page, "replacement.pdf", pdf);
   const oldObject = await admin.storage
     .from("application-resumes")
     .download(originalObjectPath);
   expect(oldObject.error).not.toBeNull();
+  page.once("dialog", (dialog) => dialog.accept());
   await page
-    .getByRole("button", { name: "Remove résumé", exact: true })
+    .getByRole("button", { name: "Delete résumé", exact: true })
     .click();
   await expect(
     page.getByText("No résumé attached.", { exact: true }),
   ).toBeVisible();
-  await uploadReplacement(page, "synthetic.pdf", pdf, "Upload résumé");
+  await uploadReplacement(page, "synthetic.pdf", pdf);
 }
 
 export async function rejectInvalidReplacement(page: Page) {
@@ -124,28 +153,27 @@ export async function rejectInvalidReplacement(page: Page) {
     buffer: Buffer.from("invalid replacement"),
   });
   await page
-    .getByRole("button", { name: "Replace résumé", exact: true })
+    .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "valid, unencrypted PDF",
-  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "This PDF could not be read. Export a new PDF and try again.",
+    }),
+  ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
   ).toBeVisible();
 }
 
-export async function uploadReplacement(
-  page: Page,
-  name: string,
-  pdf: Buffer,
-  actionName: "Upload résumé" | "Replace résumé",
-) {
+export async function uploadReplacement(page: Page, name: string, pdf: Buffer) {
   await page.getByLabel("Choose PDF résumé").setInputFiles({
     name,
     mimeType: "application/pdf",
     buffer: pdf,
   });
-  await page.getByRole("button", { name: actionName, exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload résumé", exact: true })
+    .click();
   await expect(
     page.getByRole("link", { name: `Download résumé: ${name}` }),
   ).toBeVisible();

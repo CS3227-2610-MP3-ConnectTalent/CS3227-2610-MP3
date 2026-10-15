@@ -1,25 +1,31 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { validateResume } from "./resume-input";
 import {
-  recoverPendingJobResume,
-  resolveRetryRevision,
-} from "./application-resume-retry";
+  readResumeInput,
+  validateResume,
+  type ResumeInput,
+} from "./resume-input";
+import { prepareWithPendingRecovery } from "./application-resume-retry";
 import {
-  applicationResumeBucket,
+  uploadAndFinalizeApplicationResume,
+  type ApplicationResumeUploadArguments,
+} from "./application-resume-finalization";
+import {
   cleanupApplicationResume,
   resumeMutationClient,
 } from "./application-resume-storage";
+import { isCurrentApplicationResumeOperation } from "./application-resume-retry-state";
+import {
+  ResumeUploadPreparationError,
+  resumePreparationCode,
+  type ResumePreparationErrorCode,
+} from "./resume-errors";
 
 type MutationClient = ReturnType<typeof resumeMutationClient>;
-type ValidatedResume = Awaited<ReturnType<typeof validateResume>>;
-type UploadArguments = {
-  p_actor: string;
-  p_job: string;
-  p_revision: number;
-  p_operation: string;
-};
+type ValidatedResume = ResumeInput;
+type PreparedResume = Awaited<ReturnType<typeof prepareJobResume>>;
+type UploadArguments = ApplicationResumeUploadArguments;
 
 export async function uploadApplicationResume(
   actor: string,
@@ -29,42 +35,41 @@ export async function uploadApplicationResume(
   operation: string = randomUUID(),
   retry = false,
 ) {
-  const validated = await validateResume(file);
-  return uploadValidatedApplicationResume(
-    actor,
-    job,
-    revision,
-    validated,
-    operation,
-    retry,
-  );
-}
-
-async function uploadValidatedApplicationResume(
-  actor: string,
-  job: string,
-  revision: number,
-  validated: ValidatedResume,
-  operation: string,
-  retry: boolean,
-) {
+  const normalizedOperation = normalizeOperation(operation);
   const client = resumeMutationClient();
-  const args = uploadArguments(actor, job, revision, operation);
-  const existing = await getExistingUpload(client, operation);
-  if (existing?.state === "ready")
-    return reconcileExistingUpload(client, existing, actor, validated, args);
-  if (retry) await recoverPendingUpload(client, actor, job, revision);
-  const objectPath = await reserveUpload(client, args, validated);
-  await uploadAndFinalize(
+  const retryState = retry
+    ? await prepareCompletedRetry(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        file,
+      )
+    : null;
+  if (retryState?.prepared?.state === "ready") return;
+  const validated = await validateResume(file, retryState?.input);
+  const prepared =
+    retryState?.prepared ??
+    (await prepareWithPendingRecovery(client, actor, job, revision, retry, () =>
+      prepareJobResume(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        validated,
+      ),
+    ));
+  await finishPreparedJobResume(
     client,
     actor,
     job,
-    objectPath,
-    validated.bytes,
-    operation,
-    args,
+    normalizedOperation,
+    validated,
+    prepared,
+    retry,
   );
-  await cleanupApplicationResume(actor, job);
 }
 
 function uploadArguments(
@@ -81,136 +86,6 @@ function uploadArguments(
   };
 }
 
-async function getExistingUpload(client: MutationClient, operation: string) {
-  const { data, error } = await client
-    .from("application_resume_objects")
-    .select("id,applicant_id,filename,sha256,byte_size,state")
-    .eq("id", operation)
-    .maybeSingle();
-  if (error)
-    throw new Error(
-      "We could not check the previous upload. Reload and try again.",
-    );
-  return data;
-}
-
-async function reconcileExistingUpload(
-  client: MutationClient,
-  existing: NonNullable<Awaited<ReturnType<typeof getExistingUpload>>>,
-  actor: string,
-  validated: ValidatedResume,
-  args: UploadArguments,
-) {
-  if (!matchesExistingUpload(existing, actor, validated))
-    throw new Error(
-      "Choose the same PDF to retry this operation, or choose a new file.",
-    );
-  const { error } = await client.rpc("finalize_application_resume", args);
-  if (error)
-    throw new Error(
-      "We could not reconcile the upload. Reload to check the saved résumé.",
-    );
-}
-
-function matchesExistingUpload(
-  existing: NonNullable<Awaited<ReturnType<typeof getExistingUpload>>>,
-  actor: string,
-  validated: ValidatedResume,
-) {
-  return (
-    existing.applicant_id === actor &&
-    existing.sha256 === validated.sha256 &&
-    existing.filename === validated.filename &&
-    existing.byte_size === validated.bytes.length
-  );
-}
-
-async function recoverPendingUpload(
-  client: MutationClient,
-  actor: string,
-  job: string,
-  revision: number,
-) {
-  const { error } = await client.rpc("recover_pending_application_resume", {
-    p_actor: actor,
-    p_job: job,
-    p_revision: revision,
-  });
-  if (error)
-    throw new Error("Reload the saved draft before retrying this upload.");
-  await cleanupApplicationResume(actor, job);
-}
-
-async function reserveUpload(
-  client: MutationClient,
-  args: UploadArguments,
-  validated: ValidatedResume,
-) {
-  const { data: objectPath, error } = await client.rpc(
-    "reserve_application_resume",
-    {
-      ...args,
-      p_filename: validated.filename,
-      p_size: validated.bytes.length,
-      p_sha256: validated.sha256,
-    },
-  );
-  if (error || typeof objectPath !== "string")
-    throw new Error(
-      "Save the latest draft and use Retry upload if an earlier upload was interrupted.",
-    );
-  return objectPath;
-}
-
-async function uploadAndFinalize(
-  client: MutationClient,
-  actor: string,
-  job: string,
-  objectPath: string,
-  bytes: Uint8Array,
-  operation: string,
-  args: UploadArguments,
-) {
-  try {
-    await uploadObject(client, objectPath, bytes);
-    await finalizeApplicationUpload(client, args);
-  } catch {
-    await client.rpc("cancel_application_resume", {
-      p_actor: actor,
-      p_job: job,
-      p_operation: operation,
-    });
-    await cleanupApplicationResume(actor, job);
-    throw new Error(
-      "We could not confirm the upload. Reload to check which résumé was saved. Your application text has not been changed.",
-    );
-  }
-}
-
-async function uploadObject(
-  client: MutationClient,
-  objectPath: string,
-  bytes: Uint8Array,
-) {
-  const { error } = await client.storage
-    .from(applicationResumeBucket)
-    .upload(objectPath, bytes, {
-      contentType: "application/pdf",
-      upsert: false,
-    });
-  if (error) throw new Error("Upload failed.");
-}
-
-async function finalizeApplicationUpload(
-  client: MutationClient,
-  args: UploadArguments,
-) {
-  let { error } = await client.rpc("finalize_application_resume", args);
-  if (error)
-    ({ error } = await client.rpc("finalize_application_resume", args));
-  if (error) throw new Error("Upload could not be finalized.");
-}
-
 export async function uploadResumeForJob(
   actor: string,
   job: string,
@@ -219,34 +94,71 @@ export async function uploadResumeForJob(
   operation: string,
   retry = false,
 ) {
-  const validated = await validateResume(file);
+  const normalizedOperation = normalizeOperation(operation);
   const client = resumeMutationClient();
-  const expectedRevision = await resolveRetryRevision(
+  const retryState = retry
+    ? await prepareCompletedRetry(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        file,
+      )
+    : null;
+  if (retryState?.prepared?.state === "ready") return;
+  const validated = await validateResume(file, retryState?.input);
+  const prepared =
+    retryState?.prepared ??
+    (await prepareWithPendingRecovery(client, actor, job, revision, retry, () =>
+      prepareJobResume(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        validated,
+      ),
+    ));
+  await finishPreparedJobResume(
     client,
     actor,
     job,
-    revision,
+    normalizedOperation,
+    validated,
+    prepared,
     retry,
   );
-  if (retry && expectedRevision !== null)
-    await recoverPendingJobResume(client, actor, job, expectedRevision);
-  const prepared = await prepareJobResume(
-    client,
+}
+
+async function prepareCompletedRetry(
+  client: MutationClient,
+  actor: string,
+  job: string,
+  revision: number | null,
+  operation: string,
+  file: File,
+): Promise<{ input: ResumeInput; prepared: PreparedResume | null }> {
+  const input = await readResumeInput(file);
+  // The RLS-scoped row read only identifies a possible completed retry. The
+  // prepare RPC remains authoritative for the file fingerprint and ready state.
+  const exists = await isCurrentApplicationResumeOperation(
     actor,
     job,
-    expectedRevision,
     operation,
-    validated,
   );
-  if (prepared.state === "pending")
-    await uploadValidatedApplicationResume(
+  if (!exists) return { input, prepared: null };
+  return {
+    input,
+    prepared: await prepareJobResume(
+      client,
       actor,
       job,
-      prepared.revision,
-      validated,
+      revision,
       operation,
-      false,
-    );
+      input,
+    ),
+  };
 }
 
 async function prepareJobResume(
@@ -270,10 +182,95 @@ async function prepareJobResume(
     .object({
       id: z.uuid(),
       revision: z.number().int().positive(),
+      object_path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/i),
       state: z.enum(["ready", "pending"]),
     })
     .safeParse(data);
-  if (error || !prepared.success)
-    throw new Error("Reload the application before retrying this upload.");
+  if (error) {
+    const code = resumePreparationCode(error);
+    const reference = randomUUID();
+    logPreparationFailure(reference, code, error);
+    throw new ResumeUploadPreparationError(code, reference);
+  }
+  if (
+    !prepared.success ||
+    prepared.data.object_path !==
+      `${prepared.data.id.toLowerCase()}/${operation}.pdf`
+  ) {
+    const reference = randomUUID();
+    logPreparationFailure(
+      reference,
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      undefined,
+      "invalid_response",
+    );
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      reference,
+    );
+  }
   return prepared.data;
+}
+
+function normalizeOperation(operation: string) {
+  const parsed = z.uuid().safeParse(operation);
+  if (!parsed.success) throw new Error("Choose the file again.");
+  return parsed.data.toLowerCase();
+}
+
+async function finishPreparedJobResume(
+  client: MutationClient,
+  actor: string,
+  job: string,
+  operation: string,
+  validated: ValidatedResume,
+  prepared: Awaited<ReturnType<typeof prepareJobResume>>,
+  retry = false,
+) {
+  if (prepared.state === "ready") return;
+  const args = uploadArguments(actor, job, prepared.revision, operation);
+  await uploadAndFinalizeApplicationResume(
+    client,
+    actor,
+    job,
+    prepared.object_path,
+    validated.bytes,
+    args,
+    retry,
+  );
+  await cleanupApplicationResume(actor, job);
+}
+
+function logPreparationFailure(
+  reference: string,
+  code: ResumePreparationErrorCode,
+  error: unknown,
+  category = "rpc_error",
+) {
+  const details = asRecord(error);
+  const sqlState =
+    typeof details?.code === "string" && /^[A-Z0-9]{5}$/.test(details.code)
+      ? details.code
+      : undefined;
+  const status =
+    typeof details?.status === "number" &&
+    Number.isInteger(details.status) &&
+    details.status >= 100 &&
+    details.status <= 599
+      ? details.status
+      : undefined;
+  console.error("resume_upload_prepare_failed", {
+    reference,
+    stage: "prepare_application_resume",
+    code,
+    category,
+    ...(sqlState ? { sqlState } : {}),
+    ...(status ? { upstreamStatus: status } : {}),
+  });
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null;
 }

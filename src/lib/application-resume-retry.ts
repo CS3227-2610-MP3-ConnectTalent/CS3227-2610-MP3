@@ -1,5 +1,5 @@
 import "server-only";
-import { z } from "zod";
+import { ResumeUploadPreparationError } from "./resume-errors";
 import {
   cleanupApplicationResume,
   resumeMutationClient,
@@ -7,26 +7,28 @@ import {
 
 type MutationClient = ReturnType<typeof resumeMutationClient>;
 
-export async function resolveRetryRevision(
+export async function prepareWithPendingRecovery<T>(
   client: MutationClient,
   actor: string,
   job: string,
   revision: number | null,
   retry: boolean,
-) {
-  if (!retry || revision !== null) return revision;
-  const { data, error } = await client
-    .from("applications")
-    .select("revision")
-    .eq("applicant_id", actor)
-    .eq("job_id", job)
-    .maybeSingle();
-  const persisted = z
-    .object({ revision: z.number().int().positive() })
-    .safeParse(data);
-  if (error || (data !== null && !persisted.success))
-    throw new Error("We could not check the previous upload. Try again later.");
-  return persisted.success ? persisted.data.revision : null;
+  prepare: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await prepare();
+  } catch (error) {
+    if (
+      !retry ||
+      revision === null ||
+      !(error instanceof ResumeUploadPreparationError) ||
+      error.code !== "RESUME_UPLOAD_PENDING"
+    ) {
+      throw error;
+    }
+    await recoverPendingJobResume(client, actor, job, revision);
+    return prepare();
+  }
 }
 
 export async function recoverPendingJobResume(

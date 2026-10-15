@@ -1,6 +1,20 @@
 # Product specification
 
-Current baseline: **1.8**, dated **10 October 2026** (accepted #53 résumé before Save draft/private profile files; #52 required onboarding and prior withdrawal retained). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+Current integrated branch baseline: **1.14**, dated **15 October 2026**. Merged PRs #82, #85 and #86 establish OVR-004, JOB-004/OVR-005 and OVR-006. Accepted #76 PDF validation/safe errors, #78 public job search, HR dashboard, résumé/profile, onboarding and withdrawal requirements remain. The #81, #83 and #84 packets preserve their independent approval and acceptance histories. PR #77 carries the accepted #76 implementation and upload-reliability follow-up; this branch does not establish PR #77 merge, hosted upload success or release.
+
+Paul separately accepted #84 with recorded verification limits on 15 October 2026 after independent review and a repaired Retry-pending finding. [The complete #84 packet](archive/2026-10-15-remaining-action-feedback/record.md) preserves local coverage and browser evidence.
+
+Paul separately accepted #81 via “Accept with recorded limits” on 15 October 2026 after local checks and independent review. OVR-004 requires action-specific pending feedback and disables the submitted control while preserving validation and retry paths. The [accepted packet](archive/2026-10-14-pending-action-feedback/record.md) records the resolved review findings and hosted/accessibility limits. PR #82 later merged to `develop`; acceptance and archival alone did not establish that merge.
+
+Paul separately accepted #83 with its recorded browser-held total-network-failure limit on 15 October 2026 after independent re-review. [The #83 packet](archive/2026-10-15-navigation-loading/record.md) records local tests and the unverified hosted/accessibility checks. PR #85 subsequently merged to `develop`; acceptance alone did not establish that merge or release.
+
+Paul separately accepted the #83 View role follow-up with recorded hosted/accessibility limits on 15 October 2026 after independent review. OVR-005 now includes View role; JOB-004 keeps the pending/results announcement while its duplicate visible line is removed. [The follow-up packet](archive/2026-10-15-view-role-loading/record.md) records the test-first check, independent review and acceptance. PR #85 subsequently merged to `develop`; acceptance alone did not establish that merge or release.
+
+Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026. APP-007 accepts structurally valid PDFs that open without a password, rejects password-required documents, and distinguishes safe file errors from validation service failures/timeouts. APP-006 inherits the same file rules. The [accepted packet](archive/2026-10-13-resume-error-messages/record.md) preserves tests, independent review and hosted/Linux verification limits. No deployment or release is implied.
+
+Paul separately accepted #78 on 14 October 2026 with recorded hosted and accessibility limits after independent review. JOB-004 adds literal public job text search with combined category filtering, URL restoration, debouncing and safe invalid-query feedback. The [accepted packet](archive/2026-10-14-job-listing-search/record.md) records checks, the fixed review finding and pending hosted validation. Canonical sync and archive do not establish PR merge or deployment.
+
+John Wong confirmed the HR dashboard was fully approved on 12 October 2026 after the recorded local checks; canonical sync and archive completed on 13 October. APP-009 adds a read-only HR overview with per-job and status counts through existing authorized reads. The [archived #68 packet](archive/2026-10-12-hr-dashboard/record.md) preserves the stated acceptance, known E2E/formatting failures, and the fact that independent reviewer identity and findings were not supplied. Sync/archive does not establish hosted validation, merge, or release.
 
 Paul separately accepted #53 via “Accept with recorded limits” on 10 October 2026 and authorized one combined PR for #49/#50/#52/#53. APP-006/007 and SEC-009 now cover optional private profile PDFs, explicit independent snapshot reuse and upload before Save draft without saving typed fields. [Accepted résumé packet](archive/2026-10-10-unsaved-profile-resume/record.md) preserves approval, review, acceptance and hosted/cleanup/accessibility limits. The earlier #53-pending entries below describe historical baselines; #52's required-profile rules remain authoritative.
 
@@ -18,7 +32,7 @@ The canonical requirements now live in the capability specifications below. The 
 | ------------------------------------------------------ | --------------------------------------------------------------- | --- |
 | Product boundary, actors, scope and non-goals          | [Product overview](specs/product-overview.md)                   | OVR |
 | Signup and role assignment                             | [Accounts and roles](specs/accounts-and-roles.md)               | ACC |
-| Public browsing, category filtering and details        | [Public job listings](specs/public-job-listings.md)             | JOB |
+| Public browsing, category/text filtering and details   | [Public job listings](specs/public-job-listings.md)             | JOB |
 | HR job lifecycle                                       | [Job management](specs/job-management.md)                       | JMG |
 | Applications and HR review                             | [Applications and review](specs/applications-and-review.md)     | APP |
 | Applicant-controlled AI drafting                       | [Applicant AI draft](specs/applicant-ai-draft.md)               | AID |

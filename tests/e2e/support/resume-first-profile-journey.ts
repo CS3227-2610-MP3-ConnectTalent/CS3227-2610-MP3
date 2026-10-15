@@ -77,9 +77,11 @@ async function prepareUnsavedApplication(
   await page
     .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "valid, unencrypted PDF",
-  );
+  await expect(
+    page.getByRole("status").filter({
+      hasText: "This PDF could not be read. Export a new PDF and try again.",
+    }),
+  ).toBeVisible();
   const applications = await admin
     .from("applications")
     .select("id")
@@ -119,7 +121,7 @@ async function interruptInitialUpload(
     .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Retry upload", exact: true }),
+    page.getByRole("button", { name: "Upload résumé", exact: true }),
   ).toBeVisible();
   return operation;
 }
@@ -136,10 +138,12 @@ async function retryInitialUpload(
       request.url().endsWith(`/api/jobs/${fixture.jobId}/resume`) &&
       request.headers()["x-resume-retry"] === "true",
   );
-  await page.getByRole("button", { name: "Retry upload", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Upload résumé", exact: true })
+    .click();
   const headers = (await retryRequest).headers();
   expect(headers["x-application-revision"]).toBe("");
-  expect(headers["x-resume-operation"]).not.toBe(interruptedOperation);
+  expect(headers["x-resume-operation"]).toBe(interruptedOperation);
   await expect(
     page.getByRole("link", { name: "Download résumé: direct.pdf" }),
   ).toBeVisible({ timeout: 30_000 });
@@ -154,7 +158,7 @@ async function retryInitialUpload(
     .select("state")
     .eq("id", interruptedOperation!)
     .single();
-  expect(retired.data?.state).toBe("deleting");
+  expect(retired.data?.state).toBe("ready");
 }
 
 async function selectProfileResumeAndCheckDraft(
@@ -231,8 +235,9 @@ async function submitAndRemoveProfileResume(
     page.getByText("Submitted application", { exact: true }),
   ).toBeVisible();
   await page.goto("/profile");
+  page.once("dialog", (dialog) => dialog.accept());
   await page
-    .getByRole("button", { name: "Remove résumé", exact: true })
+    .getByRole("button", { name: "Delete résumé", exact: true })
     .click();
   await expect(
     page.getByText("No résumé attached.", { exact: true }),

@@ -13,6 +13,7 @@ export default defineConfig({
         ["junit", { outputFile: "test-results/playwright-junit.xml" }],
       ]
     : "list",
+  expect: { timeout: 20_000 },
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",

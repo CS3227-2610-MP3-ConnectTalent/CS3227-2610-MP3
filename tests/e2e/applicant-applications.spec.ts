@@ -195,9 +195,9 @@ async function draftWithAI(page: Page) {
   await expect(page.getByLabel("Cover letter")).toHaveValue(
     "AI generated synthetic draft.",
   );
-  await expect(page.getByRole("status")).toContainText(
-    "Check every date, skill, and achievement",
-  );
+  await expect(
+    page.getByRole("status").filter({ hasText: "Check every date" }),
+  ).toContainText("Check every date, skill, and achievement");
   await expect(page.getByText("Submitted application")).toHaveCount(0);
   await page.unroute("**/api/ai/applicant-draft");
   await page.reload();
@@ -215,7 +215,10 @@ async function saveDraftAndReload(page: Page) {
 }
 
 async function submitApplication(page: Page) {
-  await page.getByLabel("Cover letter").fill("Original submitted letter");
+  await expect(page.locator('form[data-hydrated="true"]')).toBeVisible();
+  const coverLetter = page.getByLabel("Cover letter");
+  await coverLetter.fill("Original submitted letter");
+  await expect(coverLetter).toHaveValue("Original submitted letter");
   await page.getByLabel("Full name").fill("Synthetic Applicant");
   await page.getByRole("button", { name: "Submit application" }).click();
   await expect(

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const applicationResumeBucket = "application-resumes";
 
-// Mutations use this privileged client only after the caller verifies ownership.
+// Server résumé services use this privileged client after the route verifies ownership.
 export function resumeMutationClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =

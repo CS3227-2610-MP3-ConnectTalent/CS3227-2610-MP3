@@ -6,6 +6,11 @@ import {
   resumeHeaders,
 } from "@/lib/resume-request";
 import { RESUME_MAX_BYTES } from "@/lib/resume-input";
+import {
+  ResumeUploadOperationRetiredError,
+  ResumeUploadPreparationError,
+  resumeFailureStatus,
+} from "@/lib/resume-errors";
 
 function request(bytes: Uint8Array, filename = "synthetic%20resume.pdf") {
   return new Request("https://careers.example.test/api/resume", {
@@ -32,10 +37,14 @@ it("rejects a request without a body and cancels a stream once it exceeds the by
   const empty = new Request("https://careers.example.test/api/resume", {
     method: "POST",
   });
-  await expect(readResumeFile(empty)).rejects.toThrow("at most 1 MiB");
+  await expect(readResumeFile(empty)).rejects.toMatchObject({
+    code: "RESUME_EMPTY",
+  });
 
   const tooLarge = request(new Uint8Array(RESUME_MAX_BYTES + 1));
-  await expect(readResumeFile(tooLarge)).rejects.toThrow("at most 1 MiB");
+  await expect(readResumeFile(tooLarge)).rejects.toMatchObject({
+    code: "RESUME_TOO_LARGE",
+  });
 });
 
 it("uses private no-store download headers and encodes non-ASCII filenames", async () => {
@@ -74,5 +83,47 @@ it("preserves only recognized user-facing errors and hides unexpected messages",
   });
   expect(resumeFailure("unexpected string")).toEqual({
     error: "The résumé change could not be saved. Reload and try again.",
+  });
+});
+
+it("returns a safe conflict code when a profile upload operation was retired", () => {
+  const error = new ResumeUploadOperationRetiredError();
+
+  expect(resumeFailure(error)).toEqual({
+    error:
+      "This upload attempt ended. Press Upload résumé again to retry this selected file.",
+    code: "RESUME_UPLOAD_OPERATION_RETIRED",
+  });
+  expect(resumeFailureStatus(error)).toBe(409);
+});
+
+it("returns a safe server failure for storage and finalization outages", () => {
+  const error = new ResumeUploadPreparationError(
+    "RESUME_UPLOAD_PERSISTENCE_FAILED",
+    "84000000-0000-4000-8000-000000000102",
+  );
+
+  expect(resumeFailureStatus(error)).toBe(503);
+  expect(resumeFailure(error)).toEqual({
+    error:
+      "We could not save this résumé. Try again later and share the reference code if the problem continues.",
+    code: "RESUME_UPLOAD_PERSISTENCE_FAILED",
+    reference: "84000000-0000-4000-8000-000000000102",
+  });
+});
+
+it("reports an interrupted stream without exposing its exception", async () => {
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      controller.error(new Error("private stream failure"));
+    },
+  });
+  const interrupted = new Request("http://localhost/api/resume", {
+    method: "POST",
+    body,
+    duplex: "half",
+  } as RequestInit);
+  await expect(readResumeFile(interrupted)).rejects.toMatchObject({
+    code: "RESUME_READ_FAILED",
   });
 });

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackToOpenRoles } from "@/components/back-to-open-roles";
 
 import { categoryLabel } from "@/lib/job-categories";
 import { requireHR } from "@/lib/hr-auth";
@@ -23,6 +24,7 @@ export default async function HRJobsPage() {
 function JobsUnavailable() {
   return (
     <main className="page-shell mx-auto max-w-4xl px-5 py-10">
+      <BackToOpenRoles />
       <h1 className="text-3xl font-semibold">Manage jobs</h1>
       <p role="alert" className="mt-5">
         Jobs are temporarily unavailable. Try again later.
@@ -34,6 +36,7 @@ function JobsUnavailable() {
 function HRJobsContent({ jobs }: { jobs: Jobs }) {
   return (
     <main className="page-shell mx-auto max-w-4xl space-y-8 px-5 py-10">
+      <BackToOpenRoles />
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold">Manage jobs</h1>

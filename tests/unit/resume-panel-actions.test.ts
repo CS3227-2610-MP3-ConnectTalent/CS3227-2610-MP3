@@ -158,7 +158,7 @@ it("uploads a selected file to the profile endpoint and applies returned metadat
   });
 });
 
-it("reports an upload error and retries with the explicit retry headers", async () => {
+it("retries through the upload action with the same file and operation", async () => {
   const file = pdfFile("synthetic.pdf");
   const fetch = vi
     .fn()
@@ -180,10 +180,11 @@ it("reports an upload error and retries with the explicit retry headers", async 
   });
   const firstOperation =
     fetch.mock.calls[0]?.[1]?.headers?.["x-resume-operation"];
-  await renderActions(props).change("upload", true);
+  await renderActions(props).change("upload");
   const retryHeaders = fetch.mock.calls[1]?.[1]?.headers;
   expect(retryHeaders?.["x-resume-retry"]).toBe("true");
-  expect(retryHeaders?.["x-resume-operation"]).not.toBe(firstOperation);
+  expect(retryHeaders?.["x-resume-operation"]).toBe(firstOperation);
+  expect(fetch.mock.calls[1]?.[1]?.body).toBe(file);
   expect(renderActions(props)).toMatchObject({
     uploadFailed: false,
     attachment,
@@ -256,33 +257,42 @@ it("uses generic safe feedback for invalid JSON, non-object data, and network fa
   expect(renderActions(props)).toMatchObject({
     uploadFailed: true,
     message:
-      "We could not confirm the change. Reload to check your saved résumé.",
+      "We could not confirm the upload. Press Upload résumé again to retry, or reload to check whether it saved.",
   });
   await renderActions(props).change("remove");
   expect(renderActions(props).message).toBe(
-    "We could not confirm the change. Reload to check your saved résumé.",
+    "We could not confirm the change. Reload to check whether it saved.",
   );
   await renderActions(props).change("upload");
   expect(renderActions(props).message).toBe(
-    "We could not confirm the change. Reload to check your saved résumé.",
+    "We could not confirm the upload. Press Upload résumé again to retry, or reload to check whether it saved.",
   );
   expect(mocks.refresh).toHaveBeenCalledTimes(3);
 });
 
-it("uses generic failure text for unrecognized server errors and omits optional callbacks", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(response({ error: 7 }, 400)),
+it("displays safe server reference codes", async () => {
+  const reference = "84000000-0000-4000-8000-000000000101";
+  const fetch = vi.fn().mockResolvedValue(
+    response(
+      {
+        code: "RESUME_UPLOAD_PREPARATION_FAILED",
+        error: "We could not prepare this résumé upload.",
+        reference,
+      },
+      503,
+    ),
   );
+  vi.stubGlobal("fetch", fetch);
   const props = {
     applicationId: "app-1",
     revision: null,
     editable: true,
     resume: null,
   };
-  await renderActions(props).change("remove");
+  renderActions(props).selectFile(pdfFile("synthetic.pdf"));
+  await renderActions(props).change("upload");
   expect(renderActions(props).message).toBe(
-    "Résumé change could not be saved.",
+    `We could not prepare this résumé upload. Reference code: ${reference}`,
   );
   expect(renderActions(props).pending).toBe(false);
 });

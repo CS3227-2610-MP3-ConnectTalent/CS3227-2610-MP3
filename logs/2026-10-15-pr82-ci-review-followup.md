@@ -1,0 +1,11 @@
+# PR #82 CI and review follow-up — 15 October 2026
+
+Paul pointed out that PR #82 had a failed check and an automated review finding after #83 and #84 had been pushed separately. The root Codex execution inspected PR #82's current checks and the failed Playwright job. The report's red 88.03% branch figure comes from a 90% green-icon threshold; the failing required job was Playwright Chromium, while unit/coverage, database, integration, and Vercel checks passed at the first PR head.
+
+Three browser journeys failed because `getByRole("status")` resolved to the new persistent navigation live region and the journey's own status. The existing #81 scope already required that live region. On the existing `feat/81-pending-action-feedback` branch in an isolated worktree, the execution narrowed only those three assertions to the intended status text. This is a test repair for the accepted behavior, with no product or specification change.
+
+The local critical Playwright suite against local Supabase passed 10/10 Chromium cases after the repair. Scoped Prettier, ESLint, and TypeScript checks passed. The first local browser attempt did not start because the Windows web-server command could not find bare `pnpm`; rerunning with `PLAYWRIGHT_SERVER_COMMAND=corepack pnpm dev` passed. GitHub CI on a new head and hosted checks remain pending.
+
+The automated review's date claim overlooked Asia/Singapore time. Its cited 14 October 16:22:02 UTC timestamp was 15 October 00:22:02 SGT; Git records the actual `2c4d08c` commit at 15 October 00:19:04 SGT. Both are on the recorded 15 October acceptance date. This explanation uses the existing decision evidence and does not claim a new approval.
+
+A separate read-only `/root/pr82_repair_review` agent reviewed the final selector and evidence diff, found no blocking issue, and ran `git diff --check`. It did not independently rerun the browser suite or verify conversation timestamps. The [review handoff](../workflow/archive/2026-10-14-pending-action-feedback/handoffs/pr82-repair-review.md) records those limits. Paul subsequently answered “Accept and commit/push to PR #82” on 15 October 2026 to a separate post-review question. This authorizes the repair commit and push to the existing PR branch; it is not merge or release approval.

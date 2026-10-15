@@ -12,6 +12,8 @@ ConnectTalent is a careers portal for **one employer per deployment**. Applicant
 
 Use a browser; no desktop installation is required. Local accounts do not automatically work on the hosted website.
 
+Job details, **My profile** and **Manage jobs** have a **Back to open roles** link at the top. Applicants with an incomplete profile remain on **My profile** until they save the required details.
+
 **Verification status, 12 October 2026:** instructions were checked against current `develop` source and specifications. Authenticated hosted workflows were not verified in this review; the team must smoke-test the deployment before evaluator use.
 
 ### 1.2 Create and verify an Applicant account
@@ -42,6 +44,8 @@ Choose **Save profile** to unlock Careers and applications. Uploading a file doe
 
 Both roles use **Sign in**. Use **Sign out** in the header when finished; if an error appears, retry rather than assuming the session ended.
 
+Server-backed sign-in, account and HR form actions show an action-specific loading label and disable that form's submit button while its request is pending. If validation or an action error appears, correct it and retry. Loading feedback does not mean the action succeeded; wait for the resulting page or message.
+
 For recovery, choose **Forgot password?**, enter email, open the recovery message in the requesting browser, enter matching new passwords of 8–72 characters, then sign in again. The request acknowledgement is the same for registered and unregistered addresses. Invalid/expired links require another request. Recovery preserves your role; local messages appear in Mailpit.
 
 ## 2. Interface overview
@@ -51,7 +55,7 @@ For recovery, choose **Forgot password?**, enter email, open the recovery messag
 | Guest                | Sign in and Create account; public browsing.                                  |
 | Incomplete Applicant | My profile and Sign out; onboarding restrictions apply.                       |
 | Complete Applicant   | My profile, My applications and Sign out; Careers and applications available. |
-| HR                   | Application review, Manage jobs and Sign out.                                 |
+| HR                   | Dashboard, Application review, Manage jobs and Sign out.                      |
 
 Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards include category text as well as color. Layouts adapt to narrow screens. Access is enforced on the server too; opening a direct URL does not grant another role's permissions.
 
@@ -60,6 +64,12 @@ Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards i
 ### 3.1 Browse jobs
 
 Guests can browse; signed-in Applicants complete their profile first. Open **Careers**, use category links to filter, and open a job to read title, team, description and requirements. Choose **Apply for this role** and sign in if necessary. Draft/closed jobs are hidden publicly. HR is not offered Applicant apply controls.
+
+Use **Search open roles** to find a phrase in a job's title, team, description or requirements. Matching ignores case and repeated whitespace; the whole phrase must appear in one field. Search and category filters work together. Use up to 100 characters; punctuation is treated literally.
+
+Results update after a short pause (300 ms). Press Enter or choose **Search** to apply immediately. **Clear search** removes only the phrase; **All roles** removes only the category. The address keeps both filters for sharing, refreshing and browser Back/Forward. Without JavaScript, choose **Search** to submit the form. If no roles match, try a different phrase or category; invalid searches show guidance without results.
+
+While a search request is pending, **Search** shows **Searching…** and cannot be pressed again. You can still change the query, category or Clear. A delayed **View role**, **Apply for this role** or return-to-Careers link shows a small loading indicator beside that link; the destination and access rules stay the same. Fast navigation may finish before the indicator appears.
 
 ### 3.2 Complete and save an application
 
@@ -71,6 +81,7 @@ New forms prefill saved profile details without AI. Existing drafts take precede
 - Draft editing/submission requires a published job. Closure stops those writes; history remains readable.
 - There is at most **one application per Applicant per job**, including after withdrawal.
 - Validation feedback retains typed values. Saving or generating text does not submit.
+- During a slow request, Save draft and Submit application identify the active operation and disable another submission. Résumé Upload, Replace, Remove, Use profile and Retry controls likewise show the active operation and prevent conflicting file actions until it finishes.
 
 ### 3.3 Optional AI drafting
 
@@ -82,10 +93,10 @@ Structured profile/contact fields and files are not automatically sent to AI. Pe
 
 The résumé section is below work experience and above AI drafting. Choose **Choose PDF résumé**, select the file, then **Upload résumé** and wait for the download link. **Save draft is not a prerequisite.**
 
-- PDF only; maximum **1 MiB (1,048,576 bytes)**. Invalid/encrypted PDFs are rejected.
+- PDF only; maximum **1 MiB (1,048,576 bytes)**. The PDF must open without entering a password. Encrypted PDFs that open without a password are accepted; password-required or unreadable PDFs are rejected.
 - Upload is optional. It may create a private draft for the file without saving other typed fields.
-- Replace/remove is available before submission while the job is published. Invalid replacement preserves the prior finalized attachment.
-- After failure, **Retry upload** preserves typed text and reconciles interrupted first uploads without a full reload. If still uncertain, reload to inspect the saved attachment before further changes.
+- Before submission, choose another PDF and press **Upload résumé** to replace the attachment. Choose **Delete résumé** to remove it; deletion asks for confirmation. Invalid replacements preserve the prior finalized attachment.
+- After an upload failure, press **Upload résumé** again to retry the selected file while preserving typed text. If the outcome is uncertain, reload to inspect the saved attachment before making further changes.
 - There is no permanent cancellation button. Downloads are private attachments, not public links or inline previews. Structural validation is not malware scanning.
 
 **My profile** also allows optional private PDF upload. **Use profile résumé** explicitly copies it into the application. Later profile replacement/removal does not alter that copy. Files are not parsed for autofill or sent to AI.
@@ -107,6 +118,10 @@ Withdrawal is permanent, works after closure and does not erase data/files. You 
 ### 4.1 HR access
 
 There is no public HR signup or role switch. An administrator assigns HR to a verified dedicated account without Applicant applications. Ask the team for authorized evaluator access; this guide publishes no shared password. Developers can use the [local-only HR seed](DeveloperGuide.md#23-local-hr-account).
+
+### 4.2 HR dashboard
+
+Open **Dashboard** to see job totals by Draft, Published and Closed, submitted applications by review status, and a separate Withdrawn total. The per-job table includes jobs with no applications and closed jobs; choose a job title to open its details. Use **Manage jobs** or **Application review** to continue into the existing HR workflows. The dashboard is read-only and does not show applicant names, contact details, application text, HR notes or résumé information.
 
 ### 4.2 Manage jobs
 
@@ -158,18 +173,23 @@ For hosted smoke testing, use separate authorized Applicant/HR accounts: complet
 
 ## 7. Troubleshooting and FAQ
 
-| Problem                               | What to do                                                                                                            |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| No local verification email           | Open Mailpit on port 54324; local emails do not go to Gmail.                                                          |
-| No hosted verification/recovery email | Check spam; ask the team to check delivery/redirects. Request a fresh expired link.                                   |
-| Every tab returns to My profile       | Save required name and formatted phone. File upload alone is not completion.                                          |
-| No HR navigation                      | Ask the administrator to check the role in the correct environment.                                                   |
-| Upload unavailable                    | Complete onboarding; use a valid PDF within 1 MiB on an editable published-job application. Report persistent errors. |
-| Interrupted upload                    | Retry upload; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                 |
-| Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                              |
-| Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                 |
-| No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                |
-| AI unavailable/limited                | Continue manually; wait after limits.                                                                                 |
-| Local login fails online              | Local, Development and Production databases have separate accounts.                                                   |
+| Problem                               | What to do                                                                                                                                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No local verification email           | Open Mailpit on port 54324; local emails do not go to Gmail.                                                                                                                              |
+| No hosted verification/recovery email | Check spam; ask the team to check delivery/redirects. Request a fresh expired link.                                                                                                       |
+| Every tab returns to My profile       | Save required name and formatted phone. File upload alone is not completion.                                                                                                              |
+| No HR navigation                      | Ask the administrator to check the role in the correct environment.                                                                                                                       |
+| File exceeds 1 MiB                    | Choose a smaller PDF.                                                                                                                                                                     |
+| PDF requires a password               | Upload a copy that opens without a password. The site does not accept PDF passwords.                                                                                                      |
+| PDF could not be read                 | Export a new PDF and retry.                                                                                                                                                               |
+| File type or filename rejected        | Select a `.pdf` file recognised as PDF; use a simple filename of at most 120 characters.                                                                                                  |
+| File could not be received completely | Select the file again and retry.                                                                                                                                                          |
+| PDF checking unavailable or timed out | Retry later. This is a server validation problem; the message does not mean your file is invalid. The failed upload does not replace your previous attachment or clear typed form fields. |
+| Interrupted upload                    | Press Upload résumé again to retry the selected file; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                                             |
+| Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                                                                                                  |
+| Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                                                                                     |
+| No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                                                                                    |
+| AI unavailable/limited                | Continue manually; wait after limits.                                                                                                                                                     |
+| Local login fails online              | Local, Development and Production databases have separate accounts.                                                                                                                       |
 
 See the [Developer Guide](DeveloperGuide.md) for setup/security/tests and [Reflections](Reflections.md) for individual work.
