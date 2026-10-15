@@ -72,7 +72,9 @@ it("keeps an idle Search available and preserves the selected category", () => {
   expect(html).toContain('name="category" value="engineering"');
   expect(html).toContain('href="/?category=engineering"');
   expect(html).toContain('aria-current="page"');
-  expect(html).toMatch(/<button[^>]+type="submit"[^>]*>[\s\S]*Search<\/button>/);
+  expect(html).toMatch(
+    /<button[^>]+type="submit"[^>]*>[\s\S]*Search<\/button>/,
+  );
   expect(html).not.toContain("Searching…");
 });
 

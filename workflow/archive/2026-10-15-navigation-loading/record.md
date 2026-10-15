@@ -7,6 +7,8 @@
 - Baseline: fetched `origin/develop` at `f65f699ff2de76466e6cf374011119aec2414a91`; local `develop` fast-forwarded from `7bbf7af`; created `feat/83-navigation-loading` from that updated baseline on 15 October 2026. PR #82 for #81 was open and not included.
 - Session summaries: [15 October intake](../../../logs/2026-10-15-navigation-loading-intake.md), [15 October implementation](../../../logs/2026-10-15-navigation-loading-implementation.md), [15 October closeout](../../../logs/2026-10-15-navigation-loading-closeout.md)
 - Submission summary: [15 October PR preparation](../../../logs/2026-10-15-navigation-loading-pr.md)
+- PR CI follow-up: [15 October formatting repair](../../../logs/2026-10-15-navigation-loading-format-followup.md)
+- PR CI repair review: [separate read-only handoff](handoffs/pr85-format-review.md)
 - Implementer handoff: [T01–T04](handoffs/T01-T04-implementer.md)
 - Independent review: [read-only reviewer handoff](handoffs/independent-review.md); P2 resolved by Paul's approved [failure-boundary amendment](failure-amendment.md), with the browser-held failure retained as a limit
 
@@ -42,3 +44,9 @@ The complete ten-file packet is preserved at `workflow/archive/2026-10-15-naviga
 ## PR preparation after local acceptance
 
 Paul separately requested “open pr 83 and 84” on 15 October 2026. The #83 branch was already committed and pushed at `15a99ea`; the committed diff is limited to the accepted JOB-004/OVR-005 change, tests, docs, packet and session summaries. The unrelated untracked profile packet remains outside the PR. PR #82 for OVR-004 is still open and must be reconciled before #83 merges; #84 separately proposes OVR-006. This authorization covers PR submission to `develop`, not review approval, merge, hosted smoke testing or release.
+
+## PR #85 formatting follow-up
+
+The first PR #85 `app` check failed in `pnpm format:check` because one assertion in `tests/unit/navigation-loading.test.tsx` did not match Prettier's line wrapping. The root execution reproduced the focused warning locally, ran Prettier on that file only, and inspected the diff: the assertion's regex and expected behavior are unchanged. Focused Prettier and all six navigation-loading unit tests passed afterward. A local repository-wide `prettier --check .` run was interrupted because it traversed sibling `.worktrees` and reported many unrelated Windows working-tree line endings; it is not counted as a pass. GitHub CI on an updated PR head is the required clean-checkout confirmation. No product or canonical-spec behavior changed.
+
+A separate read-only `/root/pr85_format_review` execution reviewed the follow-up diff and independently reran focused Prettier, the six unit tests and `git diff --check`; all passed, with no blocking finding. The [handoff](handoffs/pr85-format-review.md) records its scope and the pending clean-checkout CI confirmation. Paul then answered “Accept and commit/push to PR #85” on 15 October 2026 to the separate post-review question in this conversation. This authorizes only the repair commit and push to the existing PR branch; merge and release remain separate decisions.
