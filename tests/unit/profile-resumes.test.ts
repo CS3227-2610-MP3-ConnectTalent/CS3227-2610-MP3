@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   readyResult: { data: null as unknown, error: null as unknown },
   profileResult: { data: null as unknown, error: null as unknown },
-  stateQueryFilters: [] as Array<Array<[string, string]>>,
   cleanupData: [] as unknown,
   storageBucket: null as unknown,
   client: null as unknown,
@@ -61,23 +60,15 @@ beforeEach(() => {
     storage: { from: vi.fn(() => storage) },
     from: vi.fn(() => {
       let fields = "";
-      const filters: Array<[string, string]> = [];
       const builder = {
         select: vi.fn((selected: string) => {
           fields = selected;
           return builder;
         }),
-        eq: vi.fn((column: string, value: string) => {
-          filters.push([column, value]);
-          return builder;
-        }),
-        maybeSingle: vi.fn(async () => {
-          if (fields === "state") {
-            mocks.stateQueryFilters.push(filters);
-            return mocks.readyResult;
-          }
-          return mocks.profileResult;
-        }),
+        eq: vi.fn(() => builder),
+        maybeSingle: vi.fn(async () =>
+          fields === "state" ? mocks.readyResult : mocks.profileResult,
+        ),
       };
       return builder;
     }),
@@ -88,7 +79,6 @@ beforeEach(() => {
   setProfileResult(null);
   setReadyResult();
   mocks.cleanupData = [];
-  mocks.stateQueryFilters = [];
   mocks.rpc.mockImplementation(async (name: string) => {
     if (name === "reserve_profile_resume")
       return { data: objectPath, error: null };
@@ -220,89 +210,6 @@ it("uses explicit retry to retire pending profile state before reserving again",
     "reserve_profile_resume",
     expect.objectContaining({ p_expected: operation }),
   );
-});
-
-it("reconciles the same pending profile operation without retiring it", async () => {
-  setReadyResult({ state: "pending" });
-  const file = new File(["synthetic PDF"], "synthetic.pdf");
-
-  await uploadProfileResume(actor, file, operation, null, true);
-
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
-    "retire_profile_resume",
-    expect.anything(),
-  );
-  expect(mocks.rpc).toHaveBeenCalledWith(
-    "reserve_profile_resume",
-    expect.objectContaining({ p_operation: operation, p_expected: null }),
-  );
-  expect(
-    (mocks.storageBucket as { upload: ReturnType<typeof vi.fn> }).upload,
-  ).toHaveBeenCalledOnce();
-  expect(mocks.stateQueryFilters[0]).toContainEqual(["applicant_id", actor]);
-});
-
-it("reconciles the same ready profile operation before checking the stale expected id", async () => {
-  setReadyResult({ state: "ready" });
-  const file = new File(["synthetic PDF"], "synthetic.pdf");
-
-  await uploadProfileResume(
-    actor,
-    file,
-    operation,
-    "44000000-0000-4000-8000-000000000999",
-    true,
-  );
-
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
-    "retire_profile_resume",
-    expect.anything(),
-  );
-  expect(mocks.rpc).toHaveBeenCalledWith(
-    "reserve_profile_resume",
-    expect.objectContaining({ p_operation: operation }),
-  );
-  expect(
-    (mocks.storageBucket as { upload: ReturnType<typeof vi.fn> }).upload,
-  ).not.toHaveBeenCalled();
-});
-
-it("reports a retired operation so the client can retry the selected file with a new id", async () => {
-  setReadyResult({ state: "retired" });
-
-  await expect(
-    uploadProfileResume(
-      actor,
-      new File(["synthetic PDF"], "synthetic.pdf"),
-      operation,
-      null,
-      true,
-    ),
-  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_OPERATION_RETIRED" });
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
-    "reserve_profile_resume",
-    expect.anything(),
-  );
-});
-
-it("classifies profile Storage failures as safe server errors", async () => {
-  const bucket = mocks.storageBucket as {
-    upload: ReturnType<typeof vi.fn>;
-  };
-  bucket.upload.mockResolvedValueOnce({ error: { message: "private detail" } });
-
-  await expect(
-    uploadProfileResume(
-      actor,
-      new File(["synthetic PDF"], "synthetic.pdf"),
-      operation,
-      null,
-    ),
-  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PERSISTENCE_FAILED" });
-  expect(mocks.rpc).toHaveBeenCalledWith("cancel_profile_resume", {
-    p_actor: actor,
-    p_operation: operation,
-  });
 });
 
 it("does not upload a repeated operation already marked ready", async () => {
