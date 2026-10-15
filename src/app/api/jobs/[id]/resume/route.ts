@@ -1,5 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { resumeFailureStatus } from "@/lib/resume-errors";
+import {
+  ResumeUploadPreparationError,
+  resumeFailureStatus,
+} from "@/lib/resume-errors";
 import { currentApplicant } from "@/lib/auth";
 import { getOwnApplicationForJob } from "@/lib/applications";
 import {
@@ -135,7 +139,22 @@ async function readProfileResume(sourceId: string) {
 }
 
 async function isCompletedProfileCopy(jobId: string, operation: string) {
-  const current = await currentResult(jobId);
+  let current: Awaited<ReturnType<typeof currentResult>>;
+  try {
+    current = await currentResult(jobId);
+  } catch (error) {
+    if (error instanceof ResumeUploadPreparationError) throw error;
+    const reference = randomUUID();
+    console.error("resume_upload_prepare_failed", {
+      reference,
+      stage: "completed_operation_profile_copy",
+      code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    });
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      reference,
+    );
+  }
   return current.resume?.id.toLowerCase() === operation.toLowerCase();
 }
 

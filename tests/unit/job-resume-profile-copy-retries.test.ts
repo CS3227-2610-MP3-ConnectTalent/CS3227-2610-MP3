@@ -30,6 +30,7 @@ vi.mock("@/lib/resume-request", () => ({
 }));
 
 import { POST } from "@/app/api/jobs/[id]/resume/route";
+import { resumeUploadPreparationFailure } from "@/lib/resume-errors";
 
 const actor = "44000000-0000-4000-8000-000000000101";
 const jobId = "44000000-0000-4000-8000-000000000102";
@@ -73,9 +74,18 @@ beforeEach(() => {
   mocks.uploadResumeForJob.mockResolvedValue(undefined);
   mocks.downloadProfileResume.mockResolvedValue(null);
   mocks.readResumeFile.mockResolvedValue(new File(["synthetic"], "upload.pdf"));
-  mocks.resumeFailure.mockImplementation((error: unknown) => ({
-    error: error instanceof Error ? error.message : "Upload failed.",
-  }));
+  mocks.resumeFailure.mockImplementation((error: unknown) => {
+    const preparation = resumeUploadPreparationFailure(error);
+    return preparation
+      ? {
+          error: preparation.error,
+          code: preparation.code,
+          reference: preparation.reference,
+        }
+      : {
+          error: error instanceof Error ? error.message : "Upload failed.",
+        };
+  });
 });
 
 it("reconciles a completed retry after its selected profile source was replaced", async () => {
@@ -110,5 +120,27 @@ it("forwards the snapshot revision when an explicit profile-copy retry is pendin
     expect.any(File),
     operation,
     true,
+  );
+});
+
+it("surfaces a typed 503 preparation failure when completed-operation lookup fails", async () => {
+  mocks.getApplicationResume.mockRejectedValueOnce(
+    new Error("Database connection timeout"),
+  );
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+
+  const response = await POST(retryProfileCopy(), context());
+
+  expect(response.status).toBe(503);
+  await expect(response.json()).resolves.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    reference: expect.stringMatching(/^[0-9a-f-]{36}$/),
+  });
+  expect(log).toHaveBeenCalledWith(
+    "resume_upload_prepare_failed",
+    expect.objectContaining({
+      stage: "completed_operation_profile_copy",
+      code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    }),
   );
 });
