@@ -23,12 +23,17 @@ export function ResumePanel(props: ResumePanelProps) {
         props={props}
         file={state.file}
         pending={state.pending}
+        activeIntent={state.activeIntent}
+        activeRetry={state.activeRetry}
         attachment={state.attachment}
         uploadFailed={state.uploadFailed}
         onSelect={state.selectFile}
         onChange={state.change}
       />
-      <ResumeFeedback message={state.message} pending={state.pending} />
+      <ResumeFeedback
+        message={state.message}
+        activeIntent={state.activeIntent}
+      />
     </section>
   );
 }
@@ -60,6 +65,8 @@ function ResumeEditor({
   props,
   file,
   pending,
+  activeIntent,
+  activeRetry,
   attachment,
   uploadFailed,
   onSelect,
@@ -68,6 +75,8 @@ function ResumeEditor({
   props: ResumePanelProps;
   file: File | null;
   pending: boolean;
+  activeIntent: ResumeIntent | null;
+  activeRetry: boolean;
   attachment: ResumeMetadata | null;
   uploadFailed: boolean;
   onSelect: (file: File | null) => void;
@@ -81,6 +90,8 @@ function ResumeEditor({
       <ResumeActionButtons
         file={file}
         pending={pending}
+        activeIntent={activeIntent}
+        activeRetry={activeRetry}
         attachment={attachment}
         profileResume={props.profileResume ?? null}
         profileMode={props.profileMode ?? false}
@@ -90,7 +101,6 @@ function ResumeEditor({
     </div>
   );
 }
-
 function ResumeGuidance({ profileMode }: { profileMode: boolean }) {
   return (
     <p className="text-sm">
@@ -102,7 +112,6 @@ function ResumeGuidance({ profileMode }: { profileMode: boolean }) {
     </p>
   );
 }
-
 function ResumeFilePicker({
   pending,
   onSelect,
@@ -124,27 +133,34 @@ function ResumeFilePicker({
   );
 }
 
-function ResumeActionButtons({
-  file,
-  pending,
-  attachment,
-  profileResume,
-  profileMode,
-  uploadFailed,
-  onChange,
-}: {
+type ResumeActionButtonsProps = {
   file: File | null;
   pending: boolean;
+  activeIntent: ResumeIntent | null;
+  activeRetry: boolean;
   attachment: ResumeMetadata | null;
   profileResume: ResumeMetadata | null;
   profileMode: boolean;
   uploadFailed: boolean;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
-}) {
+};
+
+function ResumeActionButtons({
+  file,
+  pending,
+  activeIntent,
+  activeRetry,
+  attachment,
+  profileResume,
+  profileMode,
+  uploadFailed,
+  onChange,
+}: ResumeActionButtonsProps) {
   return (
     <div className="flex flex-wrap gap-3">
       <UploadButton
         pending={pending}
+        active={activeIntent === "upload" && !activeRetry}
         hasFile={Boolean(file)}
         hasAttachment={Boolean(attachment)}
         onClick={() => void onChange("upload")}
@@ -152,32 +168,36 @@ function ResumeActionButtons({
       {attachment && (
         <RemoveButton
           pending={pending}
+          active={activeIntent === "remove"}
           onClick={() => void onChange("remove")}
         />
       )}
       {!profileMode && profileResume && (
         <UseProfileButton
           pending={pending}
+          active={activeIntent === "profile"}
           onClick={() => void onChange("profile")}
         />
       )}
-      {uploadFailed && file && (
+      {(uploadFailed || activeRetry) && file && (
         <RetryButton
           pending={pending}
+          active={activeRetry}
           onClick={() => void onChange("upload", true)}
         />
       )}
     </div>
   );
 }
-
 function UploadButton({
   pending,
+  active,
   hasFile,
   hasAttachment,
   onClick,
 }: {
   pending: boolean;
+  active: boolean;
   hasFile: boolean;
   hasAttachment: boolean;
   onClick: () => void;
@@ -189,16 +209,24 @@ function UploadButton({
       onClick={onClick}
       className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {hasAttachment ? "Replace résumé" : "Upload résumé"}
+      {active
+        ? hasAttachment
+          ? "Replacing résumé…"
+          : "Uploading résumé…"
+        : hasAttachment
+          ? "Replace résumé"
+          : "Upload résumé"}
     </button>
   );
 }
 
 function RemoveButton({
   pending,
+  active,
   onClick,
 }: {
   pending: boolean;
+  active: boolean;
   onClick: () => void;
 }) {
   return (
@@ -208,16 +236,18 @@ function RemoveButton({
       onClick={onClick}
       className="rounded-lg border px-4 py-2"
     >
-      Remove résumé
+      {active ? "Removing résumé…" : "Remove résumé"}
     </button>
   );
 }
 
 function UseProfileButton({
   pending,
+  active,
   onClick,
 }: {
   pending: boolean;
+  active: boolean;
   onClick: () => void;
 }) {
   return (
@@ -227,16 +257,18 @@ function UseProfileButton({
       onClick={onClick}
       className="rounded-lg border px-4 py-2"
     >
-      Use profile résumé
+      {active ? "Using profile résumé…" : "Use profile résumé"}
     </button>
   );
 }
 
 function RetryButton({
   pending,
+  active,
   onClick,
 }: {
   pending: boolean;
+  active: boolean;
   onClick: () => void;
 }) {
   return (
@@ -246,22 +278,22 @@ function RetryButton({
       onClick={onClick}
       className="rounded-lg border px-4 py-2 disabled:opacity-50"
     >
-      Retry upload
+      {active ? "Retrying upload…" : "Retry upload"}
     </button>
   );
 }
 
 function ResumeFeedback({
   message,
-  pending,
+  activeIntent,
 }: {
   message: string;
-  pending: boolean;
+  activeIntent: ResumeIntent | null;
 }) {
   return (
     <>
       {message && <p role="status">{message}</p>}
-      {pending && <p role="status">Saving résumé…</p>}
+      {activeIntent && <p role="status">Résumé change in progress…</p>}
     </>
   );
 }

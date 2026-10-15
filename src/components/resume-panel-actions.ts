@@ -10,6 +10,8 @@ export function useResumePanelActions(props: ResumePanelProps) {
   const [file, setFile] = useState<File | null>(null);
   const [operation, setOperation] = useState("");
   const [pending, setPending] = useState(false);
+  const [activeIntent, setActiveIntent] = useState<ResumeIntent | null>(null);
+  const [activeRetry, setActiveRetry] = useState(false);
   const [message, setMessage] = useState("");
   const [uploadFailed, setUploadFailed] = useState(false);
   const [attachment, setAttachment] = useState(props.resume);
@@ -17,11 +19,15 @@ export function useResumePanelActions(props: ResumePanelProps) {
     file,
     operation,
     pending,
+    activeIntent,
+    activeRetry,
     message,
     uploadFailed,
     attachment,
     setOperation,
     setPending,
+    setActiveIntent,
+    setActiveRetry,
     setMessage,
     setUploadFailed,
     setAttachment,
@@ -41,11 +47,15 @@ type ActionState = {
   file: File | null;
   operation: string;
   pending: boolean;
+  activeIntent: ResumeIntent | null;
+  activeRetry: boolean;
   message: string;
   uploadFailed: boolean;
   attachment: ResumeMetadata | null;
   setOperation: (value: string) => void;
   setPending: (value: boolean) => void;
+  setActiveIntent: (value: ResumeIntent | null) => void;
+  setActiveRetry: (value: boolean) => void;
   setMessage: (value: string) => void;
   setUploadFailed: (value: boolean) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
@@ -64,7 +74,7 @@ async function performResumeChange(
   }
   const operation = resolveOperation(intent, retry, state.operation);
   if (retry) state.setOperation(operation);
-  startRequest(props, state);
+  startRequest(props, state, intent, retry);
   try {
     await sendResumeRequest(props, state, intent, retry, operation);
   } catch {
@@ -97,8 +107,15 @@ function resolveOperation(
   return retry || intent === "profile" ? crypto.randomUUID() : current;
 }
 
-function startRequest(props: ResumePanelProps, state: ActionState) {
+function startRequest(
+  props: ResumePanelProps,
+  state: ActionState,
+  intent: ResumeIntent,
+  retry: boolean,
+) {
   state.setPending(true);
+  state.setActiveIntent(intent);
+  state.setActiveRetry(retry);
   props.onPending?.(true);
   state.setMessage("");
   state.setUploadFailed(false);
@@ -106,6 +123,8 @@ function startRequest(props: ResumePanelProps, state: ActionState) {
 
 function finishRequest(props: ResumePanelProps, state: ActionState) {
   state.setPending(false);
+  state.setActiveIntent(null);
+  state.setActiveRetry(false);
   props.onPending?.(false);
 }
 
