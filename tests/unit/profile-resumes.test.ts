@@ -275,7 +275,7 @@ it("rejects mismatched stored bytes and cancels upload state after storage/final
       operation,
       null,
     ),
-  ).rejects.toThrow("We could not confirm the upload.");
+  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PERSISTENCE_FAILED" });
   expect(mocks.rpc).toHaveBeenCalledWith("cancel_profile_resume", {
     p_actor: actor,
     p_operation: operation,

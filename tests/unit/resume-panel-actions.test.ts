@@ -257,15 +257,15 @@ it("uses generic safe feedback for invalid JSON, non-object data, and network fa
   expect(renderActions(props)).toMatchObject({
     uploadFailed: true,
     message:
-      "We could not confirm the change. Reload to check your saved résumé.",
+      "We could not confirm the upload. Press Upload résumé again to retry, or reload to check whether it saved.",
   });
   await renderActions(props).change("remove");
   expect(renderActions(props).message).toBe(
-    "We could not confirm the change. Reload to check your saved résumé.",
+    "We could not confirm the change. Reload to check whether it saved.",
   );
   await renderActions(props).change("upload");
   expect(renderActions(props).message).toBe(
-    "We could not confirm the change. Reload to check your saved résumé.",
+    "We could not confirm the upload. Press Upload résumé again to retry, or reload to check whether it saved.",
   );
   expect(mocks.refresh).toHaveBeenCalledTimes(3);
 });

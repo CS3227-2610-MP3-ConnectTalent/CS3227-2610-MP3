@@ -97,7 +97,9 @@ it("keeps cleanup tombstones retryable when cancel/delete happens before upload 
   await vi.waitFor(() => expect(mocks.upload).toHaveBeenCalled());
   await cancelResumeUpload("actor", "job");
   resolveUpload({ error: null });
-  await expect(uploading).rejects.toThrow("could not confirm");
+  await expect(uploading).rejects.toMatchObject({
+    code: "RESUME_UPLOAD_PERSISTENCE_FAILED",
+  });
   expect(mocks.remove).toHaveBeenCalledTimes(2);
   expect(mocks.update).not.toHaveBeenCalledWith({ state: "deleted" });
 });

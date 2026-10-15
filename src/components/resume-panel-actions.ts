@@ -147,7 +147,9 @@ async function performResumeChange(
 function interruptedChangeMessage(intent: ResumeIntent) {
   if (intent === "profile")
     return "Profile résumé status is unclear. Use Retry profile copy below.";
-  return "We could not confirm the change. Press Upload résumé again to retry, or reload to check whether it saved.";
+  if (intent === "upload")
+    return "We could not confirm the upload. Press Upload résumé again to retry, or reload to check whether it saved.";
+  return "We could not confirm the change. Reload to check whether it saved.";
 }
 
 function canChange(
