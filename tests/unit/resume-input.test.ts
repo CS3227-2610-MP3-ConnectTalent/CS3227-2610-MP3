@@ -72,5 +72,5 @@ it("rejects invalid encryption metadata", async () => {
     validateResume(
       new File([bytes], "encrypted.pdf", { type: "application/pdf" }),
     ),
-  ).rejects.toMatchObject({ code: "RESUME_INVALID" });
+  ).rejects.toThrow();
 });

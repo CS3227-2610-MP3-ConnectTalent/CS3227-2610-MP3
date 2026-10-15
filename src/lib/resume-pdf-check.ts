@@ -7,7 +7,7 @@ import { ResumeValidationError } from "./resume-errors";
 
 // Trusted bootstrap source; uploaded bytes never become executable source.
 // Parse page structure only, with no rendering, text extraction or actions.
-const workerSource = `
+export const pdfWorkerSource = `
   const { parentPort, workerData } = require('node:worker_threads');
   const reportPhase = phase => parentPort.postMessage({ type: 'phase', phase });
   async function inspect(pdfjs) {
@@ -27,7 +27,9 @@ const workerSource = `
       }
       return 'valid';
     } catch (error) {
-      return error instanceof pdfjs.PasswordException ? 'password' : 'invalid';
+      if (error instanceof pdfjs.PasswordException) return 'password';
+      if (error instanceof pdfjs.InvalidPDFException) return 'invalid';
+      throw error;
     } finally {
       await task.destroy();
     }
@@ -54,7 +56,7 @@ function startPdfWorker(bytes: Uint8Array) {
     const parser = pathToFileURL(
       resolve("pdfjs-dist/legacy/build/pdf.worker.mjs"),
     ).href;
-    const worker = new Worker(workerSource, {
+    const worker = new Worker(pdfWorkerSource, {
       eval: true,
       workerData: { bytes, library, parser },
       stdout: true,

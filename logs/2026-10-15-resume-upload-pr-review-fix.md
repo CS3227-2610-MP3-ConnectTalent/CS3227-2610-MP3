@@ -75,3 +75,11 @@
 - Evidence inspected in this follow-up: local tests and checks, GitHub Actions results, review thread states and Vercel deployment status.
 - Decision source and conditions: prior chat acceptance is recorded in the packet; the user separately chose to skip the hosted synthetic smoke.
 - Remaining concern: successful Preview upload behavior is not established by the Vercel deployment status.
+
+## Addendum — later PR review and résumé-panel UX follow-up
+
+The user supplied two newer P2 review findings and approved a bounded UI refinement before implementation. The profile-copy route now checks whether the current applicant/job attachment already matches the retried operation before downloading the originally selected profile source. This makes a completed retry idempotent even when that source has since been replaced or removed. The PDF worker now classifies only `PasswordException` and `InvalidPDFException` as file errors; unknown PDF.js failures reach the existing validator-unavailable path.
+
+The approved résumé-panel flow uses one “Upload résumé” button for initial uploads, replacements and retries. A failed or ambiguous request retries the same selected file using the same operation UUID. An attached résumé exposes “Delete résumé”; the action asks “Delete your résumé? You can upload it again later.” before submitting. The separate profile-copy action remains available for its distinct flow. The existing oversized-file response remains HTTP 413 with “This file exceeds 1 MiB. Choose a smaller PDF.”
+
+Test-first evidence: the new UI/retry/delete checks first failed on the old labels and retry behavior (3 expected failures), then passed. The full local suite passed 77 files / 464 tests before a lint-only module extraction and test split; the post-refactor affected suite passed 9 files / 53 tests. Full ESLint passed with zero errors and two generated-coverage warnings; TypeScript, changed-file Prettier, and `git diff --check` passed. GitHub CI/Supabase CI/Vercel were green on the prior PR head `fd2c775`; checks for the new commit are pending publication. The two newest review threads are not yet replied to or resolved. Hosted Preview upload smoke remains skipped at the user's direction, so successful Preview upload behavior is still unverified.

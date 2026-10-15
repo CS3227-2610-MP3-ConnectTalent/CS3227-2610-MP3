@@ -1,9 +1,13 @@
 # Design: résumé upload failure diagnostics and recovery
 
 - Change ID/issues: `2026-10-14-resume-upload-diagnostics`; #76 and PR #77
-- Owner/status/date: Paul; approved and accepted; T05 independent review complete; focused revised-timeout tests pass under Bun; hosted upload verification pending; 2026-10-14
+- Owner/status/date: Paul; original scope accepted; 2026-10-15 upload-action UX approved; latest review fixes in progress; hosted upload verification pending; 2026-10-14 onward
 - Inputs: approved follow-up proposal; no canonical delta; approved against ProductSpec v1.10 and integrated in v1.11; APP-006/APP-007, SEC-009
 - Scope and components: `src/lib/resume-pdf-check.ts`, `src/lib/application-resume-uploads.ts`, `src/lib/resume-errors.ts`, `src/lib/resume-request.ts`, and focused unit tests.
+
+## Approved résumé-panel interaction refinement
+
+Render one “Upload résumé” button for both an initial upload and replacement. When the selected file's previous request failed or its outcome is unclear, pressing that same button retries with the same file and operation UUID; selecting another file resets the retry state and creates a new operation. Render “Delete résumé” only when an attachment exists. Confirm with the user before submitting the existing remove intent. Keep profile-copy actions separate because they copy an existing profile object and retain their own operation snapshot/retry behavior. No route contract, storage model, or authorization changes are introduced by this UI refinement.
 
 ## Decisions and alternatives
 
@@ -48,3 +52,4 @@ No production deployment. A Vercel Preview deployment is Ready, but a synthetic 
 - [x] Interface, requirement, privacy, failure and no-migration impacts assessed.
 - Findings/owner/resolution: T05 independent review completed; no blocking source defect was found, and the reviewer confirmed the added RPC-level tests cover the P0001 classifier mappings. The three later PR review comments were addressed in this follow-up; no independent re-review of these latest corrections is recorded.
 - Human approval: Paul approved the original scope and the 5-second bounded timeout revision in chat on 2026-10-14, then accepted the implementation in chat on 2026-10-14. The focused revised-timeout tests pass under Bun; the hosted upload smoke remains unverified.
+- UX approval: Paul approved the single Upload / confirmed Delete flow in chat on 2026-10-15 before implementation. Its focused regression tests now cover the displayed actions, same-operation retry, and confirmation behavior.

@@ -3,10 +3,45 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ResumeMetadata } from "@/lib/application-resumes";
+import { responseMessage } from "./resume-panel-response";
 import type { ResumeIntent, ResumePanelProps } from "./resume-panel-state";
 
 export function useResumePanelActions(props: ResumePanelProps) {
   const router = useRouter();
+  const state = useResumeActionState(props.resume);
+  const change = (intent: ResumeIntent, retry = false) => {
+    const shouldRetry = retry || (intent === "upload" && state.uploadFailed);
+    return performResumeChange(
+      props,
+      state,
+      intent,
+      shouldRetry,
+      intent === "profile"
+        ? resolveProfileCopyAttempt(props, state, shouldRetry)
+        : null,
+      () => router.refresh(),
+    );
+  };
+  const deleteResume = async () => {
+    if (
+      !globalThis.confirm("Delete your résumé? You can upload it again later.")
+    ) {
+      return;
+    }
+    await change("remove");
+  };
+  const selectFile = (next: File | null) => {
+    state.setFile(next);
+    state.setOperation(crypto.randomUUID());
+    state.setUploadFailed(false);
+    state.setProfileCopyRetryAvailable(false);
+    state.setProfileCopyAttempt(null);
+    state.setMessage("");
+  };
+  return { ...state, selectFile, change, deleteResume };
+}
+
+function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
   const [file, setFile] = useState<File | null>(null);
   const [operation, setOperation] = useState("");
   const [pending, setPending] = useState(false);
@@ -16,8 +51,8 @@ export function useResumePanelActions(props: ResumePanelProps) {
     useState(false);
   const [profileCopyAttempt, setProfileCopyAttempt] =
     useState<ProfileCopyAttempt | null>(null);
-  const [attachment, setAttachment] = useState(props.resume);
-  const state = {
+  const [attachment, setAttachment] = useState(initialResume);
+  return {
     file,
     operation,
     pending,
@@ -26,6 +61,7 @@ export function useResumePanelActions(props: ResumePanelProps) {
     profileCopyRetryAvailable,
     profileCopyAttempt,
     attachment,
+    setFile,
     setOperation,
     setPending,
     setMessage,
@@ -34,26 +70,6 @@ export function useResumePanelActions(props: ResumePanelProps) {
     setProfileCopyAttempt,
     setAttachment,
   };
-  const change = (intent: ResumeIntent, retry = false) =>
-    performResumeChange(
-      props,
-      state,
-      intent,
-      retry,
-      intent === "profile"
-        ? resolveProfileCopyAttempt(props, state, retry)
-        : null,
-      () => router.refresh(),
-    );
-  const selectFile = (next: File | null) => {
-    setFile(next);
-    setOperation(crypto.randomUUID());
-    setUploadFailed(false);
-    setProfileCopyRetryAvailable(false);
-    setProfileCopyAttempt(null);
-    setMessage("");
-  };
-  return { ...state, selectFile, change };
 }
 
 type ActionState = {
@@ -106,8 +122,7 @@ async function performResumeChange(
   }
   if (profileAttempt) state.setProfileCopyAttempt(profileAttempt);
   const operation =
-    profileAttempt?.operation ??
-    resolveOperation(intent, retry, state.operation);
+    profileAttempt?.operation ?? resolveOperation(intent, state.operation);
   if (retry) state.setOperation(operation);
   startRequest(props, state);
   try {
@@ -148,12 +163,8 @@ function canChange(
   );
 }
 
-function resolveOperation(
-  intent: ResumeIntent,
-  retry: boolean,
-  current: string,
-) {
-  return retry || intent === "profile" ? crypto.randomUUID() : current;
+function resolveOperation(intent: ResumeIntent, current: string) {
+  return intent === "profile" ? crypto.randomUUID() : current;
 }
 
 function startRequest(props: ResumePanelProps, state: ActionState) {
@@ -269,22 +280,4 @@ async function applyResponse(
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function responseMessage(ok: boolean, error: unknown, reference: unknown) {
-  if (ok) return "Résumé change saved. Review the attachment below.";
-  const message =
-    typeof error === "string" ? error : "Résumé change could not be saved.";
-  return isReferenceCode(reference)
-    ? `${message} Reference code: ${reference}`
-    : message;
-}
-
-function isReferenceCode(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      value,
-    )
-  );
 }

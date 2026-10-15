@@ -97,7 +97,18 @@ async function uploadResume(
   const operation = request.headers.get("x-resume-operation");
   if (!z.uuid().safeParse(operation).success)
     throw new Error("Choose the file again.");
-  const file = await readUploadFile(request, intent);
+  const profileResumeId =
+    intent === "profile" ? readProfileResumeId(request) : null;
+  if (
+    profileResumeId &&
+    retry &&
+    (await isCompletedProfileCopy(context.jobId, operation!))
+  ) {
+    return;
+  }
+  const file = profileResumeId
+    ? await readProfileResume(profileResumeId)
+    : await readResumeFile(request);
   return uploadResumeForJob(
     context.actorId,
     context.jobId,
@@ -108,16 +119,24 @@ async function uploadResume(
   );
 }
 
-async function readUploadFile(request: Request, intent: "upload" | "profile") {
-  if (intent === "upload") return readResumeFile(request);
+function readProfileResumeId(request: Request) {
   const sourceId = request.headers.get("x-profile-resume");
   if (!z.uuid().safeParse(sourceId).success)
     throw new Error("Reload your profile résumé.");
-  const source = await downloadProfileResume(sourceId!);
+  return sourceId!;
+}
+
+async function readProfileResume(sourceId: string) {
+  const source = await downloadProfileResume(sourceId);
   if (!source) throw new Error("Reload your profile résumé before using it.");
   return new File([source.bytes], source.info.filename, {
     type: "application/pdf",
   });
+}
+
+async function isCompletedProfileCopy(jobId: string, operation: string) {
+  const current = await currentResult(jobId);
+  return current.resume?.id.toLowerCase() === operation.toLowerCase();
 }
 
 async function failedResumeResponse(error: unknown, jobId: string) {

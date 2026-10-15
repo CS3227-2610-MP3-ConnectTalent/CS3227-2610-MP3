@@ -158,7 +158,7 @@ it("uploads a selected file to the profile endpoint and applies returned metadat
   });
 });
 
-it("reports an upload error and retries with the explicit retry headers", async () => {
+it("retries through the upload action with the same file and operation", async () => {
   const file = pdfFile("synthetic.pdf");
   const fetch = vi
     .fn()
@@ -180,10 +180,11 @@ it("reports an upload error and retries with the explicit retry headers", async 
   });
   const firstOperation =
     fetch.mock.calls[0]?.[1]?.headers?.["x-resume-operation"];
-  await renderActions(props).change("upload", true);
+  await renderActions(props).change("upload");
   const retryHeaders = fetch.mock.calls[1]?.[1]?.headers;
   expect(retryHeaders?.["x-resume-retry"]).toBe("true");
-  expect(retryHeaders?.["x-resume-operation"]).not.toBe(firstOperation);
+  expect(retryHeaders?.["x-resume-operation"]).toBe(firstOperation);
+  expect(fetch.mock.calls[1]?.[1]?.body).toBe(file);
   expect(renderActions(props)).toMatchObject({
     uploadFailed: false,
     attachment,

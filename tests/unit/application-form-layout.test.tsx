@@ -39,5 +39,30 @@ describe("application form composition", () => {
     expect(html).not.toContain("Cancel interrupted upload");
     expect(html).not.toContain("Save your draft to enable résumé upload");
     expect(html).toContain("file:bg-primary");
+    expect(html).toContain(">Upload résumé</button>");
+    expect(html).not.toContain("Retry upload");
+  });
+});
+
+describe("résumé panel actions", () => {
+  it("uses one upload action and a confirmed delete action for an attached résumé", () => {
+    const html = renderToStaticMarkup(
+      <ResumePanel
+        applicationId="application-1"
+        revision={2}
+        editable
+        resume={{
+          id: "60000000-0000-4000-8000-000000000b01",
+          filename: "synthetic.pdf",
+          byte_size: 2048,
+          object_path: "private/synthetic.pdf",
+        }}
+      />,
+    );
+    expect(html).toContain(">Upload résumé</button>");
+    expect(html).toContain(">Delete résumé</button>");
+    expect(html).not.toContain("Replace résumé");
+    expect(html).not.toContain("Retry upload");
+    expect(html).not.toContain("Remove résumé");
   });
 });

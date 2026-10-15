@@ -3,7 +3,7 @@
 - Change ID: 2026-10-14-resume-upload-diagnostics
 - Issues: [#76](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76), [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77)
 - Owner: Paul
-- Status: approved and accepted by Paul in chat on 2026-10-14; T05 independent review is complete; focused revised-timeout tests pass under Bun; hosted upload verification remains pending
+- Status: original implementation accepted by Paul in chat on 2026-10-14; bounded upload-action UX approved in chat on 2026-10-15; T05 independent review is complete; latest review fixes are in progress; hosted upload verification remains pending
 - Date: 2026-10-14
 - Approval baseline: ProductSpec v1.10; current integrated canonical baseline: ProductSpec v1.11
 - Affected capabilities: `workflow/specs/applications-and-review.md`, APP-006/APP-007; SEC-009 privacy boundary
@@ -19,6 +19,10 @@ Local uploads time out in the PDF worker with the existing 3-second budget. On t
 - Non-goals: removing the worker deadline or increasing the worker memory or file-size limits; changing SQL/RLS grants, storage policy, authentication, or secrets; exposing raw Postgres/PostgREST errors or applicant/document data; submitting a personal transcript; changing production configuration or deploying to production.
 - Users/roles: Applicants uploading optional résumés. Existing server ownership checks, SECURITY DEFINER checks, private storage and immutable submitted snapshots remain.
 - Scope boundaries: résumé upload library, PDF worker, safe error mapping, focused tests, and this issue packet. No unrelated Applicant/HR behavior.
+
+### Approved post-submission UX refinement (2026-10-15)
+
+For the existing résumé panel, replace the separate “Replace résumé” and “Retry upload” actions with one “Upload résumé” action. When an upload response is ambiguous or retryable, that action resends the selected file with the same operation ID so server reconciliation remains idempotent. Show “Delete résumé” only when an attachment exists and ask for confirmation before sending the existing remove request. Keep the distinct “Use profile résumé” / “Retry profile copy” actions for the separate profile-copy flow. This is a bounded interaction refinement under APP-007; it adds no API, authorization, storage, or canonical-spec change.
 
 ## Alternatives and dependencies
 
@@ -50,6 +54,8 @@ Local uploads time out in the PDF worker with the existing 3-second budget. On t
 
 - [x] Scope, issue criteria, affected IDs, and unresolved questions reviewed.
 - [x] Proposal, no-delta decision, design, and plan agreed before implementation.
+- [x] The bounded résumé action UX and delete-confirmation interaction were approved in chat on 2026-10-15 before implementation.
 - Approver: Paul
 - Decision/date/source: Original scope approved in chat on 2026-10-14: “Sounds good, I approve. Please proceed.” The bounded timeout amendment was approved in chat on 2026-10-14: “Ok, then I accept the implementation. Please proceed.”
 - Conditions: use a 5-second PDF worker deadline; preserve the 64/16 MiB worker memory limits and 1 MiB file cap; use synthetic test data; no hosted configuration or production deployment. The later code-path repair is an implementation choice responding to the observed 42501/23505 logs and remains within the user's explicit request to fix the hosted Preview failure.
+- UX decision/date/source: Paul approved one context-aware “Upload résumé” action for new uploads, replacements, and same-file/same-operation retries, with a confirmed “Delete résumé” action when an attachment exists, in chat on 2026-10-15.

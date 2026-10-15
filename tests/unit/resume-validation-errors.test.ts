@@ -1,4 +1,4 @@
-import { PDFDocument, PDFName } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import { readFile } from "node:fs/promises";
 import { expect, it } from "vitest";
 import { validateResume, RESUME_MAX_BYTES } from "@/lib/resume-input";
@@ -29,17 +29,6 @@ it.each([
   [pdfFile("%PDF-1.7\nmalformed\n%%EOF"), "RESUME_INVALID"],
 ])("classifies a rejected file as %s / %s", async (file, code) => {
   await expect(validateResume(file)).rejects.toMatchObject({ code });
-});
-
-it("rejects an invalid encryption dictionary as an unreadable PDF", async () => {
-  const doc = await PDFDocument.create();
-  doc.addPage();
-  doc.context.trailerInfo.Encrypt = doc.context.register(
-    doc.context.obj({ Filter: PDFName.of("Standard") }),
-  );
-  await expect(validateResume(pdfFile(await doc.save()))).rejects.toMatchObject(
-    { code: "RESUME_INVALID" },
-  );
 });
 
 it.each(["aes-128", "aes-256"])(

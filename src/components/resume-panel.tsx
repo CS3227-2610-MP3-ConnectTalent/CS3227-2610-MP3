@@ -24,10 +24,10 @@ export function ResumePanel(props: ResumePanelProps) {
         file={state.file}
         pending={state.pending}
         attachment={state.attachment}
-        uploadFailed={state.uploadFailed}
         profileCopyRetryAvailable={state.profileCopyRetryAvailable}
         onSelect={state.selectFile}
         onChange={state.change}
+        onDelete={state.deleteResume}
       />
       <ResumeFeedback message={state.message} pending={state.pending} />
     </section>
@@ -62,19 +62,19 @@ function ResumeEditor({
   file,
   pending,
   attachment,
-  uploadFailed,
   profileCopyRetryAvailable,
   onSelect,
   onChange,
+  onDelete,
 }: {
   props: ResumePanelProps;
   file: File | null;
   pending: boolean;
   attachment: ResumeMetadata | null;
-  uploadFailed: boolean;
   profileCopyRetryAvailable: boolean;
   onSelect: (file: File | null) => void;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
+  onDelete: () => Promise<void>;
 }) {
   if (!props.editable) return null;
   return (
@@ -87,9 +87,9 @@ function ResumeEditor({
         attachment={attachment}
         profileResume={props.profileResume ?? null}
         profileMode={props.profileMode ?? false}
-        uploadFailed={uploadFailed}
         profileCopyRetryAvailable={profileCopyRetryAvailable}
         onChange={onChange}
+        onDelete={onDelete}
       />
     </div>
   );
@@ -134,31 +134,30 @@ const ResumeActionButtons = ({
   attachment,
   profileResume,
   profileMode,
-  uploadFailed,
   profileCopyRetryAvailable,
   onChange,
+  onDelete,
 }: {
   file: File | null;
   pending: boolean;
   attachment: ResumeMetadata | null;
   profileResume: ResumeMetadata | null;
   profileMode: boolean;
-  uploadFailed: boolean;
   profileCopyRetryAvailable: boolean;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
+  onDelete: () => Promise<void>;
 }) => (
   <div className="flex flex-wrap gap-3">
     <UploadButton
       pending={pending}
       hasFile={Boolean(file)}
-      hasAttachment={Boolean(attachment)}
       onClick={() => void onChange("upload")}
     />
     {attachment && (
       <SecondaryActionButton
         pending={pending}
-        label="Remove résumé"
-        onClick={() => void onChange("remove")}
+        label="Delete résumé"
+        onClick={() => void onDelete()}
       />
     )}
     <ProfileResumeAction
@@ -168,13 +167,6 @@ const ResumeActionButtons = ({
       retryAvailable={profileCopyRetryAvailable}
       onChange={onChange}
     />
-    {uploadFailed && file && (
-      <SecondaryActionButton
-        pending={pending}
-        label="Retry upload"
-        onClick={() => void onChange("upload", true)}
-      />
-    )}
   </div>
 );
 
@@ -204,12 +196,10 @@ function ProfileResumeAction({
 function UploadButton({
   pending,
   hasFile,
-  hasAttachment,
   onClick,
 }: {
   pending: boolean;
   hasFile: boolean;
-  hasAttachment: boolean;
   onClick: () => void;
 }) {
   return (
@@ -219,7 +209,7 @@ function UploadButton({
       onClick={onClick}
       className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {hasAttachment ? "Replace résumé" : "Upload résumé"}
+      Upload résumé
     </button>
   );
 }
