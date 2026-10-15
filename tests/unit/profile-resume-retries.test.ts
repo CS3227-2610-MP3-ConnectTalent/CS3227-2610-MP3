@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   currentApplicant: vi.fn(),
@@ -18,7 +18,8 @@ vi.mock("@/lib/application-resumes", () => ({
 }));
 vi.mock("@/lib/resume-input", () => ({ validateResume: mocks.validateResume }));
 
-import { uploadProfileResume } from "@/lib/profile-resumes";
+import { getProfileResume, uploadProfileResume } from "@/lib/profile-resumes";
+import { resumeFailureStatus } from "@/lib/resume-errors";
 
 const actor = "44000000-0000-4000-8000-000000000101";
 const operation = "44000000-0000-4000-8000-000000000102";
@@ -82,6 +83,8 @@ beforeEach(() => {
     return { data: null, error: null };
   });
 });
+
+afterEach(() => vi.restoreAllMocks());
 
 it("reconciles the same pending profile operation without retiring it", async () => {
   setReadyResult({ state: "pending" });
@@ -147,6 +150,99 @@ it("reports a retired operation so the client can retry the selected file with a
   expect(mocks.rpc).not.toHaveBeenCalledWith(
     "reserve_profile_resume",
     expect.anything(),
+  );
+});
+
+it("classifies profile operation lookup outages as safe server failures", async () => {
+  setReadyResult();
+  mocks.readyResult = {
+    data: null,
+    error: { message: "private database detail" },
+  };
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+
+  let caught: unknown;
+  try {
+    await uploadProfileResume(
+      actor,
+      new File(["synthetic PDF"], "synthetic.pdf"),
+      operation,
+      null,
+      true,
+    );
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(caught).toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    reference: expect.stringMatching(/^[0-9a-f-]{36}$/),
+  });
+  expect(resumeFailureStatus(caught)).toBe(503);
+  expect(log).toHaveBeenCalledWith(
+    "resume_upload_preparation_failed",
+    expect.objectContaining({ stage: "profile_state_lookup" }),
+  );
+  expect(JSON.stringify(log.mock.calls)).not.toContain(
+    "private database detail",
+  );
+});
+
+it("returns a safe server failure when a new upload state lookup fails", async () => {
+  mocks.readyResult = {
+    data: null,
+    error: { message: "private database detail" },
+  };
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+  let caught: unknown;
+  try {
+    await uploadProfileResume(
+      actor,
+      new File(["synthetic PDF"], "synthetic.pdf"),
+      operation,
+      null,
+    );
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(mocks.rpc).toHaveBeenCalledWith(
+    "reserve_profile_resume",
+    expect.objectContaining({ p_operation: operation }),
+  );
+  expect(resumeFailureStatus(caught)).toBe(503);
+  expect(caught).toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
+  expect(log).toHaveBeenCalledWith(
+    "resume_upload_preparation_failed",
+    expect.objectContaining({ stage: "profile_state_lookup" }),
+  );
+  expect(JSON.stringify(log.mock.calls)).not.toContain(
+    "private database detail",
+  );
+});
+
+it("classifies a failed current-profile lookup as a safe server failure", async () => {
+  mocks.profileResult = {
+    data: null,
+    error: { message: "private database detail" },
+  };
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+
+  let caught: unknown;
+  try {
+    await getProfileResume();
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(caught).toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
+  expect(resumeFailureStatus(caught)).toBe(503);
+  expect(log).toHaveBeenCalledWith(
+    "resume_upload_preparation_failed",
+    expect.objectContaining({ stage: "profile_metadata_lookup" }),
+  );
+  expect(JSON.stringify(log.mock.calls)).not.toContain(
+    "private database detail",
   );
 });
 

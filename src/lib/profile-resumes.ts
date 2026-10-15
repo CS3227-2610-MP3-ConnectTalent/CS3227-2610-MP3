@@ -28,8 +28,12 @@ export async function getProfileResume(): Promise<ResumeMetadata | null> {
     .eq("applicant_id", account.user.id)
     .eq("state", "ready")
     .maybeSingle();
-  if (error) throw new Error("Résumé information is temporarily unavailable.");
-  return data ? metadata.parse(data) : null;
+  if (error) throw profileStateLookupFailure("profile_metadata_lookup");
+  if (!data) return null;
+  const parsed = metadata.safeParse(data);
+  if (!parsed.success)
+    throw profileStateLookupFailure("profile_metadata_invalid");
+  return parsed.data;
 }
 export async function downloadProfileResume(expectedId?: string) {
   const account = await currentApplicant();
@@ -117,6 +121,21 @@ async function reserveProfileResume(
   return path;
 }
 
+function profileStateLookupFailure(
+  stage:
+    | "profile_state_lookup"
+    | "profile_state_unexpected"
+    | "profile_metadata_lookup"
+    | "profile_metadata_invalid",
+) {
+  const reference = randomUUID();
+  console.error("resume_upload_preparation_failed", { reference, stage });
+  return new ResumeUploadPreparationError(
+    "RESUME_UPLOAD_PREPARATION_FAILED",
+    reference,
+  );
+}
+
 async function isReadyProfileUpload(
   client: ReturnType<typeof resumeMutationClient>,
   actor: string,
@@ -137,7 +156,7 @@ async function profileUploadState(
     .eq("id", operation)
     .eq("applicant_id", actor)
     .maybeSingle();
-  if (error) throw new Error("Reload your profile before changing the résumé.");
+  if (error) throw profileStateLookupFailure("profile_state_lookup");
   if (!existing) return null;
   if (
     existing.state !== "pending" &&
@@ -145,7 +164,7 @@ async function profileUploadState(
     existing.state !== "retired" &&
     existing.state !== "deleting"
   ) {
-    throw new Error("Reload your profile before changing the résumé.");
+    throw profileStateLookupFailure("profile_state_unexpected");
   }
   return existing.state;
 }

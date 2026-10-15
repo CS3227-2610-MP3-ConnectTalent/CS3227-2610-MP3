@@ -101,11 +101,13 @@ it("returns no profile résumé for a guest or missing row and validates a saved
 
 it("hides profile resume metadata lookup errors and invalid persisted metadata", async () => {
   setProfileResult(null, { message: "synthetic query error" });
-  await expect(getProfileResume()).rejects.toThrow(
-    "Résumé information is temporarily unavailable.",
-  );
+  await expect(getProfileResume()).rejects.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+  });
   setProfileResult({ ...resumeInfo, byte_size: 0 });
-  await expect(getProfileResume()).rejects.toThrow();
+  await expect(getProfileResume()).rejects.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+  });
 });
 
 it("downloads only the current expected profile attachment", async () => {

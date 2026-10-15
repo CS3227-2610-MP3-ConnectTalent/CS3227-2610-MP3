@@ -82,3 +82,43 @@ it("asks before deleting an attached résumé", async () => {
     }),
   );
 });
+
+it("rotates the operation after delete and keeps the selected file uploadable", async () => {
+  const file = new File(["synthetic PDF"], "synthetic.pdf", {
+    type: "application/pdf",
+  });
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(response({ resume: null }))
+    .mockResolvedValueOnce(response({ resume: null }));
+  vi.stubGlobal("fetch", fetch);
+  vi.stubGlobal(
+    "confirm",
+    vi.fn(() => true),
+  );
+  const props = {
+    applicationId: "app-1",
+    revision: 3,
+    editable: true,
+    resume: attachment,
+  };
+
+  renderActions(props).selectFile(file);
+  const originalOperation = renderActions(props).operation;
+  await renderActions(props).deleteResume();
+  const retryActions = renderActions(props);
+
+  expect(retryActions.file).toBe(file);
+  expect(retryActions.operation).not.toBe(originalOperation);
+  await retryActions.change("upload");
+
+  expect(fetch.mock.calls[0]?.[1]?.headers?.["x-resume-intent"]).toBe("remove");
+  expect(fetch.mock.calls[1]?.[1]?.headers).toMatchObject({
+    "x-resume-intent": "upload",
+    "x-resume-retry": "false",
+  });
+  expect(fetch.mock.calls[1]?.[1]?.headers?.["x-resume-operation"]).toBe(
+    retryActions.operation,
+  );
+  expect(fetch.mock.calls[1]?.[1]?.body).toBe(file);
+});

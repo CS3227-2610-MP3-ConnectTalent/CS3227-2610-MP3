@@ -143,7 +143,7 @@ async function retryInitialUpload(
     .click();
   const headers = (await retryRequest).headers();
   expect(headers["x-application-revision"]).toBe("");
-  expect(headers["x-resume-operation"]).not.toBe(interruptedOperation);
+  expect(headers["x-resume-operation"]).toBe(interruptedOperation);
   await expect(
     page.getByRole("link", { name: "Download résumé: direct.pdf" }),
   ).toBeVisible({ timeout: 30_000 });
@@ -158,7 +158,7 @@ async function retryInitialUpload(
     .select("state")
     .eq("id", interruptedOperation!)
     .single();
-  expect(retired.data?.state).toBe("deleting");
+  expect(retired.data?.state).toBe("ready");
 }
 
 async function selectProfileResumeAndCheckDraft(

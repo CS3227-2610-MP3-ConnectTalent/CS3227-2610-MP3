@@ -261,6 +261,8 @@ async function applyResponse(
   ) {
     state.setOperation(crypto.randomUUID());
   }
+  if (intent === "remove" && response.ok)
+    state.setOperation(crypto.randomUUID());
   if ("resume" in result)
     state.setAttachment(result.resume as ResumeMetadata | null);
   props.onChange?.({
