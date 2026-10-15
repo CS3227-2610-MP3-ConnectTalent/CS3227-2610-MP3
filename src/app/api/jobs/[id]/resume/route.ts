@@ -1,4 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import {
+  ResumeUploadPreparationError,
+  resumeFailureStatus,
+} from "@/lib/resume-errors";
 import { currentApplicant } from "@/lib/auth";
 import { getOwnApplicationForJob } from "@/lib/applications";
 import {
@@ -74,7 +79,8 @@ async function updateResume(request: Request, context: UploadContext) {
   }
   if (intent !== "upload" && intent !== "profile")
     throw new Error("Choose an upload action.");
-  return uploadResume(request, context, revision, intent);
+  const retry = request.headers.get("x-resume-retry") === "true";
+  return uploadResume(request, context, revision, intent, retry);
 }
 
 function readRevision(request: Request) {
@@ -90,38 +96,73 @@ async function uploadResume(
   context: UploadContext,
   revision: number | null,
   intent: "upload" | "profile",
+  retry: boolean,
 ) {
   const operation = request.headers.get("x-resume-operation");
   if (!z.uuid().safeParse(operation).success)
     throw new Error("Choose the file again.");
-  const file = await readUploadFile(request, intent);
+  const profileResumeId =
+    intent === "profile" ? readProfileResumeId(request) : null;
+  if (
+    profileResumeId &&
+    retry &&
+    (await isCompletedProfileCopy(context.jobId, operation!))
+  ) {
+    return;
+  }
+  const file = profileResumeId
+    ? await readProfileResume(profileResumeId)
+    : await readResumeFile(request);
   return uploadResumeForJob(
     context.actorId,
     context.jobId,
     revision,
     file,
     operation!,
-    request.headers.get("x-resume-retry") === "true",
+    retry,
   );
 }
 
-async function readUploadFile(request: Request, intent: "upload" | "profile") {
-  if (intent === "upload") return readResumeFile(request);
+function readProfileResumeId(request: Request) {
   const sourceId = request.headers.get("x-profile-resume");
   if (!z.uuid().safeParse(sourceId).success)
     throw new Error("Reload your profile résumé.");
-  const source = await downloadProfileResume(sourceId!);
+  return sourceId!;
+}
+
+async function readProfileResume(sourceId: string) {
+  const source = await downloadProfileResume(sourceId);
   if (!source) throw new Error("Reload your profile résumé before using it.");
   return new File([source.bytes], source.info.filename, {
     type: "application/pdf",
   });
 }
 
+async function isCompletedProfileCopy(jobId: string, operation: string) {
+  let current: Awaited<ReturnType<typeof currentResult>>;
+  try {
+    current = await currentResult(jobId);
+  } catch (error) {
+    if (error instanceof ResumeUploadPreparationError) throw error;
+    const reference = randomUUID();
+    console.error("resume_upload_prepare_failed", {
+      reference,
+      stage: "completed_operation_profile_copy",
+      code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    });
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      reference,
+    );
+  }
+  return current.resume?.id.toLowerCase() === operation.toLowerCase();
+}
+
 async function failedResumeResponse(error: unknown, jobId: string) {
   const current = await currentResultSafely(jobId);
   return Response.json(
     { ...resumeFailure(error), ...current },
-    { status: 400, headers: resumeHeaders },
+    { status: resumeFailureStatus(error), headers: resumeHeaders },
   );
 }
 

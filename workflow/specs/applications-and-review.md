@@ -1,6 +1,6 @@
 # Applications and review
 
-Baseline: ProductSpec v1.8, 10 October 2026 (accepted #53 resume-before-save/profile files; #52 required onboarding and prior withdrawal preserved).
+Baseline: ProductSpec v1.11, 14 October 2026 (integrated #76 password-aware PDF validation and safe errors with #78 public job search; HR dashboard, résumé-first/profile files, required onboarding and withdrawal preserved).
 
 Canonical ownership, notes and status permissions are in [SEC-001 / SEC-002](security-and-privacy.md).
 
@@ -68,7 +68,11 @@ Scenario: Given a verified owner on profile with unsaved text, when uploading a 
 
 ## APP-007: Optional private PDF attachment
 
-An Applicant MUST be able to attach at most one optional PDF résumé of no more than 1,048,576 bytes to their own draft application while its job is published, and replace/remove it before submission. No attachment MUST be required to submit. The server MUST validate filename/type, bounded byte length and PDF structure; non-PDF, oversized, malformed or encrypted/unparseable PDFs MUST be rejected before finalization. Type/structure validation MUST NOT be described as malware scanning. The interface MUST state the PDF/size limit and show safe upload errors without losing text/profile fields or the previous attached file.
+An Applicant MUST be able to attach at most one optional PDF résumé of no more than 1,048,576 bytes to their own draft application while its job is published, and replace/remove it before submission. No attachment MUST be required to submit. The server MUST validate filename/type, bounded byte length and PDF structure; non-PDF, oversized, malformed/unparseable or password-required PDFs MUST be rejected before finalization. Encryption alone MUST NOT reject a PDF that opens and structurally validates without a supplied password. The original uploaded bytes MUST be retained unchanged; no password collection or decryption/rewrite step is exposed to users. Type/structure validation MUST NOT be described as malware scanning. The interface MUST state the PDF/size limit and show safe upload errors without losing text/profile fields or the previous attached file.
+
+Empty/missing files, invalid names, unsupported types, oversized files, password-required PDFs and structurally unreadable PDFs MUST have actionable messages. Temporary server validation failure and validation timeout MUST be distinguished from invalid-file rejection and MUST NOT claim that the file is invalid. Upload endpoints MUST return allowlisted safe codes/messages with HTTP statuses appropriate to input rejection or server failure. They MUST NOT expose raw exception details, private document content, credentials or server filesystem paths. Validation MUST fail closed before Storage/finalization, including worker failure/timeout; late worker events MUST NOT finalize a failed upload. Existing attachments and typed fields MUST remain available for retry.
+
+Scenarios: An encrypted synthetic PDF with no opening password is accepted unchanged; a password-required or oversized PDF is rejected with its specific safe category. A valid file with an unavailable/crashed/timed-out worker receives a service error without a new Storage write. Invalid replacements preserve prior attachments/form values. Existing role/owner denial remains; errors cannot reveal another user's metadata or private parser details.
 
 Submission MUST atomically freeze the finalized attachment reference together with application fields. A pending upload MUST NOT be submitted as an attachment; submission while an active upload is pending MUST return a retryable message. Replacement/removal/finalization MUST be denied after submission or job closure, including direct requests and races. Existing owned/submitted downloads MUST remain available after closure under SEC-009. An upload begun before closure/submission MUST NOT subsequently finalize or mutate frozen attachment state. DB/Storage failures and retries MUST preserve prior referenced files and track unreferenced staging objects for bounded cleanup; cleanup MUST NOT delete a referenced or another application's object. Legacy records MUST remain usable without a file.
 

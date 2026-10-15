@@ -20,11 +20,13 @@ beforeEach(() => {
     file: new File(["synthetic"], "synthetic.pdf", { type: "application/pdf" }),
     pending: false,
     activeIntent: null,
+    activeRetry: false,
     attachment: resume,
-    uploadFailed: true,
+    profileCopyRetryAvailable: false,
     message: "",
     selectFile: vi.fn(),
     change: vi.fn(),
+    deleteResume: vi.fn(),
   });
 });
 
@@ -42,7 +44,7 @@ function html() {
 
 it.each([
   ["upload", "Replacing résumé…"],
-  ["remove", "Removing résumé…"],
+  ["remove", "Deleting résumé…"],
   ["profile", "Using profile résumé…"],
 ] as const)(
   "marks %s as active and disables conflicting actions",
@@ -54,14 +56,16 @@ it.each([
     });
     const markup = html();
     expect(markup).toContain(label);
-    expect(markup.match(/disabled=""/g)?.length).toBeGreaterThanOrEqual(5);
+    expect(markup.match(/disabled=""/g)?.length).toBeGreaterThanOrEqual(4);
     expect(markup).toContain('role="status"');
   },
 );
 
 it("restores idle labels after settlement", () => {
-  expect(html()).toContain("Replace résumé");
-  expect(html()).toContain("Remove résumé");
+  expect(html()).toContain("Upload résumé");
+  expect(html()).toContain("Delete résumé");
   expect(html()).toContain("Use profile résumé");
-  expect(html()).toContain("Retry upload");
+  expect(html()).not.toContain("Replace résumé");
+  expect(html()).not.toContain("Remove résumé");
+  expect(html()).not.toContain("Retry upload");
 });

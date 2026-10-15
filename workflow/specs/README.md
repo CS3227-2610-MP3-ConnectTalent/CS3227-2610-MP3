@@ -2,11 +2,11 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.14, 15 October 2026** on this PR #86 branch. Merged PR #82 brought OVR-004; merged PR #85 brought JOB-004/OVR-005; separately accepted #84 adds OVR-006. The separate accepted packets preserve their approval, review and verification limits. This sync does not certify PR #86 merge, hosted deployment or release.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.14, 15 October 2026**. Merged PRs #82, #85 and #86 established OVR-004, JOB-004/OVR-005 and OVR-006. Accepted #76 PDF validation/safe errors (APP-007, inherited by APP-006) and #78 public search remain part of this baseline, along with the HR dashboard, résumé/profile, onboarding and withdrawal requirements. The #81, #83 and #84 packets preserve their independent approval and acceptance histories. PR #77 carries the accepted #76 implementation and upload-reliability follow-up; merge and hosted upload success remain unverified. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## v1.14 integrated pending feedback
 
-OVR-004 from merged PR #82, JOB-004/OVR-005 from merged PR #85 and OVR-006 from #84 coexist in this branch. PR #86 and hosted latency/full accessibility checks remain pending.
+OVR-004 from merged PR #82, JOB-004/OVR-005 from merged PR #85 and OVR-006 from merged PR #86 coexist in this baseline. Hosted latency and full accessibility checks recorded in the accepted packets remain pending.
 
 ## v1.13 integrated pending feedback
 
@@ -16,7 +16,11 @@ The earlier integrated baseline reconciled OVR-004 from [#81](../archive/2026-10
 
 Paul accepted #81 with recorded limits on 15 October 2026 after local checks and separate read-only review. OVR-004 requires prompt action-specific pending feedback and unavailable repeat activation for server-backed submit controls while retaining validation and retry behavior. The [complete archived packet](../archive/2026-10-14-pending-action-feedback/record.md) records two fixed reviewer findings, meaningful browser and unit checks, and hosted/accessibility limits. Canonical sync preceded archive; PR #82 later merged to `develop`. The original acceptance alone did not establish commit, PR or hosted release.
 
-## v1.10 accepted public job search
+## v1.11 accepted PDF validation and safe errors (#76)
+
+Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026 after local checks and independent review. APP-007 accepts encrypted PDFs openable without a password and rejects password-required files; safe messages/codes distinguish file rejection from validator unavailability/timeouts. APP-006 inherits these restrictions. Original bytes, size/privacy/authorization and snapshot rules remain. [Archived evidence](../archive/2026-10-13-resume-error-messages/record.md) records 85 primary unit checks, three development browser journeys, one production-server journey, build/trace checks and independent review. Hosted/Linux verification remains pending.
+
+## v1.11 accepted public job search (#78)
 
 Paul accepted #78 with recorded limits on 14 October 2026 after local checks and a separate review. JOB-004 defines literal, normalized search of published job fields, combined category filtering, a 100-character input boundary, 300 ms debounce and URL/history behavior. [The complete archived packet](../archive/2026-10-14-job-listing-search/record.md) records independent review, a fixed navigation-bookkeeping finding, meaningful tests and hosted/accessibility limits. Canonical sync preceded archive; no hosted rollout or release claim follows.
 
