@@ -25,6 +25,7 @@ vi.mock("next/link", async () => {
   return {
     default: ({ href, children, ...props }: Record<string, unknown>) =>
       React.createElement("a", { href, ...props }, children as React.ReactNode),
+    useLinkStatus: () => ({ pending: false }),
   };
 });
 vi.mock("@/components/password-input", async () => {
@@ -58,6 +59,7 @@ it("shows safe sign-in notices only when their query values are present", async 
   );
   expect(defaultPage).toContain("Sign in");
   expect(defaultPage).not.toContain('role="alert"');
+  expect(defaultPage).not.toContain("Password updated.");
   expect(defaultPage).toContain('role="status"');
   expect(defaultPage).not.toContain("Signing in…");
 
