@@ -12,11 +12,11 @@ Date: 2026-10-14
 
 - Change ID/classification: `2026-10-14-resume-upload-diagnostics`; behavior defect restoration and safe diagnostics
 - GitHub issues: [#76](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76); follow-up to [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77)
-- Branch/commits/PR: `fix/76-resume-validation-errors`, baseline `e5d6ca5`, PR #77 targets `develop`. Follow-up commits `53d96de`, `35e2f5c`, `790b482`, `9e03f4b`, `dcdb414`, `712a5b2`, `c5450b4`, `9f08d0f`, and `0f37024` are published. The develop integration commit `790b482` reconciles the accepted #76/#78 documentation conflicts; ProductSpec v1.11 is the current integrated baseline.
+- Branch/commits/PR: `fix/76-resume-validation-errors`, baseline `e5d6ca5`, PR #77 targets `develop`. Follow-up commits `53d96de`, `35e2f5c`, `790b482`, `9e03f4b`, `dcdb414`, `712a5b2`, `c5450b4`, `9f08d0f`, `0f37024`, `fd2c775`, `bd65c4d`, `9b5c14a`, `ead7edf`, `c8ab9e3`, `e18ba04`, and `6c941ab` are published. The develop integration commit `790b482` reconciles the accepted #76/#78 documentation conflicts; ProductSpec v1.11 is the current integrated baseline.
 - Proposal/design/plan/tasks/review handoff: [proposal.md](proposal.md), [design.md](design.md), [plan.md](plan.md), [tasks.md](tasks.md), [T05 independent review](handoffs/T05-independent-review.md)
 - Deltas: none; restores APP-007 and preserves SEC-009.
 - Approval baseline: ProductSpec v1.10; current integrated baseline: ProductSpec v1.11, 2026-10-14; previous #76 packet [archived](../../archive/2026-10-13-resume-error-messages/record.md)
-- Archive: T05 independent review, revised-timeout execution, T13 and T14 are complete. Keep this packet active through T15/T16 publication, latest review closeout, and hosted CI; hosted upload verification remains unperformed because the user chose to skip the smoke.
+- Archive: T05 independent review, revised-timeout execution, and T13–T19 implementation/review closeout are complete. Keep this packet active while hosted upload verification remains unperformed because the user chose to skip the smoke.
 
 ## Approval checklist
 
@@ -27,7 +27,7 @@ Date: 2026-10-14
 - [x] Paul approved the single “Upload résumé” / confirmed “Delete résumé” action flow in chat on 2026-10-15 before implementation.
 - [x] Paul accepted the implementation in chat on 2026-10-14: “I accept the changes. Please proceed.” This acceptance is separate from the skipped hosted upload verification.
 - [x] Implementation and post-submission review/conflict notes are recorded in the [implementation log](../../../logs/2026-10-14-resume-upload-diagnostics.md), [2026-10-14 PR review log](../../../logs/2026-10-14-resume-upload-pr-review-fix.md), and [2026-10-15 CI/review follow-up](../../../logs/2026-10-15-resume-upload-pr-review-fix.md).
-- [x] Accepted implementation was committed and pushed to PR #77; follow-up head `0f370247a595980c582040755bdde9f3f6ef0287` has a successful Vercel deployment status.
+- [x] Accepted implementation and review fixes were committed and pushed to PR #77; latest code head `6c941ab687876d0de87724ab4095c6a61cb7b7f0` has successful GitHub CI, Supabase CI, and Vercel status.
 - [ ] Hosted Preview upload verification remains incomplete. The synthetic smoke was skipped at Paul's direction after browser policy blocked the extension-settings page; no test file was uploaded and no browser permission was changed.
 - [x] No canonical delta: current APP-007 already covers safe failure categories, raw-detail privacy and pre-storage rejection.
 
@@ -81,12 +81,13 @@ Known limits: the user's local PDF has not been inspected or uploaded; its speci
 - A fifth P2 comment found the timeout/index status had not been updated. The active index and record now mark revised-timeout verification complete and hosted upload smoke as unverified; its thread is resolved.
 - T14 addressed two P2 comments about stale revisions and retaining the selected profile source across `router.refresh()`. The client snapshots the source ID, operation ID, and revision; the route forwards the supplied revision; the service checks the original operation before recovering a different pending upload. Its route/service/client regressions passed and both review threads are resolved. A first local attempt could not run because of a Windows Bun `EPERM`; the later serial full suite and hosted CI on the then-current PR head passed.
 - The existing oversized-file response is allowlisted as HTTP 413 with the exact message “This file exceeds 1 MiB. Choose a smaller PDF.” The upload panel renders the response error in its `role="status"` message; no new product behavior was needed.
-- Human decisions: original proposal/design/plan and bounded 5-second revision approved; Paul accepted the implementation in chat on 2026-10-14 and approved the T16 upload-panel interaction on 2026-10-15. T15/T16 hosted CI and review closeout are active. The hosted upload smoke was separately skipped at the user's direction and is not implied by acceptance.
+- The latest seven inline review threads were answered and resolved. The final code head `6c941ab687876d0de87724ab4095c6a61cb7b7f0` passed GitHub CI run `38684557140`, Supabase CI run `38684557078` (database checks, integration race suites, and Playwright Chromium), and the Vercel status check. The Playwright run caught a stale assertion expecting the removed “Upload résumé” button to disappear; commit `6c941ab` corrected it to check for the removed “Retry upload” control.
+- Human decisions: original proposal/design/plan and bounded 5-second revision approved; Paul accepted the implementation in chat on 2026-10-14 and approved the T16 upload-panel interaction on 2026-10-15. The hosted upload smoke was separately skipped at the user's direction and is not implied by acceptance.
 - Documentation/reflection: implementation and PR follow-up are recorded in dated logs; canonical sync is complete at v1.11. Archive remains pending hosted upload verification.
 
 ## Canonical sync and archive
 
 - No new canonical behavior delta; APP-007/SEC-009 already govern.
 - The integrated develop baseline is v1.11 and retains the separately accepted #76 APP-007 and #78 JOB-004 changes; this follow-up introduces no additional product-spec delta.
-- Previous CI closeout completed for head `fd2c775`: CI run `38670892050`, Supabase CI run `38670892044`, coverage report run `38670969338`, and Vercel status all passed. T15/T16 changes still need publication and hosted verification.
-- Outstanding work: publish T15/T16, verify CI and Vercel, reply to and resolve the two newest P2 threads, and keep hosted Preview upload behavior marked unverified because the synthetic smoke was skipped at the user's direction. Complete evidence closeout before archiving.
+- Latest published code head `6c941ab687876d0de87724ab4095c6a61cb7b7f0` passed GitHub CI run `38684557140`, Supabase CI run `38684557078`, and Vercel status. All seven currently open inline threads were replied to and resolved. Earlier develop conflicts were resolved in `790b482`; the PR remains mergeable.
+- Outstanding work: hosted Preview upload behavior remains unverified because the synthetic smoke was skipped at the user's direction. Keep this packet active until that acceptance evidence exists; no production deployment or merge is claimed.
