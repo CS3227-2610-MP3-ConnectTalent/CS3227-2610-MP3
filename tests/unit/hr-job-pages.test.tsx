@@ -76,6 +76,13 @@ it("labels each HR job state in the management list", async () => {
     job,
     {
       ...job,
+      id: "scheduled-id",
+      title: "Scheduled role",
+      status: "published",
+      opens_at: "2099-01-01T00:00:00Z",
+    },
+    {
+      ...job,
       id: "published-id",
       title: "Published role",
       status: "published",
@@ -84,8 +91,10 @@ it("labels each HR job state in the management list", async () => {
   ]);
   const html = renderToStaticMarkup(await HRJobsPage());
   expect(html).toContain("Draft");
+  expect(html).toContain("Scheduled");
   expect(html).toContain("Published");
   expect(html).toContain("Closed");
+  expect(html).toContain('href="/hr/jobs/scheduled-id"');
   expect(html).toContain('href="/hr/jobs/published-id"');
 });
 
