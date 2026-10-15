@@ -195,9 +195,9 @@ async function draftWithAI(page: Page) {
   await expect(page.getByLabel("Cover letter")).toHaveValue(
     "AI generated synthetic draft.",
   );
-  await expect(page.getByRole("status")).toContainText(
-    "Check every date, skill, and achievement",
-  );
+  await expect(
+    page.getByRole("status").filter({ hasText: "Check every date" }),
+  ).toContainText("Check every date, skill, and achievement");
   await expect(page.getByText("Submitted application")).toHaveCount(0);
   await page.unroute("**/api/ai/applicant-draft");
   await page.reload();

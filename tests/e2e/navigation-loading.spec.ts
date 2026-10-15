@@ -51,6 +51,54 @@ test("a delayed Search marks only its button busy and newer filters still win", 
   }
 });
 
+test("a delayed debounced request leaves Search available until explicitly submitted", async ({
+  page,
+}) => {
+  await page.goto("/");
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/*", async (route) => {
+    const url = new URL(route.request().url());
+    if (
+      url.pathname === "/" &&
+      url.searchParams.get("q") === "software" &&
+      url.searchParams.has("_rsc")
+    )
+      await gate;
+    await route.continue();
+  });
+  try {
+    const request = page.waitForRequest((item) => {
+      const url = new URL(item.url());
+      return (
+        url.searchParams.get("q") === "software" && url.searchParams.has("_rsc")
+      );
+    });
+    await page
+      .getByRole("searchbox", { name: "Search open roles" })
+      .fill("software");
+    await request;
+    const searchButton = page.getByRole("button", {
+      name: "Search",
+      exact: true,
+    });
+    await expect(searchButton).toBeEnabled();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Updating roles" }),
+    ).toHaveClass(/sr-only/);
+    await searchButton.click();
+    await expect(
+      page.getByRole("button", { name: "Searching…" }),
+    ).toBeDisabled();
+  } finally {
+    release();
+  }
+  await expect(page).toHaveURL(/q=software/);
+  await expect(page.getByRole("button", { name: "Search" })).toBeEnabled();
+});
+
 test("a delayed Apply link announces its navigation and preserves its destination", async ({
   page,
 }) => {

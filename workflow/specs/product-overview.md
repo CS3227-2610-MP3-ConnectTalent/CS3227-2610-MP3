@@ -1,6 +1,6 @@
 # Product overview
 
-Baseline: ProductSpec v1.12, 15 October 2026; accepted #83 View role loading follow-up (earlier requirements retained).
+Baseline: ProductSpec v1.13, 15 October 2026; integrated #81 pending-action feedback and #83 Search, navigation and View role feedback. Earlier accepted private profiles and optional PDF résumés remain in scope.
 
 ## OVR-001: One employer per deployment
 
@@ -22,6 +22,14 @@ See [applications and review](applications-and-review.md), [Applicant AI draft](
 ## OVR-003: Non-goals
 
 Email automation and AI hiring decisions MUST NOT be part of the first release. Résumé parsing, AI profile autofill, multiple application attachments and HR access to Applicant profiles MUST NOT be provided by this change. Removing the résumé-upload exclusion does not alter accepted Auth verification/recovery behavior. Attachment permissions/lifecycle are defined in [SEC-009](security-and-privacy.md) and [APP-006/007](applications-and-review.md).
+
+## OVR-004: Feedback for pending server actions
+
+A visible, enabled control that submits a server-backed action MUST show prompt, action-specific pending feedback and become unavailable for repeat activation while that submission is pending. The feedback MUST be perceivable to assistive technology. On validation failure or server error, the user MUST retain a usable retry path without a stuck pending state. Pending UI MUST NOT replace server authorization, validation, concurrency or duplicate-write protection. Native form submission without JavaScript MUST remain available where it exists today. Instant local controls and navigation links do not require this state.
+
+Scenario: Given an Applicant or HR form with valid input and a delayed server action, when its submit control is activated, then its specific pending state is announced and repeat activation is unavailable until success or error navigation.
+
+Failure scenario: Given invalid native input or a failed server action, when the attempt ends or never starts, then the control is usable again and the existing validation or error result remains available.
 
 ## OVR-005: Pending feedback for selected route links
 

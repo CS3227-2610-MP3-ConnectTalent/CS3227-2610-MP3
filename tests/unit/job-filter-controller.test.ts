@@ -63,6 +63,31 @@ it("Search and category act immediately and cancel old timers", () => {
   );
 });
 
+it("marks only explicit Search as pending and clears it on newer intent or confirmation", () => {
+  const navigate = vi.fn();
+  const controller = new JobFilterController({ query: "" }, navigate);
+  controller.edit("software");
+  vi.advanceTimersByTime(300);
+  expect(controller.getSnapshot().explicitSearchPending).not.toBe(true);
+  controller.search();
+  expect(controller.getSnapshot().explicitSearchPending).toBe(true);
+  controller.category("sales");
+  expect(controller.getSnapshot().explicitSearchPending).not.toBe(true);
+  controller.search();
+  expect(controller.getSnapshot().explicitSearchPending).toBe(true);
+  controller.confirm({ query: "software", category: "sales" });
+  expect(controller.getSnapshot().explicitSearchPending).not.toBe(true);
+  controller.edit("people");
+  controller.search();
+  expect(controller.getSnapshot().explicitSearchPending).toBe(true);
+  controller.clear();
+  expect(controller.getSnapshot().explicitSearchPending).not.toBe(true);
+  controller.search();
+  expect(controller.getSnapshot().explicitSearchPending).toBe(true);
+  controller.restore({ query: "recruitment" });
+  expect(controller.getSnapshot().explicitSearchPending).not.toBe(true);
+});
+
 it("does not navigate during composition or when the phrase is invalid", () => {
   const navigate = vi.fn();
   const controller = new JobFilterController({ query: "" }, navigate);

@@ -2,7 +2,15 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.12, 15 October 2026** on this branch. Accepted #83 amends JOB-004 Search feedback and adds OVR-005 link feedback; its separately accepted [View role follow-up](../archive/2026-10-15-view-role-loading/record.md) extends OVR-005 and keeps the result announcement for assistive technology while removing its duplicate visible line. [The original #83 packet](../archive/2026-10-15-navigation-loading/record.md) preserves approval, independent re-review and the browser-held failure limit. Open PR #82 also proposes v1.11 with OVR-004; reconcile both when integrating. Earlier accepted #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This branch sync does not certify hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.13, 15 October 2026** on this integration branch. Merged PR #82 brought accepted #81 OVR-004; the accepted [#83 packet](../archive/2026-10-15-navigation-loading/record.md) amends JOB-004 and adds OVR-005, and its separately accepted [View role follow-up](../archive/2026-10-15-view-role-loading/record.md) extends OVR-005 while keeping the result announcement for assistive technology. The independent #81 and #83 baselines both used v1.11 before reconciliation; their combined accepted behavior and the follow-up advance this branch to v1.13. Earlier accepted #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This sync does not certify PR #85 merge, hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.13 integrated pending feedback
+
+OVR-004 from merged PR #82 and JOB-004/OVR-005 from open PR #85 coexist in this branch's canonical files. The original [#83 packet](../archive/2026-10-15-navigation-loading/record.md), its [View role follow-up](../archive/2026-10-15-view-role-loading/record.md), and the [#81 packet](../archive/2026-10-14-pending-action-feedback/record.md) preserve their separate approval, review and acceptance histories. Hosted latency and full accessibility checks remain pending.
+
+## v1.11 accepted pending-action feedback
+
+Paul accepted #81 with recorded limits on 15 October 2026 after local checks and separate read-only review. OVR-004 requires prompt action-specific pending feedback and unavailable repeat activation for server-backed submit controls while retaining validation and retry behavior. The [complete archived packet](../archive/2026-10-14-pending-action-feedback/record.md) records two fixed reviewer findings, meaningful browser and unit checks, and hosted/accessibility limits. Canonical sync preceded archive; PR #82 later merged to `develop`. The original acceptance alone did not establish commit, PR or hosted release.
 
 ## v1.10 accepted public job search
 

@@ -41,7 +41,9 @@ async function confirmWithdrawal(page: Page, applicationId: string) {
   await page
     .getByRole("button", { name: "Confirm withdrawal", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("Withdrawn");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Withdrawn" }),
+  ).toContainText("Withdrawn");
   await expect(
     page.getByRole("button", { name: "Withdraw application", exact: true }),
   ).toHaveCount(0);

@@ -1,6 +1,6 @@
 # Public job listings
 
-Baseline: ProductSpec v1.11, 15 October 2026 (accepted #83 Search-action feedback; #78 public text search and #52 Applicant onboarding retained).
+Baseline: ProductSpec v1.13, 15 October 2026 (integrated #81/#83 accepted changes; JOB-004 Search-action feedback, #78 public text search and #52 Applicant onboarding retained).
 
 ## JOB-001: Published-only browsing
 

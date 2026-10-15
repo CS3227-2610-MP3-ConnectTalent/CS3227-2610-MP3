@@ -6,6 +6,7 @@ export type JobFilters = {
   invalid?: boolean;
   invalidKey?: string;
   historyPending?: boolean;
+  explicitSearchPending?: boolean;
 };
 type Navigate = (url: string, replace: boolean) => void;
 const filterKey = (value: JobFilters) =>
@@ -45,6 +46,13 @@ export class JobFilterController {
     this.listeners.forEach((listener) => listener());
   }
 
+  private clearSearchPending(next: JobFilters) {
+    if (!next.explicitSearchPending) return next;
+    const cleared = { ...next };
+    delete cleared.explicitSearchPending;
+    return cleared;
+  }
+
   cancel = () => {
     clearTimeout(this.timer);
     this.timer = undefined;
@@ -58,7 +66,7 @@ export class JobFilterController {
   edit(query: string) {
     this.cancel();
     this.editing = true;
-    this.update({ ...this.state, query });
+    this.update(this.clearSearchPending({ ...this.state, query }));
     if (!this.composing && !parseJobSearch(query).invalid) {
       this.timer = setTimeout(() => this.go(true), JOB_SEARCH_DELAY);
     }
@@ -70,25 +78,33 @@ export class JobFilterController {
     else this.edit(this.state.query);
   }
 
-  go(replace = false) {
+  go(replace = false, explicitSearch = false) {
     this.cancel();
     const parsed = parseJobSearch(this.state.query);
     if (this.composing || parsed.invalid) return;
     const url = jobSearchUrl(parsed.query, this.state.category);
     if (url === this.confirmed && this.requested === undefined) return;
+    if (explicitSearch)
+      this.update({ ...this.state, explicitSearchPending: true });
+    else if (this.state.explicitSearchPending)
+      this.update(this.clearSearchPending(this.state));
     // Next supersedes earlier navigations; they may never acknowledge.
     this.requested = url;
     if (this.historyTarget !== undefined) this.historyTarget = url;
     this.navigate(url, replace);
   }
 
+  search() {
+    this.go(false, true);
+  }
+
   category(category?: string) {
-    this.update({ ...this.state, category });
+    this.update(this.clearSearchPending({ ...this.state, category }));
     this.go();
   }
 
   clear() {
-    this.update({ ...this.state, query: "" });
+    this.update(this.clearSearchPending({ ...this.state, query: "" }));
     this.go();
   }
 
@@ -100,13 +116,20 @@ export class JobFilterController {
       this.confirmed = url;
       this.requested = undefined;
       this.update(
-        this.editing ? { ...this.state, historyPending: undefined } : next,
+        this.editing
+          ? this.clearSearchPending({
+              ...this.state,
+              historyPending: undefined,
+            })
+          : next,
       );
       return;
     }
     if (url === this.requested) {
       this.confirmed = url;
       this.requested = undefined;
+      if (this.state.explicitSearchPending)
+        this.update(this.clearSearchPending(this.state));
       return;
     }
     if (url === this.confirmed) return;

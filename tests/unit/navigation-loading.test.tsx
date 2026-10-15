@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
     query: string;
     category?: string;
     historyPending?: boolean;
+    explicitSearchPending?: boolean;
   },
 }));
 
@@ -27,6 +28,7 @@ vi.mock("@/components/use-job-listing-filters", () => ({
     controller: {
       edit: vi.fn(),
       go: vi.fn(),
+      search: vi.fn(),
       clear: vi.fn(),
       category: vi.fn(),
       composition: vi.fn(),
@@ -47,6 +49,7 @@ beforeEach(() => {
 
 it("shows and disables only the Search submit during a route request", () => {
   mocks.searchPending = true;
+  mocks.filtersOverride = { query: "software", explicitSearchPending: true };
   const html = renderToStaticMarkup(
     <JobListingFilters initial={{ query: "" }} invalidCategory={false}>
       <p>Results</p>
@@ -58,6 +61,20 @@ it("shows and disables only the Search submit during a route request", () => {
   expect(html).toMatch(/<button[^>]+type="submit"[^>]*disabled=""/);
   expect(html).toContain('name="q"');
   expect(html).toContain("Clear search");
+});
+
+it("keeps Search available during a non-Search route request", () => {
+  mocks.searchPending = true;
+  const html = renderToStaticMarkup(
+    <JobListingFilters initial={{ query: "software" }} invalidCategory={false}>
+      <p>Old results</p>
+    </JobListingFilters>,
+  );
+
+  expect(html).toContain("Updating roles…");
+  expect(html).toContain('aria-busy="true"');
+  expect(html).not.toContain("Searching…");
+  expect(html).toMatch(/<button[^>]+type="submit"[^>]*>.*Search<\/button>/);
 });
 
 it("keeps an idle Search available and preserves the selected category", () => {
@@ -93,7 +110,7 @@ it("withholds stale cards and announces a restored history request", () => {
   );
 
   expect(html).toContain("Updating roles…");
-  expect(html).toContain("Searching…");
+  expect(html).not.toContain("Searching…");
   expect(html).not.toContain("Old results");
 });
 

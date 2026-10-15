@@ -60,6 +60,8 @@ it("shows safe sign-in notices only when their query values are present", async 
   expect(defaultPage).toContain("Sign in");
   expect(defaultPage).not.toContain('role="alert"');
   expect(defaultPage).not.toContain("Password updated.");
+  expect(defaultPage).toContain('role="status"');
+  expect(defaultPage).not.toContain("Signing in…");
 
   const notices = renderToStaticMarkup(
     await SignIn({

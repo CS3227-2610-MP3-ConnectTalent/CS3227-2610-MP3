@@ -42,7 +42,7 @@ export function JobListingFilters({
           filters={filters}
           controller={controller}
           invalid={invalid}
-          loading={loading}
+          loading={filters.explicitSearchPending === true}
         />
         <p role="status" className="sr-only">
           {loading ? "Updating roles…" : ""}
@@ -73,7 +73,7 @@ function SearchForm({
       className="space-y-3 rounded-2xl border bg-white p-5 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
-        controller.go();
+        controller.search();
       }}
     >
       <label htmlFor="job-search" className="text-sm font-semibold">
