@@ -25,6 +25,7 @@ vi.mock("next/link", async () => {
   return {
     default: ({ href, children, ...props }: Record<string, unknown>) =>
       React.createElement("a", { href, ...props }, children as React.ReactNode),
+    useLinkStatus: () => ({ pending: false }),
   };
 });
 

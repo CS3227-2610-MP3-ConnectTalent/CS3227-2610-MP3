@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { PendingLinkStatus } from "@/components/pending-link-status";
+
 export default function JobNotFound() {
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-16">
@@ -12,6 +14,7 @@ export default function JobNotFound() {
         className="mt-6 w-fit font-medium underline underline-offset-4"
       >
         Browse open roles
+        <PendingLinkStatus label="Opening roles…" />
       </Link>
     </main>
   );

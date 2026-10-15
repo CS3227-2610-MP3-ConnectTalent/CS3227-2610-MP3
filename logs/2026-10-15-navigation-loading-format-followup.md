@@ -1,0 +1,7 @@
+# #83 PR formatting follow-up — 15 October 2026
+
+Paul reported that PR #85's `app` check failed in `pnpm format:check`, naming `tests/unit/navigation-loading.test.tsx`. The root Codex execution confirmed the focused Prettier warning on branch `feat/83-navigation-loading` at `693fc02`, applied Prettier to that file only, and inspected the resulting line-wrap-only diff. The assertion still matches the same Search button markup.
+
+Focused Prettier passed and `corepack pnpm exec vitest run tests/unit/navigation-loading.test.tsx` passed 6/6 tests. A local repository-wide format attempt was interrupted: it traversed sibling `.worktrees` and reported unrelated Windows working-tree line endings, so it does not establish a pass. The clean GitHub CI check must rerun after a pushed fix. No behavior, security boundary, accepted requirement or deployment setting changed. The unrelated untracked profile packet was not edited.
+
+A separate read-only `/root/pr85_format_review` execution inspected the final focused diff, independently reran focused Prettier, 6/6 unit tests and `git diff --check`, and found no blocking issue. Its [handoff](../workflow/archive/2026-10-15-navigation-loading/handoffs/pr85-format-review.md) records the clean-CI limit. Paul then answered “Accept and commit/push to PR #85” on 15 October 2026 to a separate post-review question. Clean GitHub CI remains pending until the repair is pushed.

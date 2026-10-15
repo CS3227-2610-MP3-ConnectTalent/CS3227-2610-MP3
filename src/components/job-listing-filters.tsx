@@ -1,7 +1,7 @@
 "use client";
 
 import { type MouseEvent, type ReactNode } from "react";
-import { Layers3, Search } from "lucide-react";
+import { Layers3, LoaderCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
@@ -42,8 +42,9 @@ export function JobListingFilters({
           filters={filters}
           controller={controller}
           invalid={invalid}
+          loading={filters.explicitSearchPending === true}
         />
-        <p role="status" className="text-sm text-muted-foreground">
+        <p role="status" className="sr-only">
           {loading ? "Updating roles…" : ""}
         </p>
         {invalid ? (
@@ -62,7 +63,8 @@ function SearchForm({
   filters,
   controller,
   invalid,
-}: Controls & { invalid: boolean }) {
+  loading,
+}: Controls & { invalid: boolean; loading: boolean }) {
   return (
     <form
       action="/"
@@ -71,7 +73,7 @@ function SearchForm({
       className="space-y-3 rounded-2xl border bg-white p-5 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
-        controller.go();
+        controller.search();
       }}
     >
       <label htmlFor="job-search" className="text-sm font-semibold">
@@ -86,10 +88,7 @@ function SearchForm({
         {filters.category && (
           <input type="hidden" name="category" value={filters.category} />
         )}
-        <Button type="submit" className="h-10">
-          <Search size={16} aria-hidden="true" />
-          Search
-        </Button>
+        <SearchSubmitButton loading={loading} />
         <a
           href={jobSearchUrl("", filters.category)}
           data-job-filter
@@ -104,6 +103,24 @@ function SearchForm({
         characters.
       </p>
     </form>
+  );
+}
+
+function SearchSubmitButton({ loading }: { loading: boolean }) {
+  return (
+    <Button
+      type="submit"
+      className="h-10"
+      disabled={loading}
+      aria-busy={loading}
+    >
+      {loading ? (
+        <LoaderCircle size={16} aria-hidden="true" className="animate-spin" />
+      ) : (
+        <Search size={16} aria-hidden="true" />
+      )}
+      {loading ? "Searching…" : "Search"}
+    </Button>
   );
 }
 

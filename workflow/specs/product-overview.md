@@ -1,6 +1,6 @@
 # Product overview
 
-Baseline: ProductSpec v1.11, 15 October 2026; accepted pending-action feedback. Earlier accepted private profiles and optional PDF résumés remain in scope.
+Baseline: ProductSpec v1.13, 15 October 2026; integrated #81 pending-action feedback and #83 Search, navigation and View role feedback. Earlier accepted private profiles and optional PDF résumés remain in scope.
 
 ## OVR-001: One employer per deployment
 
@@ -30,6 +30,14 @@ A visible, enabled control that submits a server-backed action MUST show prompt,
 Scenario: Given an Applicant or HR form with valid input and a delayed server action, when its submit control is activated, then its specific pending state is announced and repeat activation is unavailable until success or error navigation.
 
 Failure scenario: Given invalid native input or a failed server action, when the attempt ends or never starts, then the control is usable again and the existing validation or error result remains available.
+
+## OVR-005: Pending feedback for selected route links
+
+A visible **View role**, **Apply for this role** or named return-to-Careers link MUST show an action-specific, visually and assistive-technology perceivable pending hint while its client navigation has started but has not reached the destination. The hint MUST clear when the client route completes, is superseded, or renders an application error or destination. If the browser holds a full-document navigation after a total network failure, the browser controls loading; the app does not promise an in-page reset while its JavaScript cannot run. Fast and prefetched navigation MAY complete without a visible intermediate state. The link MUST preserve its real href and normal keyboard, modified-click, new-tab and no-JavaScript behavior. Pending feedback MUST NOT grant route access, change the destination, expose private state, or replace server authorization.
+
+Scenario: Given a published job and an eligible Applicant, when **Apply for this role** waits for its route, then its link shows “Opening application…” until navigation completes. A cancelled client navigation or application-handled error clears the hint. A browser-held total network failure remains the accepted in-page-clearing limit.
+
+Scenario: Given a published job card, when a visitor activates **View role** and the detail route waits, then that card shows “Opening role…” until navigation completes. A fast or already-prefetched route may have no perceivable pending interval.
 
 ## Unresolved ownership and implementation evidence
 
