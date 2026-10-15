@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requestPasswordReset } from "@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 
 export default async function ForgotPassword({
   searchParams,
@@ -42,9 +43,11 @@ export default async function ForgotPassword({
             required
           />
         </div>
-        <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">
-          Send reset link
-        </button>
+        <PendingSubmitButton
+          label="Send reset link"
+          pendingLabel="Sending reset link…"
+          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+        />
       </form>
     </main>
   );

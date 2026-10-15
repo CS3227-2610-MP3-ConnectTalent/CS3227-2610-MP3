@@ -4,12 +4,13 @@ import { useActionState, useState } from "react";
 
 import { signUp } from "@/app/auth/actions";
 import { PasswordInput } from "@/components/password-input";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SignUpForm({ serverError }: { serverError?: string }) {
   const [error, setError] = useState("");
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction] = useActionState(
     signUp,
     { email: "", error: "" },
     "/auth/sign-up",
@@ -45,12 +46,11 @@ export function SignUpForm({ serverError }: { serverError?: string }) {
           />
         </div>
         <SignUpPasswords />
-        <button
-          disabled={pending}
-          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
-        >
-          Create account
-        </button>
+        <PendingSubmitButton
+          label="Create account"
+          pendingLabel="Creating account…"
+          className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+        />
       </form>
     </>
   );

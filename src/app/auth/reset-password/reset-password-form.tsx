@@ -4,10 +4,11 @@ import { useActionState } from "react";
 
 import { updatePassword } from "@/app/auth/actions";
 import { PasswordInput } from "@/components/password-input";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Label } from "@/components/ui/label";
 
 export function ResetPasswordForm() {
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction] = useActionState(
     updatePassword,
     { error: "" },
     "/auth/reset-password",
@@ -42,12 +43,11 @@ export function ResetPasswordForm() {
           required
         />
       </div>
-      <button
-        disabled={pending}
-        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
-      >
-        Update password
-      </button>
+      <PendingSubmitButton
+        label="Update password"
+        pendingLabel="Updating password…"
+        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+      />
     </form>
   );
 }

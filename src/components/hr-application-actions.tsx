@@ -2,6 +2,7 @@ import { addHRNote, changeHRStatus } from "@/app/hr/applications/actions";
 import { listHRNotes, listHRStatusEvents } from "@/lib/hr-applications";
 import { reviewStatusLabel } from "@/lib/hr-input";
 import { getSubmittedApplication } from "@/lib/hr-applications";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 
 type Application = NonNullable<
   Awaited<ReturnType<typeof getSubmittedApplication>>
@@ -85,12 +86,11 @@ function HRNoteForm({ applicationId }: { applicationId: string }) {
         rows={5}
         className="w-full rounded-lg border p-3"
       />
-      <button
-        type="submit"
+      <PendingSubmitButton
+        label="Add note"
+        pendingLabel="Adding note…"
         className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
-      >
-        Add note
-      </button>
+      />
     </form>
   );
 }
@@ -126,12 +126,11 @@ function StatusUpdateForm({ application }: { application: Application }) {
         value={application.review_revision}
       />
       <ReviewStatusSelect />
-      <button
-        type="submit"
+      <PendingSubmitButton
+        label="Update status"
+        pendingLabel="Updating status…"
         className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
-      >
-        Update status
-      </button>
+      />
     </form>
   );
 }

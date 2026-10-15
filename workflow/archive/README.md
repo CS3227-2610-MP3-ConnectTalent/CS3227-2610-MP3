@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-14 pending action feedback](2026-10-14-pending-action-feedback/record.md): Paul separately accepted #81 with recorded limits on 15 October 2026; OVR-004 synced to canonical v1.11 before complete archive. [Independent review](2026-10-14-pending-action-feedback/handoffs/independent-review.md) found two issues that were fixed and rechecked. [Implementation](../../logs/2026-10-14-pending-action-feedback.md) and [closeout](../../logs/2026-10-15-pending-action-feedback-closeout.md) summaries. Hosted/accessibility checks and Git publication remain pending.
+
 - [2026-10-14 public job search](2026-10-14-job-listing-search/record.md): Paul separately accepted #78 with recorded limits; JOB-004 synced to canonical v1.10 before archive. [Independent review](2026-10-14-job-listing-search/handoffs/independent-review.md) found a P2 that was fixed and rechecked. [Intake](../../logs/2026-10-14-job-search-intake.md) and [implementation](../../logs/2026-10-14-job-search-implementation.md) summaries. Hosted/accessibility checks and release remain pending.
 
 - [2026-10-13 return navigation and cursors](2026-10-13-navigation-cursors/record.md): Paul separately accepted #74 with recorded limits. ACC-005/006 preserved; canonical delta N/A. Complete packet archived; hosted/accessibility and Git publication pending. [Independent review](2026-10-13-navigation-cursors/independent-review.md), [session summary](../../logs/2026-10-13-navigation-cursors.md).

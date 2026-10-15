@@ -34,5 +34,7 @@ export async function withdrawApplication(page: Page) {
   await page
     .getByRole("button", { name: "Confirm withdrawal", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("Withdrawn");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Withdrawn" }),
+  ).toContainText("Withdrawn");
 }
