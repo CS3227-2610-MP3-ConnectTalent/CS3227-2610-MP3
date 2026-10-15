@@ -61,64 +61,39 @@ beforeEach(() => {
           : { data: null, error: null },
   );
 });
-it("resolves only the owned job revision and recovers before preparing a retry", async () => {
-  await uploadResumeForJob(actor, job, null, file, operation, true);
-  expect(mocks.eq).toHaveBeenCalledWith("applicant_id", actor);
-  expect(mocks.eq).toHaveBeenCalledWith("job_id", job);
-  expect(mocks.rpc).toHaveBeenCalledWith("recover_pending_application_resume", {
-    p_actor: actor,
-    p_job: job,
-    p_revision: 3,
-  });
-  expect(mocks.rpc).toHaveBeenCalledWith(
-    "prepare_application_resume",
-    expect.objectContaining({ p_revision: 3, p_operation: operation }),
-  );
-  const calls = mocks.rpc.mock.calls.map((call) => call[0]);
-  expect(calls.indexOf("recover_pending_application_resume")).toBeLessThan(
-    calls.indexOf("prepare_application_resume"),
-  );
-});
-it("allows fresh allocation if the failed request never created an application", async () => {
-  mocks.lookup.mockResolvedValue({ data: null, error: null });
-  await uploadResumeForJob(actor, job, null, file, operation, true);
+it("checks a retried operation before recovering any other pending upload", async () => {
+  await uploadResumeForJob(actor, job, 2, file, operation, true);
   expect(mocks.rpc).not.toHaveBeenCalledWith(
     "recover_pending_application_resume",
     expect.anything(),
   );
   expect(mocks.rpc).toHaveBeenCalledWith(
     "prepare_application_resume",
+    expect.objectContaining({ p_revision: 2, p_operation: operation }),
+  );
+  const calls = mocks.rpc.mock.calls.map((call) => call[0]);
+  expect(calls.indexOf("prepare_application_resume")).toBe(0);
+});
+it("allows fresh allocation if the failed request never created an application", async () => {
+  await uploadResumeForJob(actor, job, null, file, operation, true);
+  expect(mocks.rpc).toHaveBeenCalledWith(
+    "prepare_application_resume",
     expect.objectContaining({ p_revision: null }),
   );
-});
-it("fails closed on lookup error or invalid stored revision", async () => {
-  for (const result of [
-    { data: null, error: { message: "unavailable" } },
-    { data: { revision: 0 }, error: null },
-  ]) {
-    mocks.lookup.mockResolvedValue(result);
-    await expect(
-      uploadResumeForJob(actor, job, null, file, operation, true),
-    ).rejects.toThrow();
-  }
-  expect(mocks.rpc).not.toHaveBeenCalled();
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
+    "recover_pending_application_resume",
+    expect.anything(),
+  );
 });
 it("never upgrades an explicitly supplied stale revision", async () => {
   await uploadResumeForJob(actor, job, 1, file, operation, true);
   expect(mocks.lookup).not.toHaveBeenCalled();
-  expect(mocks.rpc).toHaveBeenCalledWith("recover_pending_application_resume", {
-    p_actor: actor,
-    p_job: job,
-    p_revision: 1,
-  });
-});
-it("does not prepare after the database rejects recovery for a changed or frozen draft", async () => {
-  mocks.rpc.mockResolvedValue({ error: { message: "Application changed" } });
-  await expect(
-    uploadResumeForJob(actor, job, null, file, operation, true),
-  ).rejects.toThrow();
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
+  expect(mocks.rpc).toHaveBeenCalledWith(
     "prepare_application_resume",
+    expect.objectContaining({ p_revision: 1, p_operation: operation }),
+  );
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
+    "recover_pending_application_resume",
     expect.anything(),
   );
 });
@@ -171,9 +146,13 @@ it("does not upload again when prepare confirms the operation is already ready",
       : { data: null, error: null },
   );
 
-  await uploadResumeForJob(actor, job, 3, file, operation);
+  await uploadResumeForJob(actor, job, 2, file, operation, true);
 
   expect(mocks.upload).not.toHaveBeenCalled();
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
+    "recover_pending_application_resume",
+    expect.anything(),
+  );
   expect(mocks.rpc).not.toHaveBeenCalledWith(
     "finalize_application_resume",
     expect.anything(),

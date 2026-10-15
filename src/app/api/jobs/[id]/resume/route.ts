@@ -76,9 +76,7 @@ async function updateResume(request: Request, context: UploadContext) {
   if (intent !== "upload" && intent !== "profile")
     throw new Error("Choose an upload action.");
   const retry = request.headers.get("x-resume-retry") === "true";
-  // A profile copy may commit before its response is lost; resolve that retry's revision server-side.
-  const retryRevision = intent === "profile" && retry ? null : revision;
-  return uploadResume(request, context, retryRevision, intent, retry);
+  return uploadResume(request, context, revision, intent, retry);
 }
 
 function readRevision(request: Request) {

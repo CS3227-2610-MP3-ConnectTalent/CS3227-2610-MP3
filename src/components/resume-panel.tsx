@@ -191,7 +191,7 @@ function ProfileResumeAction({
   retryAvailable: boolean;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
 }) {
-  if (profileMode || !profileResume) return null;
+  if (profileMode || (!profileResume && !retryAvailable)) return null;
   return (
     <SecondaryActionButton
       pending={pending}

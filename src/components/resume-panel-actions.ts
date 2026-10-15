@@ -14,6 +14,8 @@ export function useResumePanelActions(props: ResumePanelProps) {
   const [uploadFailed, setUploadFailed] = useState(false);
   const [profileCopyRetryAvailable, setProfileCopyRetryAvailable] =
     useState(false);
+  const [profileCopyAttempt, setProfileCopyAttempt] =
+    useState<ProfileCopyAttempt | null>(null);
   const [attachment, setAttachment] = useState(props.resume);
   const state = {
     file,
@@ -22,21 +24,33 @@ export function useResumePanelActions(props: ResumePanelProps) {
     message,
     uploadFailed,
     profileCopyRetryAvailable,
+    profileCopyAttempt,
     attachment,
     setOperation,
     setPending,
     setMessage,
     setUploadFailed,
     setProfileCopyRetryAvailable,
+    setProfileCopyAttempt,
     setAttachment,
   };
   const change = (intent: ResumeIntent, retry = false) =>
-    performResumeChange(props, state, intent, retry, () => router.refresh());
+    performResumeChange(
+      props,
+      state,
+      intent,
+      retry,
+      intent === "profile"
+        ? resolveProfileCopyAttempt(props, state, retry)
+        : null,
+      () => router.refresh(),
+    );
   const selectFile = (next: File | null) => {
     setFile(next);
     setOperation(crypto.randomUUID());
     setUploadFailed(false);
     setProfileCopyRetryAvailable(false);
+    setProfileCopyAttempt(null);
     setMessage("");
   };
   return { ...state, selectFile, change };
@@ -49,31 +63,62 @@ type ActionState = {
   message: string;
   uploadFailed: boolean;
   profileCopyRetryAvailable: boolean;
+  profileCopyAttempt: ProfileCopyAttempt | null;
   attachment: ResumeMetadata | null;
   setOperation: (value: string) => void;
   setPending: (value: boolean) => void;
   setMessage: (value: string) => void;
   setUploadFailed: (value: boolean) => void;
   setProfileCopyRetryAvailable: (value: boolean) => void;
+  setProfileCopyAttempt: (value: ProfileCopyAttempt | null) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
 };
+
+type ProfileCopyAttempt = {
+  operation: string;
+  sourceId: string;
+  revision: number | null;
+};
+
+function resolveProfileCopyAttempt(
+  props: ResumePanelProps,
+  state: ActionState,
+  retry: boolean,
+): ProfileCopyAttempt | null {
+  if (retry) return state.profileCopyAttempt;
+  const sourceId = props.profileResume?.id;
+  return sourceId
+    ? { operation: crypto.randomUUID(), sourceId, revision: props.revision }
+    : null;
+}
 
 async function performResumeChange(
   props: ResumePanelProps,
   state: ActionState,
   intent: ResumeIntent,
   retry: boolean,
+  profileAttempt: ProfileCopyAttempt | null,
   refresh: () => void,
 ) {
-  if (!canChange(props, state.file, intent)) {
+  if (!canChange(props, state.file, intent, profileAttempt)) {
     state.setMessage("Choose a PDF résumé.");
     return;
   }
-  const operation = resolveOperation(intent, retry, state.operation);
+  if (profileAttempt) state.setProfileCopyAttempt(profileAttempt);
+  const operation =
+    profileAttempt?.operation ??
+    resolveOperation(intent, retry, state.operation);
   if (retry) state.setOperation(operation);
   startRequest(props, state);
   try {
-    await sendResumeRequest(props, state, intent, retry, operation);
+    await sendResumeRequest(
+      props,
+      state,
+      intent,
+      retry,
+      operation,
+      profileAttempt,
+    );
   } catch {
     state.setUploadFailed(intent === "upload");
     state.setProfileCopyRetryAvailable(intent === "profile");
@@ -94,10 +139,12 @@ function canChange(
   props: ResumePanelProps,
   file: File | null,
   intent: ResumeIntent,
+  profileAttempt: ProfileCopyAttempt | null,
 ) {
   return (
     !(!props.profileMode && !props.jobId && !props.applicationId) &&
-    !(intent === "upload" && !file)
+    !(intent === "upload" && !file) &&
+    !(intent === "profile" && !profileAttempt)
   );
 }
 
@@ -128,10 +175,11 @@ async function sendResumeRequest(
   intent: ResumeIntent,
   retry: boolean,
   operation: string,
+  profileAttempt: ProfileCopyAttempt | null,
 ) {
   const response = await fetch(endpoint(props), {
     method: "POST",
-    ...requestOptions(props, state, intent, retry, operation),
+    ...requestOptions(props, state, intent, retry, operation, profileAttempt),
   });
   await applyResponse(response, props, state, intent);
 }
@@ -148,11 +196,14 @@ function requestOptions(
   intent: ResumeIntent,
   retry: boolean,
   operation: string,
+  profileAttempt: ProfileCopyAttempt | null,
 ): Pick<RequestInit, "headers" | "body"> {
+  const revision = profileAttempt ? profileAttempt.revision : props.revision;
   const headers: Record<string, string> = {
     "x-resume-intent": intent,
-    "x-application-revision": String(props.revision ?? ""),
-    "x-profile-resume": profileResumeId(props, state.attachment),
+    "x-application-revision": String(revision ?? ""),
+    "x-profile-resume":
+      profileAttempt?.sourceId ?? profileResumeId(props, state.attachment),
     "x-resume-operation": operation,
     "x-resume-retry": String(retry),
     ...uploadHeaders(intent, state.file, operation, retry),
@@ -205,6 +256,12 @@ async function applyResponse(
       !response.ok &&
       result.code === "RESUME_UPLOAD_PENDING",
   );
+  if (
+    intent === "profile" &&
+    (response.ok || result.code !== "RESUME_UPLOAD_PENDING")
+  ) {
+    state.setProfileCopyAttempt(null);
+  }
   state.setMessage(
     responseMessage(response.ok, result.error, result.reference),
   );

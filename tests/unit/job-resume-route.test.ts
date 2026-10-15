@@ -209,7 +209,7 @@ it("copies the Applicant's selected profile résumé into the selected job draft
   );
 });
 
-it("resolves the current saved revision for an explicit profile-copy retry", async () => {
+it("preserves the supplied revision for an explicit profile-copy retry", async () => {
   mocks.downloadProfileResume.mockResolvedValueOnce({
     info: { filename: "profile.pdf" },
     bytes: new Blob(["synthetic profile PDF"]),
@@ -229,7 +229,7 @@ it("resolves the current saved revision for an explicit profile-copy retry", asy
   expect(mocks.uploadResumeForJob).toHaveBeenLastCalledWith(
     actor,
     jobId,
-    null,
+    2,
     expect.any(File),
     operation,
     true,
