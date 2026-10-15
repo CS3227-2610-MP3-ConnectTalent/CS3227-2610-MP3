@@ -1,6 +1,8 @@
 # Product specification
 
-Current baseline: **1.11**, dated **14 October 2026** (accepted #76 password-aware PDF validation and safe errors plus #78 public job search; #68 HR dashboard, résumé-first/profile files, required onboarding and withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+Current baseline: **1.11**, dated **15 October 2026** (accepted #81 pending-action feedback and #76 PDF validation/safe errors; #78 public job search, #68 HR dashboard, résumé-first/profile files, required onboarding and withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+
+Paul separately accepted #81 via “Accept with recorded limits” on 15 October 2026 after local checks and independent review. OVR-004 requires action-specific pending feedback and disables the submitted control while preserving validation and retry paths. The [accepted packet](archive/2026-10-14-pending-action-feedback/record.md) records the resolved review findings and hosted/accessibility limits. Spec sync and archive do not establish a commit, PR, deployment or release.
 
 Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026. APP-007 accepts structurally valid PDFs that open without a password, rejects password-required documents, and distinguishes safe file errors from validation service failures/timeouts. APP-006 inherits the same file rules. The [accepted packet](archive/2026-10-13-resume-error-messages/record.md) preserves tests, independent review and hosted/Linux verification limits. No deployment or release is implied.
 

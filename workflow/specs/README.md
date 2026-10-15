@@ -2,7 +2,11 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 14 October 2026**. This integrated baseline preserves the separately accepted #76 PDF validation/error behavior (APP-007, inherited by APP-006) and #78 public job search (JOB-004). The archived packets preserve their separate approval sources, reviews and limits. Earlier change traces preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 15 October 2026**. The integrated baseline preserves accepted #81 pending-action feedback (OVR-004), #76 PDF validation/safe errors (APP-007, inherited by APP-006), and #78 public job search (JOB-004). The [#81 packet](../archive/2026-10-14-pending-action-feedback/record.md) and [#76 packet](../archive/2026-10-13-resume-error-messages/record.md) retain their separate approval sources, reviews and limits; the [#78 packet](../archive/2026-10-14-job-listing-search/record.md) records its acceptance and review. Earlier change traces below preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.11 accepted pending-action feedback
+
+Paul accepted #81 with recorded limits on 15 October 2026 after local checks and separate read-only review. OVR-004 requires prompt action-specific pending feedback and unavailable repeat activation for server-backed submit controls while retaining validation and retry behavior. The [complete archived packet](../archive/2026-10-14-pending-action-feedback/record.md) records two fixed reviewer findings, meaningful browser and unit checks, and hosted/accessibility limits. Canonical sync preceded archive; no commit, PR or hosted release follows from acceptance.
 
 ## v1.11 accepted PDF validation and safe errors (#76)
 

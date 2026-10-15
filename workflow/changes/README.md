@@ -8,6 +8,8 @@ Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-Co
 
 ## Accepted and archived work
 
+Issue [#81 pending action feedback](../archive/2026-10-14-pending-action-feedback/record.md) was separately accepted by Paul with recorded limits on 15 October 2026. OVR-004 synced to canonical v1.11 before complete packet archive; [independent review](../archive/2026-10-14-pending-action-feedback/handoffs/independent-review.md) found two evidence gaps that were fixed and rechecked. Local checks passed; hosted latency and full accessibility checks remain pending. No commit, push or PR is authorized by acceptance.
+
 Issue [#78 public job search](../archive/2026-10-14-job-listing-search/record.md) was separately accepted by Paul with recorded limits on 14 October 2026. JOB-004 synced to canonical v1.10 before the complete packet archive; [independent review](../archive/2026-10-14-job-listing-search/handoffs/independent-review.md) found a request-tracking issue that was repaired and rechecked. Local checks passed; hosted/accessibility validation and repository PR review remain pending.
 
 Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76) was separately accepted by Paul with recorded limits on 14 October 2026. APP-007 synced to v1.10 before the [original packet](../archive/2026-10-13-resume-error-messages/record.md) was archived. Its upload-reliability follow-up remains active above while PR #77 is under review; hosted upload verification is not claimed.

@@ -225,8 +225,35 @@ async function checkSafeSummaryRendering(page: Page) {
 
 async function addPrivateNoteAndChangeStatus(page: Page) {
   await page.getByLabel("Add a note").fill("Private synthetic HR note");
-  await page.getByRole("button", { name: "Add note" }).click();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let noteRequests = 0;
+  const routePattern = "**/hr/applications/**";
+  await page.route(routePattern, async (route) => {
+    if (route.request().method() === "POST") {
+      noteRequests += 1;
+      await gate;
+    }
+    await route.continue();
+  });
+  try {
+    await page.getByRole("button", { name: "Add note" }).click({
+      noWaitAfter: true,
+    });
+    const adding = page.getByRole("button", { name: "Adding note…" });
+    await expect(adding).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Update status" }),
+    ).toBeEnabled();
+    await adding.evaluate((button) => (button as HTMLButtonElement).click());
+    expect(noteRequests).toBe(1);
+  } finally {
+    release();
+  }
   await expect(page.getByText("Private synthetic HR note")).toBeVisible();
+  await page.unroute(routePattern);
   await page.getByLabel("New status").selectOption("in_review");
   await page.getByRole("button", { name: "Update status" }).click();
   await expect(page.getByText("Review status: In review")).toBeVisible();

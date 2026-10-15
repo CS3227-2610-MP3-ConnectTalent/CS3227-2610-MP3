@@ -44,6 +44,8 @@ Choose **Save profile** to unlock Careers and applications. Uploading a file doe
 
 Both roles use **Sign in**. Use **Sign out** in the header when finished; if an error appears, retry rather than assuming the session ended.
 
+Server-backed sign-in, account and HR form actions show an action-specific loading label and disable that form's submit button while its request is pending. If validation or an action error appears, correct it and retry. Loading feedback does not mean the action succeeded; wait for the resulting page or message.
+
 For recovery, choose **Forgot password?**, enter email, open the recovery message in the requesting browser, enter matching new passwords of 8–72 characters, then sign in again. The request acknowledgement is the same for registered and unregistered addresses. Invalid/expired links require another request. Recovery preserves your role; local messages appear in Mailpit.
 
 ## 2. Interface overview
