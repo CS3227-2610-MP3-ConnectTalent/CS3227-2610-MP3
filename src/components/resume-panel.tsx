@@ -26,9 +26,10 @@ export function ResumePanel(props: ResumePanelProps) {
         activeIntent={state.activeIntent}
         activeRetry={state.activeRetry}
         attachment={state.attachment}
-        uploadFailed={state.uploadFailed}
+        profileCopyRetryAvailable={state.profileCopyRetryAvailable}
         onSelect={state.selectFile}
         onChange={state.change}
+        onDelete={state.deleteResume}
       />
       <ResumeFeedback
         message={state.message}
@@ -68,9 +69,10 @@ function ResumeEditor({
   activeIntent,
   activeRetry,
   attachment,
-  uploadFailed,
+  profileCopyRetryAvailable,
   onSelect,
   onChange,
+  onDelete,
 }: {
   props: ResumePanelProps;
   file: File | null;
@@ -78,9 +80,10 @@ function ResumeEditor({
   activeIntent: ResumeIntent | null;
   activeRetry: boolean;
   attachment: ResumeMetadata | null;
-  uploadFailed: boolean;
+  profileCopyRetryAvailable: boolean;
   onSelect: (file: File | null) => void;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
+  onDelete: () => Promise<void>;
 }) {
   if (!props.editable) return null;
   return (
@@ -95,8 +98,9 @@ function ResumeEditor({
         attachment={attachment}
         profileResume={props.profileResume ?? null}
         profileMode={props.profileMode ?? false}
-        uploadFailed={uploadFailed}
+        profileCopyRetryAvailable={profileCopyRetryAvailable}
         onChange={onChange}
+        onDelete={onDelete}
       />
     </div>
   );
@@ -141,8 +145,9 @@ type ResumeActionButtonsProps = {
   attachment: ResumeMetadata | null;
   profileResume: ResumeMetadata | null;
   profileMode: boolean;
-  uploadFailed: boolean;
+  profileCopyRetryAvailable: boolean;
   onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
+  onDelete: () => Promise<void>;
 };
 
 function ResumeActionButtons({
@@ -153,51 +158,78 @@ function ResumeActionButtons({
   attachment,
   profileResume,
   profileMode,
-  uploadFailed,
+  profileCopyRetryAvailable,
   onChange,
+  onDelete,
 }: ResumeActionButtonsProps) {
   return (
     <div className="flex flex-wrap gap-3">
       <UploadButton
         pending={pending}
-        active={activeIntent === "upload" && !activeRetry}
+        active={activeIntent === "upload"}
+        activeRetry={activeRetry}
         hasFile={Boolean(file)}
         hasAttachment={Boolean(attachment)}
         onClick={() => void onChange("upload")}
       />
       {attachment && (
-        <RemoveButton
+        <SecondaryActionButton
           pending={pending}
+          label="Delete résumé"
+          activeLabel="Deleting résumé…"
           active={activeIntent === "remove"}
-          onClick={() => void onChange("remove")}
+          onClick={() => void onDelete()}
         />
       )}
-      {!profileMode && profileResume && (
-        <UseProfileButton
-          pending={pending}
-          active={activeIntent === "profile"}
-          onClick={() => void onChange("profile")}
-        />
-      )}
-      {(uploadFailed || activeRetry) && file && (
-        <RetryButton
-          pending={pending}
-          active={activeRetry}
-          onClick={() => void onChange("upload", true)}
-        />
-      )}
+      <ProfileResumeAction
+        pending={pending}
+        active={activeIntent === "profile"}
+        profileMode={profileMode}
+        profileResume={profileResume}
+        retryAvailable={profileCopyRetryAvailable}
+        onChange={onChange}
+      />
     </div>
+  );
+}
+
+function ProfileResumeAction({
+  pending,
+  active,
+  profileMode,
+  profileResume,
+  retryAvailable,
+  onChange,
+}: {
+  pending: boolean;
+  active: boolean;
+  profileMode: boolean;
+  profileResume: ResumeMetadata | null;
+  retryAvailable: boolean;
+  onChange: (intent: ResumeIntent, retry?: boolean) => Promise<void>;
+}) {
+  if (profileMode || (!profileResume && !retryAvailable)) return null;
+  return (
+    <SecondaryActionButton
+      pending={pending}
+      label={retryAvailable ? "Retry profile copy" : "Use profile résumé"}
+      active={active}
+      activeLabel="Using profile résumé…"
+      onClick={() => void onChange("profile", retryAvailable)}
+    />
   );
 }
 function UploadButton({
   pending,
   active,
+  activeRetry,
   hasFile,
   hasAttachment,
   onClick,
 }: {
   pending: boolean;
   active: boolean;
+  activeRetry: boolean;
   hasFile: boolean;
   hasAttachment: boolean;
   onClick: () => void;
@@ -210,65 +242,27 @@ function UploadButton({
       className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
     >
       {active
-        ? hasAttachment
-          ? "Replacing résumé…"
-          : "Uploading résumé…"
-        : hasAttachment
-          ? "Replace résumé"
-          : "Upload résumé"}
+        ? activeRetry
+          ? "Retrying upload…"
+          : hasAttachment
+            ? "Replacing résumé…"
+            : "Uploading résumé…"
+        : "Upload résumé"}
     </button>
   );
 }
 
-function RemoveButton({
+function SecondaryActionButton({
   pending,
-  active,
+  active = false,
+  label,
+  activeLabel,
   onClick,
 }: {
   pending: boolean;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={onClick}
-      className="rounded-lg border px-4 py-2"
-    >
-      {active ? "Removing résumé…" : "Remove résumé"}
-    </button>
-  );
-}
-
-function UseProfileButton({
-  pending,
-  active,
-  onClick,
-}: {
-  pending: boolean;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={onClick}
-      className="rounded-lg border px-4 py-2"
-    >
-      {active ? "Using profile résumé…" : "Use profile résumé"}
-    </button>
-  );
-}
-
-function RetryButton({
-  pending,
-  active,
-  onClick,
-}: {
-  pending: boolean;
-  active: boolean;
+  active?: boolean;
+  label: string;
+  activeLabel?: string;
   onClick: () => void;
 }) {
   return (
@@ -278,7 +272,7 @@ function RetryButton({
       onClick={onClick}
       className="rounded-lg border px-4 py-2 disabled:opacity-50"
     >
-      {active ? "Retrying upload…" : "Retry upload"}
+      {active && activeLabel ? activeLabel : label}
     </button>
   );
 }

@@ -1,11 +1,29 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { currentApplicant } from "./auth";
 import {
   resumeMutationClient,
   type ResumeMetadata,
 } from "./application-resumes";
-import { validateResume } from "./resume-input";
+import {
+  ResumeUploadPreparationError,
+  ResumeValidationError,
+  resumePreparationCode,
+} from "./resume-errors";
+import {
+  isMissingProfileObject,
+  profileStateLookupFailure,
+  profileStorageDownloadFailure,
+} from "./profile-resume-errors";
+import { validateResume, type ResumeInput } from "./resume-input";
+import {
+  isCurrentProfileResumeOperation,
+  prepareCompletedProfileRetry,
+  prepareProfileWithPendingRecovery,
+} from "./profile-resume-retry-state";
+
+export { isCurrentProfileResumeOperation } from "./profile-resume-retry-state";
 const bucket = "profile-resumes";
 const metadata = z.object({
   id: z.uuid(),
@@ -22,19 +40,31 @@ export async function getProfileResume(): Promise<ResumeMetadata | null> {
     .eq("applicant_id", account.user.id)
     .eq("state", "ready")
     .maybeSingle();
-  if (error) throw new Error("Résumé information is temporarily unavailable.");
-  return data ? metadata.parse(data) : null;
+  if (error) throw profileStateLookupFailure("profile_metadata_lookup");
+  if (!data) return null;
+  const parsed = metadata.safeParse(data);
+  if (!parsed.success)
+    throw profileStateLookupFailure("profile_metadata_invalid");
+  return parsed.data;
 }
 export async function downloadProfileResume(expectedId?: string) {
   const account = await currentApplicant();
   if (!account) return null;
   const info = await getProfileResume();
   if (!info || (expectedId && info.id !== expectedId)) return null;
-  const { data, error } = await account.client.storage
-    .from(bucket)
-    .download(info.object_path);
-  return error || !data ? null : { info, bytes: data };
+  try {
+    const { data, error } = await account.client.storage
+      .from(bucket)
+      .download(info.object_path);
+    if (isMissingProfileObject(error)) return null;
+    if (error) throw profileStorageDownloadFailure();
+    return data ? { info, bytes: data } : null;
+  } catch (error) {
+    if (error instanceof ResumeUploadPreparationError) throw error;
+    throw profileStorageDownloadFailure();
+  }
 }
+
 async function cleanup(actor: string) {
   const client = resumeMutationClient();
   const { data, error } = await client.rpc("claim_profile_resume_cleanup", {
@@ -62,24 +92,39 @@ export async function retireProfileResume(
   if (error) throw new Error("Reload your profile before changing the résumé.");
   await cleanup(actor);
 }
+
 export async function uploadProfileResume(
   actor: string,
   file: File,
-  operation: string,
+  rawOperation: string,
   expected: string | null,
   retry = false,
 ) {
-  const valid = await validateResume(file);
+  const operation = rawOperation.toLowerCase();
   const client = resumeMutationClient();
-  if (retry) await retireProfileResume(actor, expected, true);
-  const path = await reserveProfileResume(
+  let retryState: { input: ResumeInput; isReady: boolean } | null = null;
+  if (retry || (await isCurrentProfileResumeOperation(actor, operation))) {
+    retryState = await prepareCompletedProfileRetry(
+      client,
+      actor,
+      operation,
+      expected,
+      file,
+      reserveProfileResume,
+    );
+    if (retryState.isReady) return;
+  }
+  const valid = await validateResume(file, retryState?.input);
+  const path = await prepareProfileWithPendingRecovery(
     client,
     actor,
     operation,
     expected,
     valid,
+    retry,
+    reserveProfileResume,
+    retireProfileResume,
   );
-  if (await isReadyProfileUpload(client, operation)) return;
   await uploadAndFinalizeProfileResume(client, actor, operation, path, valid);
   await cleanup(actor);
 }
@@ -89,33 +134,49 @@ async function reserveProfileResume(
   actor: string,
   operation: string,
   expected: string | null,
-  valid: Awaited<ReturnType<typeof validateResume>>,
+  valid: { filename: string; bytes: Uint8Array; sha256: string },
 ) {
-  const { data: path, error } = await client.rpc("reserve_profile_resume", {
-    p_actor: actor,
-    p_operation: operation,
-    p_filename: valid.filename,
-    p_size: valid.bytes.length,
-    p_sha256: valid.sha256,
-    p_expected: expected,
-  });
-  if (error || typeof path !== "string")
-    throw new Error(
-      "Reload your profile or use Retry upload if an earlier upload was interrupted.",
-    );
+  let result: Awaited<
+    ReturnType<ReturnType<typeof resumeMutationClient>["rpc"]>
+  >;
+  try {
+    result = await client.rpc("reserve_profile_resume", {
+      p_actor: actor,
+      p_operation: operation,
+      p_filename: valid.filename,
+      p_size: valid.bytes.length,
+      p_sha256: valid.sha256,
+      p_expected: expected,
+    });
+  } catch (error) {
+    throw profileReservationFailure(error);
+  }
+  const { data: path, error } = result;
+  if (error) throw profileReservationFailure(error);
+  if (typeof path !== "string")
+    throw profileStateLookupFailure("profile_reservation_invalid_response");
   return path;
 }
 
-async function isReadyProfileUpload(
-  client: ReturnType<typeof resumeMutationClient>,
-  operation: string,
-) {
-  const { data: existing } = await client
-    .from("profile_resume_objects")
-    .select("state")
-    .eq("id", operation)
-    .maybeSingle();
-  return existing?.state === "ready";
+function profileReservationFailure(error: unknown) {
+  const code = resumePreparationCode(error);
+  const reference = randomUUID();
+  if (code === "RESUME_UPLOAD_PREPARATION_FAILED") {
+    const details =
+      typeof error === "object" && error !== null
+        ? (error as Record<string, unknown>)
+        : null;
+    const sqlState =
+      typeof details?.code === "string" && /^[0-9A-Z]{5}$/.test(details.code)
+        ? details.code
+        : undefined;
+    console.error("resume_upload_preparation_failed", {
+      reference,
+      stage: "profile_reservation",
+      ...(sqlState ? { sqlState } : {}),
+    });
+  }
+  return new ResumeUploadPreparationError(code, reference);
 }
 
 async function uploadAndFinalizeProfileResume(
@@ -128,11 +189,32 @@ async function uploadAndFinalizeProfileResume(
   try {
     await storeOrVerifyProfileUpload(client, path, valid);
     await finalizeProfileUpload(client, actor, operation);
-  } catch {
-    await cancelProfileUpload(client, actor, operation);
-    await cleanup(actor);
-    throw new Error(
-      "We could not confirm the upload. Reload to check your saved résumé.",
+  } catch (error) {
+    try {
+      await cancelProfileUpload(client, actor, operation);
+    } catch {
+      // Cancellation is best effort; retain the original failure for the route.
+    }
+    try {
+      await cleanup(actor);
+    } catch {
+      // Cleanup is best effort; retain the original failure for the route.
+    }
+    if (error instanceof ResumeValidationError) throw error;
+    if (resumePreparationCode(error) === "RESUME_PROFILE_CHANGED") {
+      throw new ResumeUploadPreparationError(
+        "RESUME_PROFILE_CHANGED",
+        randomUUID(),
+      );
+    }
+    const reference = randomUUID();
+    console.error("resume_upload_persistence_failed", {
+      reference,
+      stage: "profile_storage_or_finalize",
+    });
+    throw new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PERSISTENCE_FAILED",
+      reference,
     );
   }
 }
@@ -172,7 +254,7 @@ async function finalizeProfileUpload(
   const args = { p_actor: actor, p_operation: operation };
   let { error } = await client.rpc("finalize_profile_resume", args);
   if (error) ({ error } = await client.rpc("finalize_profile_resume", args));
-  if (error) throw new Error("Finalize failed");
+  if (error) throw error;
 }
 
 async function cancelProfileUpload(

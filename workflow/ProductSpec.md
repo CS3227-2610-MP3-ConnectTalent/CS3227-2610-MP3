@@ -1,6 +1,6 @@
 # Product specification
 
-Current integrated branch baseline: **1.14**, dated **15 October 2026**. Merged PRs #82 and #85 established OVR-004, JOB-004 and OVR-005; this PR #86 branch adds separately accepted OVR-006. Earlier public search, HR dashboard, résumé, onboarding and withdrawal requirements remain. The #81, #83 and #84 packets preserve their independent approval and acceptance histories. This branch baseline does not establish PR #86 merge, hosted validation or release.
+Current integrated branch baseline: **1.14**, dated **15 October 2026**. Merged PRs #82, #85 and #86 establish OVR-004, JOB-004/OVR-005 and OVR-006. Accepted #76 PDF validation/safe errors, #78 public job search, HR dashboard, résumé/profile, onboarding and withdrawal requirements remain. The #81, #83 and #84 packets preserve their independent approval and acceptance histories. PR #77 carries the accepted #76 implementation and upload-reliability follow-up; this branch does not establish PR #77 merge, hosted upload success or release.
 
 Paul separately accepted #84 with recorded verification limits on 15 October 2026 after independent review and a repaired Retry-pending finding. [The complete #84 packet](archive/2026-10-15-remaining-action-feedback/record.md) preserves local coverage and browser evidence.
 
@@ -9,6 +9,8 @@ Paul separately accepted #81 via “Accept with recorded limits” on 15 October
 Paul separately accepted #83 with its recorded browser-held total-network-failure limit on 15 October 2026 after independent re-review. [The #83 packet](archive/2026-10-15-navigation-loading/record.md) records local tests and the unverified hosted/accessibility checks. PR #85 subsequently merged to `develop`; acceptance alone did not establish that merge or release.
 
 Paul separately accepted the #83 View role follow-up with recorded hosted/accessibility limits on 15 October 2026 after independent review. OVR-005 now includes View role; JOB-004 keeps the pending/results announcement while its duplicate visible line is removed. [The follow-up packet](archive/2026-10-15-view-role-loading/record.md) records the test-first check, independent review and acceptance. PR #85 subsequently merged to `develop`; acceptance alone did not establish that merge or release.
+
+Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026. APP-007 accepts structurally valid PDFs that open without a password, rejects password-required documents, and distinguishes safe file errors from validation service failures/timeouts. APP-006 inherits the same file rules. The [accepted packet](archive/2026-10-13-resume-error-messages/record.md) preserves tests, independent review and hosted/Linux verification limits. No deployment or release is implied.
 
 Paul separately accepted #78 on 14 October 2026 with recorded hosted and accessibility limits after independent review. JOB-004 adds literal public job text search with combined category filtering, URL restoration, debouncing and safe invalid-query feedback. The [accepted packet](archive/2026-10-14-job-listing-search/record.md) records checks, the fixed review finding and pending hosted validation. Canonical sync and archive do not establish PR merge or deployment.
 

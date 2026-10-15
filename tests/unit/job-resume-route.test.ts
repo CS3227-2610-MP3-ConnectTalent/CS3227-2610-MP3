@@ -30,6 +30,10 @@ vi.mock("@/lib/resume-request", () => ({
 }));
 
 import { POST } from "@/app/api/jobs/[id]/resume/route";
+import {
+  ResumeUploadPreparationError,
+  resumeUploadPreparationFailure,
+} from "@/lib/resume-errors";
 
 const actor = "44000000-0000-4000-8000-000000000101";
 const jobId = "44000000-0000-4000-8000-000000000102";
@@ -70,9 +74,24 @@ beforeEach(() => {
   mocks.uploadResumeForJob.mockResolvedValue(undefined);
   mocks.downloadProfileResume.mockResolvedValue(null);
   mocks.readResumeFile.mockResolvedValue(new File(["synthetic"], "upload.pdf"));
-  mocks.resumeFailure.mockImplementation((error: unknown) => ({
-    error: error instanceof Error ? error.message : "safe error",
-  }));
+  mocks.resumeFailure.mockImplementation((error: unknown) => {
+    const preparation = resumeUploadPreparationFailure(error);
+    return preparation
+      ? {
+          error: preparation.error,
+          code: preparation.code,
+          reference: preparation.reference,
+        }
+      : {
+          error:
+            error instanceof Error &&
+            /^(Choose|Reload|Save the latest|We could not|Résumé)/.test(
+              error.message,
+            )
+              ? error.message
+              : "The résumé change could not be saved. Reload and try again.",
+        };
+  });
 });
 
 it("rejects cross-origin, unauthenticated, and malformed job identifiers", async () => {
@@ -172,6 +191,27 @@ it("rejects a profile résumé that is no longer available", async () => {
   expect(mocks.uploadResumeForJob).not.toHaveBeenCalled();
 });
 
+it("returns a safe server error when the selected profile résumé cannot be downloaded", async () => {
+  const reference = "44000000-0000-4000-8000-000000000106";
+  mocks.downloadProfileResume.mockRejectedValueOnce(
+    new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PERSISTENCE_FAILED",
+      reference,
+    ),
+  );
+
+  const failed = await POST(useProfileResume(), context());
+
+  expect(failed.status).toBe(503);
+  await expect(failed.json()).resolves.toMatchObject({
+    code: "RESUME_UPLOAD_PERSISTENCE_FAILED",
+    reference,
+    error:
+      "We could not save this résumé. Try again later and share the reference code if the problem continues.",
+  });
+  expect(mocks.uploadResumeForJob).not.toHaveBeenCalled();
+});
+
 it("copies the Applicant's selected profile résumé into the selected job draft", async () => {
   mocks.downloadProfileResume.mockResolvedValueOnce({
     info: { filename: "profile.pdf" },
@@ -223,6 +263,31 @@ it("keeps storage and database details out of failed upload responses", async ()
   );
   expect(response.status).toBe(400);
   await expect(response.json()).resolves.toEqual({
-    error: "synthetic storage detail",
+    error: "The résumé change could not be saved. Reload and try again.",
+  });
+});
+
+it("returns the safe preparation code and reference to the Applicant client", async () => {
+  const reference = "84000000-0000-4000-8000-000000000101";
+  mocks.uploadResumeForJob.mockRejectedValueOnce(
+    new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PREPARATION_FAILED",
+      reference,
+    ),
+  );
+  const response = await POST(
+    post({
+      "x-resume-intent": "upload",
+      "x-resume-operation": operation,
+    }),
+    context(),
+  );
+
+  expect(response.status).toBe(503);
+  await expect(response.json()).resolves.toMatchObject({
+    code: "RESUME_UPLOAD_PREPARATION_FAILED",
+    error:
+      "We could not prepare this résumé upload. Try again later and share the reference code if the problem continues.",
+    reference,
   });
 });

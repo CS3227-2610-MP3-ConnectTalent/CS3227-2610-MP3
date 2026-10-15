@@ -6,8 +6,11 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
-- [2026-10-15 remaining action feedback](2026-10-15-remaining-action-feedback/record.md): Paul separately accepted #84 with recorded limits after independent review and a repaired Retry-pending P2. OVR-006 synced to this branch's canonical v1.11 before complete archive. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md). OVR-004/005/006 are reconciled in branch canonical v1.14; PR #86 merge and hosted/accessibility checks remain pending.
+- [2026-10-15 remaining action feedback](2026-10-15-remaining-action-feedback/record.md): Paul separately accepted #84 with recorded limits after independent review and a repaired Retry-pending P2. OVR-006 synced to that branch's canonical v1.11 before complete archive. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md). OVR-004/005/006 are reconciled in canonical v1.14; PR #86 merged to `develop`, while hosted latency and full accessibility checks remain pending.
+
 - [2026-10-15 PR #85 Search-action review repair](2026-10-15-pr85-search-action-review/record.md): Paul accepted the reviewed #83 correction after its local checks and separately requested commit/push. Existing JOB-004 already states the requirement, so canonical delta is N/A. [Dated summary](../../logs/2026-10-15-pr85-search-review-followup.md). Hosted latency/full accessibility checks remain pending; PR #85 merged to `develop`.
+
+- [2026-10-13 résumé validation and errors](2026-10-13-resume-error-messages/record.md): #76 accepted by Paul with recorded limits on 14 October. APP-007 synced to v1.10 before archive; independent review findings resolved. PR #77 contains the accepted implementation and upload-reliability follow-up; the hosted upload smoke remains unverified. Current review-fix and CI evidence is recorded in the active diagnostics packet and PR #77.
 
 - [2026-10-15 View role loading follow-up](2026-10-15-view-role-loading/record.md): Paul separately accepted #83 with recorded hosted/accessibility limits. OVR-005 and branch canonical v1.12 were synced before the complete packet was archived. [Independent review](2026-10-15-view-role-loading/handoffs/independent-review.md) found no blocking issue after a formatting repair; [session summary](../../logs/2026-10-15-view-role-loading-followup.md). PR #85 subsequently merged to `develop`.
 

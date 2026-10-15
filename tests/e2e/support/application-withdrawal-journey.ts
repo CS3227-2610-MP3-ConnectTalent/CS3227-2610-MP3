@@ -102,10 +102,10 @@ async function requestReplacement(page: Page, fixture: WithdrawalFixture) {
     .fill("Synthetic unsaved letter retained during upload");
   await choosePdf(page, "replacement.pdf", fixture.pdf);
   await page
-    .getByRole("button", { name: "Replace résumé", exact: true })
+    .getByRole("button", { name: "Upload résumé", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Retry upload", exact: true }),
+    page.getByRole("button", { name: "Upload résumé", exact: true }),
   ).toBeVisible();
 }
 
@@ -124,14 +124,14 @@ async function retryReplacement(page: Page) {
   });
   try {
     await page
-      .getByRole("button", { name: "Retry upload", exact: true })
+      .getByRole("button", { name: "Upload résumé", exact: true })
       .click();
     await expect(
-      page.getByRole("button", { name: "Retrying upload…" }),
+      page.getByRole("button", { name: "Retrying upload…", exact: true }),
     ).toBeDisabled();
     await expect(
       page.getByRole("button", { name: "Replace résumé" }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
   } finally {
     release();
   }
