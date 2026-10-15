@@ -2,11 +2,15 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.13, 15 October 2026** on this integration branch. Merged PR #82 brought accepted #81 OVR-004; the accepted [#83 packet](../archive/2026-10-15-navigation-loading/record.md) amends JOB-004 and adds OVR-005, and its separately accepted [View role follow-up](../archive/2026-10-15-view-role-loading/record.md) extends OVR-005 while keeping the result announcement for assistive technology. The independent #81 and #83 baselines both used v1.11 before reconciliation; their combined accepted behavior and the follow-up advance this branch to v1.13. Earlier accepted #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This sync does not certify PR #85 merge, hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.14, 15 October 2026** on this PR #86 branch. Merged PR #82 brought OVR-004; merged PR #85 brought JOB-004/OVR-005; separately accepted #84 adds OVR-006. The separate accepted packets preserve their approval, review and verification limits. This sync does not certify PR #86 merge, hosted deployment or release.
+
+## v1.14 integrated pending feedback
+
+OVR-004 from merged PR #82, JOB-004/OVR-005 from merged PR #85 and OVR-006 from #84 coexist in this branch. PR #86 and hosted latency/full accessibility checks remain pending.
 
 ## v1.13 integrated pending feedback
 
-OVR-004 from merged PR #82 and JOB-004/OVR-005 from open PR #85 coexist in this branch's canonical files. The original [#83 packet](../archive/2026-10-15-navigation-loading/record.md), its [View role follow-up](../archive/2026-10-15-view-role-loading/record.md), and the [#81 packet](../archive/2026-10-14-pending-action-feedback/record.md) preserve their separate approval, review and acceptance histories. Hosted latency and full accessibility checks remain pending.
+The earlier integrated baseline reconciled OVR-004 from [#81](../archive/2026-10-14-pending-action-feedback/record.md) with JOB-004/OVR-005 from [#83](../archive/2026-10-15-navigation-loading/record.md) and its separately accepted [View role follow-up](../archive/2026-10-15-view-role-loading/record.md). Those packets preserve separate approval, review and acceptance evidence. PR #85 subsequently merged to `develop`; hosted latency and full accessibility checks remain pending.
 
 ## v1.11 accepted pending-action feedback
 

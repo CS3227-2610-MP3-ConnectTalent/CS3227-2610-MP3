@@ -1,6 +1,6 @@
 # Product overview
 
-Baseline: ProductSpec v1.13, 15 October 2026; integrated #81 pending-action feedback and #83 Search, navigation and View role feedback. Earlier accepted private profiles and optional PDF résumés remain in scope.
+Baseline: ProductSpec v1.14, 15 October 2026; accepted #81, #83 and #84 pending feedback coexist with earlier requirements, including private profiles and optional PDF résumés.
 
 ## OVR-001: One employer per deployment
 
@@ -38,6 +38,12 @@ A visible **View role**, **Apply for this role** or named return-to-Careers link
 Scenario: Given a published job and an eligible Applicant, when **Apply for this role** waits for its route, then its link shows “Opening application…” until navigation completes. A cancelled client navigation or application-handled error clears the hint. A browser-held total network failure remains the accepted in-page-clearing limit.
 
 Scenario: Given a published job card, when a visitor activates **View role** and the detail route waits, then that card shows “Opening role…” until navigation completes. A fast or already-prefetched route may have no perceivable pending interval.
+
+## OVR-006: Pending feedback for remaining request actions
+
+Application Save draft and Submit application, résumé upload/replace/remove/profile-copy/retry, and error-page route retry MUST show action-specific pending feedback when their request or transition waits. The active request action MUST not be available for repeat activation while pending; conflicting file actions MUST remain unavailable until settlement. On an application-handled failure, the controls MUST return to a usable state with truthful error/retry feedback. Pending UI MUST preserve native form validity, keyboard behavior, typed Applicant content, attachment lifecycle and server-side authorization. Immediate local-only controls do not require artificial loading indicators. A visual state does not replace backend idempotency, RLS or role checks.
+
+Scenario: Given a slow application draft save, when **Save draft** is activated, then that button says “Saving draft…” while Submit is unavailable. Given a slow résumé operation, its active button names the operation and competing file controls stay unavailable until resolution. Invalid form input or a rejected file retains native/server validation and existing safe errors without revealing a private file.
 
 ## Unresolved ownership and implementation evidence
 
