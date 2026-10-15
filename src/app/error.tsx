@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTransition } from "react";
 
 export default function ErrorPage({
   reset,
@@ -8,6 +9,7 @@ export default function ErrorPage({
   error: Error;
   reset: () => void;
 }) {
+  const [pending, startTransition] = useTransition();
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-16">
       <h1 className="text-3xl font-semibold">Jobs are unavailable right now</h1>
@@ -15,10 +17,12 @@ export default function ErrorPage({
       <div className="mt-6 flex gap-5">
         <button
           type="button"
-          onClick={reset}
+          disabled={pending}
+          aria-busy={pending}
+          onClick={() => startTransition(() => reset())}
           className="font-medium underline underline-offset-4"
         >
-          Try again
+          {pending ? "Retrying…" : "Try again"}
         </button>
         <Link href="/" className="font-medium underline underline-offset-4">
           Open roles

@@ -6,6 +6,8 @@ Issue [#70 collection pagination](https://github.com/CS3227-2610-MP3-ConnectTale
 
 ## Accepted and archived work
 
+Issue [#84 remaining action feedback](../archive/2026-10-15-remaining-action-feedback/record.md) was separately accepted by Paul with recorded limits on 15 October 2026 after independent review. OVR-006 synced to this branch's canonical v1.11 before complete archive; open #81/#83 proposals require integration reconciliation. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md).
+
 Issue [#78 public job search](../archive/2026-10-14-job-listing-search/record.md) was separately accepted by Paul with recorded limits on 14 October 2026. JOB-004 synced to canonical v1.10 before the complete packet archive; [independent review](../archive/2026-10-14-job-listing-search/handoffs/independent-review.md) found a request-tracking issue that was repaired and rechecked. Local checks passed; hosted/accessibility validation and repository PR review remain pending.
 
 Issue [#74 return navigation and cursors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/74) was separately accepted by Paul with recorded limits on 13 October 2026. The [complete packet](../archive/2026-10-13-navigation-cursors/record.md) preserves independent review and local checks. Canonical delta N/A; publication and hosted/accessibility verification remain pending.

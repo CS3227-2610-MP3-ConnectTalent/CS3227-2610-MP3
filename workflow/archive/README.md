@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-15 remaining action feedback](2026-10-15-remaining-action-feedback/record.md): Paul separately accepted #84 with recorded limits after independent review and a repaired Retry-pending P2. OVR-006 synced to this branch's canonical v1.11 before complete archive. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md). Open #81/#83 v1.11 branches require integration reconciliation; hosted/accessibility checks and Git publication remain pending.
+
 - [2026-10-14 public job search](2026-10-14-job-listing-search/record.md): Paul separately accepted #78 with recorded limits; JOB-004 synced to canonical v1.10 before archive. [Independent review](2026-10-14-job-listing-search/handoffs/independent-review.md) found a P2 that was fixed and rechecked. [Intake](../../logs/2026-10-14-job-search-intake.md) and [implementation](../../logs/2026-10-14-job-search-implementation.md) summaries. Hosted/accessibility checks and release remain pending.
 
 - [2026-10-13 return navigation and cursors](2026-10-13-navigation-cursors/record.md): Paul separately accepted #74 with recorded limits. ACC-005/006 preserved; canonical delta N/A. Complete packet archived; hosted/accessibility and Git publication pending. [Independent review](2026-10-13-navigation-cursors/independent-review.md), [session summary](../../logs/2026-10-13-navigation-cursors.md).

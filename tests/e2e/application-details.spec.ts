@@ -144,13 +144,36 @@ async function generateApplicantDraft(page: Page, jobId: string) {
 }
 
 async function saveValidatedDraft(page: Page) {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/jobs/**/apply", async (route) => {
+    if (
+      route.request().method() === "POST" &&
+      route.request().headers()["next-action"]
+    )
+      await gate;
+    await route.continue();
+  });
   const savedResponse = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
       Boolean(response.request().headers()["next-action"]),
   );
-  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  try {
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Saving draft…" }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Submit application" }),
+    ).toBeDisabled();
+  } finally {
+    release();
+  }
   expect(await (await savedResponse).finished()).toBeNull();
+  await page.unroute("**/jobs/**/apply");
   await expect(
     page.getByRole("button", { name: "Save draft", exact: true }),
   ).toBeEnabled();

@@ -77,6 +77,7 @@ New forms prefill saved profile details without AI. Existing drafts take precede
 - Draft editing/submission requires a published job. Closure stops those writes; history remains readable.
 - There is at most **one application per Applicant per job**, including after withdrawal.
 - Validation feedback retains typed values. Saving or generating text does not submit.
+- During a slow request, Save draft and Submit application identify the active operation and disable another submission. Résumé Upload, Replace, Remove, Use profile and Retry controls likewise show the active operation and prevent conflicting file actions until it finishes.
 
 ### 3.3 Optional AI drafting
 
