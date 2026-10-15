@@ -7,7 +7,6 @@ import {
   type ResumeMetadata,
 } from "./application-resumes";
 import {
-  ResumeUploadOperationRetiredError,
   ResumeUploadPreparationError,
   ResumeValidationError,
   resumePreparationCode,
@@ -17,7 +16,14 @@ import {
   profileStateLookupFailure,
   profileStorageDownloadFailure,
 } from "./profile-resume-errors";
-import { validateResume } from "./resume-input";
+import { validateResume, type ResumeInput } from "./resume-input";
+import {
+  isCurrentProfileResumeOperation,
+  prepareCompletedProfileRetry,
+  prepareProfileWithPendingRecovery,
+} from "./profile-resume-retry-state";
+
+export { isCurrentProfileResumeOperation } from "./profile-resume-retry-state";
 const bucket = "profile-resumes";
 const metadata = z.object({
   id: z.uuid(),
@@ -86,6 +92,7 @@ export async function retireProfileResume(
   if (error) throw new Error("Reload your profile before changing the résumé.");
   await cleanup(actor);
 }
+
 export async function uploadProfileResume(
   actor: string,
   file: File,
@@ -94,24 +101,29 @@ export async function uploadProfileResume(
   retry = false,
 ) {
   const client = resumeMutationClient();
-  let operationState: Awaited<ReturnType<typeof profileUploadState>> = null;
-  if (retry) {
-    operationState = await profileUploadState(client, actor, operation);
-    if (operationState === "ready") return;
-    if (operationState === "retired" || operationState === "deleting")
-      throw new ResumeUploadOperationRetiredError();
+  let retryState: { input: ResumeInput; isReady: boolean } | null = null;
+  if (retry || (await isCurrentProfileResumeOperation(actor, operation))) {
+    retryState = await prepareCompletedProfileRetry(
+      client,
+      actor,
+      operation,
+      expected,
+      file,
+      reserveProfileResume,
+    );
+    if (retryState.isReady) return;
   }
-  const valid = await validateResume(file);
-  if (retry && !operationState)
-    await retireProfileResume(actor, expected, true);
-  const path = await reserveProfileResume(
+  const valid = await validateResume(file, retryState?.input);
+  const path = await prepareProfileWithPendingRecovery(
     client,
     actor,
     operation,
     expected,
     valid,
+    retry,
+    reserveProfileResume,
+    retireProfileResume,
   );
-  if (await isReadyProfileUpload(client, actor, operation)) return;
   await uploadAndFinalizeProfileResume(client, actor, operation, path, valid);
   await cleanup(actor);
 }
@@ -121,7 +133,7 @@ async function reserveProfileResume(
   actor: string,
   operation: string,
   expected: string | null,
-  valid: Awaited<ReturnType<typeof validateResume>>,
+  valid: { filename: string; bytes: Uint8Array; sha256: string },
 ) {
   let result: Awaited<
     ReturnType<ReturnType<typeof resumeMutationClient>["rpc"]>
@@ -164,39 +176,6 @@ function profileReservationFailure(error: unknown) {
     });
   }
   return new ResumeUploadPreparationError(code, reference);
-}
-
-async function isReadyProfileUpload(
-  client: ReturnType<typeof resumeMutationClient>,
-  actor: string,
-  operation: string,
-) {
-  const existing = await profileUploadState(client, actor, operation);
-  return existing === "ready";
-}
-
-async function profileUploadState(
-  client: ReturnType<typeof resumeMutationClient>,
-  actor: string,
-  operation: string,
-) {
-  const { data: existing, error } = await client
-    .from("profile_resume_objects")
-    .select("state")
-    .eq("id", operation)
-    .eq("applicant_id", actor)
-    .maybeSingle();
-  if (error) throw profileStateLookupFailure("profile_state_lookup");
-  if (!existing) return null;
-  if (
-    existing.state !== "pending" &&
-    existing.state !== "ready" &&
-    existing.state !== "retired" &&
-    existing.state !== "deleting"
-  ) {
-    throw profileStateLookupFailure("profile_state_unexpected");
-  }
-  return existing.state;
 }
 
 async function uploadAndFinalizeProfileResume(

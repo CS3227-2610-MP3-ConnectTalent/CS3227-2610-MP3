@@ -15,7 +15,10 @@ vi.mock("@/lib/auth", () => ({ currentApplicant: mocks.currentApplicant }));
 vi.mock("@/lib/application-resumes", () => ({
   resumeMutationClient: () => mocks.client,
 }));
-vi.mock("@/lib/resume-input", () => ({ validateResume: mocks.validateResume }));
+vi.mock("@/lib/resume-input", () => ({
+  validateResume: mocks.validateResume,
+  readResumeInput: vi.fn(async () => valid),
+}));
 
 import {
   getProfileResume,
@@ -66,7 +69,9 @@ beforeEach(() => {
         }),
         eq: vi.fn(() => builder),
         maybeSingle: vi.fn(async () =>
-          fields === "state" ? mocks.readyResult : mocks.profileResult,
+          fields === "state" || fields === "resume_id"
+            ? mocks.readyResult
+            : mocks.profileResult,
         ),
       };
       return builder;
@@ -162,6 +167,19 @@ it("reserves, uploads, finalizes, and cleans an ordinary profile résumé", asyn
 });
 
 it("uses explicit retry to retire pending profile state before reserving again", async () => {
+  let reserved = 0;
+  mocks.rpc.mockImplementation(async (name: string) => {
+    if (name === "reserve_profile_resume") {
+      reserved += 1;
+      if (reserved === 1)
+        return { data: null, error: { code: "23505", message: "pending" } };
+      return { data: objectPath, error: null };
+    }
+    if (name === "claim_profile_resume_cleanup")
+      return { data: mocks.cleanupData, error: null };
+    return { data: null, error: null };
+  });
+
   await uploadProfileResume(
     actor,
     new File(["synthetic PDF"], "synthetic.pdf"),
@@ -181,7 +199,7 @@ it("uses explicit retry to retire pending profile state before reserving again",
 });
 
 it("does not upload a repeated operation already marked ready", async () => {
-  setReadyResult({ state: "ready" });
+  setReadyResult({ resume_id: operation });
   await uploadProfileResume(
     actor,
     new File(["synthetic PDF"], "synthetic.pdf"),

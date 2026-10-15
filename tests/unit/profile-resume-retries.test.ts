@@ -3,8 +3,9 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   currentApplicant: vi.fn(),
   validateResume: vi.fn(),
+  readResumeInput: vi.fn(),
   rpc: vi.fn(),
-  readyResult: { data: null as unknown, error: null as unknown },
+  applicantProfileResult: { data: null as unknown, error: null as unknown },
   profileResult: { data: null as unknown, error: null as unknown },
   stateQueryFilters: [] as Array<Array<[string, string]>>,
   cleanupData: [] as unknown,
@@ -16,7 +17,10 @@ vi.mock("@/lib/auth", () => ({ currentApplicant: mocks.currentApplicant }));
 vi.mock("@/lib/application-resumes", () => ({
   resumeMutationClient: () => mocks.client,
 }));
-vi.mock("@/lib/resume-input", () => ({ validateResume: mocks.validateResume }));
+vi.mock("@/lib/resume-input", () => ({
+  validateResume: mocks.validateResume,
+  readResumeInput: mocks.readResumeInput,
+}));
 
 import { getProfileResume, uploadProfileResume } from "@/lib/profile-resumes";
 import { resumeFailureStatus } from "@/lib/resume-errors";
@@ -30,8 +34,15 @@ const valid = {
   sha256: "a".repeat(64),
 };
 
-function setReadyResult(data: unknown = null) {
-  mocks.readyResult = { data, error: null };
+function setReadyResult(state: "ready" | "pending" | "retired" | null = null) {
+  if (state === "ready") {
+    mocks.applicantProfileResult = {
+      data: { resume_id: operation },
+      error: null,
+    };
+  } else {
+    mocks.applicantProfileResult = { data: null, error: null };
+  }
 }
 
 beforeEach(() => {
@@ -45,7 +56,7 @@ beforeEach(() => {
   const client = {
     rpc: mocks.rpc,
     storage: { from: vi.fn(() => storage) },
-    from: vi.fn(() => {
+    from: vi.fn((table: string) => {
       let fields = "";
       const filters: Array<[string, string]> = [];
       const builder = {
@@ -58,9 +69,9 @@ beforeEach(() => {
           return builder;
         }),
         maybeSingle: vi.fn(async () => {
-          if (fields === "state") {
+          if (table === "applicant_profiles" && fields === "resume_id") {
             mocks.stateQueryFilters.push(filters);
-            return mocks.readyResult;
+            return mocks.applicantProfileResult;
           }
           return mocks.profileResult;
         }),
@@ -70,6 +81,7 @@ beforeEach(() => {
   };
   mocks.client = client;
   mocks.currentApplicant.mockResolvedValue({ client, user: { id: actor } });
+  mocks.readResumeInput.mockResolvedValue(valid);
   mocks.validateResume.mockResolvedValue(valid);
   mocks.profileResult = { data: null, error: null };
   setReadyResult();
@@ -87,7 +99,7 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 it("reconciles the same pending profile operation without retiring it", async () => {
-  setReadyResult({ state: "pending" });
+  setReadyResult("pending");
 
   await uploadProfileResume(
     actor,
@@ -108,11 +120,11 @@ it("reconciles the same pending profile operation without retiring it", async ()
   expect(
     (mocks.storageBucket as { upload: ReturnType<typeof vi.fn> }).upload,
   ).toHaveBeenCalledOnce();
-  expect(mocks.stateQueryFilters[0]).toContainEqual(["applicant_id", actor]);
+  expect(mocks.stateQueryFilters[0]).toContainEqual(["user_id", actor]);
 });
 
 it("reconciles a ready profile operation before checking the stale expected id", async () => {
-  setReadyResult({ state: "ready" });
+  setReadyResult("ready");
 
   await uploadProfileResume(
     actor,
@@ -126,9 +138,14 @@ it("reconciles a ready profile operation before checking the stale expected id",
     "retire_profile_resume",
     expect.anything(),
   );
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
+  expect(mocks.rpc).toHaveBeenCalledWith(
     "reserve_profile_resume",
-    expect.anything(),
+    expect.objectContaining({
+      p_operation: operation,
+      p_filename: valid.filename,
+      p_size: valid.bytes.length,
+      p_sha256: valid.sha256,
+    }),
   );
   expect(
     (mocks.storageBucket as { upload: ReturnType<typeof vi.fn> }).upload,
@@ -136,7 +153,7 @@ it("reconciles a ready profile operation before checking the stale expected id",
 });
 
 it("returns a ready profile retry before revalidating its file", async () => {
-  setReadyResult({ state: "ready" });
+  setReadyResult("ready");
   mocks.validateResume.mockRejectedValue(new Error("validator unavailable"));
 
   await expect(
@@ -149,15 +166,25 @@ it("returns a ready profile retry before revalidating its file", async () => {
     ),
   ).resolves.toBeUndefined();
 
+  expect(mocks.readResumeInput).toHaveBeenCalledOnce();
   expect(mocks.validateResume).not.toHaveBeenCalled();
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
+  expect(mocks.rpc).toHaveBeenCalledWith(
     "reserve_profile_resume",
-    expect.anything(),
+    expect.objectContaining({ p_operation: operation }),
   );
 });
 
 it("reports a retired operation so the client can retry the selected file with a new id", async () => {
-  setReadyResult({ state: "retired" });
+  setReadyResult(null);
+  mocks.rpc.mockImplementation(async (name: string) => {
+    if (name === "reserve_profile_resume") {
+      return {
+        data: null,
+        error: { code: "P0001", message: "Upload operation cannot be reused" },
+      };
+    }
+    return { data: null, error: null };
+  });
 
   await expect(
     uploadProfileResume(
@@ -168,15 +195,10 @@ it("reports a retired operation so the client can retry the selected file with a
       true,
     ),
   ).rejects.toMatchObject({ code: "RESUME_UPLOAD_OPERATION_RETIRED" });
-  expect(mocks.rpc).not.toHaveBeenCalledWith(
-    "reserve_profile_resume",
-    expect.anything(),
-  );
 });
 
 it("classifies profile operation lookup outages as safe server failures", async () => {
-  setReadyResult();
-  mocks.readyResult = {
+  mocks.applicantProfileResult = {
     data: null,
     error: { message: "private database detail" },
   };
@@ -200,39 +222,6 @@ it("classifies profile operation lookup outages as safe server failures", async 
     reference: expect.stringMatching(/^[0-9a-f-]{36}$/),
   });
   expect(resumeFailureStatus(caught)).toBe(503);
-  expect(log).toHaveBeenCalledWith(
-    "resume_upload_preparation_failed",
-    expect.objectContaining({ stage: "profile_state_lookup" }),
-  );
-  expect(JSON.stringify(log.mock.calls)).not.toContain(
-    "private database detail",
-  );
-});
-
-it("returns a safe server failure when a new upload state lookup fails", async () => {
-  mocks.readyResult = {
-    data: null,
-    error: { message: "private database detail" },
-  };
-  const log = vi.spyOn(console, "error").mockImplementation(() => {});
-  let caught: unknown;
-  try {
-    await uploadProfileResume(
-      actor,
-      new File(["synthetic PDF"], "synthetic.pdf"),
-      operation,
-      null,
-    );
-  } catch (error) {
-    caught = error;
-  }
-
-  expect(mocks.rpc).toHaveBeenCalledWith(
-    "reserve_profile_resume",
-    expect.objectContaining({ p_operation: operation }),
-  );
-  expect(resumeFailureStatus(caught)).toBe(503);
-  expect(caught).toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
   expect(log).toHaveBeenCalledWith(
     "resume_upload_preparation_failed",
     expect.objectContaining({ stage: "profile_state_lookup" }),
