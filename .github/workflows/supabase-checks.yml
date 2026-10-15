@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: 2.119.0
       - name: Start local Supabase
@@ -63,7 +63,7 @@ jobs:
         with:
           runtime: node@24
           require-lockfile: true
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: 2.119.0
       - name: Start local Supabase
@@ -105,7 +105,7 @@ jobs:
         with:
           runtime: node@24
           require-lockfile: true
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: 2.119.0
       - name: Start local Supabase and Mailpit
