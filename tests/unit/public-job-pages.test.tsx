@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getPublishedJob: vi.fn(),
   getAccountNavigation: vi.fn(),
   notFound: vi.fn(),
+  linkPending: false,
 }));
 
 vi.mock("@/lib/jobs", () => ({
@@ -24,6 +25,7 @@ vi.mock("next/link", async () => {
   return {
     default: ({ href, children, ...props }: Record<string, unknown>) =>
       React.createElement("a", { href, ...props }, children as React.ReactNode),
+    useLinkStatus: () => ({ pending: mocks.linkPending }),
   };
 });
 
@@ -44,6 +46,7 @@ beforeEach(() => {
   mocks.listPublishedJobs.mockResolvedValue([job]);
   mocks.getPublishedJob.mockResolvedValue(job);
   mocks.getAccountNavigation.mockResolvedValue({ kind: "guest" });
+  mocks.linkPending = false;
   mocks.notFound.mockImplementation(() => {
     throw new Error("not-found");
   });
@@ -127,3 +130,14 @@ it.each([
     expect(html).toContain("TypeScript and testing experience.");
   },
 );
+
+it("announces a waiting Apply navigation for a guest", async () => {
+  mocks.linkPending = true;
+  const element = await JobDetail({ params: Promise.resolve({ id: job.id }) });
+  const html = renderToStaticMarkup(element);
+
+  expect(html).toContain(`href="/jobs/${job.id}/apply"`);
+  expect(html).toContain("Apply for this role");
+  expect(html).toContain("Opening application…");
+  expect(html).toContain('role="status"');
+});

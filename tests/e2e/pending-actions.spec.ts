@@ -29,7 +29,9 @@ test("sign-in reports a delayed submission and permits retry after failure", asy
     await submit.click({ noWaitAfter: true });
     const pending = page.getByRole("button", { name: "Signing in…" });
     await expect(pending).toBeDisabled();
-    await expect(page.getByRole("status")).toContainText("Signing in");
+    await expect(
+      page.getByRole("status").filter({ hasText: "Signing in" }),
+    ).toContainText("Signing in");
     await pending.evaluate((button) => (button as HTMLButtonElement).click());
     expect(requests).toBe(1);
   } finally {

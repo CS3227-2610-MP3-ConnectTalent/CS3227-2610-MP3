@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PendingLinkStatus } from "@/components/pending-link-status";
 import { listOwnApplications } from "@/lib/applications";
 import { reviewStatusLabel } from "@/lib/hr-input";
 
@@ -17,6 +18,7 @@ export default async function ApplicationsPage({
       <header className="flex items-center justify-between gap-4">
         <Link href="/" className="underline">
           ← Careers
+          <PendingLinkStatus label="Opening roles…" />
         </Link>
       </header>
       <h1 className="text-3xl font-semibold">My applications</h1>
@@ -37,6 +39,7 @@ export default async function ApplicationsPage({
           No applications yet.{" "}
           <Link href="/" className="underline">
             Browse open roles
+            <PendingLinkStatus label="Opening roles…" />
           </Link>
           .
         </p>
