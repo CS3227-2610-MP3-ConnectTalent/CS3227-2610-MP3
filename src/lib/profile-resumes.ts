@@ -12,6 +12,11 @@ import {
   ResumeValidationError,
   resumePreparationCode,
 } from "./resume-errors";
+import {
+  isMissingProfileObject,
+  profileStateLookupFailure,
+  profileStorageDownloadFailure,
+} from "./profile-resume-errors";
 import { validateResume } from "./resume-input";
 const bucket = "profile-resumes";
 const metadata = z.object({
@@ -41,11 +46,19 @@ export async function downloadProfileResume(expectedId?: string) {
   if (!account) return null;
   const info = await getProfileResume();
   if (!info || (expectedId && info.id !== expectedId)) return null;
-  const { data, error } = await account.client.storage
-    .from(bucket)
-    .download(info.object_path);
-  return error || !data ? null : { info, bytes: data };
+  try {
+    const { data, error } = await account.client.storage
+      .from(bucket)
+      .download(info.object_path);
+    if (isMissingProfileObject(error)) return null;
+    if (error) throw profileStorageDownloadFailure();
+    return data ? { info, bytes: data } : null;
+  } catch (error) {
+    if (error instanceof ResumeUploadPreparationError) throw error;
+    throw profileStorageDownloadFailure();
+  }
 }
+
 async function cleanup(actor: string) {
   const client = resumeMutationClient();
   const { data, error } = await client.rpc("claim_profile_resume_cleanup", {
@@ -151,22 +164,6 @@ function profileReservationFailure(error: unknown) {
     });
   }
   return new ResumeUploadPreparationError(code, reference);
-}
-
-function profileStateLookupFailure(
-  stage:
-    | "profile_state_lookup"
-    | "profile_state_unexpected"
-    | "profile_metadata_lookup"
-    | "profile_metadata_invalid"
-    | "profile_reservation_invalid_response",
-) {
-  const reference = randomUUID();
-  console.error("resume_upload_preparation_failed", { reference, stage });
-  return new ResumeUploadPreparationError(
-    "RESUME_UPLOAD_PREPARATION_FAILED",
-    reference,
-  );
 }
 
 async function isReadyProfileUpload(

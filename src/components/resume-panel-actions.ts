@@ -275,15 +275,13 @@ async function applyResponse(
     revision: typeof result.revision === "number" ? result.revision : undefined,
   });
   state.setUploadFailed(intent === "upload" && !response.ok);
+  const canRetryProfileCopy =
+    result.code === "RESUME_UPLOAD_PENDING" ||
+    result.code === "RESUME_UPLOAD_PERSISTENCE_FAILED";
   state.setProfileCopyRetryAvailable(
-    intent === "profile" &&
-      !response.ok &&
-      result.code === "RESUME_UPLOAD_PENDING",
+    intent === "profile" && !response.ok && canRetryProfileCopy,
   );
-  if (
-    intent === "profile" &&
-    (response.ok || result.code !== "RESUME_UPLOAD_PENDING")
-  ) {
+  if (intent === "profile" && (response.ok || !canRetryProfileCopy)) {
     state.setProfileCopyAttempt(null);
   }
   state.setMessage(

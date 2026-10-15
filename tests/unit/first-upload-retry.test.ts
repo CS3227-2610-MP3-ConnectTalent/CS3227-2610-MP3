@@ -1,9 +1,11 @@
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
+  currentApplicant: vi.fn(),
   rpc: vi.fn(),
   lookup: vi.fn(),
-  eq: vi.fn(),
+  from: vi.fn(),
   validate: vi.fn(),
+  readInput: vi.fn(),
   upload: vi.fn(),
   storageFrom: vi.fn(),
 }));
@@ -11,18 +13,14 @@ vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
     rpc: mocks.rpc,
     storage: { from: mocks.storageFrom },
-    from: () => {
-      const query = {
-        select: () => query,
-        eq: mocks.eq,
-        maybeSingle: mocks.lookup,
-      };
-      mocks.eq.mockReturnValue(query);
-      return query;
-    },
+    from: mocks.from,
   }),
 }));
+vi.mock("../../src/lib/auth", () => ({
+  currentApplicant: mocks.currentApplicant,
+}));
 vi.mock("../../src/lib/resume-input", () => ({
+  readResumeInput: mocks.readInput,
   validateResume: mocks.validate,
 }));
 import { uploadResumeForJob } from "../../src/lib/application-resumes";
@@ -36,14 +34,32 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
   vi.stubEnv("SUPABASE_SECRET_KEY", "synthetic-unit-key");
-  mocks.validate.mockResolvedValue({
+  const input = {
     bytes: new Uint8Array([1]),
     filename: "synthetic.pdf",
     sha256: "a".repeat(64),
-  });
+  };
+  mocks.readInput.mockResolvedValue(input);
+  mocks.validate.mockResolvedValue(input);
   mocks.storageFrom.mockReturnValue({ upload: mocks.upload });
   mocks.upload.mockResolvedValue({ error: null });
-  mocks.lookup.mockResolvedValue({ data: { revision: 3 }, error: null });
+  mocks.lookup.mockResolvedValue({ data: null, error: null });
+  mocks.from.mockImplementation((table: string) => {
+    const filters: Array<[string, string]> = [];
+    const query = {
+      select: vi.fn(() => query),
+      eq: vi.fn((column: string, value: string) => {
+        filters.push([column, value]);
+        return query;
+      }),
+      maybeSingle: vi.fn(() => mocks.lookup(table, filters)),
+    };
+    return query;
+  });
+  mocks.currentApplicant.mockResolvedValue({
+    user: { id: actor },
+    client: { from: mocks.from },
+  });
   mocks.rpc.mockImplementation(
     async (name: string, args: { p_operation?: string } = {}) =>
       name === "prepare_application_resume"
@@ -87,7 +103,7 @@ it("allows fresh allocation if the failed request never created an application",
 });
 it("never upgrades an explicitly supplied stale revision", async () => {
   await uploadResumeForJob(actor, job, 1, file, operation, true);
-  expect(mocks.lookup).not.toHaveBeenCalled();
+  expect(mocks.lookup).toHaveBeenCalledOnce();
   expect(mocks.rpc).toHaveBeenCalledWith(
     "prepare_application_resume",
     expect.objectContaining({ p_revision: 1, p_operation: operation }),
@@ -244,11 +260,11 @@ it("returns a reference for unexpected preparation errors without raw details", 
   expect(JSON.stringify(log.mock.calls)).not.toContain("private database");
   expect(JSON.stringify(log.mock.calls)).not.toContain("private SQL");
 });
-it("rejects invalid PDFs before lookup or allocation", async () => {
+it("rejects invalid PDFs before allocation after a read-only retry lookup", async () => {
   mocks.validate.mockRejectedValue(new Error("Choose a valid PDF"));
   await expect(
     uploadResumeForJob(actor, job, null, file, operation, true),
   ).rejects.toThrow("valid PDF");
-  expect(mocks.lookup).not.toHaveBeenCalled();
+  expect(mocks.lookup).toHaveBeenCalledOnce();
   expect(mocks.rpc).not.toHaveBeenCalled();
 });

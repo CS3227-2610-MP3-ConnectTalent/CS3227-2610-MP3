@@ -191,6 +191,27 @@ it("rejects a profile résumé that is no longer available", async () => {
   expect(mocks.uploadResumeForJob).not.toHaveBeenCalled();
 });
 
+it("returns a safe server error when the selected profile résumé cannot be downloaded", async () => {
+  const reference = "44000000-0000-4000-8000-000000000106";
+  mocks.downloadProfileResume.mockRejectedValueOnce(
+    new ResumeUploadPreparationError(
+      "RESUME_UPLOAD_PERSISTENCE_FAILED",
+      reference,
+    ),
+  );
+
+  const failed = await POST(useProfileResume(), context());
+
+  expect(failed.status).toBe(503);
+  await expect(failed.json()).resolves.toMatchObject({
+    code: "RESUME_UPLOAD_PERSISTENCE_FAILED",
+    reference,
+    error:
+      "We could not save this résumé. Try again later and share the reference code if the problem continues.",
+  });
+  expect(mocks.uploadResumeForJob).not.toHaveBeenCalled();
+});
+
 it("copies the Applicant's selected profile résumé into the selected job draft", async () => {
   mocks.downloadProfileResume.mockResolvedValueOnce({
     info: { filename: "profile.pdf" },

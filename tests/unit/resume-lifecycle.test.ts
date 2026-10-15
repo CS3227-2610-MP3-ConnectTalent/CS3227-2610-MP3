@@ -1,22 +1,37 @@
 import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
+  currentApplicant: vi.fn(),
   rpc: vi.fn(),
   upload: vi.fn(),
   remove: vi.fn(),
   update: vi.fn(),
   existing: vi.fn(),
+  userFrom: vi.fn(),
 }));
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
     rpc: mocks.rpc,
     storage: { from: () => ({ upload: mocks.upload, remove: mocks.remove }) },
-    from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: mocks.existing }) }),
-      update: mocks.update,
-    }),
+    from: () => {
+      const query = {
+        select: () => query,
+        eq: () => query,
+        maybeSingle: mocks.existing,
+        update: mocks.update,
+      };
+      return query;
+    },
   }),
 }));
+vi.mock("../../src/lib/auth", () => ({
+  currentApplicant: mocks.currentApplicant,
+}));
 vi.mock("../../src/lib/resume-input", () => ({
+  readResumeInput: async (file: File) => ({
+    bytes: new Uint8Array([1]),
+    filename: file.name,
+    sha256: "a".repeat(64),
+  }),
   validateResume: async () => ({
     bytes: new Uint8Array([1]),
     filename: "synthetic.pdf",
@@ -32,6 +47,18 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
   vi.stubEnv("SUPABASE_SECRET_KEY", "synthetic-unit-key");
   mocks.existing.mockResolvedValue({ data: null, error: null });
+  mocks.userFrom.mockImplementation(() => {
+    const query = {
+      select: () => query,
+      eq: () => query,
+      maybeSingle: mocks.existing,
+    };
+    return query;
+  });
+  mocks.currentApplicant.mockResolvedValue({
+    user: { id: "actor" },
+    client: { from: mocks.userFrom },
+  });
   mocks.remove.mockResolvedValue({ error: null });
   mocks.upload.mockResolvedValue({ error: null });
   mocks.update.mockReturnValue({

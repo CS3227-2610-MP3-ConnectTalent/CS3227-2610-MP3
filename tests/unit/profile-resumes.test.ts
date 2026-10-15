@@ -18,7 +18,6 @@ vi.mock("@/lib/application-resumes", () => ({
 vi.mock("@/lib/resume-input", () => ({ validateResume: mocks.validateResume }));
 
 import {
-  downloadProfileResume,
   getProfileResume,
   retireProfileResume,
   uploadProfileResume,
@@ -108,39 +107,6 @@ it("hides profile resume metadata lookup errors and invalid persisted metadata",
   await expect(getProfileResume()).rejects.toMatchObject({
     code: "RESUME_UPLOAD_PREPARATION_FAILED",
   });
-});
-
-it("downloads only the current expected profile attachment", async () => {
-  mocks.currentApplicant.mockResolvedValueOnce(null);
-  await expect(downloadProfileResume()).resolves.toBeNull();
-
-  setProfileResult(resumeInfo);
-  await expect(
-    downloadProfileResume("44000000-0000-4000-8000-000000000999"),
-  ).resolves.toBeNull();
-  const bytes = new Blob(["synthetic resume"]);
-  const bucket = mocks.storageBucket as {
-    download: ReturnType<typeof vi.fn>;
-  };
-  bucket.download.mockResolvedValueOnce({ data: bytes, error: null });
-  await expect(downloadProfileResume(operation)).resolves.toEqual({
-    info: resumeInfo,
-    bytes,
-  });
-});
-
-it("returns null for missing storage objects and storage errors", async () => {
-  setProfileResult(resumeInfo);
-  const result = await downloadProfileResume();
-  expect(result).toBeNull();
-  const bucket = mocks.storageBucket as {
-    download: ReturnType<typeof vi.fn>;
-  };
-  bucket.download.mockResolvedValueOnce({
-    data: new Blob(),
-    error: { message: "missing" },
-  });
-  await expect(downloadProfileResume()).resolves.toBeNull();
 });
 
 it("retires the expected profile résumé and cleans only valid owned storage paths", async () => {

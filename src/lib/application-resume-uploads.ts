@@ -1,7 +1,11 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { validateResume } from "./resume-input";
+import {
+  readResumeInput,
+  validateResume,
+  type ResumeInput,
+} from "./resume-input";
 import { prepareWithPendingRecovery } from "./application-resume-retry";
 import {
   uploadAndFinalizeApplicationResume,
@@ -11,6 +15,7 @@ import {
   cleanupApplicationResume,
   resumeMutationClient,
 } from "./application-resume-storage";
+import { isCurrentApplicationResumeOperation } from "./application-resume-retry-state";
 import {
   ResumeUploadPreparationError,
   resumePreparationCode,
@@ -18,7 +23,8 @@ import {
 } from "./resume-errors";
 
 type MutationClient = ReturnType<typeof resumeMutationClient>;
-type ValidatedResume = Awaited<ReturnType<typeof validateResume>>;
+type ValidatedResume = ResumeInput;
+type PreparedResume = Awaited<ReturnType<typeof prepareJobResume>>;
 type UploadArguments = ApplicationResumeUploadArguments;
 
 export async function uploadApplicationResume(
@@ -30,15 +36,22 @@ export async function uploadApplicationResume(
   retry = false,
 ) {
   const normalizedOperation = normalizeOperation(operation);
-  const validated = await validateResume(file);
   const client = resumeMutationClient();
-  const prepared = await prepareWithPendingRecovery(
-    client,
-    actor,
-    job,
-    revision,
-    retry,
-    () =>
+  const retryState = retry
+    ? await prepareCompletedRetry(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        file,
+      )
+    : null;
+  if (retryState?.prepared?.state === "ready") return;
+  const validated = await validateResume(file, retryState?.input);
+  const prepared =
+    retryState?.prepared ??
+    (await prepareWithPendingRecovery(client, actor, job, revision, retry, () =>
       prepareJobResume(
         client,
         actor,
@@ -47,7 +60,7 @@ export async function uploadApplicationResume(
         normalizedOperation,
         validated,
       ),
-  );
+    ));
   await finishPreparedJobResume(
     client,
     actor,
@@ -82,15 +95,22 @@ export async function uploadResumeForJob(
   retry = false,
 ) {
   const normalizedOperation = normalizeOperation(operation);
-  const validated = await validateResume(file);
   const client = resumeMutationClient();
-  const prepared = await prepareWithPendingRecovery(
-    client,
-    actor,
-    job,
-    revision,
-    retry,
-    () =>
+  const retryState = retry
+    ? await prepareCompletedRetry(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        file,
+      )
+    : null;
+  if (retryState?.prepared?.state === "ready") return;
+  const validated = await validateResume(file, retryState?.input);
+  const prepared =
+    retryState?.prepared ??
+    (await prepareWithPendingRecovery(client, actor, job, revision, retry, () =>
       prepareJobResume(
         client,
         actor,
@@ -99,7 +119,7 @@ export async function uploadResumeForJob(
         normalizedOperation,
         validated,
       ),
-  );
+    ));
   await finishPreparedJobResume(
     client,
     actor,
@@ -109,6 +129,36 @@ export async function uploadResumeForJob(
     prepared,
     retry,
   );
+}
+
+async function prepareCompletedRetry(
+  client: MutationClient,
+  actor: string,
+  job: string,
+  revision: number | null,
+  operation: string,
+  file: File,
+): Promise<{ input: ResumeInput; prepared: PreparedResume | null }> {
+  const input = await readResumeInput(file);
+  // The RLS-scoped row read only identifies a possible completed retry. The
+  // prepare RPC remains authoritative for the file fingerprint and ready state.
+  const exists = await isCurrentApplicationResumeOperation(
+    actor,
+    job,
+    operation,
+  );
+  if (!exists) return { input, prepared: null };
+  return {
+    input,
+    prepared: await prepareJobResume(
+      client,
+      actor,
+      job,
+      revision,
+      operation,
+      input,
+    ),
+  };
 }
 
 async function prepareJobResume(
