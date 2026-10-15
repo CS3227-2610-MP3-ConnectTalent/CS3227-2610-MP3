@@ -13,7 +13,7 @@ on conflict(user_id) do nothing;
 
 update public.profiles set role = 'hr' where user_id = '30000000-0000-4000-8000-000000000a02';
 
-select plan(12);
+select plan(11);
 
 -- Check new functions exist
 select has_function('public', 'unpublish_hr_job', array['uuid'], 'unpublish RPC exists');

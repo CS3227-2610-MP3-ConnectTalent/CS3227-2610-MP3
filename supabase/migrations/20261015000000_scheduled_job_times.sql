@@ -17,15 +17,9 @@ create policy "Published jobs are publicly readable"
     and (closes_at is null or closes_at > clock_timestamp())
   );
 
-drop function if exists public.create_hr_job_draft(text, text, text, text, text);
-drop function if exists public.edit_hr_job_draft(uuid, text, text, text, text, text);
-drop function if exists private.create_hr_job_draft(text, text, text, text, text);
-drop function if exists private.edit_hr_job_draft(uuid, text, text, text, text, text);
-drop function if exists private.validate_hr_job_fields(text, text, text, text, text);
-
 create or replace function private.validate_hr_job_fields(
   p_title text, p_team text, p_category text, p_description text, p_requirements text,
-  p_opens_at timestamptz default null, p_closes_at timestamptz default null
+  p_opens_at timestamptz, p_closes_at timestamptz
 ) returns void language plpgsql immutable set search_path = '' as $$
 begin
   if p_title is null or pg_catalog.char_length(pg_catalog.btrim(p_title)) not between 1 and 160
@@ -41,9 +35,15 @@ begin
 end;
 $$;
 
+create or replace function private.validate_hr_job_fields(
+  p_title text, p_team text, p_category text, p_description text, p_requirements text
+) returns void language sql immutable set search_path = '' as $$
+  select private.validate_hr_job_fields(p_title, p_team, p_category, p_description, p_requirements, null::timestamptz, null::timestamptz);
+$$;
+
 create or replace function private.create_hr_job_draft(
   p_title text, p_team text, p_category text, p_description text, p_requirements text,
-  p_opens_at timestamptz default null, p_closes_at timestamptz default null
+  p_opens_at timestamptz, p_closes_at timestamptz
 ) returns uuid language plpgsql security definer set search_path = '' as $$
 declare v_id uuid;
 begin
@@ -57,9 +57,15 @@ begin
 end;
 $$;
 
+create or replace function private.create_hr_job_draft(
+  p_title text, p_team text, p_category text, p_description text, p_requirements text
+) returns uuid language sql security definer set search_path = '' as $$
+  select private.create_hr_job_draft(p_title, p_team, p_category, p_description, p_requirements, null::timestamptz, null::timestamptz);
+$$;
+
 create or replace function private.edit_hr_job_draft(
   p_job_id uuid, p_title text, p_team text, p_category text, p_description text, p_requirements text,
-  p_opens_at timestamptz default null, p_closes_at timestamptz default null
+  p_opens_at timestamptz, p_closes_at timestamptz
 ) returns uuid language plpgsql security definer set search_path = '' as $$
 begin
   perform public.require_verified_hr();
@@ -75,6 +81,12 @@ begin
     where id = p_job_id;
   return p_job_id;
 end;
+$$;
+
+create or replace function private.edit_hr_job_draft(
+  p_job_id uuid, p_title text, p_team text, p_category text, p_description text, p_requirements text
+) returns uuid language sql security definer set search_path = '' as $$
+  select private.edit_hr_job_draft(p_job_id, p_title, p_team, p_category, p_description, p_requirements, null::timestamptz, null::timestamptz);
 $$;
 
 create or replace function private.unpublish_hr_job(p_job_id uuid)
@@ -94,27 +106,44 @@ begin
 end;
 $$;
 
-revoke all on function private.validate_hr_job_fields(text, text, text, text, text, timestamptz, timestamptz),
+revoke all on function private.validate_hr_job_fields(text, text, text, text, text),
+  private.validate_hr_job_fields(text, text, text, text, text, timestamptz, timestamptz),
+  private.create_hr_job_draft(text, text, text, text, text),
   private.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+  private.edit_hr_job_draft(uuid, text, text, text, text, text),
   private.edit_hr_job_draft(uuid, text, text, text, text, text, timestamptz, timestamptz),
   private.unpublish_hr_job(uuid) from public, anon, authenticated;
-grant execute on function private.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+grant execute on function private.create_hr_job_draft(text, text, text, text, text),
+  private.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+  private.edit_hr_job_draft(uuid, text, text, text, text, text),
   private.edit_hr_job_draft(uuid, text, text, text, text, text, timestamptz, timestamptz),
   private.unpublish_hr_job(uuid) to authenticated;
 
 -- Public invoker wrappers
 create or replace function public.create_hr_job_draft(
   p_title text, p_team text, p_category text, p_description text, p_requirements text,
-  p_opens_at timestamptz default null, p_closes_at timestamptz default null
+  p_opens_at timestamptz, p_closes_at timestamptz
 ) returns uuid language sql security invoker set search_path = '' as $$
   select private.create_hr_job_draft(p_title, p_team, p_category, p_description, p_requirements, p_opens_at, p_closes_at);
 $$;
 
+create or replace function public.create_hr_job_draft(
+  p_title text, p_team text, p_category text, p_description text, p_requirements text
+) returns uuid language sql security invoker set search_path = '' as $$
+  select private.create_hr_job_draft(p_title, p_team, p_category, p_description, p_requirements, null::timestamptz, null::timestamptz);
+$$;
+
 create or replace function public.edit_hr_job_draft(
   p_job_id uuid, p_title text, p_team text, p_category text, p_description text, p_requirements text,
-  p_opens_at timestamptz default null, p_closes_at timestamptz default null
+  p_opens_at timestamptz, p_closes_at timestamptz
 ) returns uuid language sql security invoker set search_path = '' as $$
   select private.edit_hr_job_draft(p_job_id, p_title, p_team, p_category, p_description, p_requirements, p_opens_at, p_closes_at);
+$$;
+
+create or replace function public.edit_hr_job_draft(
+  p_job_id uuid, p_title text, p_team text, p_category text, p_description text, p_requirements text
+) returns uuid language sql security invoker set search_path = '' as $$
+  select private.edit_hr_job_draft(p_job_id, p_title, p_team, p_category, p_description, p_requirements, null::timestamptz, null::timestamptz);
 $$;
 
 create or replace function public.unpublish_hr_job(p_job_id uuid)
@@ -122,10 +151,14 @@ returns uuid language sql security invoker set search_path = '' as $$
   select private.unpublish_hr_job(p_job_id);
 $$;
 
-revoke all on function public.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+revoke all on function public.create_hr_job_draft(text, text, text, text, text),
+  public.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+  public.edit_hr_job_draft(uuid, text, text, text, text, text),
   public.edit_hr_job_draft(uuid, text, text, text, text, text, timestamptz, timestamptz),
   public.unpublish_hr_job(uuid) from public, anon, authenticated;
-grant execute on function public.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+grant execute on function public.create_hr_job_draft(text, text, text, text, text),
+  public.create_hr_job_draft(text, text, text, text, text, timestamptz, timestamptz),
+  public.edit_hr_job_draft(uuid, text, text, text, text, text),
   public.edit_hr_job_draft(uuid, text, text, text, text, text, timestamptz, timestamptz),
   public.unpublish_hr_job(uuid) to authenticated;
 
