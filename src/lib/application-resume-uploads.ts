@@ -2,7 +2,10 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { validateResume } from "./resume-input";
-import { recoverPendingJobResume } from "./application-resume-retry";
+import {
+  prepareWithPendingRecovery,
+  recoverPendingJobResume,
+} from "./application-resume-retry";
 import {
   applicationResumeBucket,
   cleanupApplicationResume,
@@ -128,14 +131,21 @@ export async function uploadResumeForJob(
   const normalizedOperation = normalizeOperation(operation);
   const validated = await validateResume(file);
   const client = resumeMutationClient();
-  const prepared = await prepareRetryOrRecoverPending(
+  const prepared = await prepareWithPendingRecovery(
     client,
     actor,
     job,
     revision,
-    normalizedOperation,
-    validated,
     retry,
+    () =>
+      prepareJobResume(
+        client,
+        actor,
+        job,
+        revision,
+        normalizedOperation,
+        validated,
+      ),
   );
   await finishPreparedJobResume(
     client,
@@ -146,38 +156,6 @@ export async function uploadResumeForJob(
     prepared,
     retry,
   );
-}
-
-async function prepareRetryOrRecoverPending(
-  client: MutationClient,
-  actor: string,
-  job: string,
-  revision: number | null,
-  operation: string,
-  validated: ValidatedResume,
-  retry: boolean,
-) {
-  try {
-    return await prepareJobResume(
-      client,
-      actor,
-      job,
-      revision,
-      operation,
-      validated,
-    );
-  } catch (error) {
-    if (
-      !retry ||
-      revision === null ||
-      !(error instanceof ResumeUploadPreparationError) ||
-      error.code !== "RESUME_UPLOAD_PENDING"
-    ) {
-      throw error;
-    }
-    await recoverPendingJobResume(client, actor, job, revision);
-    return prepareJobResume(client, actor, job, revision, operation, validated);
-  }
 }
 
 async function prepareJobResume(

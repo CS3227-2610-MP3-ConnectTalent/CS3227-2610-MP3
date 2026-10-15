@@ -1,10 +1,35 @@
 import "server-only";
+import { ResumeUploadPreparationError } from "./resume-errors";
 import {
   cleanupApplicationResume,
   resumeMutationClient,
 } from "./application-resume-storage";
 
 type MutationClient = ReturnType<typeof resumeMutationClient>;
+
+export async function prepareWithPendingRecovery<T>(
+  client: MutationClient,
+  actor: string,
+  job: string,
+  revision: number | null,
+  retry: boolean,
+  prepare: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await prepare();
+  } catch (error) {
+    if (
+      !retry ||
+      revision === null ||
+      !(error instanceof ResumeUploadPreparationError) ||
+      error.code !== "RESUME_UPLOAD_PENDING"
+    ) {
+      throw error;
+    }
+    await recoverPendingJobResume(client, actor, job, revision);
+    return prepare();
+  }
+}
 
 export async function recoverPendingJobResume(
   client: MutationClient,
