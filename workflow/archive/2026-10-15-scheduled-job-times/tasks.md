@@ -20,6 +20,6 @@
 ## Review and closeout
 
 - [x] T07 — Independent reviewer checks diff, acceptance evidence, and security boundaries. Depends on: T06. Evidence: handoffs/independent-review.md.
-- [ ] T08 — Student owner John records acceptance decision. Evidence: record.md.
-- [ ] T09 — Integration lead syncs canonical specs and archives change packet. Evidence: canonical specs and archive folder.
-- [ ] T10 — Contributor logs dated session summary and opens issue-linked PR. Evidence: logs/ and PR link.
+- [x] T08 — Student owner John records acceptance decision. Evidence: record.md. Approved by John in chat on 2026-10-15.
+- [x] T09 — Integration lead syncs canonical specs and archives change packet. Evidence: canonical specs and archive folder.
+- [x] T10 — Contributor logs dated session summary and opens issue-linked PR. Evidence: logs/ and PR link.

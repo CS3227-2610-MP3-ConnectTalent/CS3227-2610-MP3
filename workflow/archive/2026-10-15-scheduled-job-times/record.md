@@ -75,14 +75,17 @@ Commands and results:
 
 - Reviewer identity and independence: Independent reviewer subagent (`d81d7f95-a4e7-441b-ba28-f6cd957f240c`); separate execution with zero implementation code changes.
 - Findings/resolutions: See [handoffs/independent-review.md](handoffs/independent-review.md). 1 initial quality finding (ESLint `max-lines-per-function` in `tests/unit/hr-jobs.test.ts`) resolved by splitting the describe block. Re-verification confirmed 0 lint errors, 0 type errors, and 532 passing unit tests. Independent reviewer recommends Approval.
-- Human decisions: (pending student approval)
+- Human decisions: Accepted by John (Johnwz123) in chat on 2026-10-15 following independent review resolution and passing quality gates (typecheck, lint, 532 unit tests). Approved to proceed with canonical spec sync, archive, and PR submission.
 
 ## Session evidence index
 
 | Date / session | Summary log link | Work / prompts / decisions covered                   | Verification status / missing coverage |
 | -------------- | ---------------- | ---------------------------------------------------- | -------------------------------------- |
-| 2026-10-15     | Pending closeout | Issue #88 intake, packet creation, proposal & design | In progress                            |
+| 2026-10-15     | [2026-10-15-scheduled-job-times.md](../../../logs/2026-10-15-scheduled-job-times.md) | Issue #88 intake, packet creation, proposal & design, implementation, independent review, acceptance | Passed local unit, lint, and typecheck; hosted DB checks pending CI |
 
 ## Canonical sync and archive
-
-(Pending completion and human acceptance)
+ 
+- Synced `JMG-004` to [workflow/specs/job-management.md](../../specs/job-management.md).
+- Synced `JOB-001` schedule operational window rules to [workflow/specs/public-job-listings.md](../../specs/public-job-listings.md).
+- Updated baseline to v1.15 in [workflow/specs/README.md](../../specs/README.md) and [workflow/ProductSpec.md](../../ProductSpec.md).
+- Moved packet to [workflow/archive/2026-10-15-scheduled-job-times/](../2026-10-15-scheduled-job-times/record.md).

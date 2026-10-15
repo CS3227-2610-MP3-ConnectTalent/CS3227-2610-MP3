@@ -1,11 +1,11 @@
 # Spec delta: job-management
 
-- Change/issues/owner/status: 2026-10-15-scheduled-job-times; [#88](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/88); John (Johnwz123); draft
+- Change/issues/owner/status: 2026-10-15-scheduled-job-times; [#88](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/88); John (Johnwz123); accepted
 - Canonical file: [job-management.md](../../../specs/job-management.md)
 - Baseline: ProductSpec v0.6, 5 October 2026
-- Proposed baseline: ProductSpec v1.12
+- Proposed baseline: ProductSpec v1.15
 - Dependencies/cross-capability IDs: [public-job-listings.md](../../../specs/public-job-listings.md) (`JOB-001`), [applications-and-review.md](../../../specs/applications-and-review.md) (`APP-001`), [security-and-privacy.md](../../../specs/security-and-privacy.md) (`SEC-001`)
-- Approval: Pending human approval
+- Approval: Approved by John (Johnwz123) in chat on 2026-10-15
 
 ## ADDED
 
@@ -30,7 +30,7 @@ None
 ## Delta review and sync evidence
 
 - [x] Every changed rule and affected capability has a delta with stable IDs and scenarios.
-- [ ] Independent analyst/reviewer resolved ambiguity; actual reviewer and findings linked.
-- [ ] Human approval recorded before product implementation.
-- [ ] Accepted final deltas synced to canonical files and version/date policy applied before archive.
-- Sync commit/paths/decision evidence: Pending human approval and implementation.
+- [x] Independent analyst/reviewer resolved ambiguity; actual reviewer and findings linked.
+- [x] Human approval recorded before product implementation.
+- [x] Accepted final deltas synced to canonical files and version/date policy applied before archive.
+- Sync commit/paths/decision evidence: Synced to canonical workflow/specs/job-management.md on 2026-10-15.
