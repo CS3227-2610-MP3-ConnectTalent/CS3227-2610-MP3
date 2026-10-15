@@ -18,7 +18,7 @@
 | 6 | Student owner John recorded acceptance decision in chat on 2026-10-15. |
 | 7 | Canonical specifications `job-management.md` (`JMG-004`) and `public-job-listings.md` (`JOB-001`) synced and baseline advanced to `v1.15, 15 October 2026` in `ProductSpec.md` and `specs/README.md`. Change packet moved to `workflow/archive/2026-10-15-scheduled-job-times/`. |
 
-| 8 | GitHub Actions CI (`38767472181` / `38767472347`) completed with all checks passing: Database checks (Postgres migrations reset, linter, pgTAP suite 12/12 files, 365 tests passed), Integration race suites (application, quota, withdrawal, and resume races passed), Playwright Chromium (11/11 critical PR journeys passed), app (format check, ESLint, TypeScript typecheck, Vitest unit test suite with coverage, build), and Vercel preview deployment. |
+| 8 | GitHub Actions CI (`38769093403` / `38769093513` on commit `7f66ea5`) completed with all checks passing: Database checks (Postgres migrations reset, linter, pgTAP suite 12/12 files, 365 tests passed in 2m36s), Integration race suites (application, quota, withdrawal, and resume races passed in 3m34s), Playwright Chromium (11/11 critical PR journeys passed in 3m44s), app (format check, ESLint, TypeScript typecheck, Vitest unit test suite with coverage, build in 1m10s), and Vercel preview deployment. |
 
 ## Limits and next gates
 

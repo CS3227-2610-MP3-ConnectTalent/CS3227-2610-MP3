@@ -70,11 +70,11 @@ Commands and results:
 - `pnpm typecheck`: Exit 0 (zero errors).
 - `pnpm lint`: Exit 0 (zero errors/warnings).
 - `pnpm test:unit`: Exit 0, 90 test files, 532 passing tests.
-- GitHub Actions CI (`38767472181` / `38767472347`):
-  - `Database checks` (`supabase db reset`, `supabase db lint`, `supabase test db`): Passed (exit 0, 2m20s).
-  - `Integration race suites` (`test:integration`): Passed (exit 0, 3m23s).
-  - `Playwright Chromium` (`test:e2e:critical`): Passed (11/11 journeys passed, 4m23s).
-  - `app` (`format:check`, `lint`, `typecheck`, `test:unit:coverage`, `build`): Passed (exit 0, 1m12s).
+- GitHub Actions CI (`38769093403` / `38769093513` on commit `7f66ea5`):
+  - `Database checks` (`supabase db reset`, `supabase db lint`, `supabase test db`): Passed (exit 0, 2m36s, 12/12 pgTAP test files, 365 tests passed).
+  - `Integration race suites` (`test:integration`): Passed (exit 0, 3m34s).
+  - `Playwright Chromium` (`test:e2e:critical`): Passed (11/11 journeys passed, 3m44s).
+  - `app` (`format:check`, `lint`, `typecheck`, `test:unit:coverage`, `build`): Passed (exit 0, 1m10s).
   - `Vercel` preview deployment: Passed.
 
 ## Review and decision
