@@ -34,7 +34,7 @@ describe("HR Job schema", () => {
   });
 });
 
-describe("HR Job operational status transitions", () => {
+describe("HR Job operational status - static states", () => {
   const now = new Date("2026-10-15T12:00:00.000Z");
 
   it("identifies draft and explicitly closed jobs", () => {
@@ -51,6 +51,10 @@ describe("HR Job operational status transitions", () => {
       ),
     ).toBe("closed");
   });
+});
+
+describe("HR Job operational status - schedule time windows", () => {
+  const now = new Date("2026-10-15T12:00:00.000Z");
 
   it("identifies scheduled jobs with future opens_at", () => {
     const job = createJob({
