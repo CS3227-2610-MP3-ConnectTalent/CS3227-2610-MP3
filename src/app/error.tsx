@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { PendingLinkStatus } from "@/components/pending-link-status";
+
 export default function ErrorPage({
   reset,
 }: {
@@ -22,6 +24,7 @@ export default function ErrorPage({
         </button>
         <Link href="/" className="font-medium underline underline-offset-4">
           Open roles
+          <PendingLinkStatus label="Opening roles…" />
         </Link>
       </div>
     </main>

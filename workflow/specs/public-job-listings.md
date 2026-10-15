@@ -1,6 +1,6 @@
 # Public job listings
 
-Baseline: ProductSpec v1.10, 14 October 2026 (accepted #78 public text search; prior #52 signed-in Applicant onboarding gate retained).
+Baseline: ProductSpec v1.11, 15 October 2026 (accepted #83 Search-action feedback; #78 public text search and #52 Applicant onboarding retained).
 
 ## JOB-001: Published-only browsing
 
@@ -32,6 +32,6 @@ The query MUST be one string of at most 100 Unicode characters after normalizati
 
 With JavaScript enabled, typing MUST apply after 300 ms of inactivity. Enter or Search MUST apply immediately and cancel pending debounce work; composition input MUST NOT trigger navigation until composition completes. Clear search MUST remove only text immediately; All roles MUST clear only category. Query/category MUST persist in shareable URL parameters and restore on refresh and back/forward. Debounced edits MUST replace the current history entry; explicit changed Search/category/Clear actions MUST add an entry. Stale timers/navigation responses MUST NOT override newer intended filters or trigger after leaving the page.
 
-The responsive interface MUST label search, preserve typing focus and scroll, announce pending/results status, and distinguish no matches, invalid search and generic loading failure. It MUST provide a usable explicit Search action without JavaScript. Existing JOB-001/002/003, ACC-006 and SEC-001 remain authoritative for published-only access, role/onboarding and category rules. No private data or AI MUST be included in search.
+The responsive interface MUST label search, preserve typing focus and scroll, announce pending/results status, and distinguish no matches, invalid search and generic loading failure. When an explicit Search starts a route request that has not resolved, its submit control MUST promptly show action-specific visible and assistive-technology pending feedback and be unavailable for repeat activation until the current request settles or is superseded. This MUST NOT disable typing, category or Clear controls needed to express a newer intent, and it MUST NOT show a loading state solely for the idle 300 ms debounce before a request starts. It MUST provide a usable explicit Search action without JavaScript. Existing JOB-001/002/003, ACC-006 and SEC-001 remain authoritative for published-only access, role/onboarding and category rules. No private data or AI MUST be included in search.
 
 Scenario: Given published and unpublished jobs with matching text, when a visitor searches and selects a category, then only published jobs matching the entire normalized phrase in that category appear, including a match beyond the first database page. Given malformed search input, the visitor sees safe guidance and no job results. Given an incomplete signed-in Applicant opening a search URL, the app leads to profile completion before reading jobs.

@@ -1,6 +1,8 @@
 # Product specification
 
-Current baseline: **1.10**, dated **14 October 2026** (accepted #78 public job search; v1.9 HR recruitment dashboard, v1.8 résumé before Save draft/private profile files, #52 required onboarding and prior withdrawal remain). The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+Current branch baseline: **1.11**, dated **15 October 2026** (accepted #83 Search/link pending feedback; #78 public job search, v1.9 HR recruitment dashboard, v1.8 résumé before Save draft/private profile files, #52 required onboarding and prior withdrawal remain). Open PR #82 separately proposes OVR-004 at v1.11; reconcile the version and both IDs when the branches integrate. The v1.4 profile/résumé baseline was dated 9 October 2026. The v1.0 email password recovery, v0.9 signup password usability and v0.8 HR review baselines were dated 8 October 2026; the v0.7 Applicant lifecycle baseline was dated 7 October 2026.
+
+Paul separately accepted #83 with its recorded browser-held total-network-failure limit on 15 October 2026 after independent re-review. [The #83 packet](archive/2026-10-15-navigation-loading/record.md) records local tests and the unverified hosted/accessibility checks. This accepted branch baseline does not establish PR merge or release.
 
 Paul separately accepted #78 on 14 October 2026 with recorded hosted and accessibility limits after independent review. JOB-004 adds literal public job text search with combined category filtering, URL restoration, debouncing and safe invalid-query feedback. The [accepted packet](archive/2026-10-14-job-listing-search/record.md) records checks, the fixed review finding and pending hosted validation. Canonical sync and archive do not establish PR merge or deployment.
 

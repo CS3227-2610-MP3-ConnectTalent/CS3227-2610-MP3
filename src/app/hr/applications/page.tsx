@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PendingLinkStatus } from "@/components/pending-link-status";
 import { requireHR } from "@/lib/hr-auth";
 import { listSubmittedApplications } from "@/lib/hr-applications";
 import { reviewStatusLabel } from "@/lib/hr-input";
@@ -27,6 +28,7 @@ export default async function HRApplicationsPage() {
       <header className="flex items-center justify-between gap-4">
         <Link href="/" className="underline">
           ← Careers
+          <PendingLinkStatus label="Opening roles…" />
         </Link>
       </header>
       <h1 className="text-3xl font-semibold">Application review</h1>

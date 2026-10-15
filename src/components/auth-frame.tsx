@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { BriefcaseBusiness } from "lucide-react";
+import { PendingLinkStatus } from "@/components/pending-link-status";
 
 export function AuthFrame({ children }: { children: ReactNode }) {
   return (
     <main className="page-shell mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
       <Link href="/" className="mb-6 inline-block text-sm underline">
         ← Careers
+        <PendingLinkStatus label="Opening roles…" />
       </Link>
       <div className="grid items-start gap-6 lg:grid-cols-[0.85fr_1fr]">
         <aside className="rounded-3xl bg-violet-100 p-7 text-violet-950 sm:p-10">

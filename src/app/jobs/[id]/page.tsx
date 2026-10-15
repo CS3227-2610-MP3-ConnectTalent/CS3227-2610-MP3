@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { BackToOpenRoles } from "@/components/back-to-open-roles";
+import { PendingLinkStatus } from "@/components/pending-link-status";
 import { getAccountNavigation } from "@/lib/account-navigation";
 import { categoryLabel } from "@/lib/job-categories";
 import { getPublishedJob } from "@/lib/jobs";
@@ -59,6 +60,7 @@ function JobApplyLink({ id }: { id: string }) {
       className="mt-7 inline-block rounded-lg bg-primary px-5 py-2.5 font-medium text-primary-foreground hover:opacity-90"
     >
       Apply for this role
+      <PendingLinkStatus label="Opening application…" />
     </Link>
   );
 }

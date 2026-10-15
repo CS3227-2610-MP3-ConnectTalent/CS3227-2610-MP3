@@ -149,6 +149,8 @@ Public job search (`JOB-004`, #78) validates the single `q` URL parameter on the
 
 [JobListingFilters](../src/components/job-listing-filters.tsx) renders a native GET form and category links. Its [controller](../src/lib/job-filter-controller.ts) coordinates a 300 ms debounce, composition, immediate actions and history restoration; the [hook](../src/components/use-job-listing-filters.ts) connects it to the Next router. Automatic updates replace history; explicit changes push. Server-rendered results remain separate from client controls. No database migration, dependency or hosted setting is required. Local implementation evidence is in the [#78 record](../workflow/archive/2026-10-14-job-listing-search/record.md); hosted validation remains pending.
 
+Issue #83 adds a disabled **Searching…** state to the Search submit button during the existing route transition; query/category/Clear remain usable for newer intent. The small [link status component](../src/components/pending-link-status.tsx) uses Next 16 `useLinkStatus` inside Apply and Careers return links, preserving real hrefs and route authorization. The [#83 packet](../workflow/archive/2026-10-15-navigation-loading/record.md) records local checks; hosted latency and a full assistive-technology review remain pending.
+
 ### 5.2 Data and lifecycle
 
 [supabase/migrations](../supabase/migrations) defines jobs, role profiles, Applicant profiles, applications, HR notes/status events, file lifecycle metadata and AI invocation/audit metadata. Unique owner/job constraints enforce one application. Supabase Auth owns account identity; submitted email is snapshotted from verified Auth, not browser input.

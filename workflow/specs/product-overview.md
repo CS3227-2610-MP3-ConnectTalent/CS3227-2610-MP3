@@ -1,6 +1,6 @@
 # Product overview
 
-Baseline: ProductSpec v1.4, 9 October 2026; accepted private profiles and optional PDF résumés.
+Baseline: ProductSpec v1.11, 15 October 2026; accepted #83 pending link feedback (earlier requirements retained).
 
 ## OVR-001: One employer per deployment
 
@@ -22,6 +22,12 @@ See [applications and review](applications-and-review.md), [Applicant AI draft](
 ## OVR-003: Non-goals
 
 Email automation and AI hiring decisions MUST NOT be part of the first release. Résumé parsing, AI profile autofill, multiple application attachments and HR access to Applicant profiles MUST NOT be provided by this change. Removing the résumé-upload exclusion does not alter accepted Auth verification/recovery behavior. Attachment permissions/lifecycle are defined in [SEC-009](security-and-privacy.md) and [APP-006/007](applications-and-review.md).
+
+## OVR-005: Pending feedback for selected route links
+
+A visible **Apply for this role** link or named return-to-Careers link MUST show an action-specific, visually and assistive-technology perceivable pending hint while its client navigation has started but has not reached the destination. The hint MUST clear when the client route completes, is superseded, or renders an application error or destination. If the browser holds a full-document navigation after a total network failure, the browser controls loading; the app does not promise an in-page reset while its JavaScript cannot run. Fast and prefetched navigation MAY complete without a visible intermediate state. The link MUST preserve its real href and normal keyboard, modified-click, new-tab and no-JavaScript behavior. Pending feedback MUST NOT grant route access, change the destination, expose private state, or replace server authorization.
+
+Scenario: Given a published job and an eligible Applicant, when **Apply for this role** waits for its route, then its link shows “Opening application…” until navigation completes. A cancelled client navigation or application-handled error clears the hint. A browser-held total network failure remains the accepted in-page-clearing limit.
 
 ## Unresolved ownership and implementation evidence
 

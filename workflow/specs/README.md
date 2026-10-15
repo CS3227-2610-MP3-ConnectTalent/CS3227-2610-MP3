@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.10, 14 October 2026**. The accepted #78 public search adds JOB-004 below; the [archived packet](../archive/2026-10-14-job-listing-search/record.md) preserves the acceptance source, reviewer finding and limits. Earlier change traces below preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 15 October 2026** on this branch. Accepted #83 amends JOB-004 Search feedback and adds OVR-005 link feedback; [its archived packet](../archive/2026-10-15-navigation-loading/record.md) preserves approval, independent re-review and the browser-held failure limit. Open PR #82 also proposes v1.11 with OVR-004; reconcile both when integrating. Earlier accepted #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This branch sync does not certify hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## v1.10 accepted public job search
 
