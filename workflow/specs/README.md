@@ -2,7 +2,11 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.10, 14 October 2026**. The accepted #78 public search adds JOB-004 below; the [archived packet](../archive/2026-10-14-job-listing-search/record.md) preserves the acceptance source, reviewer finding and limits. Earlier change traces below preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 15 October 2026**. The accepted #81 pending-action feedback adds OVR-004 to [product overview](product-overview.md); its [archived packet](../archive/2026-10-14-pending-action-feedback/record.md) preserves approval, review, acceptance and limits. The accepted #78 public search added JOB-004; the [archived packet](../archive/2026-10-14-job-listing-search/record.md) preserves its acceptance source, reviewer finding and limits. Earlier change traces below preserve the accepted HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines. The accepted #52 change adds required-profile onboarding and international-phone/autofill rules; accepted #53 adds résumé before Save draft and private profile files. Neither version nor the split certifies hosted migration or release acceptance. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+
+## v1.11 accepted pending-action feedback
+
+Paul accepted #81 with recorded limits on 15 October 2026 after local checks and separate read-only review. OVR-004 requires prompt action-specific pending feedback and unavailable repeat activation for server-backed submit controls while retaining validation and retry behavior. The [complete archived packet](../archive/2026-10-14-pending-action-feedback/record.md) records two fixed reviewer findings, meaningful browser and unit checks, and hosted/accessibility limits. Canonical sync preceded archive; no commit, PR or hosted release follows from acceptance.
 
 ## v1.10 accepted public job search
 

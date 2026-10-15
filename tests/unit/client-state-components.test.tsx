@@ -32,6 +32,7 @@ import { PasswordInput } from "@/components/password-input";
 import { WithdrawalControl } from "@/components/withdrawal-control";
 import { SignUpForm } from "@/app/auth/sign-up/sign-up-form";
 import { ResetPasswordForm } from "@/app/auth/reset-password/reset-password-form";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 
 beforeEach(() => {
   mocks.stateValues = [];
@@ -212,7 +213,7 @@ it("clears a local password error after a match and restores the provider error"
   expect(signupAlert(matched)).toBe("provider error");
 });
 
-it("renders reset-password errors and disables the submit action while pending", () => {
+it("renders reset-password errors and delegates pending feedback to its form button", () => {
   mocks.actionState = [{ error: "Could not update password." }, vi.fn(), true];
   const form = renderWithState(() => ResetPasswordForm());
   expect(form.type).toBe("form");
@@ -221,9 +222,9 @@ it("renders reset-password errors and disables the submit action while pending",
     props?: Record<string, unknown>;
   }>;
   expect(children[0]?.props?.role).toBe("alert");
-  const button = children.find((child) => child.type === "button");
-  expect(button?.props?.disabled).toBe(true);
-  expect(button?.props?.children).toBe("Update password");
+  const button = children.find((child) => child.type === PendingSubmitButton);
+  expect(button?.props?.label).toBe("Update password");
+  expect(button?.props?.pendingLabel).toBe("Updating password…");
 
   mocks.actionState = [{ error: "" }, vi.fn(), false];
   const noError = renderWithState(() => ResetPasswordForm());
