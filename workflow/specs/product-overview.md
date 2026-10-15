@@ -1,6 +1,6 @@
 # Product overview
 
-Baseline: ProductSpec v1.11 on this branch, 15 October 2026; accepted #84 action feedback (earlier requirements retained).
+Baseline: ProductSpec v1.14, 15 October 2026; accepted #81, #83 and #84 pending feedback coexist with earlier requirements, including private profiles and optional PDF résumés.
 
 ## OVR-001: One employer per deployment
 
@@ -22,6 +22,22 @@ See [applications and review](applications-and-review.md), [Applicant AI draft](
 ## OVR-003: Non-goals
 
 Email automation and AI hiring decisions MUST NOT be part of the first release. Résumé parsing, AI profile autofill, multiple application attachments and HR access to Applicant profiles MUST NOT be provided by this change. Removing the résumé-upload exclusion does not alter accepted Auth verification/recovery behavior. Attachment permissions/lifecycle are defined in [SEC-009](security-and-privacy.md) and [APP-006/007](applications-and-review.md).
+
+## OVR-004: Feedback for pending server actions
+
+A visible, enabled control that submits a server-backed action MUST show prompt, action-specific pending feedback and become unavailable for repeat activation while that submission is pending. The feedback MUST be perceivable to assistive technology. On validation failure or server error, the user MUST retain a usable retry path without a stuck pending state. Pending UI MUST NOT replace server authorization, validation, concurrency or duplicate-write protection. Native form submission without JavaScript MUST remain available where it exists today. Instant local controls and navigation links do not require this state.
+
+Scenario: Given an Applicant or HR form with valid input and a delayed server action, when its submit control is activated, then its specific pending state is announced and repeat activation is unavailable until success or error navigation.
+
+Failure scenario: Given invalid native input or a failed server action, when the attempt ends or never starts, then the control is usable again and the existing validation or error result remains available.
+
+## OVR-005: Pending feedback for selected route links
+
+A visible **View role**, **Apply for this role** or named return-to-Careers link MUST show an action-specific, visually and assistive-technology perceivable pending hint while its client navigation has started but has not reached the destination. The hint MUST clear when the client route completes, is superseded, or renders an application error or destination. If the browser holds a full-document navigation after a total network failure, the browser controls loading; the app does not promise an in-page reset while its JavaScript cannot run. Fast and prefetched navigation MAY complete without a visible intermediate state. The link MUST preserve its real href and normal keyboard, modified-click, new-tab and no-JavaScript behavior. Pending feedback MUST NOT grant route access, change the destination, expose private state, or replace server authorization.
+
+Scenario: Given a published job and an eligible Applicant, when **Apply for this role** waits for its route, then its link shows “Opening application…” until navigation completes. A cancelled client navigation or application-handled error clears the hint. A browser-held total network failure remains the accepted in-page-clearing limit.
+
+Scenario: Given a published job card, when a visitor activates **View role** and the detail route waits, then that card shows “Opening role…” until navigation completes. A fast or already-prefetched route may have no perceivable pending interval.
 
 ## OVR-006: Pending feedback for remaining request actions
 

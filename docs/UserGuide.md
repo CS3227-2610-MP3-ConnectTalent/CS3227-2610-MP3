@@ -44,6 +44,8 @@ Choose **Save profile** to unlock Careers and applications. Uploading a file doe
 
 Both roles use **Sign in**. Use **Sign out** in the header when finished; if an error appears, retry rather than assuming the session ended.
 
+Server-backed sign-in, account and HR form actions show an action-specific loading label and disable that form's submit button while its request is pending. If validation or an action error appears, correct it and retry. Loading feedback does not mean the action succeeded; wait for the resulting page or message.
+
 For recovery, choose **Forgot password?**, enter email, open the recovery message in the requesting browser, enter matching new passwords of 8–72 characters, then sign in again. The request acknowledgement is the same for registered and unregistered addresses. Invalid/expired links require another request. Recovery preserves your role; local messages appear in Mailpit.
 
 ## 2. Interface overview
@@ -66,6 +68,8 @@ Guests can browse; signed-in Applicants complete their profile first. Open **Car
 Use **Search open roles** to find a phrase in a job's title, team, description or requirements. Matching ignores case and repeated whitespace; the whole phrase must appear in one field. Search and category filters work together. Use up to 100 characters; punctuation is treated literally.
 
 Results update after a short pause (300 ms). Press Enter or choose **Search** to apply immediately. **Clear search** removes only the phrase; **All roles** removes only the category. The address keeps both filters for sharing, refreshing and browser Back/Forward. Without JavaScript, choose **Search** to submit the form. If no roles match, try a different phrase or category; invalid searches show guidance without results.
+
+While a search request is pending, **Search** shows **Searching…** and cannot be pressed again. You can still change the query, category or Clear. A delayed **View role**, **Apply for this role** or return-to-Careers link shows a small loading indicator beside that link; the destination and access rules stay the same. Fast navigation may finish before the indicator appears.
 
 ### 3.2 Complete and save an application
 

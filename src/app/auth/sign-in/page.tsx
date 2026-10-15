@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signIn } from "@/app/auth/actions";
 import { AuthFrame } from "@/components/auth-frame";
 import { PasswordInput } from "@/components/password-input";
+import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -60,9 +61,11 @@ function SignInForm() {
           required
         />
       </div>
-      <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">
-        Sign in
-      </button>
+      <PendingSubmitButton
+        label="Sign in"
+        pendingLabel="Signing in…"
+        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+      />
     </form>
   );
 }

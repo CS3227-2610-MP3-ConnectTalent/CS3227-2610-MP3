@@ -2,7 +2,19 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 15 October 2026** on this branch. Accepted #84 adds OVR-006 action-specific pending feedback; [its complete archive](../archive/2026-10-15-remaining-action-feedback/record.md) preserves the review fix, checks and limits. Open PR #82 and the separate accepted #83 branch also propose v1.11 with OVR-004/005; reconcile all IDs and version when integrating. Earlier #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This branch sync does not certify hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.14, 15 October 2026** on this PR #86 branch. Merged PR #82 brought OVR-004; merged PR #85 brought JOB-004/OVR-005; separately accepted #84 adds OVR-006. The separate accepted packets preserve their approval, review and verification limits. This sync does not certify PR #86 merge, hosted deployment or release.
+
+## v1.14 integrated pending feedback
+
+OVR-004 from merged PR #82, JOB-004/OVR-005 from merged PR #85 and OVR-006 from #84 coexist in this branch. PR #86 and hosted latency/full accessibility checks remain pending.
+
+## v1.13 integrated pending feedback
+
+The earlier integrated baseline reconciled OVR-004 from [#81](../archive/2026-10-14-pending-action-feedback/record.md) with JOB-004/OVR-005 from [#83](../archive/2026-10-15-navigation-loading/record.md) and its separately accepted [View role follow-up](../archive/2026-10-15-view-role-loading/record.md). Those packets preserve separate approval, review and acceptance evidence. PR #85 subsequently merged to `develop`; hosted latency and full accessibility checks remain pending.
+
+## v1.11 accepted pending-action feedback
+
+Paul accepted #81 with recorded limits on 15 October 2026 after local checks and separate read-only review. OVR-004 requires prompt action-specific pending feedback and unavailable repeat activation for server-backed submit controls while retaining validation and retry behavior. The [complete archived packet](../archive/2026-10-14-pending-action-feedback/record.md) records two fixed reviewer findings, meaningful browser and unit checks, and hosted/accessibility limits. Canonical sync preceded archive; PR #82 later merged to `develop`. The original acceptance alone did not establish commit, PR or hosted release.
 
 ## v1.10 accepted public job search
 
