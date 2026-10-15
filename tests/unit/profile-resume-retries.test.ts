@@ -126,13 +126,34 @@ it("reconciles a ready profile operation before checking the stale expected id",
     "retire_profile_resume",
     expect.anything(),
   );
-  expect(mocks.rpc).toHaveBeenCalledWith(
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
     "reserve_profile_resume",
-    expect.objectContaining({ p_operation: operation }),
+    expect.anything(),
   );
   expect(
     (mocks.storageBucket as { upload: ReturnType<typeof vi.fn> }).upload,
   ).not.toHaveBeenCalled();
+});
+
+it("returns a ready profile retry before revalidating its file", async () => {
+  setReadyResult({ state: "ready" });
+  mocks.validateResume.mockRejectedValue(new Error("validator unavailable"));
+
+  await expect(
+    uploadProfileResume(
+      actor,
+      new File(["synthetic PDF"], "synthetic.pdf"),
+      operation,
+      null,
+      true,
+    ),
+  ).resolves.toBeUndefined();
+
+  expect(mocks.validateResume).not.toHaveBeenCalled();
+  expect(mocks.rpc).not.toHaveBeenCalledWith(
+    "reserve_profile_resume",
+    expect.anything(),
+  );
 });
 
 it("reports a retired operation so the client can retry the selected file with a new id", async () => {

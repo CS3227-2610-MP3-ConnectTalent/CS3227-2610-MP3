@@ -294,5 +294,5 @@ it("rejects mismatched stored bytes and cancels upload state after storage/final
       operation,
       null,
     ),
-  ).rejects.toThrow("Reload your profile or press Upload résumé again");
+  ).rejects.toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
 });

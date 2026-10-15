@@ -60,6 +60,11 @@ const preparationFailures = {
     message:
       "Your application changed. Refresh it before uploading the résumé.",
   },
+  RESUME_PROFILE_CHANGED: {
+    status: 409,
+    message:
+      "Your profile résumé changed. Refresh your profile before uploading again.",
+  },
   RESUME_UPLOAD_OPERATION_CONFLICT: {
     status: 409,
     message:
@@ -161,6 +166,8 @@ export function resumePreparationCode(
     case "Editable saved draft required":
     case "Application changed; reload before saving":
       return "RESUME_APPLICATION_CHANGED";
+    case "Profile resume changed; reload":
+      return "RESUME_PROFILE_CHANGED";
     case "Upload operation cannot be reused":
       return "RESUME_UPLOAD_OPERATION_CONFLICT";
     default:

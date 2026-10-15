@@ -10,6 +10,7 @@ import {
   ResumeUploadOperationRetiredError,
   ResumeUploadPreparationError,
   ResumeValidationError,
+  resumePreparationCode,
 } from "./resume-errors";
 import { validateResume } from "./resume-input";
 const bucket = "profile-resumes";
@@ -79,14 +80,17 @@ export async function uploadProfileResume(
   expected: string | null,
   retry = false,
 ) {
-  const valid = await validateResume(file);
   const client = resumeMutationClient();
+  let operationState: Awaited<ReturnType<typeof profileUploadState>> = null;
   if (retry) {
-    const state = await profileUploadState(client, actor, operation);
-    if (state === "retired" || state === "deleting")
+    operationState = await profileUploadState(client, actor, operation);
+    if (operationState === "ready") return;
+    if (operationState === "retired" || operationState === "deleting")
       throw new ResumeUploadOperationRetiredError();
-    if (!state) await retireProfileResume(actor, expected, true);
   }
+  const valid = await validateResume(file);
+  if (retry && !operationState)
+    await retireProfileResume(actor, expected, true);
   const path = await reserveProfileResume(
     client,
     actor,
@@ -106,19 +110,47 @@ async function reserveProfileResume(
   expected: string | null,
   valid: Awaited<ReturnType<typeof validateResume>>,
 ) {
-  const { data: path, error } = await client.rpc("reserve_profile_resume", {
-    p_actor: actor,
-    p_operation: operation,
-    p_filename: valid.filename,
-    p_size: valid.bytes.length,
-    p_sha256: valid.sha256,
-    p_expected: expected,
-  });
-  if (error || typeof path !== "string")
-    throw new Error(
-      "Reload your profile or press Upload résumé again if an earlier upload was interrupted.",
-    );
+  let result: Awaited<
+    ReturnType<ReturnType<typeof resumeMutationClient>["rpc"]>
+  >;
+  try {
+    result = await client.rpc("reserve_profile_resume", {
+      p_actor: actor,
+      p_operation: operation,
+      p_filename: valid.filename,
+      p_size: valid.bytes.length,
+      p_sha256: valid.sha256,
+      p_expected: expected,
+    });
+  } catch (error) {
+    throw profileReservationFailure(error);
+  }
+  const { data: path, error } = result;
+  if (error) throw profileReservationFailure(error);
+  if (typeof path !== "string")
+    throw profileStateLookupFailure("profile_reservation_invalid_response");
   return path;
+}
+
+function profileReservationFailure(error: unknown) {
+  const code = resumePreparationCode(error);
+  const reference = randomUUID();
+  if (code === "RESUME_UPLOAD_PREPARATION_FAILED") {
+    const details =
+      typeof error === "object" && error !== null
+        ? (error as Record<string, unknown>)
+        : null;
+    const sqlState =
+      typeof details?.code === "string" && /^[0-9A-Z]{5}$/.test(details.code)
+        ? details.code
+        : undefined;
+    console.error("resume_upload_preparation_failed", {
+      reference,
+      stage: "profile_reservation",
+      ...(sqlState ? { sqlState } : {}),
+    });
+  }
+  return new ResumeUploadPreparationError(code, reference);
 }
 
 function profileStateLookupFailure(
@@ -126,7 +158,8 @@ function profileStateLookupFailure(
     | "profile_state_lookup"
     | "profile_state_unexpected"
     | "profile_metadata_lookup"
-    | "profile_metadata_invalid",
+    | "profile_metadata_invalid"
+    | "profile_reservation_invalid_response",
 ) {
   const reference = randomUUID();
   console.error("resume_upload_preparation_failed", { reference, stage });
