@@ -17,13 +17,27 @@ const jobSchema = z.object({
   category: z.enum(categoryValues),
   description: z.string(),
   requirements: z.string(),
+  closes_at: z.string().nullable().optional(),
 });
 
 export type PublishedJob = z.infer<typeof jobSchema>;
 
-const publishedJobRowSchema = jobSchema.extend({ published_at: z.string() });
+const publishedJobRowSchema = jobSchema.extend({
+  published_at: z.string(),
+  opens_at: z.string().nullable().optional(),
+});
+
 const publicFields =
-  "id,title,team,category,description,requirements,published_at";
+  "id,title,team,category,description,requirements,published_at,opens_at,closes_at";
+
+function isJobInActiveWindow(
+  row: { opens_at?: string | null; closes_at?: string | null },
+  now: number = Date.now(),
+): boolean {
+  if (row.opens_at && new Date(row.opens_at).getTime() > now) return false;
+  if (row.closes_at && new Date(row.closes_at).getTime() <= now) return false;
+  return true;
+}
 
 function publicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -73,6 +87,7 @@ export async function listPublishedJobs(
     (row) => row.published_at,
     false,
   )
+    .filter((row) => isJobInActiveWindow(row))
     .map((row) => jobSchema.parse(row))
     .filter((row) => matchesJobSearch(row, phrase));
 }
@@ -95,5 +110,10 @@ export async function getPublishedJob(
     throw new Error("Unable to load the selected job.", { cause: error });
   }
 
-  return data ? jobSchema.parse(data) : null;
+  const parsed = data ? publishedJobRowSchema.parse(data) : null;
+  if (!parsed || !isJobInActiveWindow(parsed)) {
+    return null;
+  }
+
+  return jobSchema.parse(parsed);
 }

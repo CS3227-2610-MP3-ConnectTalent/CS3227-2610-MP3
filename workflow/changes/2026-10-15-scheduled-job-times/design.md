@@ -11,12 +11,12 @@
 
 ## Decisions and alternatives
 
-| Decision | Considered alternatives | Reason and tradeoffs | Human approval reference |
-| -------- | ----------------------- | -------------------- | ------------------------ |
-| Dynamic time-window evaluation in RLS and queries | External cron daemon (`pg_cron`, serverless cron) mutating `status` column | High reliability, 0 cron failure points, atomic consistency under row lock | Approved in brainstorming on 2026-10-15 |
-| Optional inputs in Job Editor form | Separate modal or publication action | Unified form simplifies draft preparation and review | Approved in brainstorming on 2026-10-15 |
-| Operational status badge ("Draft", "Scheduled", "Published", "Closed") | Keep status badge as "Published" with dates | Clear UX distinction between scheduled and active postings | Approved in brainstorming on 2026-10-15 |
-| Allow reverting scheduled jobs to draft before `opens_at` | Permanent lock immediately upon clicking publish | Since no applicant can view or apply before `opens_at`, HR can safely make schedule adjustments or recall | Approved in brainstorming on 2026-10-15 |
+| Decision                                                               | Considered alternatives                                                    | Reason and tradeoffs                                                                                      | Human approval reference                |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Dynamic time-window evaluation in RLS and queries                      | External cron daemon (`pg_cron`, serverless cron) mutating `status` column | High reliability, 0 cron failure points, atomic consistency under row lock                                | Approved in brainstorming on 2026-10-15 |
+| Optional inputs in Job Editor form                                     | Separate modal or publication action                                       | Unified form simplifies draft preparation and review                                                      | Approved in brainstorming on 2026-10-15 |
+| Operational status badge ("Draft", "Scheduled", "Published", "Closed") | Keep status badge as "Published" with dates                                | Clear UX distinction between scheduled and active postings                                                | Approved in brainstorming on 2026-10-15 |
+| Allow reverting scheduled jobs to draft before `opens_at`              | Permanent lock immediately upon clicking publish                           | Since no applicant can view or apply before `opens_at`, HR can safely make schedule adjustments or recall | Approved in brainstorming on 2026-10-15 |
 
 ## Interfaces and data flow
 
@@ -53,13 +53,13 @@
 
 ## Failure behavior
 
-| Failure / adversarial input | Observable outcome / state guarantees | Verification |
-| --------------------------- | ------------------------------------- | ------------ |
-| `closes_at <= opens_at` | Database CHECK constraint `jobs_schedule_window` rejects write; form input returns safe validation error | sched-AC-01 |
-| Applicant attempts submission to future-scheduled job | `submit_application` RPC raises exception `Job is not open for applications` (P0001) | sched-AC-01 |
-| Applicant attempts submission to expired `closes_at` job | `submit_application` RPC raises exception `Job is not open for applications` (P0001) | sched-AC-03 |
-| HR attempts `unpublish_hr_job` after `opens_at` has elapsed | RPC raises exception `Published job has already opened` (P0001) | sched-AC-02 |
-| Direct SELECT query for scheduled job by anonymous user | RLS returns 0 rows | sched-AC-01 |
+| Failure / adversarial input                                 | Observable outcome / state guarantees                                                                    | Verification |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------ |
+| `closes_at <= opens_at`                                     | Database CHECK constraint `jobs_schedule_window` rejects write; form input returns safe validation error | sched-AC-01  |
+| Applicant attempts submission to future-scheduled job       | `submit_application` RPC raises exception `Job is not open for applications` (P0001)                     | sched-AC-01  |
+| Applicant attempts submission to expired `closes_at` job    | `submit_application` RPC raises exception `Job is not open for applications` (P0001)                     | sched-AC-03  |
+| HR attempts `unpublish_hr_job` after `opens_at` has elapsed | RPC raises exception `Published job has already opened` (P0001)                                          | sched-AC-02  |
+| Direct SELECT query for scheduled job by anonymous user     | RLS returns 0 rows                                                                                       | sched-AC-01  |
 
 ## Migration and backward compatibility
 
@@ -78,4 +78,3 @@
 - [x] Security, failure, migration, rollout and rollback impacts assessed.
 - Findings/owner/resolution: All core design decisions approved by student owner John on 2026-10-15.
 - Human approval: Pending student sign-off on packet artifacts.
-

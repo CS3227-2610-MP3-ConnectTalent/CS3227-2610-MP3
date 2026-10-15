@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { requireHR } from "@/lib/hr-auth";
 import { parseHRJobFields, parseHRJobId } from "@/lib/hr-job-input";
 
-type Operation = "create" | "edit" | "publish" | "close";
+type Operation = "create" | "edit" | "publish" | "close" | "unpublish";
 function audit(
   actor: string,
   operation: Operation,
@@ -47,6 +47,8 @@ export async function createHRJobDraft(formData: FormData) {
       p_category: fields.category,
       p_description: fields.description,
       p_requirements: fields.requirements,
+      p_opens_at: fields.opens_at,
+      p_closes_at: fields.closes_at,
     });
   } catch {
     audit(user.id, "create", "new", "denied");
@@ -85,6 +87,8 @@ export async function editHRJobDraft(formData: FormData) {
       p_category: fields.value.category,
       p_description: fields.value.description,
       p_requirements: fields.value.requirements,
+      p_opens_at: fields.value.opens_at,
+      p_closes_at: fields.value.closes_at,
     }));
   } catch {
     error = true;
@@ -97,7 +101,7 @@ export async function editHRJobDraft(formData: FormData) {
 
 async function transitionHRJob(
   formData: FormData,
-  operation: "publish" | "close",
+  operation: "publish" | "close" | "unpublish",
 ) {
   const { client, user } = await requireHR();
   const id = parseHRJobId(formData.get("jobId"));
@@ -107,19 +111,26 @@ async function transitionHRJob(
   }
   let error: unknown;
   try {
-    ({ error } = await client.rpc(
-      operation === "publish" ? "publish_hr_job" : "close_hr_job",
-      { p_job_id: id.value },
-    ));
+    const rpcName =
+      operation === "publish"
+        ? "publish_hr_job"
+        : operation === "close"
+          ? "close_hr_job"
+          : "unpublish_hr_job";
+    ({ error } = await client.rpc(rpcName, { p_job_id: id.value }));
   } catch {
     error = true;
   }
   audit(user.id, operation, id.value, error ? "denied" : "changed");
   if (error) redirect(`/hr/jobs/${id.value}?error=transition`);
   refreshJobs(id.value);
-  redirect(
-    `/hr/jobs/${id.value}?notice=${operation === "publish" ? "published" : "closed"}`,
-  );
+  const notice =
+    operation === "publish"
+      ? "published"
+      : operation === "close"
+        ? "closed"
+        : "unpublished";
+  redirect(`/hr/jobs/${id.value}?notice=${notice}`);
 }
 
 export async function publishHRJob(formData: FormData) {
@@ -128,4 +139,8 @@ export async function publishHRJob(formData: FormData) {
 
 export async function closeHRJob(formData: FormData) {
   await transitionHRJob(formData, "close");
+}
+
+export async function unpublishHRJob(formData: FormData) {
+  await transitionHRJob(formData, "unpublish");
 }

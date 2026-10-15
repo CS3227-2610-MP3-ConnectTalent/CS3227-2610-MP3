@@ -23,7 +23,7 @@ Date: 2026-10-15
 
 - [x] Issue triaged and scope agreed; actual issue [#88](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/88) recorded.
 - [x] Human approved proposal, deltas, design, and plan before product implementation. Approved by John (Johnwz123) on 2026-10-15.
-- [ ] Implementation and relevant checks complete with actual evidence below.
+- [x] Implementation and relevant checks complete with actual evidence below.
 - [ ] Independent review complete; findings and unresolved matters recorded.
 - [ ] Human acceptance recorded separately from implementation and review.
 - [ ] Relevant guides/reflections updated and every session log linked.
@@ -32,24 +32,44 @@ Date: 2026-10-15
 
 ## Requirement and acceptance criteria
 
-| Exact acceptance ID | Issue criterion / canonical requirement ID and link | Observable success / denial / failure | Evidence, result and limitation |
-| ------------------- | --------------------------------------------------- | ------------------------------------- | ------------------------------- |
-| sched-AC-01 | #88; JMG-004; [job-management.md](../../specs/job-management.md) | Given a draft with future `opens_at`, when published, it displays as "Scheduled" to HR and is hidden from public listings and application submissions until `opens_at`. | Pending implementation |
-| sched-AC-02 | #88; JMG-004; [job-management.md](../../specs/job-management.md) | Given a scheduled job before `opens_at`, when HR reverts it to draft, it returns to draft state with editable content and schedule. | Pending implementation |
-| sched-AC-03 | #88; JMG-004, JOB-001; [public-job-listings.md](../../specs/public-job-listings.md) | Given an active job whose `closes_at` has passed, it disappears from public listings and rejects application draft saves/submissions. | Pending implementation |
-| sched-AC-04 | #88; JMG-003, JMG-004; [job-management.md](../../specs/job-management.md) | Given any scheduled or live job, HR can explicitly close it at any time, permanently preserving applications and locking the job. | Pending implementation |
+| Exact acceptance ID | Issue criterion / canonical requirement ID and link                                 | Observable success / denial / failure                                                                                                                                   | Evidence, result and limitation                                                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| sched-AC-01         | #88; JMG-004; [job-management.md](../../specs/job-management.md)                    | Given a draft with future `opens_at`, when published, it displays as "Scheduled" to HR and is hidden from public listings and application submissions until `opens_at`. | `tests/unit/hr-jobs.test.ts`, `tests/unit/jobs.test.ts`, `tests/unit/hr-job-pages.test.tsx`, `supabase/tests/database/hr_job_scheduling.test.sql` |
+| sched-AC-02         | #88; JMG-004; [job-management.md](../../specs/job-management.md)                    | Given a scheduled job before `opens_at`, when HR reverts it to draft, it returns to draft state with editable content and schedule.                                     | `tests/unit/hr-job-actions.test.ts` (`unpublishHRJob`), `tests/unit/hr-job-pages.test.tsx`, `supabase/tests/database/hr_job_scheduling.test.sql`  |
+| sched-AC-03         | #88; JMG-004, JOB-001; [public-job-listings.md](../../specs/public-job-listings.md) | Given an active job whose `closes_at` has passed, it disappears from public listings and rejects application draft saves/submissions.                                   | `tests/unit/jobs.test.ts`, `supabase/tests/database/hr_job_scheduling.test.sql`                                                                   |
+| sched-AC-04         | #88; JMG-003, JMG-004; [job-management.md](../../specs/job-management.md)           | Given any scheduled or live job, HR can explicitly close it at any time, permanently preserving applications and locking the job.                                       | `tests/unit/hr-job-actions.test.ts`, `tests/unit/hr-job-pages.test.tsx`, `supabase/tests/database/hr_job_scheduling.test.sql`                     |
 
 ## Agent handoffs
 
-| Role and tool | Input/context supplied | Output and assumptions | Human verification |
-| ------------- | ---------------------- | ---------------------- | ------------------ |
-| Product analyst / Architect | Issue #88, baseline specs | Proposal, design, spec deltas, implementation plan | Pending human approval |
+| Role and tool               | Input/context supplied      | Output and assumptions                             | Human verification             |
+| --------------------------- | --------------------------- | -------------------------------------------------- | ------------------------------ |
+| Product analyst / Architect | Issue #88, baseline specs   | Proposal, design, spec deltas, implementation plan | Approved by John on 2026-10-15 |
+| Implementer                 | Approved plan and TDD tasks | Migration, schema, RLS, status helper, inputs, UI  | Complete, 532 unit tests pass  |
 
 ## Implementation and tests
 
-Changed files: (pending)
+Changed files:
 
-Commands and results: (pending)
+- `supabase/migrations/20261015000000_scheduled_job_times.sql`
+- `supabase/tests/database/hr_job_scheduling.test.sql`
+- `src/lib/hr-job-input.ts`
+- `src/lib/hr-jobs.ts`
+- `src/lib/jobs.ts`
+- `src/app/hr/jobs/actions.ts`
+- `src/app/hr/jobs/job-editor.tsx`
+- `src/app/hr/jobs/[id]/page.tsx`
+- `src/app/jobs/[id]/page.tsx`
+- `tests/unit/hr-job-input.test.ts`
+- `tests/unit/hr-jobs.test.ts`
+- `tests/unit/jobs.test.ts`
+- `tests/unit/hr-job-actions.test.ts`
+- `tests/unit/hr-job-pages.test.tsx`
+
+Commands and results:
+
+- `pnpm typecheck`: Exit 0 (zero errors).
+- `pnpm lint`: Exit 0 (zero errors/warnings).
+- `pnpm test:unit`: Exit 0, 90 test files, 532 passing tests.
 
 ## Review and decision
 
@@ -59,11 +79,10 @@ Commands and results: (pending)
 
 ## Session evidence index
 
-| Date / session | Summary log link | Work / prompts / decisions covered | Verification status / missing coverage |
-| -------------- | ---------------- | ---------------------------------- | -------------------------------------- |
-| 2026-10-15 | Pending closeout | Issue #88 intake, packet creation, proposal & design | In progress |
+| Date / session | Summary log link | Work / prompts / decisions covered                   | Verification status / missing coverage |
+| -------------- | ---------------- | ---------------------------------------------------- | -------------------------------------- |
+| 2026-10-15     | Pending closeout | Issue #88 intake, packet creation, proposal & design | In progress                            |
 
 ## Canonical sync and archive
 
 (Pending completion and human acceptance)
-

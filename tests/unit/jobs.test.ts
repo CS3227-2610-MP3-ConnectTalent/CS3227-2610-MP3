@@ -146,3 +146,47 @@ it.each(["%", "_", "(title.ilike.*)", "software typescript"])(
     await expect(listPublishedJobs(undefined, phrase)).resolves.toEqual([]);
   },
 );
+
+it("excludes future-scheduled and expired jobs from public listings and detail", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+
+  const futureJob = {
+    ...publicJobRow,
+    id: "00000000-0000-4000-8000-000000000103",
+    opens_at: "2099-01-01T00:00:00Z",
+  };
+  const expiredJob = {
+    ...publicJobRow,
+    id: "00000000-0000-4000-8000-000000000104",
+    closes_at: "2020-01-01T00:00:00Z",
+  };
+  const activeJob = {
+    ...publicJobRow,
+    id: "00000000-0000-4000-8000-000000000105",
+    opens_at: "2020-01-01T00:00:00Z",
+    closes_at: "2099-01-01T00:00:00Z",
+  };
+
+  vi.stubGlobal(
+    "fetch",
+    createFetchMock(() => {}, [futureJob, expiredJob, activeJob]),
+  );
+
+  const results = await listPublishedJobs();
+  expect(results.map((j) => j.id)).toEqual([activeJob.id]);
+
+  // Test getPublishedJob for future
+  vi.stubGlobal(
+    "fetch",
+    createFetchMock(() => {}, futureJob),
+  );
+  await expect(getPublishedJob(futureJob.id)).resolves.toBeNull();
+
+  // Test getPublishedJob for expired
+  vi.stubGlobal(
+    "fetch",
+    createFetchMock(() => {}, expiredJob),
+  );
+  await expect(getPublishedJob(expiredJob.id)).resolves.toBeNull();
+});

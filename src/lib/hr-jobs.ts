@@ -8,7 +8,8 @@ const categories = JOB_CATEGORIES.map((category) => category.value) as [
   JobCategory,
   ...JobCategory[],
 ];
-const hrJobSchema = z.object({
+
+export const hrJobSchema = z.object({
   id: z.uuid(),
   title: z.string(),
   team: z.string(),
@@ -18,10 +19,33 @@ const hrJobSchema = z.object({
   status: z.enum(["draft", "published", "closed"]),
   created_at: z.string(),
   published_at: z.string().nullable(),
+  opens_at: z.string().nullable().optional(),
+  closes_at: z.string().nullable().optional(),
 });
+
 export type HRJob = z.infer<typeof hrJobSchema>;
+
+export type HROperationalJobStatus =
+  "draft" | "scheduled" | "published" | "closed";
+
+export function getHROperationalJobStatus(
+  job: Pick<HRJob, "status" | "opens_at" | "closes_at">,
+  now: Date = new Date(),
+): HROperationalJobStatus {
+  if (job.status === "draft") return "draft";
+  if (job.status === "closed") return "closed";
+  // status is 'published'
+  if (job.opens_at && new Date(job.opens_at).getTime() > now.getTime()) {
+    return "scheduled";
+  }
+  if (job.closes_at && new Date(job.closes_at).getTime() <= now.getTime()) {
+    return "closed";
+  }
+  return "published";
+}
+
 const fields =
-  "id,title,team,category,description,requirements,status,created_at,published_at";
+  "id,title,team,category,description,requirements,status,created_at,published_at,opens_at,closes_at";
 
 export async function listHRJobs(): Promise<HRJob[]> {
   const { client } = await requireHR();

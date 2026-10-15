@@ -8,18 +8,18 @@
 
 ## Dependency-ordered work
 
-| Task ID / order | Depends on | Owner / agent role | Requirement and acceptance IDs | Exact files / expected change | Verification command or review / expected evidence |
-| --------------- | ---------- | ------------------ | ------------------------------ | ----------------------------- | -------------------------------------------------- |
-| T00 | none | John (student owner) | All | proposal.md, design.md, plan.md, specs/ | Human approval recorded in record.md |
-| T01 | T00 | Implementer | JMG-004, sched-AC-01, sched-AC-03 | `supabase/migrations/20261015000000_scheduled_job_times.sql`, `supabase/tests/database/hr_job_scheduling.test.sql` | `pnpm supabase db test` (or local test run); tests fail then pass |
-| T02 | T01 | Implementer | JMG-004, sched-AC-01 | `src/lib/hr-job-input.ts`, `tests/unit/hr-job-input.test.ts` | `pnpm vitest run tests/unit/hr-job-input.test.ts`; validation of datetime parsing & bounds |
-| T03 | T02 | Implementer | JMG-004, sched-AC-01, sched-AC-02 | `src/lib/hr-jobs.ts`, `tests/unit/hr-jobs.test.ts` | `pnpm vitest run tests/unit/hr-jobs.test.ts`; operational status derivation |
-| T04 | T03 | Implementer | JMG-004, JOB-001, sched-AC-01, sched-AC-03 | `src/lib/jobs.ts`, `tests/unit/jobs.test.ts` | `pnpm vitest run tests/unit/jobs.test.ts`; public filtering on active window |
-| T05 | T04 | Implementer | JMG-004, sched-AC-01, sched-AC-02, sched-AC-04 | `src/app/hr/jobs/actions.ts`, `src/app/hr/jobs/job-editor.tsx`, `src/app/hr/jobs/[id]/page.tsx`, `src/app/jobs/[id]/page.tsx` | UI rendering, server actions, revert to draft, close job early |
-| T06 | T05 | Test engineer | All | Full test suite | `pnpm test` and `pnpm lint`; full passing suite |
-| T07 | T06 | Independent reviewer | All | Review handoff | Independent verification of diff against requirements |
-| T08 | T07 | John (student owner) | All | record.md | Student acceptance recorded |
-| T09 | T08 | Integration lead | All | Canonical specs & archive | Spec sync and packet archiving |
+| Task ID / order | Depends on | Owner / agent role   | Requirement and acceptance IDs                 | Exact files / expected change                                                                                                 | Verification command or review / expected evidence                                         |
+| --------------- | ---------- | -------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| T00             | none       | John (student owner) | All                                            | proposal.md, design.md, plan.md, specs/                                                                                       | Human approval recorded in record.md                                                       |
+| T01             | T00        | Implementer          | JMG-004, sched-AC-01, sched-AC-03              | `supabase/migrations/20261015000000_scheduled_job_times.sql`, `supabase/tests/database/hr_job_scheduling.test.sql`            | `pnpm supabase db test` (or local test run); tests fail then pass                          |
+| T02             | T01        | Implementer          | JMG-004, sched-AC-01                           | `src/lib/hr-job-input.ts`, `tests/unit/hr-job-input.test.ts`                                                                  | `pnpm vitest run tests/unit/hr-job-input.test.ts`; validation of datetime parsing & bounds |
+| T03             | T02        | Implementer          | JMG-004, sched-AC-01, sched-AC-02              | `src/lib/hr-jobs.ts`, `tests/unit/hr-jobs.test.ts`                                                                            | `pnpm vitest run tests/unit/hr-jobs.test.ts`; operational status derivation                |
+| T04             | T03        | Implementer          | JMG-004, JOB-001, sched-AC-01, sched-AC-03     | `src/lib/jobs.ts`, `tests/unit/jobs.test.ts`                                                                                  | `pnpm vitest run tests/unit/jobs.test.ts`; public filtering on active window               |
+| T05             | T04        | Implementer          | JMG-004, sched-AC-01, sched-AC-02, sched-AC-04 | `src/app/hr/jobs/actions.ts`, `src/app/hr/jobs/job-editor.tsx`, `src/app/hr/jobs/[id]/page.tsx`, `src/app/jobs/[id]/page.tsx` | UI rendering, server actions, revert to draft, close job early                             |
+| T06             | T05        | Test engineer        | All                                            | Full test suite                                                                                                               | `pnpm test` and `pnpm lint`; full passing suite                                            |
+| T07             | T06        | Independent reviewer | All                                            | Review handoff                                                                                                                | Independent verification of diff against requirements                                      |
+| T08             | T07        | John (student owner) | All                                            | record.md                                                                                                                     | Student acceptance recorded                                                                |
+| T09             | T08        | Integration lead     | All                                            | Canonical specs & archive                                                                                                     | Spec sync and packet archiving                                                             |
 
 ## Integration and handoffs
 
@@ -34,4 +34,3 @@
 - [ ] Closeout includes every session log and truthful limitations.
 - [ ] Contributor flow ends with issue-linked PR after closeout.
 - Approval/date/source: Pending student owner sign-off.
-

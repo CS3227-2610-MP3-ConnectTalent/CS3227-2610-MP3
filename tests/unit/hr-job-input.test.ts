@@ -16,7 +16,7 @@ function fields(overrides: Record<string, string> = {}) {
   return data;
 }
 
-describe("HR job input", () => {
+describe("HR job text fields", () => {
   it("accepts the shared required job fields and trims surrounding whitespace", () => {
     const parsed = parseHRJobFields(fields({ title: "  Software engineer  " }));
     expect(parsed.success).toBe(true);
@@ -45,5 +45,63 @@ describe("HR job input", () => {
     );
     expect(parseHRJobId("not-a-uuid").success).toBe(false);
     expect(parseHRJobId(null).success).toBe(false);
+  });
+});
+
+describe("HR job valid schedule inputs", () => {
+  it("accepts valid optional opensAt and closesAt datetime fields", () => {
+    const parsed = parseHRJobFields(
+      fields({ opensAt: "2026-10-20T10:00", closesAt: "2026-10-25T18:00" }),
+    );
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.value.opens_at).toBeTruthy();
+      expect(parsed.value.closes_at).toBeTruthy();
+      expect(new Date(parsed.value.closes_at!).getTime()).toBeGreaterThan(
+        new Date(parsed.value.opens_at!).getTime(),
+      );
+    }
+  });
+
+  it("allows omitting opensAt or closesAt or both", () => {
+    const parsedNone = parseHRJobFields(fields());
+    expect(parsedNone.success).toBe(true);
+    if (parsedNone.success) {
+      expect(parsedNone.value.opens_at).toBeNull();
+      expect(parsedNone.value.closes_at).toBeNull();
+    }
+
+    const parsedOpens = parseHRJobFields(
+      fields({ opensAt: "2026-10-20T10:00" }),
+    );
+    expect(parsedOpens.success).toBe(true);
+    expect(parsedOpens.success && parsedOpens.value.opens_at).toBeTruthy();
+
+    const parsedCloses = parseHRJobFields(
+      fields({ closesAt: "2026-10-25T18:00" }),
+    );
+    expect(parsedCloses.success).toBe(true);
+    expect(parsedCloses.success && parsedCloses.value.closes_at).toBeTruthy();
+  });
+});
+
+describe("HR job invalid schedule inputs", () => {
+  it("rejects invalid date strings and closesAt before or equal to opensAt", () => {
+    expect(parseHRJobFields(fields({ opensAt: "not-a-date" })).success).toBe(
+      false,
+    );
+    expect(parseHRJobFields(fields({ closesAt: "invalid" })).success).toBe(
+      false,
+    );
+    expect(
+      parseHRJobFields(
+        fields({ opensAt: "2026-10-25T18:00", closesAt: "2026-10-20T10:00" }),
+      ).success,
+    ).toBe(false);
+    expect(
+      parseHRJobFields(
+        fields({ opensAt: "2026-10-20T10:00", closesAt: "2026-10-20T10:00" }),
+      ).success,
+    ).toBe(false);
   });
 });

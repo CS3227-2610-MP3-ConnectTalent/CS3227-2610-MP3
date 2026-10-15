@@ -38,11 +38,11 @@ This change introduces optional scheduled opening (`opens_at`) and closing (`clo
 
 ## Alternatives and dependencies
 
-| Alternative | Benefit / cost / risk | Decision and reason |
-| ----------- | --------------------- | ------------------- |
-| Dynamic time-window evaluation in SQL & RLS | Precise, zero cron maintenance, robust across local/staging/prod | Chosen: Simplest, most reliable, zero operational failure points |
-| Background cron mutation (`pg_cron`) | Status column is mutated on disk | Rejected: High complexity, polling delay, fragile in local/test environments |
-| Status quo (manual only) | No code changes | Rejected: Does not satisfy user requirement for automated scheduling |
+| Alternative                                 | Benefit / cost / risk                                            | Decision and reason                                                          |
+| ------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Dynamic time-window evaluation in SQL & RLS | Precise, zero cron maintenance, robust across local/staging/prod | Chosen: Simplest, most reliable, zero operational failure points             |
+| Background cron mutation (`pg_cron`)        | Status column is mutated on disk                                 | Rejected: High complexity, polling delay, fragile in local/test environments |
+| Status quo (manual only)                    | No code changes                                                  | Rejected: Does not satisfy user requirement for automated scheduling         |
 
 - Assumptions: System clocks on database and application servers are synchronized via NTP.
 - Dependencies: Supabase PostgreSQL migration; Next.js server actions.
@@ -51,12 +51,12 @@ This change introduces optional scheduled opening (`opens_at`) and closing (`clo
 
 ## Acceptance evidence and artifacts
 
-| Acceptance ID | Issue criterion and canonical requirement IDs | Given / When / Then outcome | Required evidence and owner |
-| ------------- | --------------------------------------------- | --------------------------- | --------------------------- |
-| sched-AC-01 | #88; JMG-004; [job-management.md](../../specs/job-management.md) | Given a draft with future `opens_at`, when published, it displays as "Scheduled" to HR and is hidden from public listings and application submissions until `opens_at`. | Database & E2E tests; John |
-| sched-AC-02 | #88; JMG-004; [job-management.md](../../specs/job-management.md) | Given a scheduled job before `opens_at`, when HR reverts it to draft, it returns to draft state with editable content and schedule. | Stored procedure & UI tests; John |
-| sched-AC-03 | #88; JMG-004, JOB-001; [public-job-listings.md](../../specs/public-job-listings.md) | Given an active job whose `closes_at` has passed, it disappears from public listings and rejects application draft saves/submissions. | RLS & RPC tests; John |
-| sched-AC-04 | #88; JMG-003, JMG-004; [job-management.md](../../specs/job-management.md) | Given any scheduled or live job, HR can explicitly close it at any time, permanently preserving applications and locking the job. | Stored procedure & UI tests; John |
+| Acceptance ID | Issue criterion and canonical requirement IDs                                       | Given / When / Then outcome                                                                                                                                             | Required evidence and owner       |
+| ------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| sched-AC-01   | #88; JMG-004; [job-management.md](../../specs/job-management.md)                    | Given a draft with future `opens_at`, when published, it displays as "Scheduled" to HR and is hidden from public listings and application submissions until `opens_at`. | Database & E2E tests; John        |
+| sched-AC-02   | #88; JMG-004; [job-management.md](../../specs/job-management.md)                    | Given a scheduled job before `opens_at`, when HR reverts it to draft, it returns to draft state with editable content and schedule.                                     | Stored procedure & UI tests; John |
+| sched-AC-03   | #88; JMG-004, JOB-001; [public-job-listings.md](../../specs/public-job-listings.md) | Given an active job whose `closes_at` has passed, it disappears from public listings and rejects application draft saves/submissions.                                   | RLS & RPC tests; John             |
+| sched-AC-04   | #88; JMG-003, JMG-004; [job-management.md](../../specs/job-management.md)           | Given any scheduled or live job, HR can explicitly close it at any time, permanently preserving applications and locking the job.                                       | Stored procedure & UI tests; John |
 
 - Spec deltas: `specs/job-management.md`, `specs/public-job-listings.md`
 - Design: `design.md`
@@ -70,4 +70,3 @@ This change introduces optional scheduled opening (`opens_at`) and closing (`clo
 - Approver: John (Johnwz123)
 - Decision/date/source: Approved on 2026-10-15 via user chat confirmation
 - Conditions: None.
-

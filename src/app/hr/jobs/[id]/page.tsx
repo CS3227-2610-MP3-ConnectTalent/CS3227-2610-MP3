@@ -5,12 +5,13 @@ import {
   closeHRJob,
   editHRJobDraft,
   publishHRJob,
+  unpublishHRJob,
 } from "@/app/hr/jobs/actions";
 import { JobEditor } from "@/app/hr/jobs/job-editor";
 import { PendingSubmitButton } from "@/components/pending-submit-button";
 import { categoryLabel } from "@/lib/job-categories";
 import { requireHR } from "@/lib/hr-auth";
-import { getHRJob } from "@/lib/hr-jobs";
+import { getHRJob, getHROperationalJobStatus } from "@/lib/hr-jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +35,7 @@ export default async function HRJobDetail({
   if (!job) notFound();
   const { error, notice } = await searchParams;
   return (
-    <JobDetailContent
-      job={job}
-      hasError={Boolean(error)}
-      hasNotice={Boolean(notice)}
-    />
+    <JobDetailContent job={job} hasError={Boolean(error)} notice={notice} />
   );
 }
 
@@ -56,11 +53,11 @@ function JobUnavailable() {
 function JobDetailContent({
   job,
   hasError,
-  hasNotice,
+  notice,
 }: {
   job: Job;
   hasError: boolean;
-  hasNotice: boolean;
+  notice?: string;
 }) {
   return (
     <main className="page-shell mx-auto max-w-3xl space-y-7 px-5 py-10">
@@ -68,36 +65,60 @@ function JobDetailContent({
         ← Manage jobs
       </Link>
       <JobHeader job={job} />
-      <JobNotices hasError={hasError} hasNotice={hasNotice} />
+      <JobNotices hasError={hasError} notice={notice} />
       <JobActions job={job} />
     </main>
   );
 }
 
+function formatTimestamp(iso?: string | null): string {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return "";
+  }
+}
+
 function JobHeader({ job }: { job: Job }) {
-  const status =
-    job.status === "draft"
+  const operationalStatus = getHROperationalJobStatus(job);
+  const statusLabel =
+    operationalStatus === "draft"
       ? "Draft"
-      : job.status === "published"
-        ? "Published"
-        : "Closed";
+      : operationalStatus === "scheduled"
+        ? "Scheduled"
+        : operationalStatus === "published"
+          ? "Published"
+          : "Closed";
+
   return (
     <header className="space-y-2">
       <p className="text-sm text-muted-foreground">
         {categoryLabel(job.category)} · {job.team}
       </p>
       <h1 className="text-3xl font-semibold">{job.title}</h1>
-      <p>{status}</p>
+      <p className="font-medium">{statusLabel}</p>
+      {operationalStatus === "scheduled" && job.opens_at && (
+        <p className="text-sm text-muted-foreground">
+          Scheduled to open on {formatTimestamp(job.opens_at)}
+          {job.closes_at && ` (closes ${formatTimestamp(job.closes_at)})`}
+        </p>
+      )}
+      {operationalStatus === "published" && job.closes_at && (
+        <p className="text-sm text-muted-foreground">
+          Applications close on {formatTimestamp(job.closes_at)}
+        </p>
+      )}
     </header>
   );
 }
 
 function JobNotices({
   hasError,
-  hasNotice,
+  notice,
 }: {
   hasError: boolean;
-  hasNotice: boolean;
+  notice?: string;
 }) {
   return (
     <>
@@ -106,7 +127,12 @@ function JobNotices({
           The change was not saved. Reload and try again.
         </p>
       )}
-      {hasNotice && (
+      {notice === "unpublished" && (
+        <p role="status" className="rounded-lg border p-3">
+          The job was reverted to draft.
+        </p>
+      )}
+      {notice && notice !== "unpublished" && (
         <p role="status" className="rounded-lg border p-3">
           The change was saved.
         </p>
@@ -116,11 +142,17 @@ function JobNotices({
 }
 
 function JobActions({ job }: { job: Job }) {
-  return job.status === "draft" ? (
-    <DraftJobActions job={job} />
-  ) : (
-    <PublishedJobDetails job={job} />
-  );
+  const operationalStatus = getHROperationalJobStatus(job);
+
+  if (operationalStatus === "draft") {
+    return <DraftJobActions job={job} />;
+  }
+
+  if (operationalStatus === "scheduled") {
+    return <ScheduledJobActions job={job} />;
+  }
+
+  return <PublishedJobDetails job={job} />;
 }
 
 function DraftJobActions({ job }: { job: Job }) {
@@ -133,8 +165,8 @@ function DraftJobActions({ job }: { job: Job }) {
       <section className="space-y-3 border-t pt-5">
         <h2 className="text-xl font-semibold">Publish job</h2>
         <p>
-          Publishing makes this fixed description visible and opens
-          applications. Review the draft first.
+          Publishing makes this fixed description visible and opens applications
+          according to its schedule. Review the draft first.
         </p>
         <form action={publishHRJob}>
           <input type="hidden" name="jobId" value={job.id} />
@@ -145,6 +177,32 @@ function DraftJobActions({ job }: { job: Job }) {
           />
         </form>
       </section>
+    </>
+  );
+}
+
+function ScheduledJobActions({ job }: { job: Job }) {
+  return (
+    <>
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Revert to draft</h2>
+        <p>
+          This job is scheduled to open in the future. You can revert it to
+          draft to edit its requirements, description, or schedule before it
+          goes live.
+        </p>
+        <form action={unpublishHRJob}>
+          <input type="hidden" name="jobId" value={job.id} />
+          <PendingSubmitButton
+            label="Revert to draft"
+            pendingLabel="Reverting to draft…"
+            className="rounded-lg border px-4 py-2 font-medium"
+          />
+        </form>
+      </section>
+      <JobTextSection title="Description" text={job.description} />
+      <JobTextSection title="Requirements" text={job.requirements} />
+      <CloseJobSection jobId={job.id} />
     </>
   );
 }
