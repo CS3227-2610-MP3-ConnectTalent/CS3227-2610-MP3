@@ -33,13 +33,16 @@ export async function isCurrentProfileResumeOperation(
   } catch {
     throw profileStateLookupFailure("profile_state_lookup");
   }
-  return currentResumeId === operation;
+  return (
+    typeof currentResumeId === "string" &&
+    currentResumeId.toLowerCase() === operation.toLowerCase()
+  );
 }
 
 export async function prepareCompletedProfileRetry(
   client: ReturnType<typeof resumeMutationClient>,
   actor: string,
-  operation: string,
+  rawOperation: string,
   expected: string | null,
   file: File,
   reserve: (
@@ -50,6 +53,7 @@ export async function prepareCompletedProfileRetry(
     valid: { filename: string; bytes: Uint8Array; sha256: string },
   ) => Promise<string>,
 ): Promise<{ input: ResumeInput; isReady: boolean }> {
+  const operation = rawOperation.toLowerCase();
   const input = await readResumeInput(file);
   const exists = await isCurrentProfileResumeOperation(actor, operation);
   if (!exists) return { input, isReady: false };
@@ -60,7 +64,7 @@ export async function prepareCompletedProfileRetry(
 export async function prepareProfileWithPendingRecovery(
   client: ReturnType<typeof resumeMutationClient>,
   actor: string,
-  operation: string,
+  rawOperation: string,
   expected: string | null,
   valid: { filename: string; bytes: Uint8Array; sha256: string },
   retry: boolean,
@@ -77,6 +81,7 @@ export async function prepareProfileWithPendingRecovery(
     pendingOnly: boolean,
   ) => Promise<void>,
 ) {
+  const operation = rawOperation.toLowerCase();
   try {
     return await reserve(client, actor, operation, expected, valid);
   } catch (error) {

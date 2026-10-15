@@ -174,6 +174,33 @@ it("returns a ready profile retry before revalidating its file", async () => {
   );
 });
 
+it("normalizes uppercase operation UUIDs when checking ready retries", async () => {
+  const upperOperation = "44000000-0000-4000-8000-00000000010B";
+  const lowerOperation = upperOperation.toLowerCase();
+  mocks.applicantProfileResult = {
+    data: { resume_id: lowerOperation },
+    error: null,
+  };
+  mocks.validateResume.mockRejectedValue(new Error("validator unavailable"));
+
+  await expect(
+    uploadProfileResume(
+      actor,
+      new File(["synthetic PDF"], "synthetic.pdf"),
+      upperOperation,
+      null,
+      true,
+    ),
+  ).resolves.toBeUndefined();
+
+  expect(mocks.readResumeInput).toHaveBeenCalledOnce();
+  expect(mocks.validateResume).not.toHaveBeenCalled();
+  expect(mocks.rpc).toHaveBeenCalledWith(
+    "reserve_profile_resume",
+    expect.objectContaining({ p_operation: lowerOperation }),
+  );
+});
+
 it("reports a retired operation so the client can retry the selected file with a new id", async () => {
   setReadyResult(null);
   mocks.rpc.mockImplementation(async (name: string) => {
@@ -204,18 +231,13 @@ it("classifies profile operation lookup outages as safe server failures", async 
   };
   const log = vi.spyOn(console, "error").mockImplementation(() => {});
 
-  let caught: unknown;
-  try {
-    await uploadProfileResume(
-      actor,
-      new File(["synthetic PDF"], "synthetic.pdf"),
-      operation,
-      null,
-      true,
-    );
-  } catch (error) {
-    caught = error;
-  }
+  const caught = await uploadProfileResume(
+    actor,
+    new File(["synthetic PDF"], "synthetic.pdf"),
+    operation,
+    null,
+    true,
+  ).catch((e) => e);
 
   expect(caught).toMatchObject({
     code: "RESUME_UPLOAD_PREPARATION_FAILED",
@@ -238,12 +260,7 @@ it("classifies a failed current-profile lookup as a safe server failure", async 
   };
   const log = vi.spyOn(console, "error").mockImplementation(() => {});
 
-  let caught: unknown;
-  try {
-    await getProfileResume();
-  } catch (error) {
-    caught = error;
-  }
+  const caught = await getProfileResume().catch((e) => e);
 
   expect(caught).toMatchObject({ code: "RESUME_UPLOAD_PREPARATION_FAILED" });
   expect(resumeFailureStatus(caught)).toBe(503);

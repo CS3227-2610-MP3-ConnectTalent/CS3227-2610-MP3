@@ -96,10 +96,11 @@ export async function retireProfileResume(
 export async function uploadProfileResume(
   actor: string,
   file: File,
-  operation: string,
+  rawOperation: string,
   expected: string | null,
   retry = false,
 ) {
+  const operation = rawOperation.toLowerCase();
   const client = resumeMutationClient();
   let retryState: { input: ResumeInput; isReady: boolean } | null = null;
   if (retry || (await isCurrentProfileResumeOperation(actor, operation))) {
