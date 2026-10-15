@@ -16,6 +16,25 @@ type ResumeResponseState = {
   setMessage: (value: string) => void;
 };
 
+function shouldRotateUploadOperation(
+  code: unknown,
+  profileMode?: boolean,
+) {
+  if (code === "RESUME_UPLOAD_OPERATION_RETIRED") return true;
+  return (
+    !profileMode &&
+    (code === "RESUME_JOB_CLOSED" || code === "RESUME_APPLICATION_CHANGED")
+  );
+}
+
+function canRetryProfileCopy(code: unknown) {
+  return (
+    code === "RESUME_UPLOAD_PENDING" ||
+    code === "RESUME_UPLOAD_PERSISTENCE_FAILED" ||
+    code === "RESUME_UPLOAD_PREPARATION_FAILED"
+  );
+}
+
 export async function applyResumeResponse(
   response: Response,
   props: ResumePanelProps,
@@ -26,10 +45,7 @@ export async function applyResumeResponse(
   if (!isObject(result)) throw new Error("Invalid résumé response.");
   if (
     intent === "upload" &&
-    (result.code === "RESUME_UPLOAD_OPERATION_RETIRED" ||
-      (!props.profileMode &&
-        (result.code === "RESUME_JOB_CLOSED" ||
-          result.code === "RESUME_APPLICATION_CHANGED")))
+    shouldRotateUploadOperation(result.code, props.profileMode)
   ) {
     state.setOperation(crypto.randomUUID());
   }
@@ -45,13 +61,11 @@ export async function applyResumeResponse(
     revision: typeof result.revision === "number" ? result.revision : undefined,
   });
   state.setUploadFailed(intent === "upload" && !response.ok);
-  const canRetryProfileCopy =
-    result.code === "RESUME_UPLOAD_PENDING" ||
-    result.code === "RESUME_UPLOAD_PERSISTENCE_FAILED";
+  const retryable = canRetryProfileCopy(result.code);
   state.setProfileCopyRetryAvailable(
-    intent === "profile" && !response.ok && canRetryProfileCopy,
+    intent === "profile" && !response.ok && retryable,
   );
-  if (intent === "profile" && (response.ok || !canRetryProfileCopy)) {
+  if (intent === "profile" && (response.ok || !retryable)) {
     state.setProfileCopyAttempt(null);
   }
   state.setMessage(

@@ -149,3 +149,33 @@ it("retains the profile-copy attempt after a persistence failure", async () => {
     "x-profile-resume": source.id,
   });
 });
+
+it("retains the profile-copy attempt after a preparation failure", async () => {
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(
+      response(
+        {
+          code: "RESUME_UPLOAD_PREPARATION_FAILED",
+          error: "We could not prepare this résumé.",
+        },
+        503,
+      ),
+    )
+    .mockResolvedValueOnce(response({}));
+  vi.stubGlobal("fetch", fetch);
+
+  await renderActions(initialProps).change("profile");
+  const firstHeaders = fetch.mock.calls[0]?.[1]?.headers;
+  const refreshedProps = { ...initialProps, revision: 4, profileResume: null };
+  expect(renderActions(refreshedProps).profileCopyRetryAvailable).toBe(true);
+
+  await renderActions(refreshedProps).change("profile", true);
+
+  expect(fetch.mock.calls[1]?.[1]?.headers).toMatchObject({
+    "x-resume-retry": "true",
+    "x-resume-operation": firstHeaders?.["x-resume-operation"],
+    "x-application-revision": "3",
+    "x-profile-resume": source.id,
+  });
+});
