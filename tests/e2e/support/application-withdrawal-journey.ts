@@ -63,7 +63,7 @@ async function uploadInitialResume(page: Page, fixture: WithdrawalFixture) {
     page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
   ).toBeVisible({ timeout: 30_000 });
   await expect(
-    page.getByRole("button", { name: "Upload résumé", exact: true }),
+    page.getByRole("button", { name: "Retry upload", exact: true }),
   ).toHaveCount(0);
 }
 
