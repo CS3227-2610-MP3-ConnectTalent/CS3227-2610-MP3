@@ -255,9 +255,11 @@ async function applyResponse(
   const result: unknown = await response.json();
   if (!isObject(result)) throw new Error("Invalid résumé response.");
   if (
-    props.profileMode &&
     intent === "upload" &&
-    result.code === "RESUME_UPLOAD_OPERATION_RETIRED"
+    (result.code === "RESUME_UPLOAD_OPERATION_RETIRED" ||
+      (!props.profileMode &&
+        (result.code === "RESUME_JOB_CLOSED" ||
+          result.code === "RESUME_APPLICATION_CHANGED")))
   ) {
     state.setOperation(crypto.randomUUID());
   }

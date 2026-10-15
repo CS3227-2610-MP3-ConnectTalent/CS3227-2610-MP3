@@ -122,3 +122,35 @@ it("rotates the operation after delete and keeps the selected file uploadable", 
   );
   expect(fetch.mock.calls[1]?.[1]?.body).toBe(file);
 });
+
+it("rotates a terminally rejected upload while keeping its selected file", async () => {
+  const file = new File(["synthetic PDF"], "synthetic.pdf", {
+    type: "application/pdf",
+  });
+  const fetch = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        code: "RESUME_JOB_CLOSED",
+        error: "This job is no longer accepting résumé uploads.",
+      }),
+      { status: 409 },
+    ),
+  );
+  vi.stubGlobal("fetch", fetch);
+  const props = {
+    applicationId: null,
+    jobId: "job-1",
+    revision: null,
+    editable: true,
+    resume: null,
+  };
+
+  renderActions(props).selectFile(file);
+  const firstOperation = renderActions(props).operation;
+  await renderActions(props).change("upload");
+  const afterTerminalFailure = renderActions(props);
+
+  expect(afterTerminalFailure.file).toBe(file);
+  expect(afterTerminalFailure.operation).not.toBe(firstOperation);
+  expect(afterTerminalFailure.uploadFailed).toBe(true);
+});

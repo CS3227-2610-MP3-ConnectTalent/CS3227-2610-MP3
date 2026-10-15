@@ -4,23 +4,22 @@ import { z } from "zod";
 import { validateResume } from "./resume-input";
 import { prepareWithPendingRecovery } from "./application-resume-retry";
 import {
-  applicationResumeBucket,
+  uploadAndFinalizeApplicationResume,
+  type ApplicationResumeUploadArguments,
+} from "./application-resume-finalization";
+import {
   cleanupApplicationResume,
   resumeMutationClient,
 } from "./application-resume-storage";
 import {
   ResumeUploadPreparationError,
+  resumePreparationCode,
   type ResumePreparationErrorCode,
 } from "./resume-errors";
 
 type MutationClient = ReturnType<typeof resumeMutationClient>;
 type ValidatedResume = Awaited<ReturnType<typeof validateResume>>;
-type UploadArguments = {
-  p_actor: string;
-  p_job: string;
-  p_revision: number;
-  p_operation: string;
-};
+type UploadArguments = ApplicationResumeUploadArguments;
 
 export async function uploadApplicationResume(
   actor: string,
@@ -72,61 +71,6 @@ function uploadArguments(
     p_revision: revision,
     p_operation: operation,
   };
-}
-
-async function uploadAndFinalize(
-  client: MutationClient,
-  actor: string,
-  job: string,
-  objectPath: string,
-  bytes: Uint8Array,
-  args: UploadArguments,
-  retry = false,
-) {
-  try {
-    await uploadObject(client, objectPath, bytes, retry);
-    await finalizeApplicationUpload(client, args);
-  } catch {
-    try {
-      await cleanupApplicationResume(actor, job);
-    } catch {
-      // Cleanup is best effort; keep the persistence failure response safe.
-    }
-    const reference = randomUUID();
-    console.error("resume_upload_persistence_failed", {
-      reference,
-      stage: "application_storage_or_finalize",
-    });
-    throw new ResumeUploadPreparationError(
-      "RESUME_UPLOAD_PERSISTENCE_FAILED",
-      reference,
-    );
-  }
-}
-
-async function uploadObject(
-  client: MutationClient,
-  objectPath: string,
-  bytes: Uint8Array,
-  retry: boolean,
-) {
-  const { error } = await client.storage
-    .from(applicationResumeBucket)
-    .upload(objectPath, bytes, {
-      contentType: "application/pdf",
-      upsert: retry,
-    });
-  if (error) throw new Error("Upload failed.");
-}
-
-async function finalizeApplicationUpload(
-  client: MutationClient,
-  args: UploadArguments,
-) {
-  let { error } = await client.rpc("finalize_application_resume", args);
-  if (error)
-    ({ error } = await client.rpc("finalize_application_resume", args));
-  if (error) throw new Error("Upload could not be finalized.");
 }
 
 export async function uploadResumeForJob(
@@ -193,7 +137,7 @@ async function prepareJobResume(
     })
     .safeParse(data);
   if (error) {
-    const code = preparationCode(error);
+    const code = resumePreparationCode(error);
     const reference = randomUUID();
     logPreparationFailure(reference, code, error);
     throw new ResumeUploadPreparationError(code, reference);
@@ -235,7 +179,7 @@ async function finishPreparedJobResume(
 ) {
   if (prepared.state === "ready") return;
   const args = uploadArguments(actor, job, prepared.revision, operation);
-  await uploadAndFinalize(
+  await uploadAndFinalizeApplicationResume(
     client,
     actor,
     job,
@@ -245,24 +189,6 @@ async function finishPreparedJobResume(
     retry,
   );
   await cleanupApplicationResume(actor, job);
-}
-
-function preparationCode(error: unknown): ResumePreparationErrorCode {
-  const details = asRecord(error);
-  if (details?.code === "23505") return "RESUME_UPLOAD_PENDING";
-  if (details?.code !== "P0001") return "RESUME_UPLOAD_PREPARATION_FAILED";
-  switch (details.message) {
-    case "Job is not open for applications":
-      return "RESUME_JOB_CLOSED";
-    case "Application changed; reload before uploading":
-    case "Editable saved draft required":
-    case "Application changed; reload before saving":
-      return "RESUME_APPLICATION_CHANGED";
-    case "Upload operation cannot be reused":
-      return "RESUME_UPLOAD_OPERATION_CONFLICT";
-    default:
-      return "RESUME_UPLOAD_PREPARATION_FAILED";
-  }
 }
 
 function logPreparationFailure(

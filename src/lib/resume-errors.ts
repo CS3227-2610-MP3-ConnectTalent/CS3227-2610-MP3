@@ -144,3 +144,26 @@ export function resumeFailureStatus(error: unknown) {
     400
   );
 }
+
+export function resumePreparationCode(
+  error: unknown,
+): ResumePreparationErrorCode {
+  const details =
+    typeof error === "object" && error !== null
+      ? (error as Record<string, unknown>)
+      : null;
+  if (details?.code === "23505") return "RESUME_UPLOAD_PENDING";
+  if (details?.code !== "P0001") return "RESUME_UPLOAD_PREPARATION_FAILED";
+  switch (details.message) {
+    case "Job is not open for applications":
+      return "RESUME_JOB_CLOSED";
+    case "Application changed; reload before uploading":
+    case "Editable saved draft required":
+    case "Application changed; reload before saving":
+      return "RESUME_APPLICATION_CHANGED";
+    case "Upload operation cannot be reused":
+      return "RESUME_UPLOAD_OPERATION_CONFLICT";
+    default:
+      return "RESUME_UPLOAD_PREPARATION_FAILED";
+  }
+}
