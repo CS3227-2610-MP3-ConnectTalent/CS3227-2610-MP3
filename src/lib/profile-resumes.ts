@@ -201,6 +201,12 @@ async function uploadAndFinalizeProfileResume(
       // Cleanup is best effort; retain the original failure for the route.
     }
     if (error instanceof ResumeValidationError) throw error;
+    if (resumePreparationCode(error) === "RESUME_PROFILE_CHANGED") {
+      throw new ResumeUploadPreparationError(
+        "RESUME_PROFILE_CHANGED",
+        randomUUID(),
+      );
+    }
     const reference = randomUUID();
     console.error("resume_upload_persistence_failed", {
       reference,
@@ -248,7 +254,7 @@ async function finalizeProfileUpload(
   const args = { p_actor: actor, p_operation: operation };
   let { error } = await client.rpc("finalize_profile_resume", args);
   if (error) ({ error } = await client.rpc("finalize_profile_resume", args));
-  if (error) throw new Error("Finalize failed");
+  if (error) throw error;
 }
 
 async function cancelProfileUpload(

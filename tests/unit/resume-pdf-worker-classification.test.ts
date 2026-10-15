@@ -31,6 +31,32 @@ it("treats unexpected PDF.js inspection failures as validator outages", async ()
   }
 });
 
+it("classifies parser format errors as invalid PDFs", async () => {
+  const library = new URL(
+    "../fixtures/pdf/pdfjs-format-error.mjs",
+    import.meta.url,
+  ).href;
+  const parser = new URL(
+    "../fixtures/pdf/pdfjs-worker-stub.mjs",
+    import.meta.url,
+  ).href;
+  const worker = new Worker(pdfWorkerSource, {
+    eval: true,
+    workerData: { bytes: new Uint8Array([1]), library, parser },
+  });
+
+  try {
+    const messages = await readWorkerResult(worker);
+    expect(messages).toContainEqual({
+      type: "phase",
+      phase: "page-structure",
+    });
+    expect(messages.at(-1)).toBe("invalid");
+  } finally {
+    await worker.terminate();
+  }
+});
+
 function readWorkerResult(worker: Worker) {
   return new Promise<unknown[]>((resolve, reject) => {
     const messages: unknown[] = [];

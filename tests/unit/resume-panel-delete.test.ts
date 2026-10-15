@@ -154,3 +154,34 @@ it("rotates a terminally rejected upload while keeping its selected file", async
   expect(afterTerminalFailure.operation).not.toBe(firstOperation);
   expect(afterTerminalFailure.uploadFailed).toBe(true);
 });
+
+it("synchronizes the internal attachment state when the resume prop updates", () => {
+  const initialProps = {
+    applicationId: null,
+    profileMode: true,
+    revision: null,
+    editable: true,
+    resume: attachment,
+  };
+  const first = renderActions(initialProps);
+  expect(first.attachment).toBe(attachment);
+
+  const updatedAttachment = {
+    ...attachment,
+    id: "60000000-0000-4000-8000-000000000b02",
+    filename: "updated.pdf",
+  };
+  const updatedProps = {
+    ...initialProps,
+    resume: updatedAttachment,
+  };
+  const second = renderActions(updatedProps);
+  expect(second.attachment).toBe(updatedAttachment);
+
+  const removedProps = {
+    ...initialProps,
+    resume: null,
+  };
+  const third = renderActions(removedProps);
+  expect(third.attachment).toBeNull();
+});

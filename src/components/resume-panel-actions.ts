@@ -54,6 +54,13 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
   const [profileCopyAttempt, setProfileCopyAttempt] =
     useState<ProfileCopyAttempt | null>(null);
   const [attachment, setAttachment] = useState(initialResume);
+  const [prevResume, setPrevResume] = useState(initialResume);
+  let currentAttachment = attachment;
+  if (initialResume !== prevResume) {
+    setPrevResume(initialResume);
+    setAttachment(initialResume);
+    currentAttachment = initialResume;
+  }
   return {
     file,
     operation,
@@ -64,7 +71,7 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
     uploadFailed,
     profileCopyRetryAvailable,
     profileCopyAttempt,
-    attachment,
+    attachment: currentAttachment,
     setFile,
     setOperation,
     setPending,

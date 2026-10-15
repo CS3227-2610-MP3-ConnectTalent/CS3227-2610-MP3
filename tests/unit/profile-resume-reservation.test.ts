@@ -194,3 +194,48 @@ it("recovers a different pending operation when retrying a profile upload", asyn
     p_pending_only: true,
   });
 });
+
+it("surfaces a profile conflict when finalize detects the profile changed", async () => {
+  mocks.rpc.mockImplementation(async (name: string) => {
+    if (name === "reserve_profile_resume") {
+      return { data: `${actor}.pdf`, error: null };
+    }
+    if (name === "finalize_profile_resume") {
+      return {
+        data: null,
+        error: {
+          code: "P0001",
+          message: "Profile resume changed; reload",
+        },
+      };
+    }
+    return { data: [], error: null };
+  });
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+
+  let caught: unknown;
+  try {
+    await uploadProfileResume(
+      actor,
+      new File(["synthetic PDF"], "synthetic.pdf"),
+      operation,
+      null,
+    );
+  } catch (error) {
+    caught = error;
+  }
+
+  expect(caught).toMatchObject({ code: "RESUME_PROFILE_CHANGED" });
+  expect(resumeFailureStatus(caught)).toBe(409);
+  expect(log).not.toHaveBeenCalledWith(
+    "resume_upload_persistence_failed",
+    expect.anything(),
+  );
+  expect(mocks.rpc).toHaveBeenCalledWith("cancel_profile_resume", {
+    p_actor: actor,
+    p_operation: operation,
+  });
+  expect(mocks.rpc).toHaveBeenCalledWith("claim_profile_resume_cleanup", {
+    p_actor: actor,
+  });
+});

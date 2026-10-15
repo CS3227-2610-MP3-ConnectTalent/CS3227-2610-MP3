@@ -61,9 +61,25 @@ export async function POST(request: Request) {
       { headers: resumeHeaders },
     );
   } catch (error) {
-    return Response.json(resumeFailure(error), {
+    return profileResumeFailureResponse(error);
+  }
+}
+
+async function profileResumeFailureResponse(error: unknown) {
+  let currentResume: Awaited<ReturnType<typeof getProfileResume>> | undefined;
+  try {
+    currentResume = await getProfileResume();
+  } catch {
+    // Best-effort lookup; omit resume if unavailable.
+  }
+  return Response.json(
+    {
+      ...resumeFailure(error),
+      ...(currentResume !== undefined ? { resume: currentResume } : {}),
+    },
+    {
       status: resumeFailureStatus(error),
       headers: resumeHeaders,
-    });
-  }
+    },
+  );
 }

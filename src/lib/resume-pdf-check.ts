@@ -29,6 +29,11 @@ export const pdfWorkerSource = `
     } catch (error) {
       if (error instanceof pdfjs.PasswordException) return 'password';
       if (error instanceof pdfjs.InvalidPDFException) return 'invalid';
+      if (
+        error?.name === 'FormatError' ||
+        (typeof error?.details === 'string' && error.details.includes('FormatError')) ||
+        (typeof error?.message === 'string' && error.message.includes('FormatError'))
+      ) return 'invalid';
       throw error;
     } finally {
       await task.destroy();

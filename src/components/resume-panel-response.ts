@@ -16,10 +16,7 @@ type ResumeResponseState = {
   setMessage: (value: string) => void;
 };
 
-function shouldRotateUploadOperation(
-  code: unknown,
-  profileMode?: boolean,
-) {
+function shouldRotateUploadOperation(code: unknown, profileMode?: boolean) {
   if (code === "RESUME_UPLOAD_OPERATION_RETIRED") return true;
   return (
     !profileMode &&
