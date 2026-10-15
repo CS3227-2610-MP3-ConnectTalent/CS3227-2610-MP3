@@ -30,20 +30,46 @@ export async function uploadInitialResume(
     mimeType: "application/pdf",
     buffer: pdf,
   });
-  const request = page.waitForRequest(
-    (item) =>
-      item.url().endsWith("/resume") &&
-      item.headers()["x-resume-intent"] === "upload",
-  );
-  await page
-    .getByRole("button", { name: "Upload résumé", exact: true })
-    .click();
-  const operation = (await request).headers()["x-resume-operation"];
+  const operation = await uploadWithHeldRequest(page);
   await expect(
     page.getByRole("link", { name: "Download résumé: synthetic.pdf" }),
   ).toBeVisible();
   expect(operation).toBeTruthy();
   return operation!;
+}
+
+async function uploadWithHeldRequest(page: Page) {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/**/resume", async (route) => {
+    if (
+      route.request().method() === "POST" &&
+      route.request().headers()["x-resume-intent"] === "upload"
+    )
+      await gate;
+    await route.continue();
+  });
+  const request = page.waitForRequest(
+    (item) =>
+      item.url().endsWith("/resume") &&
+      item.headers()["x-resume-intent"] === "upload",
+  );
+  try {
+    await page
+      .getByRole("button", { name: "Upload résumé", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Uploading résumé…" }),
+    ).toBeDisabled();
+    await expect(page.getByLabel("Choose PDF résumé")).toBeDisabled();
+  } finally {
+    release();
+  }
+  const operation = (await request).headers()["x-resume-operation"];
+  await page.unroute("**/api/**/resume");
+  return operation;
 }
 
 export async function verifyResumeDownloadAndRetry(

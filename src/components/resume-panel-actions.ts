@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ResumeMetadata } from "@/lib/application-resumes";
-import { responseMessage } from "./resume-panel-response";
+import { applyResumeResponse } from "./resume-panel-response";
 import type { ResumeIntent, ResumePanelProps } from "./resume-panel-state";
 
 export function useResumePanelActions(props: ResumePanelProps) {
@@ -45,6 +45,8 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
   const [file, setFile] = useState<File | null>(null);
   const [operation, setOperation] = useState("");
   const [pending, setPending] = useState(false);
+  const [activeIntent, setActiveIntent] = useState<ResumeIntent | null>(null);
+  const [activeRetry, setActiveRetry] = useState(false);
   const [message, setMessage] = useState("");
   const [uploadFailed, setUploadFailed] = useState(false);
   const [profileCopyRetryAvailable, setProfileCopyRetryAvailable] =
@@ -56,6 +58,8 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
     file,
     operation,
     pending,
+    activeIntent,
+    activeRetry,
     message,
     uploadFailed,
     profileCopyRetryAvailable,
@@ -64,6 +68,8 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
     setFile,
     setOperation,
     setPending,
+    setActiveIntent,
+    setActiveRetry,
     setMessage,
     setUploadFailed,
     setProfileCopyRetryAvailable,
@@ -76,6 +82,8 @@ type ActionState = {
   file: File | null;
   operation: string;
   pending: boolean;
+  activeIntent: ResumeIntent | null;
+  activeRetry: boolean;
   message: string;
   uploadFailed: boolean;
   profileCopyRetryAvailable: boolean;
@@ -83,6 +91,8 @@ type ActionState = {
   attachment: ResumeMetadata | null;
   setOperation: (value: string) => void;
   setPending: (value: boolean) => void;
+  setActiveIntent: (value: ResumeIntent | null) => void;
+  setActiveRetry: (value: boolean) => void;
   setMessage: (value: string) => void;
   setUploadFailed: (value: boolean) => void;
   setProfileCopyRetryAvailable: (value: boolean) => void;
@@ -124,7 +134,7 @@ async function performResumeChange(
   const operation =
     profileAttempt?.operation ?? resolveOperation(intent, state.operation);
   if (retry) state.setOperation(operation);
-  startRequest(props, state);
+  startRequest(props, state, intent, retry);
   try {
     await sendResumeRequest(
       props,
@@ -169,8 +179,15 @@ function resolveOperation(intent: ResumeIntent, current: string) {
   return intent === "profile" ? crypto.randomUUID() : current;
 }
 
-function startRequest(props: ResumePanelProps, state: ActionState) {
+function startRequest(
+  props: ResumePanelProps,
+  state: ActionState,
+  intent: ResumeIntent,
+  retry: boolean,
+) {
   state.setPending(true);
+  state.setActiveIntent(intent);
+  state.setActiveRetry(retry);
   props.onPending?.(true);
   state.setMessage("");
   state.setUploadFailed(false);
@@ -179,6 +196,8 @@ function startRequest(props: ResumePanelProps, state: ActionState) {
 
 function finishRequest(props: ResumePanelProps, state: ActionState) {
   state.setPending(false);
+  state.setActiveIntent(null);
+  state.setActiveRetry(false);
   props.onPending?.(false);
 }
 
@@ -194,7 +213,7 @@ async function sendResumeRequest(
     method: "POST",
     ...requestOptions(props, state, intent, retry, operation, profileAttempt),
   });
-  await applyResponse(response, props, state, intent);
+  await applyResumeResponse(response, props, state, intent);
 }
 
 function endpoint(props: ResumePanelProps) {
@@ -244,51 +263,4 @@ function uploadHeaders(
     "x-resume-operation": operation,
     "x-resume-retry": String(retry),
   };
-}
-
-async function applyResponse(
-  response: Response,
-  props: ResumePanelProps,
-  state: ActionState,
-  intent: ResumeIntent,
-) {
-  const result: unknown = await response.json();
-  if (!isObject(result)) throw new Error("Invalid résumé response.");
-  if (
-    intent === "upload" &&
-    (result.code === "RESUME_UPLOAD_OPERATION_RETIRED" ||
-      (!props.profileMode &&
-        (result.code === "RESUME_JOB_CLOSED" ||
-          result.code === "RESUME_APPLICATION_CHANGED")))
-  ) {
-    state.setOperation(crypto.randomUUID());
-  }
-  if (intent === "remove" && response.ok)
-    state.setOperation(crypto.randomUUID());
-  if ("resume" in result)
-    state.setAttachment(result.resume as ResumeMetadata | null);
-  props.onChange?.({
-    applicationId:
-      typeof result.applicationId === "string"
-        ? result.applicationId
-        : undefined,
-    revision: typeof result.revision === "number" ? result.revision : undefined,
-  });
-  state.setUploadFailed(intent === "upload" && !response.ok);
-  const canRetryProfileCopy =
-    result.code === "RESUME_UPLOAD_PENDING" ||
-    result.code === "RESUME_UPLOAD_PERSISTENCE_FAILED";
-  state.setProfileCopyRetryAvailable(
-    intent === "profile" && !response.ok && canRetryProfileCopy,
-  );
-  if (intent === "profile" && (response.ok || !canRetryProfileCopy)) {
-    state.setProfileCopyAttempt(null);
-  }
-  state.setMessage(
-    responseMessage(response.ok, result.error, result.reference),
-  );
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }

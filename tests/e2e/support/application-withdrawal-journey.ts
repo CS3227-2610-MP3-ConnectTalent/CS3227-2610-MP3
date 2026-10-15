@@ -110,12 +110,35 @@ async function requestReplacement(page: Page, fixture: WithdrawalFixture) {
 }
 
 async function retryReplacement(page: Page) {
-  await page
-    .getByRole("button", { name: "Upload résumé", exact: true })
-    .click();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/**/resume", async (route) => {
+    if (
+      route.request().method() === "POST" &&
+      route.request().headers()["x-resume-retry"] === "true"
+    )
+      await gate;
+    await route.continue();
+  });
+  try {
+    await page
+      .getByRole("button", { name: "Upload résumé", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Retrying upload…", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Replace résumé" }),
+    ).toHaveCount(0);
+  } finally {
+    release();
+  }
   await expect(
     page.getByRole("link", { name: "Download résumé: replacement.pdf" }),
   ).toBeVisible();
+  await page.unroute("**/api/**/resume");
   await expect(page.getByLabel("Cover letter", { exact: true })).toHaveValue(
     "Synthetic unsaved letter retained during upload",
   );

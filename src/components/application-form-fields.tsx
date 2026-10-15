@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneInput } from "@/components/phone-input";
 import type { ApplicationFormState } from "@/lib/application-form-state";
+import { useFormStatus } from "react-dom";
 
 type Values = ApplicationFormState["values"];
 type Errors = ApplicationFormState["errors"];
@@ -180,6 +181,8 @@ export function CoverLetterField({
 }
 
 export function ApplicationFormActions() {
+  const { pending, data } = useFormStatus();
+  const intent = pending ? data?.get("intent") : null;
   return (
     <div className="flex flex-wrap gap-3">
       <button
@@ -187,17 +190,19 @@ export function ApplicationFormActions() {
         name="intent"
         value="save"
         formNoValidate
+        disabled={pending}
         className="rounded-lg border px-4 py-2"
       >
-        Save draft
+        {intent === "save" ? "Saving draft…" : "Save draft"}
       </button>
       <button
         type="submit"
         name="intent"
         value="submit"
+        disabled={pending}
         className="rounded-lg bg-primary px-4 py-2 text-primary-foreground"
       >
-        Submit application
+        {intent === "submit" ? "Submitting…" : "Submit application"}
       </button>
     </div>
   );
