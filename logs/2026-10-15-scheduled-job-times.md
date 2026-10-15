@@ -6,7 +6,7 @@
 - Owner and issue: John (Johnwz123), [#88 feat(jobs): schedule opening and closing times for job listings](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/88).
 - Branch: `feat/88-scheduled-job-times` branched from `develop` (`f5da004`); [complete archive](../workflow/archive/2026-10-15-scheduled-job-times/record.md).
 - Capabilities: `JMG-004`, `JOB-001`.
-- PR: Pending issue-linked PR submission to `develop`.
+- PR: [PR #89](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/89) opened to `develop` on 2026-10-15.
 
 | Sequence | Source / actual result |
 | --- | --- |

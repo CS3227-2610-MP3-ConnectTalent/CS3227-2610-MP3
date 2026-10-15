@@ -1,23 +1,23 @@
 # Feature record: Scheduled job opening and closing times
 
-Status: proposed
+Status: archived
 
 Owner: John (Johnwz123)
 
-Spec version: ProductSpec v1.11; [ProductSpec.md](../../ProductSpec.md)
+Spec version: ProductSpec v1.15; [ProductSpec.md](../../ProductSpec.md)
 Date: 2026-10-15
 
 ## Metadata and artifact links
 
 - Change ID/classification: 2026-10-15-scheduled-job-times; behavior change (medium)
 - GitHub issues: [#88](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/88)
-- Branch/commits/PR: `feat/88-scheduled-job-times`; PR pending
+- Branch/commits/PR: `feat/88-scheduled-job-times`; [PR #89](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/89)
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: [specs/job-management.md](specs/job-management.md), [specs/public-job-listings.md](specs/public-job-listings.md)
 - Implementation plan/tasks: [plan.md](plan.md), [tasks.md](tasks.md)
-- Baseline: ProductSpec v1.11, commit `f5da004`
-- Archive path: pending (`workflow/archive/2026-10-15-scheduled-job-times/`)
+- Baseline: ProductSpec v1.15, commit `f5da004`
+- Archive path: `workflow/archive/2026-10-15-scheduled-job-times/`
 
 ## Approval checklist
 
