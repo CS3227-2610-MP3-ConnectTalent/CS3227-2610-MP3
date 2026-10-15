@@ -2,7 +2,7 @@
 
 ## Canonical baseline and index
 
-These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.11, 15 October 2026** on this branch. Accepted #83 amends JOB-004 Search feedback and adds OVR-005 link feedback; [its archived packet](../archive/2026-10-15-navigation-loading/record.md) preserves approval, independent re-review and the browser-held failure limit. Open PR #82 also proposes v1.11 with OVR-004; reconcile both when integrating. Earlier accepted #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This branch sync does not certify hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
+These files are the canonical product requirements for [ProductSpec](../ProductSpec.md) **v1.12, 15 October 2026** on this branch. Accepted #83 amends JOB-004 Search feedback and adds OVR-005 link feedback; its separately accepted [View role follow-up](../archive/2026-10-15-view-role-loading/record.md) extends OVR-005 and keeps the result announcement for assistive technology while removing its duplicate visible line. [The original #83 packet](../archive/2026-10-15-navigation-loading/record.md) preserves approval, independent re-review and the browser-held failure limit. Open PR #82 also proposes v1.11 with OVR-004; reconcile both when integrating. Earlier accepted #78 public search, HR dashboard, lifecycle, roles, navigation, AI, privacy, profiles and withdrawal baselines remain. This branch sync does not certify hosted deployment or release. [ProductSpec](../ProductSpec.md) indexes the nine modules.
 
 ## v1.10 accepted public job search
 

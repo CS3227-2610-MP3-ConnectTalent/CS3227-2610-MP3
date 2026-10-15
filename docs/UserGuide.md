@@ -67,7 +67,7 @@ Use **Search open roles** to find a phrase in a job's title, team, description o
 
 Results update after a short pause (300 ms). Press Enter or choose **Search** to apply immediately. **Clear search** removes only the phrase; **All roles** removes only the category. The address keeps both filters for sharing, refreshing and browser Back/Forward. Without JavaScript, choose **Search** to submit the form. If no roles match, try a different phrase or category; invalid searches show guidance without results.
 
-While a search request is pending, **Search** shows **Searching…** and cannot be pressed again. You can still change the query, category or Clear. A delayed **Apply for this role** or return-to-Careers link shows a small loading indicator beside that link; the destination and access rules stay the same. Fast navigation may finish before the indicator appears.
+While a search request is pending, **Search** shows **Searching…** and cannot be pressed again. You can still change the query, category or Clear. A delayed **View role**, **Apply for this role** or return-to-Careers link shows a small loading indicator beside that link; the destination and access rules stay the same. Fast navigation may finish before the indicator appears.
 
 ### 3.2 Complete and save an application
 

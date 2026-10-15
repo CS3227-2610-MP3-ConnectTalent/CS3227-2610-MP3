@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { categoryLabel } from "@/lib/job-categories";
 import { JOB_SEARCH_ERROR } from "@/lib/job-search";
 import type { PublishedJob } from "@/lib/jobs";
+import { PendingLinkStatus } from "@/components/pending-link-status";
 type Jobs = PublishedJob[];
 type Job = PublishedJob;
 
@@ -150,6 +151,7 @@ function JobCardFooter() {
       </span>
       <span className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white">
         View role
+        <PendingLinkStatus label="Opening role…" />
       </span>
     </div>
   );

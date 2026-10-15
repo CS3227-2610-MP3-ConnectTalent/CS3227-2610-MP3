@@ -36,7 +36,7 @@ test("a delayed Search marks only its button busy and newer filters still win", 
     await expect(search).toBeEnabled();
     await expect(
       page.getByRole("status").filter({ hasText: "Updating roles" }),
-    ).toBeVisible();
+    ).toHaveClass(/sr-only/);
     await page
       .getByRole("navigation", { name: "Filter jobs by category" })
       .getByRole("link", { name: "Sales", exact: true })
@@ -82,6 +82,34 @@ test("a delayed Apply link announces its navigation and preserves its destinatio
     release();
   }
   await expect(page).toHaveURL(/\/auth\/sign-in/);
+});
+
+test("a delayed View role card announces its navigation and preserves its destination", async ({
+  page,
+}) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/*", async (route) => {
+    const url = new URL(route.request().url());
+    if (/^\/jobs\/[^/]+$/.test(url.pathname) && url.searchParams.has("_rsc"))
+      await gate;
+    await route.continue();
+  });
+  try {
+    await page.goto("/");
+    const card = page.locator("a.job-card").first();
+    const destination = await card.getAttribute("href");
+    expect(destination).toMatch(/^\/jobs\/[^/]+$/);
+    await card.click();
+    await expect(card.getByRole("status")).toHaveText("Opening role…");
+    await expect(card.locator("svg.animate-spin")).toBeVisible();
+    release();
+    await expect(page).toHaveURL(new RegExp(`${destination}$`));
+  } finally {
+    release();
+  }
 });
 
 test("a delayed Back to open roles link announces its navigation", async ({

@@ -37,6 +37,7 @@ vi.mock("@/components/use-job-listing-filters", () => ({
 import { JobListingFilters } from "@/components/job-listing-filters";
 import { BackToOpenRoles } from "@/components/back-to-open-roles";
 import { AuthFrame } from "@/components/auth-frame";
+import { JobResults } from "@/components/job-listing-results";
 
 beforeEach(() => {
   mocks.searchPending = false;
@@ -53,6 +54,7 @@ it("shows and disables only the Search submit during a route request", () => {
   );
 
   expect(html).toContain("Searching…");
+  expect(html).toMatch(/<p role="status" class="sr-only">Updating roles…<\/p>/);
   expect(html).toMatch(/<button[^>]+type="submit"[^>]*disabled=""/);
   expect(html).toContain('name="q"');
   expect(html).toContain("Clear search");
@@ -130,4 +132,27 @@ it("announces a waiting Careers return link in the auth frame", () => {
 
   expect(html).toContain('href="/"');
   expect(html).toContain("Opening roles…");
+});
+
+it("announces a waiting View role card link and keeps its destination", () => {
+  mocks.linkPending = true;
+  const html = renderToStaticMarkup(
+    <JobResults
+      jobs={[
+        {
+          id: "00000000-0000-4000-8000-000000000101",
+          title: "Software Engineer",
+          team: "Digital Products",
+          category: "engineering",
+          description: "Build tools",
+          requirements: "TypeScript",
+        },
+      ]}
+      invalidCategory={false}
+    />,
+  );
+
+  expect(html).toContain('href="/jobs/00000000-0000-4000-8000-000000000101"');
+  expect(html).toContain("View role");
+  expect(html).toContain("Opening role…");
 });
