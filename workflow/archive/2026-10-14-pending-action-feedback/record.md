@@ -7,6 +7,8 @@
 - Status: accepted locally with recorded limits on 15 October 2026; OVR-004 synced to canonical v1.11; complete packet archived; Paul explicitly requested commit, push and PR on 15 October 2026
 - Session summary: [14 October pending action feedback](../../../logs/2026-10-14-pending-action-feedback.md)
 - Closeout summary: [15 October pending action feedback](../../../logs/2026-10-15-pending-action-feedback-closeout.md)
+- PR review follow-up: [15 October CI and review correction](../../../logs/2026-10-15-pr82-ci-review-followup.md)
+- PR repair review: [separate read-only review](handoffs/pr82-repair-review.md)
 
 ## Intake and observations
 
@@ -61,3 +63,11 @@ The accepted OVR-004 normative clause and its success/failure scenarios were cop
 ## PR submission authorization
 
 After acceptance, sync and archive, Paul explicitly requested “git commit push and create a pr” on 15 October 2026. This authorizes submission of the #81 branch to `develop`; it does not grant PR review, merge, deployment or release approval. The archived packet and both linked session summaries were complete before PR preparation. The unrelated untracked profile/résumé packet is outside the staged scope.
+
+## PR #82 review follow-up
+
+The first PR head `2c4d08c` failed its Playwright Chromium check: three critical journeys used an unqualified `getByRole("status")` assertion. #81's persistent, initially empty sign-out status region made those locators match both the navigation status and the intended application/AI status. The CI failure was a test-selector collision; the intended application and withdrawal messages were present in the failure output. The assertions now filter the intended status text in the Applicant application, withdrawal, and HR dashboard journeys. The exact critical suite passed locally, 10/10 Chromium cases, with local Supabase; scoped formatting, lint and typecheck also passed. No product behavior, requirement, database policy, or accepted scope changed. GitHub CI must rerun on the updated PR head before merge.
+
+The automated review's future-date finding used UTC without converting to the project's Asia/Singapore timezone. The review-cited `2026-10-14T16:22:02Z` is `2026-10-15 00:22:02 SGT`; the actual Git commit time for `2c4d08c` is `2026-10-15 00:19:04 +08:00`, and PR creation at `2026-10-14T16:21:20Z` is `2026-10-15 00:21:20 SGT`. The recorded 15 October student acceptance and PR request refer to Singapore local date. The exact conversational decisions remain the evidence source; this conversion clarifies the date and does not invent another approval.
+
+A separate read-only `/root/pr82_repair_review` execution found no blocking issue in the three selector repairs or timezone clarification; its [handoff](handoffs/pr82-repair-review.md) records the reviewed inputs and limits. The reviewer did not rerun the browser suite or verify conversation timestamps independently. Paul then answered “Accept and commit/push to PR #82” on 15 October 2026 to the separate post-review question in this conversation. This accepts the bounded follow-up and authorizes a commit/push to the existing PR branch, not merge or release. GitHub CI must rerun on the new head.
