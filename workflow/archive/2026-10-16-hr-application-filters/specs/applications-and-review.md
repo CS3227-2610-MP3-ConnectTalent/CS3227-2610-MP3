@@ -16,7 +16,7 @@
   - Search: HR MUST be able to search applications by applicant name (`full_name`) using case-insensitive substring matching. Leading and trailing whitespace MUST be trimmed and consecutive whitespace collapsed. The search phrase MUST be limited to at most 100 characters and MUST reject disallowed control characters. With JavaScript enabled, text input MUST apply after 300 ms of typing inactivity; pressing Enter or clicking Search MUST apply immediately.
   - Job filter: HR MUST be able to filter applications by specific job opening or select all jobs.
   - Review status filter: HR MUST be able to filter applications by review status (`Submitted`, `In review`, `Shortlisted`, `Rejected`) or select all review statuses.
-  - Withdrawal filter: HR MUST be able to filter applications by withdrawal state (`Active only`, `Withdrawn only`, `All`). The default view MUST show `Active only` (non-withdrawn) applications to keep the primary review queue actionable.
+  - Withdrawal filter: HR MUST be able to filter applications by withdrawal state (`Active only`, `Withdrawn only`, `All`). The default view MUST show `All` submitted applications to maintain full queue visibility and backward compatibility.
   - Sorting: HR MUST be able to toggle the sort order of submitted applications between `Newest first` (`submitted_at DESC`, default) and `Oldest first` (`submitted_at ASC`).
   - Pagination: Results MUST be paginated (page size of 10 items). The UI MUST show current page, total pages/count, and provide Next / Previous navigation controls. Out-of-bounds page requests or negative numbers MUST safely fall back to page 1.
   - URL synchronization: All active search, filter, sort, and pagination state MUST be reflected in URL query parameters (`q`, `job`, `status`, `withdrawal`, `sort`, `page`) so that filtered views are bookmarkable, shareable, and preserve browser history navigation.
@@ -38,5 +38,6 @@ None.
 - [x] Every changed rule and affected capability has a delta with stable IDs and scenarios.
 - [x] Independent analyst/reviewer resolved ambiguity; actual reviewer and findings linked.
 - [x] Human approval recorded before product implementation.
-- [ ] Accepted final deltas synced to canonical files and version/date policy applied before archive.
-- Sync commit/paths/decision evidence: Pending implementation and acceptance.
+- [x] Accepted final deltas synced to canonical files and version/date policy applied before archive.
+- Sync commit/paths/decision evidence: Synced to canonical workflow/specs/applications-and-review.md (v1.17, 16 October 2026); accepted by John (student owner).
+
