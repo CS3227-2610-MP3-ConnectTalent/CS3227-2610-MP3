@@ -10,6 +10,14 @@ const mocks = vi.hoisted(() => ({
   listHRStatusEvents: vi.fn(),
   getApplicationResume: vi.fn(),
   notFound: vi.fn(),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  })),
 }));
 
 vi.mock("@/lib/hr-auth", () => ({ requireHR: mocks.requireHR }));
@@ -22,7 +30,10 @@ vi.mock("@/lib/hr-applications", () => ({
 vi.mock("@/lib/application-resumes", () => ({
   getApplicationResume: mocks.getApplicationResume,
 }));
-vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
+vi.mock("next/navigation", () => ({
+  notFound: mocks.notFound,
+  useRouter: mocks.useRouter,
+}));
 vi.mock("next/link", async () => {
   const React = await import("react");
   return {
@@ -93,7 +104,9 @@ beforeEach(() => {
 });
 
 it("renders an empty HR review list, submitted rows, and a withdrawn status", async () => {
-  const empty = renderToStaticMarkup(await HRApplicationsPage());
+  const empty = renderToStaticMarkup(
+    await HRApplicationsPage({ searchParams: Promise.resolve({}) }),
+  );
   expect(empty).toContain("No submitted applications yet.");
 
   mocks.listSubmittedApplications.mockResolvedValue([
@@ -104,7 +117,9 @@ it("renders an empty HR review list, submitted rows, and a withdrawn status", as
       withdrawn_at: "2026-10-11T00:00:00Z",
     },
   ]);
-  const html = renderToStaticMarkup(await HRApplicationsPage());
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({ searchParams: Promise.resolve({}) }),
+  );
   expect(html).toContain("In review");
   expect(html).toContain("Withdrawn");
   expect(html).toContain(`Applicant ${applicantId}`);
@@ -115,7 +130,9 @@ it("shows a safe error when the HR application list is unavailable", async () =>
   mocks.listSubmittedApplications.mockRejectedValue(
     new Error("synthetic query detail"),
   );
-  const html = renderToStaticMarkup(await HRApplicationsPage());
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({ searchParams: Promise.resolve({}) }),
+  );
   expect(html).toContain("Review data is temporarily unavailable");
   expect(html).not.toContain("synthetic query detail");
 });
@@ -184,4 +201,93 @@ it("keeps withdrawn Applicant history visible and disables HR actions and AI sum
   expect(html).toContain('data-testid="actions" data-editable="false"');
   expect(html).not.toContain('data-testid="ai-summary"');
   expect(html).toContain("Original synthetic letter");
+});
+
+it("filters applications by search query on applicant name", async () => {
+  mocks.listSubmittedApplications.mockResolvedValue([
+    {
+      ...application,
+      id: "app-1",
+      full_name: "Alice Adams",
+    },
+    {
+      ...application,
+      id: "app-2",
+      full_name: "Bob Baker",
+    },
+  ]);
+
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({
+      searchParams: Promise.resolve({ q: "alice" }),
+    }),
+  );
+  expect(html).toContain("Alice Adams");
+  expect(html).not.toContain("Bob Baker");
+});
+
+it("filters applications by job ID and status", async () => {
+  const otherJobId = "55000000-0000-4000-8000-000000000105";
+  mocks.listSubmittedApplications.mockResolvedValue([
+    {
+      ...application,
+      id: "app-1",
+      full_name: "Alice Adams",
+      review_status: "submitted",
+    },
+    {
+      ...application,
+      id: "app-2",
+      job_id: otherJobId,
+      full_name: "Bob Baker",
+      review_status: "in_review",
+    },
+  ]);
+
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({
+      searchParams: Promise.resolve({ status: "in_review" }),
+    }),
+  );
+  expect(html).toContain("Bob Baker");
+  expect(html).not.toContain("Alice Adams");
+});
+
+it("displays safe error feedback for invalid search queries", async () => {
+  mocks.listSubmittedApplications.mockResolvedValue([application]);
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({
+      searchParams: Promise.resolve({ q: "Jane\u0000Doe" }),
+    }),
+  );
+  expect(html).toContain("Use a search phrase of at most 100 characters");
+});
+
+it("displays message when no applications match filters", async () => {
+  mocks.listSubmittedApplications.mockResolvedValue([application]);
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({
+      searchParams: Promise.resolve({ q: "Nonexistent Person" }),
+    }),
+  );
+  expect(html).toContain("No applications match your selected filters.");
+});
+
+it("renders pagination controls when application count exceeds page size", async () => {
+  const manyApps = Array.from({ length: 15 }, (_, i) => ({
+    ...application,
+    id: `44000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}`,
+    full_name: `Applicant ${i + 1}`,
+  }));
+  mocks.listSubmittedApplications.mockResolvedValue(manyApps);
+
+  const html = renderToStaticMarkup(
+    await HRApplicationsPage({
+      searchParams: Promise.resolve({ page: "1", sort: "oldest" }),
+    }),
+  );
+  expect(html).toMatch(/Showing.*1.*to.*10.*of.*15.*applications/);
+  expect(html).toContain("Page 1 of 2");
+  expect(html).toContain("Applicant 1 ");
+  expect(html).not.toContain("Applicant 15 ");
 });

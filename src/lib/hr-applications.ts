@@ -9,6 +9,11 @@ const listItemSchema = z.object({
   withdrawn_by: z.uuid().nullable(),
   id: z.uuid(),
   applicant_id: z.uuid(),
+  full_name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   job_id: z.uuid(),
   job_title: z.string(),
   submitted_at: z.string(),
@@ -18,7 +23,6 @@ const listItemSchema = z.object({
 const detailSchema = listItemSchema.extend({
   education: z.string().nullable(),
   work_experience: z.string().nullable(),
-  full_name: z.string().nullable(),
   submitted_email: z.string().nullable(),
   phone: z.string().nullable(),
   portfolio_url: z.string().nullable(),
@@ -45,6 +49,21 @@ const statusEventSchema = z.object({
 });
 
 export type HRApplication = z.infer<typeof detailSchema>;
+export type HRApplicationSummary = z.infer<typeof listItemSchema>;
+
+export function listDistinctJobsFromApplications(
+  applications: Array<{ job_id: string; job_title: string }>,
+): Array<{ id: string; title: string }> {
+  const map = new Map<string, string>();
+  for (const app of applications) {
+    if (!map.has(app.job_id)) {
+      map.set(app.job_id, app.job_title);
+    }
+  }
+  return Array.from(map.entries())
+    .map(([id, title]) => ({ id, title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
 
 export async function listSubmittedApplications() {
   const { client } = await requireHR();
@@ -54,7 +73,7 @@ export async function listSubmittedApplications() {
       let query = client
         .from("applications")
         .select(
-          "withdrawn_at,withdrawn_by,id,applicant_id,job_id,job_title,submitted_at,review_status",
+          "withdrawn_at,withdrawn_by,id,applicant_id,full_name,job_id,job_title,submitted_at,review_status",
         )
         .eq("submission_state", "submitted");
       if (afterId !== null) query = query.gt("id", afterId);
