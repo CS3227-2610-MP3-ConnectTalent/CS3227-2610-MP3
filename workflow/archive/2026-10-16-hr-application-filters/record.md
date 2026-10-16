@@ -11,7 +11,7 @@ Date: 2026-10-16
 
 - Change ID/classification: 2026-10-16-hr-application-filters; behavior change
 - GitHub issues: [#97 feat(hr): application search, filters, sorting, and pagination](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/97)
-- Branch/commits/PR: `feat/97-hr-application-filters`; commits `7ca4e09`, `4c2ce47`, `a3b3b55`
+- Branch/commits/PR: `feat/97-hr-application-filters`; commits `7ca4e09`, `4c2ce47`, `a3b3b55`, `b344f5e`; [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99)
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: [specs/applications-and-review.md](specs/applications-and-review.md)

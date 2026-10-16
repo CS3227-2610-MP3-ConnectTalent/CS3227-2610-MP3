@@ -10,8 +10,8 @@ Follows the [log policy](README.md) and [SessionSummaryTemplate](SessionSummaryT
 - Evidence available and missing coverage: Full terminal execution logs, git diffs, unit test suites (focused 32/32 and full 563/563), lint, typecheck, production build, independent review handoff, canonical spec delta sync. Hosted environment smoke test unperformed locally.
 - GitHub issues: [#97 feat(hr): application search, filters, sorting, and pagination](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/97)
 - Change packet and feature record: `workflow/archive/2026-10-16-hr-application-filters/` ([record.md](../workflow/archive/2026-10-16-hr-application-filters/record.md))
-- Branch and commits: `feat/97-hr-application-filters`; `origin/develop..HEAD`; commits `7ca4e09`, `4c2ce47`, `a3b3b55`
-- PR: Pending opening to `develop` referencing #97
+- Branch and commits: `feat/97-hr-application-filters`; `origin/develop..HEAD`; commits `7ca4e09`, `4c2ce47`, `a3b3b55`, `b344f5e`
+- PR: [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99)
 - Related session summaries: [logs/2026-10-16-applicant-withdraw-and-reapply.md](2026-10-16-applicant-withdraw-and-reapply.md)
 
 ## Chronological interactions and handoffs
@@ -23,7 +23,7 @@ Follows the [log policy](README.md) and [SessionSummaryTemplate](SessionSummaryT
 | 3 / 21:20 | Implementer | Authored test-first unit tests in `tests/unit/hr-application-filters.test.ts`. Implemented `src/lib/hr-application-search.ts`, `src/lib/hr-applications.ts`, UI components `src/components/hr-application-filters.tsx`, `src/components/hr-application-filter-dropdowns.tsx`, `src/components/hr-application-pagination.tsx`, and updated `src/app/hr/applications/page.tsx`. | Commit `4c2ce47`; 32 focused unit tests pass; `typecheck` and `build` pass. | Handed off to Independent Reviewer. |
 | 4 / 21:40 | Coordinator → Independent Reviewer subagent (`mp3-independent-verification`) | Assigned independent review of commit `4c2ce47` vs `origin/develop` against acceptance criteria HR-APP-FILTER-AC-01..06, security boundaries, and lint rules. | Handoff report in `handoffs/independent-review.md`. Identified 1 blocking finding (ESLint `max-lines-per-function` in `SearchForm`, 56 lines > 50) and 1 advisory finding (duplicate function export). | Escalated to Implementer for remediation. |
 | 5 / 21:48 | Implementer | Refactored `SearchForm` extracting `useSearchFormHandlers` and `SearchActions`; re-exported `listDistinctJobsFromApplications` from search library. | Commit `a3b3b55`; `pnpm lint` passed with 0 errors and 0 warnings. | Recheck verified clean; approved by reviewer. |
-| 6 / 22:05 | Student / Agent | Reconciled tasks, synced canonical `workflow/specs/applications-and-review.md` (`APP-010`, baseline v1.17), updated `workflow/ProductSpec.md`, moved packet to `workflow/archive/`, and updated indices. | Tasks T00–T10 marked complete; PR readiness achieved. | PR opening to `develop` referencing #97. |
+| 6 / 22:05 | Student / Agent | Reconciled tasks, synced canonical `workflow/specs/applications-and-review.md` (`APP-010`, baseline v1.17), updated `workflow/ProductSpec.md`, moved packet to `workflow/archive/`, and opened PR #99. | Tasks T00–T11 complete; PR #99 opened. | Repository review and merge pending. |
 
 ## Tool and agent executions
 

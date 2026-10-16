@@ -23,5 +23,5 @@
 - [x] T08 — Human acceptance recorded by John. Depends on: T07. Evidence: `record.md`.
 - [x] T09 — Canonical spec sync and complete packet archive to `workflow/archive/2026-10-16-hr-application-filters/`. Depends on: T08. Evidence: `workflow/specs/applications-and-review.md` update (v1.17).
 - [x] T10 — Session closeout log in `logs/2026-10-16-hr-application-filters.md`. Depends on: T09.
-- [ ] T11 — Open issue-linked PR to `develop` referencing #97. Depends on: T10. Evidence: PR URL.
+- [x] T11 — Open issue-linked PR to `develop` referencing #97. Depends on: T10. Evidence: [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99).
 
