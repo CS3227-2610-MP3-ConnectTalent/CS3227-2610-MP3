@@ -18,7 +18,7 @@
 
 ## Review and closeout
 
-- [ ] T06 — Independent Reviewer assesses git diff against `reapply-AC-01..05` and records report in `handoffs/independent-review.md`. Depends on: T05.
+- [x] T06 — Independent Reviewer assesses git diff against `reapply-AC-01..05` and records report in `handoffs/independent-review.md`. Depends on: T05. Evidence: Verified in `handoffs/independent-review.md`.
 - [ ] T07 — Human owner John records acceptance decision in chat and `record.md`. Depends on: T06.
 - [ ] T08 — Integration Lead syncs accepted deltas to canonical specs (`applications-and-review.md`), advances ProductSpec baseline to v1.16, moves packet to `workflow/archive/2026-10-16-applicant-withdraw-and-reapply/`, and adds dated session summary in `logs/2026-10-16-applicant-withdraw-and-reapply.md`. Depends on: T07.
 - [ ] T09 — Authorized contributor opens issue-linked PR to `develop`. Depends on: T08.
