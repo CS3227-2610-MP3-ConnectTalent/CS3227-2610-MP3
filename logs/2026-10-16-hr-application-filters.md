@@ -68,10 +68,12 @@ Follows the [log policy](README.md) and [SessionSummaryTemplate](SessionSummaryT
 | 2026-10-16 / local / `a3b3b55` | `pnpm typecheck` (`tsc --noEmit`) | Passed: Exit code 0, 0 type errors | Terminal output | Full TypeScript compilation |
 | 2026-10-16 / local / `a3b3b55` | `pnpm lint` (`eslint`) | Passed: Exit code 0, 0 errors, 0 warnings | Terminal output | ESLint rules including complexity & function length |
 | 2026-10-16 / local / `a3b3b55` | `pnpm build` (`next build`) | Passed: Exit code 0, Turbopack build succeeded; `/hr/applications` dynamic route verified | Next.js build output | Production compilation |
+| 2026-10-16 / GitHub Actions / `ca29635` | `CI` workflow (`run 38921063494`) | Passed: format, lint, typecheck, unit tests, evals, build in 1m13s | GitHub Actions log | PR #99 automated CI |
+| 2026-10-16 / GitHub Actions / `ca29635` | `Supabase CI` workflow (`run 38921063505`) | Passed: database checks, race suites, 12 Playwright tests in 3m55s | GitHub Actions log | PR #99 Supabase CI |
 
 ## Open work, blockers and limitations
 
-- Outstanding work and owner: Push branch `feat/97-hr-application-filters` to origin to update PR #99.
+- Outstanding work and owner: Ready for review and merge to develop (PR #99).
 - Blockers and missing evidence: None. All quality gates passed cleanly.
 - Review findings and disposition: All 4 findings from thorough review resolved:
   1. Card layout: redundant duplicate `job_title` removed.
