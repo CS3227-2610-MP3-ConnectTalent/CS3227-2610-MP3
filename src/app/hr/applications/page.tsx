@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { PendingLinkStatus } from "@/components/pending-link-status";
 import { requireHR } from "@/lib/hr-auth";
-import { listSubmittedApplications } from "@/lib/hr-applications";
+import {
+  listDistinctApplicationJobs,
+  listSubmittedApplications,
+} from "@/lib/hr-applications";
 import { reviewStatusLabel } from "@/lib/hr-input";
 import {
   filterApplications,
@@ -20,22 +23,40 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+async function loadReviewData(
+  params: ReturnType<typeof parseHRApplicationFilterParams>,
+) {
+  const [distinctJobs, applications] = await Promise.all([
+    listDistinctApplicationJobs(),
+    listSubmittedApplications({
+      jobId: params.job,
+      status: params.status,
+      withdrawal: params.withdrawal,
+    }),
+  ]);
+  const jobs =
+    distinctJobs.length > 0
+      ? distinctJobs
+      : listDistinctJobsFromApplications(applications);
+  return { jobs, applications };
+}
+
 export default async function HRApplicationsPage({
   searchParams,
 }: {
   searchParams?: SearchParams;
 }) {
   await requireHR();
-  let applications;
+  const rawParams = searchParams ? await searchParams : {};
+  const filterParams = parseHRApplicationFilterParams(rawParams);
+
+  let data;
   try {
-    applications = await listSubmittedApplications();
+    data = await loadReviewData(filterParams);
   } catch {
     return <ReviewDataUnavailable />;
   }
-
-  const rawParams = searchParams ? await searchParams : {};
-  const filterParams = parseHRApplicationFilterParams(rawParams);
-  const jobs = listDistinctJobsFromApplications(applications);
+  const { jobs, applications } = data;
 
   const filtered = filterApplications(applications, filterParams);
   const sorted = sortApplications(filtered, filterParams.sort);
@@ -152,13 +173,13 @@ function HRApplicationLink({
     >
       <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
         <span className="block font-semibold">
-          {application.full_name
-            ? `${application.full_name} — ${application.job_title}`
-            : application.job_title}
+          {application.full_name || application.job_title}
         </span>
-        <span className="block text-xs font-medium text-muted-foreground sm:text-right">
-          {application.job_title}
-        </span>
+        {application.full_name ? (
+          <span className="block text-xs font-medium text-muted-foreground sm:text-right">
+            {application.job_title}
+          </span>
+        ) : null}
       </div>
       <span className="block text-sm text-muted-foreground mt-0.5">
         Applicant {application.applicant_id}

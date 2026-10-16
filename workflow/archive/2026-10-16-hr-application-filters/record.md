@@ -64,8 +64,14 @@ Changed files:
 - `tests/unit/hr-application-pages.test.tsx`
 
 Verification commands and results:
-- `pnpm vitest run tests/unit/hr-application-filters.test.ts tests/unit/hr-application-pagination.test.ts tests/unit/hr-applications.test.ts tests/unit/hr-application-pages.test.tsx`: 4 files, 32/32 tests passed
-- `pnpm test:unit`: 93 files, 563/563 tests passed
+- `pnpm vitest run tests/unit/hr-application-filters.test.ts tests/unit/hr-application-pagination.test.ts tests/unit/hr-applications.test.ts tests/unit/hr-application-pages.test.tsx`: 4 files, 35/35 tests passed
+- `pnpm test:unit`: 93 files, 566/566 tests passed
 - `pnpm typecheck`: Exit code 0, 0 errors
 - `pnpm lint`: Exit code 0, 0 errors, 0 warnings
 - `pnpm build`: Next.js Turbopack production build succeeded; `/hr/applications` dynamic server-rendered
+
+## Post-review remediation (4 findings resolved)
+1. **Finding 1 (UI layout)**: Removed redundant `job_title` duplicate display on application card; applicant `full_name` is on the left and `job_title` on the right.
+2. **Finding 2 (Edge cases)**: Supported array query parameter parsing (`Array.isArray(raw) ? raw[0] : raw`) across search text, job UUID, review status, withdrawal state, sort, and page parameters.
+3. **Finding 3 (Internationalization)**: Added Unicode NFD diacritic folding (`foldDiacritics`) so accented applicant names (e.g. "René") match unaccented queries ("rene") and vice-versa.
+4. **Finding 4 (Architecture & Scale)**: Added database query pushdown options (`jobId`, `status`, `withdrawal`, `nameQuery`) to `listSubmittedApplications` and implemented `listDistinctApplicationJobs()` for distinct dropdown roles.

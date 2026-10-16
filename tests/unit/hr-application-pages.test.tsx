@@ -5,6 +5,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   requireHR: vi.fn(),
   listSubmittedApplications: vi.fn(),
+  listDistinctApplicationJobs: vi.fn(),
   getSubmittedApplication: vi.fn(),
   listHRNotes: vi.fn(),
   listHRStatusEvents: vi.fn(),
@@ -23,6 +24,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/hr-auth", () => ({ requireHR: mocks.requireHR }));
 vi.mock("@/lib/hr-applications", () => ({
   listSubmittedApplications: mocks.listSubmittedApplications,
+  listDistinctApplicationJobs: mocks.listDistinctApplicationJobs,
   getSubmittedApplication: mocks.getSubmittedApplication,
   listHRNotes: mocks.listHRNotes,
   listHRStatusEvents: mocks.listHRStatusEvents,
@@ -94,6 +96,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.requireHR.mockResolvedValue({ user: { id: "hr-user" }, client: {} });
   mocks.listSubmittedApplications.mockResolvedValue([]);
+  mocks.listDistinctApplicationJobs.mockResolvedValue([]);
   mocks.getSubmittedApplication.mockResolvedValue(application);
   mocks.listHRNotes.mockResolvedValue([]);
   mocks.listHRStatusEvents.mockResolvedValue([]);
@@ -288,6 +291,6 @@ it("renders pagination controls when application count exceeds page size", async
   );
   expect(html).toMatch(/Showing.*1.*to.*10.*of.*15.*applications/);
   expect(html).toContain("Page 1 of 2");
-  expect(html).toContain("Applicant 1 ");
-  expect(html).not.toContain("Applicant 15 ");
+  expect(html).toContain(">Applicant 1<");
+  expect(html).not.toContain(">Applicant 15<");
 });

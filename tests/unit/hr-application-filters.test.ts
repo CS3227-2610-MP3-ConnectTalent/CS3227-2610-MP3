@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   filterApplications,
+  foldDiacritics,
   parseHRApplicationFilterParams,
   sortApplications,
   type HRApplicationListItem,
@@ -72,7 +73,9 @@ describe("HR application filter parameter validation", () => {
       parseHRApplicationFilterParams({ withdrawal: "invalid" }).withdrawal,
     ).toBe("all");
   });
+});
 
+describe("HR application sort, page, and array parameters", () => {
   it("validates sort direction and page number", () => {
     expect(parseHRApplicationFilterParams({ sort: "oldest" }).sort).toBe(
       "oldest",
@@ -82,6 +85,26 @@ describe("HR application filter parameter validation", () => {
     );
     expect(parseHRApplicationFilterParams({ page: "3" }).page).toBe(3);
     expect(parseHRApplicationFilterParams({ page: "-1" }).page).toBe(1);
+  });
+
+  it("handles array query parameters gracefully across all filters", () => {
+    const validJobId = "11111111-1111-4111-8111-111111111111";
+    const res = parseHRApplicationFilterParams({
+      q: ["Jane Doe", "Other"],
+      job: [validJobId, "extra"],
+      status: ["in_review", "rejected"],
+      withdrawal: ["withdrawn", "active"],
+      sort: ["oldest", "newest"],
+      page: ["2", "1"],
+    });
+    expect(res).toMatchObject({
+      q: "Jane Doe",
+      job: validJobId,
+      status: "in_review",
+      withdrawal: "withdrawn",
+      sort: "oldest",
+      page: 2,
+    });
   });
 });
 
@@ -174,7 +197,7 @@ describe("HR application filtering by withdrawal", () => {
   });
 });
 
-describe("HR application filtering by job, status and search", () => {
+describe("HR application filtering by job and status", () => {
   it("filters by job ID and status", () => {
     const byJob = filterApplications(sampleApps, {
       q: "",
@@ -201,8 +224,23 @@ describe("HR application filtering by job, status and search", () => {
     });
     expect(byStatus.map((a) => a.id)).toEqual([sampleApps[1].id]);
   });
+});
 
-  it("filters by applicant name and handles invalid search", () => {
+describe("HR application filtering by applicant name and diacritics", () => {
+  it("filters by applicant name, folds diacritics, and handles invalid search", () => {
+    expect(foldDiacritics("Hélène Müller")).toBe("Helene Muller");
+    const accentApps = [{ ...sampleApps[0], full_name: "René François" }];
+    expect(
+      filterApplications(accentApps, {
+        q: "rene",
+        invalidSearch: false,
+        withdrawal: "all",
+        page: 1,
+        pageSize: 10,
+        sort: "newest",
+      }),
+    ).toHaveLength(1);
+
     const filtered = filterApplications(sampleApps, {
       q: "alice",
       invalidSearch: false,
@@ -226,32 +264,8 @@ describe("HR application filtering by job, status and search", () => {
 });
 
 describe("HR application sorting", () => {
-  const list: HRApplicationListItem[] = [
-    {
-      id: "a0000000-0000-4000-8000-000000000001",
-      applicant_id: "u1",
-      full_name: "One",
-      job_id: "j1",
-      job_title: "Role",
-      submitted_at: "2026-10-10T10:00:00Z",
-      review_status: "submitted",
-      withdrawn_at: null,
-      withdrawn_by: null,
-    },
-    {
-      id: "a0000000-0000-4000-8000-000000000002",
-      applicant_id: "u2",
-      full_name: "Two",
-      job_id: "j1",
-      job_title: "Role",
-      submitted_at: "2026-10-12T10:00:00Z",
-      review_status: "submitted",
-      withdrawn_at: null,
-      withdrawn_by: null,
-    },
-  ];
-
   it("sorts newest first (DESC) and oldest first (ASC)", () => {
+    const list = [sampleApps[0], sampleApps[1]];
     const desc = sortApplications(list, "newest");
     expect(desc[0].id).toBe(list[1].id);
     expect(desc[1].id).toBe(list[0].id);

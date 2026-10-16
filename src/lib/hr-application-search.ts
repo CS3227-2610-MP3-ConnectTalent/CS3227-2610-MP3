@@ -35,14 +35,19 @@ export function normalizeSearchQuery(value: string): string {
   return value.trim().replace(/\s+/gu, " ");
 }
 
+export function foldDiacritics(value: string): string {
+  return value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}
+
 function parseSearchInput(raw: unknown): { q: string; invalidSearch: boolean } {
-  if (typeof raw !== "string") {
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof val !== "string") {
     return { q: "", invalidSearch: false };
   }
-  if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/u.test(raw)) {
+  if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/u.test(val)) {
     return { q: "", invalidSearch: true };
   }
-  const normalized = normalizeSearchQuery(raw);
+  const normalized = normalizeSearchQuery(val);
   if ([...normalized].length > HR_APPLICATION_SEARCH_LIMIT) {
     return { q: "", invalidSearch: true };
   }
@@ -50,31 +55,36 @@ function parseSearchInput(raw: unknown): { q: string; invalidSearch: boolean } {
 }
 
 function parseJobParam(raw: unknown): string | undefined {
-  if (typeof raw !== "string") return undefined;
-  return z.uuid().safeParse(raw).success ? raw : undefined;
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof val !== "string") return undefined;
+  return z.uuid().safeParse(val).success ? val : undefined;
 }
 
 function parseStatusParam(raw: unknown): HRReviewStatus | undefined {
-  if (typeof raw !== "string") return undefined;
-  const parsed = hrReviewStatusSchema.safeParse(raw);
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof val !== "string") return undefined;
+  const parsed = hrReviewStatusSchema.safeParse(val);
   return parsed.success ? parsed.data : undefined;
 }
 
 function parseWithdrawalParam(raw: unknown): HRApplicationWithdrawalFilter {
-  return raw === "active" || raw === "withdrawn" ? raw : "all";
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  return val === "active" || val === "withdrawn" ? val : "all";
 }
 
 function parseSortParam(raw: unknown): HRApplicationSort {
-  return raw === "oldest" ? "oldest" : "newest";
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  return val === "oldest" ? "oldest" : "newest";
 }
 
 function parsePageParam(raw: unknown): number {
-  if (typeof raw === "string") {
-    const val = parseInt(raw, 10);
-    return !Number.isNaN(val) && val > 0 ? val : 1;
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof val === "string") {
+    const parsed = parseInt(val, 10);
+    return !Number.isNaN(parsed) && parsed > 0 ? parsed : 1;
   }
-  if (typeof raw === "number" && Number.isInteger(raw) && raw > 0) {
-    return raw;
+  if (typeof val === "number" && Number.isInteger(val) && val > 0) {
+    return val;
   }
   return 1;
 }
@@ -104,7 +114,7 @@ export function filterApplications(
   }
 
   const normalizedQuery = params.q
-    ? normalizeSearchQuery(params.q).toLowerCase()
+    ? foldDiacritics(normalizeSearchQuery(params.q)).toLowerCase()
     : "";
 
   return applications.filter((app) => {
@@ -129,7 +139,7 @@ export function filterApplications(
     // 4. Search query on applicant name
     if (normalizedQuery) {
       const applicantName = app.full_name
-        ? normalizeSearchQuery(app.full_name).toLowerCase()
+        ? foldDiacritics(normalizeSearchQuery(app.full_name)).toLowerCase()
         : "";
       if (!applicantName.includes(normalizedQuery)) {
         return false;

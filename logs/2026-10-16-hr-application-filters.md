@@ -63,18 +63,23 @@ Follows the [log policy](README.md) and [SessionSummaryTemplate](SessionSummaryT
 
 | Date / environment / commit | Exact command or manual check | Status and observed result | Evidence reference | Scope and limitations |
 | --- | --- | --- | --- | --- |
-| 2026-10-16 / local Node.js v24 / `a3b3b55` | `pnpm vitest run tests/unit/hr-application-filters.test.ts tests/unit/hr-application-pagination.test.ts tests/unit/hr-applications.test.ts tests/unit/hr-application-pages.test.tsx` | Passed: 4 test files, 32/32 tests passed | Terminal output | Unit test coverage for all ACs |
-| 2026-10-16 / local Node.js v24 / `a3b3b55` | `pnpm test:unit` | Passed: 93 test files, 563/563 tests passed | Vitest execution log | Full unit test suite regression check |
+| 2026-10-16 / local Node.js v24 / `a3b3b55` | `pnpm vitest run tests/unit/hr-application-filters.test.ts tests/unit/hr-application-pagination.test.ts tests/unit/hr-applications.test.ts tests/unit/hr-application-pages.test.tsx` | Passed: 4 test files, 35/35 tests passed | Terminal output | Unit test coverage for all ACs |
+| 2026-10-16 / local Node.js v24 / `a3b3b55` | `pnpm test:unit` | Passed: 93 test files, 566/566 tests passed | Vitest execution log | Full unit test suite regression check |
 | 2026-10-16 / local / `a3b3b55` | `pnpm typecheck` (`tsc --noEmit`) | Passed: Exit code 0, 0 type errors | Terminal output | Full TypeScript compilation |
 | 2026-10-16 / local / `a3b3b55` | `pnpm lint` (`eslint`) | Passed: Exit code 0, 0 errors, 0 warnings | Terminal output | ESLint rules including complexity & function length |
 | 2026-10-16 / local / `a3b3b55` | `pnpm build` (`next build`) | Passed: Exit code 0, Turbopack build succeeded; `/hr/applications` dynamic route verified | Next.js build output | Production compilation |
 
 ## Open work, blockers and limitations
 
-- Outstanding work and owner: Push branch `feat/97-hr-application-filters` and create PR to `develop` referencing #97 (John / Agent).
+- Outstanding work and owner: Push branch `feat/97-hr-application-filters` to origin to update PR #99.
 - Blockers and missing evidence: None. All quality gates passed cleanly.
-- Review findings and disposition: 1 blocking ESLint `max-lines-per-function` finding and 1 duplicate export finding were remediated in `a3b3b55` and rechecked clean.
-- Approval, acceptance, archive, PR, merge and deployment status: Proposal approved by John; implementation accepted by John on 2026-10-16; packet archived in `workflow/archive/2026-10-16-hr-application-filters/`; PR pending opening. Merge and deployment remain separate subsequent gates.
+- Review findings and disposition: All 4 findings from thorough review resolved:
+  1. Card layout: redundant duplicate `job_title` removed.
+  2. Query arrays: all filter parsers safely extract `raw[0]` when array is passed.
+  3. Diacritics: `foldDiacritics` normalization implemented for name search.
+  4. Query pushdown: `listSubmittedApplications` pushdown filters added, along with `listDistinctApplicationJobs()`.
+  ESLint `max-lines-per-function` enforced cleanly across tests and page component.
+- Approval, acceptance, archive, PR, merge and deployment status: Proposal approved by John; implementation accepted by John on 2026-10-16; packet archived in `workflow/archive/2026-10-16-hr-application-filters/`; PR #99 open. Merge and deployment remain separate subsequent gates.
 - Historical interaction coverage: Full chat trajectory and transcript preserved in session context.
 
 ## Student verification
