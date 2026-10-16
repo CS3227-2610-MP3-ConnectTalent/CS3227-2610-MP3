@@ -137,3 +137,84 @@ begin
 end;
 $$;
 
+-- Update finalize_application_resume to select active (non-withdrawn) application
+create or replace function public.finalize_application_resume(p_actor uuid, p_job uuid, p_revision integer, p_operation uuid)
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare v_app public.applications; v_obj public.application_resume_objects;
+begin
+ perform application_private.verified_resume_actor(p_actor);
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_actor::text || p_job::text, 0));
+ perform 1 from public.jobs where id = p_job for update;
+ select * into v_app from public.applications where applicant_id = p_actor and job_id = p_job and withdrawn_at is null for update;
+ select * into v_obj from public.application_resume_objects where id = p_operation for update;
+ -- Reconcile only this immutable object after a lost committed response, including after submission/closure.
+ if v_obj.state = 'ready' and v_app.resume_id = v_obj.id and v_obj.application_id = v_app.id and v_obj.applicant_id = p_actor then return v_obj.id; end if;
+ v_app := application_private.lock_resume_draft(p_actor, p_job, p_revision);
+ if v_obj.state is distinct from 'pending' or v_obj.application_id is distinct from v_app.id or v_obj.applicant_id is distinct from p_actor
+  or v_obj.expected_revision is distinct from p_revision then raise exception 'Upload cannot be finalized'; end if;
+ if not exists(select 1 from storage.objects where bucket_id = 'application-resumes' and name = v_obj.object_path) then raise exception 'Upload is incomplete'; end if;
+ update public.application_resume_objects set state = 'retired' where id = v_app.resume_id;
+ update public.application_resume_objects set state = 'ready' where id = v_obj.id;
+ update public.applications set resume_id = v_obj.id, revision = revision + 1, updated_at = now() where id = v_app.id;
+ return v_obj.id;
+end;
+$$;
+
+-- Update cancel_application_resume to select active (non-withdrawn) application
+create or replace function public.cancel_application_resume(p_actor uuid, p_job uuid, p_operation uuid default null)
+returns void language plpgsql security definer set search_path = '' as $$
+declare v_app public.applications;
+begin
+ perform application_private.verified_resume_actor(p_actor);
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_actor::text || p_job::text, 0));
+ perform 1 from public.jobs where id = p_job for update;
+ select * into v_app from public.applications where applicant_id = p_actor and job_id = p_job and withdrawn_at is null for update;
+ if not found then raise exception 'Application unavailable'; end if;
+ update public.application_resume_objects set state = 'retired' where application_id = v_app.id and applicant_id = p_actor
+  and state = 'pending' and (p_operation is null or id = p_operation);
+end;
+$$;
+
+-- Update claim_resume_cleanup to select active (non-withdrawn) application
+create or replace function public.claim_resume_cleanup(p_actor uuid, p_job uuid)
+returns table(id uuid, object_path text) language plpgsql security definer set search_path = '' as $$
+declare v_app public.applications;
+begin
+ perform application_private.verified_resume_actor(p_actor);
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_actor::text || p_job::text, 0));
+ perform 1 from public.jobs where public.jobs.id = p_job for update;
+ select * into v_app from public.applications where applicant_id = p_actor and job_id = p_job and withdrawn_at is null for update;
+ if not found then return; end if;
+ return query update public.application_resume_objects r set state = 'deleting' where r.application_id = v_app.id and r.applicant_id = p_actor
+  and r.state in ('retired', 'deleting') and not exists(select 1 from public.applications a where a.resume_id = r.id)
+  returning r.id, r.object_path;
+end;
+$$;
+
+revoke all on function public.finalize_application_resume(uuid, uuid, integer, uuid),
+ public.cancel_application_resume(uuid, uuid, uuid),
+ public.claim_resume_cleanup(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.finalize_application_resume(uuid, uuid, integer, uuid),
+ public.cancel_application_resume(uuid, uuid, uuid),
+ public.claim_resume_cleanup(uuid, uuid) to service_role;
+
+-- Update legacy v2 wrappers to query active (non-withdrawn) application
+create or replace function public.save_application_details_v2(p_job_id uuid, p_cover_letter text, p_full_name text, p_phone text, p_portfolio_url text, p_expected_revision integer default null)
+returns uuid language sql security definer set search_path = '' as $$
+ select application_private.write_application_details_v3(p_job_id, p_cover_letter, p_full_name, p_phone, p_portfolio_url,
+  (select education from public.applications where applicant_id = auth.uid() and job_id = p_job_id and withdrawn_at is null),
+  (select work_experience from public.applications where applicant_id = auth.uid() and job_id = p_job_id and withdrawn_at is null), p_expected_revision, false);
+$$;
+
+create or replace function public.submit_application_details_v2(p_job_id uuid, p_cover_letter text, p_full_name text, p_phone text, p_portfolio_url text, p_expected_revision integer default null)
+returns uuid language sql security definer set search_path = '' as $$
+ select application_private.write_application_details_v3(p_job_id, p_cover_letter, p_full_name, p_phone, p_portfolio_url,
+  (select education from public.applications where applicant_id = auth.uid() and job_id = p_job_id and withdrawn_at is null),
+  (select work_experience from public.applications where applicant_id = auth.uid() and job_id = p_job_id and withdrawn_at is null), p_expected_revision, true);
+$$;
+
+revoke all on function public.save_application_details_v2(uuid, text, text, text, text, integer),
+ public.submit_application_details_v2(uuid, text, text, text, text, integer) from public, anon;
+grant execute on function public.save_application_details_v2(uuid, text, text, text, text, integer),
+ public.submit_application_details_v2(uuid, text, text, text, text, integer) to authenticated;
+

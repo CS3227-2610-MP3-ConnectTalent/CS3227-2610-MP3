@@ -1,9 +1,18 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(12);
+select plan(15);
 
 select has_index('public', 'applications', 'applications_one_active_per_applicant_job', array['applicant_id', 'job_id'], 'partial unique index exists for active applications');
+select is(
+  (select pg_get_expr(indpred, indrelid) from pg_index where indexrelid = 'public.applications_one_active_per_applicant_job'::regclass),
+  '(withdrawn_at IS NULL)',
+  'partial unique index has WHERE (withdrawn_at IS NULL) predicate'
+);
+select ok(
+  (select indisunique from pg_index where indexrelid = 'public.applications_one_active_per_applicant_job'::regclass),
+  'partial index is unique'
+);
 
 -- Setup test users
 insert into auth.users(id, instance_id, aud, role, email, encrypted_password, email_confirmed_at) values
@@ -79,6 +88,16 @@ select throws_ok(
   'P0001',
   'Application already submitted',
   'third application while second is active is rejected'
+);
+
+-- Direct duplicate insertion bypassing RPC must violate partial unique index
+reset role;
+select throws_ok(
+  $$insert into public.applications (applicant_id, job_id, job_title, cover_letter, submission_state)
+    values ('60000000-0000-4000-8000-000000000001', '60000000-0000-4000-8000-000000000101', 'Reapply role', 'Direct duplicate active application', 'draft')$$,
+  '23505',
+  null,
+  'direct insertion of second active application violates partial unique index'
 );
 
 -- Check HR can view both applications

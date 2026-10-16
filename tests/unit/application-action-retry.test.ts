@@ -12,9 +12,10 @@ const { rpc, maybeSingle, eq, from, revalidatePath, redirect } = vi.hoisted(
   () => {
     const rpc = vi.fn();
     const maybeSingle = vi.fn();
-    const query = { select: vi.fn(), eq: vi.fn(), maybeSingle };
+    const query = { select: vi.fn(), eq: vi.fn(), is: vi.fn(), maybeSingle };
     query.select.mockReturnValue(query);
     query.eq.mockReturnValue(query);
+    query.is.mockReturnValue(query);
     return {
       rpc,
       maybeSingle,

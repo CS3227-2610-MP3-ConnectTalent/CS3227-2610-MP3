@@ -229,6 +229,7 @@ async function reconcileApplication(
       )
       .eq("applicant_id", userId)
       .eq("job_id", jobId)
+      .is("withdrawn_at", null)
       .maybeSingle();
     const parsed = error ? null : writeResultSchema.safeParse(data);
     return reconcileApplicationWrite(

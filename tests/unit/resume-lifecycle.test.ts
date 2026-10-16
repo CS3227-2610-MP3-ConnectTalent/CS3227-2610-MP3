@@ -16,6 +16,7 @@ vi.mock("@supabase/supabase-js", () => ({
       const query = {
         select: () => query,
         eq: () => query,
+        is: () => query,
         maybeSingle: mocks.existing,
         update: mocks.update,
       };
@@ -51,6 +52,7 @@ beforeEach(() => {
     const query = {
       select: () => query,
       eq: () => query,
+      is: () => query,
       maybeSingle: mocks.existing,
     };
     return query;

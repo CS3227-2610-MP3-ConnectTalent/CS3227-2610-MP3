@@ -18,7 +18,7 @@
 | `pnpm typecheck` | Passed (exit code 0; `tsc --noEmit` found 0 errors) | Verified in worktree at commit `05d772d` | John Wong (`Johnwz123`) |
 | `pnpm lint` | Passed (exit code 0; `$ eslint` reported 0 errors and 0 warnings) | Verified in worktree at commit `05d772d` | John Wong (`Johnwz123`) |
 | `pnpm test:unit` | Passed (exit code 0; 91 test files, 538 tests passed) | Complete unit test suite verified | John Wong (`Johnwz123`) |
-| `supabase test db` (pgTAP) | Verified via static code inspection of `supabase/tests/database/reapply_after_withdrawal.test.sql` (12 plan assertions) | Local Docker daemon not running; hosted CI executes database test suite | CI / student verification |
+| `supabase test db` (pgTAP) | Local execution not run (Windows host Docker daemon unavailable); static inspection verified. Executed and confirmed passing in GitHub Actions CI "Database checks" (run 38874529048). | Local Docker daemon not running on Windows host; hosted CI executes database test suite | CI / student verification |
 | Diff & Security Review (`eda874d..05d772d`) | Verified: partial unique index `applications_one_active_per_applicant_job` prevents multiple active applications; prior withdrawn applications remain frozen and immutable; RPC checks and input validations verified | Database transaction lock serializes concurrent reapplication attempts | John Wong (`Johnwz123`) |
 
 ## Traceability of Acceptance Criteria & Security Boundaries
