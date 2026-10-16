@@ -46,6 +46,19 @@ export function getHROperationalJobStatus(
 
 const fields =
   "id,title,team,category,description,requirements,status,created_at,published_at,opens_at,closes_at";
+const legacyFields =
+  "id,title,team,category,description,requirements,status,created_at,published_at";
+
+function isMissingColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = "code" in error ? (error as { code: unknown }).code : undefined;
+  const message =
+    "message" in error ? (error as { message: unknown }).message : undefined;
+  return (
+    code === "42703" ||
+    (typeof message === "string" && message.includes("does not exist"))
+  );
+}
 
 export async function listHRJobs(): Promise<HRJob[]> {
   const { client } = await requireHR();
@@ -56,8 +69,20 @@ export async function listHRJobs(): Promise<HRJob[]> {
       if (afterId !== null) query = query.gt("id", afterId);
       return query.order("id", { ascending: true }).limit(pageSize);
     });
-  } catch {
-    throw new Error("Jobs are temporarily unavailable.");
+  } catch (error) {
+    if (isMissingColumnError(error)) {
+      try {
+        data = await fetchAllPages((afterId, pageSize) => {
+          let query = client.from("jobs").select(legacyFields);
+          if (afterId !== null) query = query.gt("id", afterId);
+          return query.order("id", { ascending: true }).limit(pageSize);
+        });
+      } catch {
+        throw new Error("Jobs are temporarily unavailable.");
+      }
+    } else {
+      throw new Error("Jobs are temporarily unavailable.");
+    }
   }
   return sortByTimestampAndId(
     hrJobSchema.array().parse(data),
@@ -69,11 +94,18 @@ export async function listHRJobs(): Promise<HRJob[]> {
 export async function getHRJob(id: string): Promise<HRJob | null> {
   if (!z.uuid().safeParse(id).success) return null;
   const { client } = await requireHR();
-  const { data, error } = await client
+  let { data, error } = await client
     .from("jobs")
     .select(fields)
     .eq("id", id)
     .maybeSingle();
+  if (error && isMissingColumnError(error)) {
+    ({ data, error } = await client
+      .from("jobs")
+      .select(legacyFields)
+      .eq("id", id)
+      .maybeSingle());
+  }
   if (error) throw new Error("Job is temporarily unavailable.");
   return data ? hrJobSchema.parse(data) : null;
 }

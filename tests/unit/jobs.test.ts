@@ -190,3 +190,34 @@ it("excludes future-scheduled and expired jobs from public listings and detail",
   );
   await expect(getPublishedJob(expiredJob.id)).resolves.toBeNull();
 });
+
+it("falls back gracefully when opens_at/closes_at columns do not exist in database", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://jobs.example.test");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+
+  let callCount = 0;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(input instanceof Request ? input.url : String(input));
+      callCount++;
+      if (url.searchParams.get("select")?.includes("opens_at")) {
+        return new Response(
+          JSON.stringify({
+            code: "42703",
+            message: "column jobs.opens_at does not exist",
+          }),
+          { status: 400, headers: { "content-type": "application/json" } },
+        );
+      }
+      return new Response(JSON.stringify([publicJobRow]), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }),
+  );
+
+  const results = await listPublishedJobs();
+  expect(results).toEqual([job]);
+  expect(callCount).toBe(2);
+});

@@ -29,6 +29,19 @@ const publishedJobRowSchema = jobSchema.extend({
 
 const publicFields =
   "id,title,team,category,description,requirements,published_at,opens_at,closes_at";
+const legacyPublicFields =
+  "id,title,team,category,description,requirements,published_at";
+
+function isMissingColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = "code" in error ? (error as { code: unknown }).code : undefined;
+  const message =
+    "message" in error ? (error as { message: unknown }).message : undefined;
+  return (
+    code === "42703" ||
+    (typeof message === "string" && message.includes("does not exist"))
+  );
+}
 
 function isJobInActiveWindow(
   row: { opens_at?: string | null; closes_at?: string | null },
@@ -59,29 +72,49 @@ function publicClient() {
   });
 }
 
+async function fetchPublishedJobRows(
+  client: ReturnType<typeof publicClient>,
+  category?: JobCategory,
+): Promise<unknown[]> {
+  try {
+    return await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("jobs")
+        .select(publicFields)
+        .eq("status", "published");
+      if (category) query = query.eq("category", category);
+      if (afterId !== null) query = query.gt("id", afterId);
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw new Error("Unable to load published jobs.", { cause: error });
+    }
+    try {
+      return await fetchAllPages((afterId, pageSize) => {
+        let query = client
+          .from("jobs")
+          .select(legacyPublicFields)
+          .eq("status", "published");
+        if (category) query = query.eq("category", category);
+        if (afterId !== null) query = query.gt("id", afterId);
+        return query.order("id", { ascending: true }).limit(pageSize);
+      });
+    } catch (fallbackError) {
+      throw new Error("Unable to load published jobs.", {
+        cause: fallbackError,
+      });
+    }
+  }
+}
+
 export async function listPublishedJobs(
   category?: JobCategory,
   search?: string,
 ): Promise<PublishedJob[]> {
   const { query: phrase, invalid } = parseJobSearch(search);
   if (invalid) throw new Error("Invalid job search.");
-  const client = publicClient();
-  let data: unknown[];
-  try {
-    data = await fetchAllPages((afterId, pageSize) => {
-      let query = client
-        .from("jobs")
-        .select(publicFields)
-        .eq("status", "published");
-
-      if (category) query = query.eq("category", category);
-      if (afterId !== null) query = query.gt("id", afterId);
-
-      return query.order("id", { ascending: true }).limit(pageSize);
-    });
-  } catch (error) {
-    throw new Error("Unable to load published jobs.", { cause: error });
-  }
+  const data = await fetchPublishedJobRows(publicClient(), category);
   return sortByTimestampAndId(
     publishedJobRowSchema.array().parse(data),
     (row) => row.published_at,
@@ -99,12 +132,21 @@ export async function getPublishedJob(
     return null;
   }
 
-  const { data, error } = await publicClient()
+  let { data, error } = await publicClient()
     .from("jobs")
     .select(publicFields)
     .eq("status", "published")
     .eq("id", id)
     .maybeSingle();
+
+  if (error && isMissingColumnError(error)) {
+    ({ data, error } = await publicClient()
+      .from("jobs")
+      .select(legacyPublicFields)
+      .eq("status", "published")
+      .eq("id", id)
+      .maybeSingle());
+  }
 
   if (error) {
     throw new Error("Unable to load the selected job.", { cause: error });
