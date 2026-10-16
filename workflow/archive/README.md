@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-16 PR #96 browser repair and coverage](2026-10-16-pr96-browser-coverage/record.md): Paul separately accepted with recorded limits on 16 October after independent review. Final local checks: 609 unit tests, 12 critical browser cases, 48 offline evaluations; branches 90.25% with unchanged policy. Earlier failed tooling attempts remain recorded. Test-only; canonical sync N/A. [Session summary](../../logs/2026-10-16-pr96-browser-coverage.md). Commit/push, remote CI and hosted verification remain pending.
+
 - [2026-10-16 AI security and evaluations](2026-10-16-ai-security-evaluations/record.md): Paul separately accepted #94/#95 with recorded limits on 16 October after local verification and separate safety/final reviews. AID-002, SEC-010 and OPS-004 synced to v1.16 before archive. [Closeout summary](../../logs/2026-10-16-ai-security-evaluations-closeout.md). Live budget consumed; seven model-check failures and pending human/hosted/accessibility review retained. No publication/release authorization.
 
 - [2026-10-16 applicant withdraw and reapply](2026-10-16-applicant-withdraw-and-reapply/record.md): John accepted #90 after independent review and quality gate verification. APP-001 and APP-008 synced to canonical v1.16 before archive. [Closeout summary](../../logs/2026-10-16-applicant-withdraw-and-reapply.md). [PR #91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91).

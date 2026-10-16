@@ -4,6 +4,15 @@ import { boundedProviderFetch } from "@/lib/ai/provider-transport";
 
 afterEach(() => vi.unstubAllGlobals());
 
+it("refuses a missing provider body without accepting a partial completion", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null)));
+  await expect(
+    boundedProviderFetch(
+      "https://soclaas-api.comp.nus.edu.sg/v1/chat/completions",
+    ),
+  ).rejects.toThrow("no response body");
+});
+
 it("refuses a redirect without reading its body", async () => {
   const cancel = vi.fn();
   vi.stubGlobal(
