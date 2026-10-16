@@ -19,3 +19,4 @@ John's individual reflection document (`docs/JohnReflections.md`) was previously
 - Student owner (John) requested commit, branch, and PR creation.
 - Documentation-only change with no product delta; canonical sync is N/A.
 - [Session summary](../../../logs/2026-10-17-john-reflections.md) recorded.
+

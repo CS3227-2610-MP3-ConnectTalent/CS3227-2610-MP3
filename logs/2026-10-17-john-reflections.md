@@ -40,3 +40,4 @@
 | Relative link check | PowerShell path resolver | Passed (46/46 valid links) | Zero missing targets, zero `file:///` leaks |
 | Schema / code consistency | Manual & AST verification against migrations | Passed | Migrations `20261009055743` and `20261016000000` |
 | Application / schema tests | N/A | N/A | Documentation-only task; no product behavior delta |
+

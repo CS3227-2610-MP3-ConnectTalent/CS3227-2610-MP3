@@ -46,3 +46,4 @@ Complete John's individual reflection in `docs/JohnReflections.md` and align the
 - [x] Relevant checks/security/privacy cases have results and truthful limits.
 - [x] Accepted specs are synced before archive; docs/links reflect final paths.
 - [x] Risks, unresolved findings, rollback and deployment state are clear.
+
