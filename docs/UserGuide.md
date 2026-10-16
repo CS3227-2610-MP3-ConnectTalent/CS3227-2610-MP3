@@ -1,3 +1,9 @@
+---
+title: User Guide
+sidebar_label: User Guide
+hide_title: true
+---
+
 # ConnectTalent User Guide
 
 ConnectTalent is a careers portal for **one employer per deployment**. Applicants browse jobs and manage applications; HR publishes jobs and reviews submissions. AI assistance is optional and does not make hiring decisions.

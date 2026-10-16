@@ -1,3 +1,9 @@
+---
+title: Developer Guide
+sidebar_label: Developer Guide
+hide_title: true
+---
+
 # ConnectTalent Developer Guide
 
 This guide describes the current careers-portal implementation, local setup and the team's software engineering evidence. User actions are in the [User Guide](UserGuide.md). Requirements are authoritative in [workflow/specs](../workflow/specs/README.md), integrated PR #86 branch baseline **v1.14**.
@@ -245,16 +251,32 @@ Useful evidence: [HR review](../workflow/archive/2026-10-08-hr-application-revie
 
 [test-report.yml](../.github/workflows/test-report.yml) follows the action's trusted `workflow_run` pattern and uses `davelosert/vitest-coverage-report-action@v2` to update one PR comment with line, statement, branch, and function coverage from the exact CI run and attempt. A small default-branch downloader checks the ZIP is at most 8 MiB and each expected coverage JSON is at most 2 MiB before extraction or parsing. The 90% target is informational; coverage does not fail CI. Before reporting, the workflow verifies the unique open PR, skips stale CI runs, and checks the exact artifact. If CI did not produce coverage, it replaces the prior report with an unavailable status. A postcondition checks that the action created or updated its marked PR comment. Coverage comes from an artifact supplied by the PR's CI run, so the report is not an independent attestation of test execution or coverage. The workflow checks out only the default branch and never executes PR code. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub App is installed for this repository. Dependabot handles weekly GitHub Actions updates. Minor/patch updates are grouped, major updates remain separate, and every update needs review; auto-merge is not configured.
 
-[pages.yml](../.github/workflows/pages.yml) uploads `docs/` to GitHub Pages on master docs changes or manual dispatch. The site is static [index.html](index.html), not Docusaurus or the Next.js app. Preview it with `python -m http.server 8080 --directory docs` if Python is available; this is only the documentation site. GitHub Code review settings can add Codex review, but actual runs/findings and student verification must be recorded; AI review replaces neither CI nor human approval.
+[pages.yml](../.github/workflows/pages.yml) builds the Docusaurus documentation package in `website/` and publishes `website/build` to GitHub Pages from `master`. Documentation PRs build the site without deploying. The site reads the existing guide Markdown in `docs/`; the sidebar links to their sections without duplicating the guides. Only the selected public guides, overview and reflections are rendered. Repository source/evidence links open GitHub.
+
+The documentation package uses its own npm lockfile, following the MP2 structure. Run these commands from the repository root; Node 24 is required. The app continues to use pnpm.
+
+```powershell
+npm --prefix website ci
+npm --prefix website start
+```
+
+Open [localhost:3002/CS3227-2610-MP3/](http://localhost:3002/CS3227-2610-MP3/). To check the production output:
+
+```powershell
+npm --prefix website run build
+npm --prefix website run serve
+```
+
+The build checks internal document links, images and anchors. `website/build` and `.docusaurus` are generated, ignored output. After previewing, `npm --prefix website run clear` removes the generated site and caches; run it before application-wide lint/format checks so those tools do not inspect generated documentation files. Rebuild before using `serve` again. GitHub Code review settings can add Codex review, but actual runs/findings and student verification must be recorded; AI review replaces neither CI nor human approval.
 
 ## 9. Deployment and release
 
-| Environment         | Intended app/database mapping                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| Local               | Local Next.js → local Docker Supabase; synthetic users/jobs/files.                                     |
-| Preview / develop   | Vercel preview → Development Supabase. Feature previews can precede shared Development schema updates. |
-| Production / master | Production Vercel → Production Supabase.                                                               |
-| Product website     | GitHub Pages from master `docs/`; separate from application deployment.                                |
+| Environment         | Intended app/database mapping                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| Local               | Local Next.js → local Docker Supabase; synthetic users/jobs/files.                                      |
+| Preview / develop   | Vercel preview → Development Supabase. Feature previews can precede shared Development schema updates.  |
+| Production / master | Production Vercel → Production Supabase.                                                                |
+| Product website     | GitHub Pages from the master Docusaurus `website/build` artifact; separate from application deployment. |
 
 These are team-managed mappings; branch names alone do not isolate data. Verify environment-scoped credentials, actual deployment commit, schema version, email sender/callbacks and site origin. Apply reviewed migrations to the verified target only through authorized rollout. Rehearse clean migration replay and agree cutover order: older contact write RPCs were revoked, and new required-profile/file rules can reject older clients.
 
@@ -277,6 +299,6 @@ Rollback should preserve submitted/withdrawn snapshots, private files, columns a
 - Next.js create-next-app generated the initial scaffold; React/TypeScript/Tailwind and shadcn/ui provide the app/UI foundations. Supabase CLI generated the local config; Auth/PostgreSQL/Storage provide shared services.
 - Zod, PDF.js (`pdfjs-dist`), libphonenumber-js and lucide-react support validation, bounded PDF parsing, calling-code metadata and icons. `pdf-lib` generates synthetic test PDFs. Checked-in country labels avoid runtime ICU differences; no SMS or identity verification is implied.
 - Vitest/V8, Playwright, pgTAP, ESLint/SonarJS and Prettier provide tests, reporting and static checks. The installed OpenAI SDK is used as the required SoCLaaS-compatible client.
-- This guide and the User Guide adapt the organization of the two user-supplied **NUSynapxe** guide templates (author/source URL not supplied). Their clinical content, native toolchain and toolkit process were not reused as this product's features. The team should add the original attribution if available.
+- This guide and the User Guide adapt the organization of the user-supplied **NUSynapxe** guide templates. The Docusaurus `website/` package, sidebar grouping and build-to-Pages structure adapt the team's [MP2 repository](https://github.com/CS3227-2610-MP2-NUSynapxe/CS3227-2610-MP2) at commit `249162a`. Its clinical content, native application toolchain and toolkit process were not reused as this product's features.
 - The project's TDD guidance references Superpowers' red/green/refactor idea; this does not claim the Superpowers plugin was installed or used to host the app. See [CONTRIBUTING](../CONTRIBUTING.md) and archived process evidence.
 - Codex assisted with specifications, source/configuration, tests/review evidence and guide/reflection drafts. Paul and John must verify their contributions and acknowledge AI assistance in the submission; the team remains responsible for accuracy and quality. Separate reflection links are in [Reflections.md](Reflections.md).
