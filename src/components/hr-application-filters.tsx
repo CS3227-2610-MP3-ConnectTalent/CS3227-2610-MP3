@@ -121,7 +121,10 @@ function useSearchFormHandlers({
 }: {
   query: string;
   setQuery: (val: string) => void;
-  navigate: (updates: Partial<HRApplicationFilterParams>, replace?: boolean) => void;
+  navigate: (
+    updates: Partial<HRApplicationFilterParams>,
+    replace?: boolean,
+  ) => void;
   debounceTimerRef: MutableRefObject<NodeJS.Timeout | null>;
   isComposingRef: MutableRefObject<boolean>;
   startTransition: (fn: () => void) => void;

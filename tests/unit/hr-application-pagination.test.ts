@@ -94,4 +94,3 @@ describe("buildHRApplicationsUrl", () => {
     expect(url).toContain("page=2");
   });
 });
-
