@@ -1,7 +1,7 @@
 # Implementation plan: Allow Applicants to Withdraw and Reapply
 
 - Change/issues: `2026-10-16-applicant-withdraw-and-reapply`; [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
-- Owner/status/date: John Wong (`Johnwz123`); draft awaiting approval; 2026-10-16
+- Owner/status/date: John Wong (`Johnwz123`); approved by John Wong on 2026-10-16; 2026-10-16
 - Approved inputs: `proposal.md`; `design.md`; `specs/applications-and-review.md`
 - Baseline and affected IDs: ProductSpec v1.15 (`2a56ba1`); `APP-001`, `APP-008`; acceptance IDs `reapply-AC-01..05`
 - Constraints: Maintain strict data retention (no row deletion), follow Conventional Commits, follow test-first development.
@@ -32,8 +32,8 @@
 
 - [x] Human approved the proposal, deltas, design and plan before product implementation.
 - [x] tasks.md matches the ordered work and states acceptance evidence for each checkbox.
-- [ ] Independent review and human acceptance are separate tasks with real decision evidence.
-- [ ] Closeout includes session logs and truthful limitations.
-- [ ] Contributor flow ends with issue-linked PR after closeout.
+- [x] Independent review and human acceptance are separate tasks with real decision evidence.
+- [x] Closeout includes session logs and truthful limitations.
+- [x] Contributor flow ends with issue-linked PR after closeout.
 - Approval/date/source: Approved by student John Wong (`Johnwz123`) in chat on 2026-10-16.
 

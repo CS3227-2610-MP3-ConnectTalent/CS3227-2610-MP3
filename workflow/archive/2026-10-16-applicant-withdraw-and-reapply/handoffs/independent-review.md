@@ -18,8 +18,8 @@
 | `pnpm typecheck` | Passed (exit code 0; `tsc --noEmit` found 0 errors) | Verified in worktree at commit `05d772d` | John Wong (`Johnwz123`) |
 | `pnpm lint` | Passed (exit code 0; `$ eslint` reported 0 errors and 0 warnings) | Verified in worktree at commit `05d772d` | John Wong (`Johnwz123`) |
 | `pnpm test:unit` | Passed (exit code 0; 91 test files, 538 tests passed) | Complete unit test suite verified | John Wong (`Johnwz123`) |
-| `supabase test db` (pgTAP) | Local execution not run (Windows host Docker daemon unavailable); static inspection verified. Executed and confirmed passing in GitHub Actions CI "Database checks" (run 38874529048). | Local Docker daemon not running on Windows host; hosted CI executes database test suite | CI / student verification |
-| Diff & Security Review (`eda874d..05d772d`) | Verified: partial unique index `applications_one_active_per_applicant_job` prevents multiple active applications; prior withdrawn applications remain frozen and immutable; RPC checks and input validations verified | Database transaction lock serializes concurrent reapplication attempts | John Wong (`Johnwz123`) |
+| `supabase test db` (pgTAP) | Local execution not run (Windows host Docker daemon unavailable); static inspection verified. Executed and confirmed passing in GitHub Actions CI "Database checks" (run 38874529048, 15 assertions testing sequential duplicate active insert rejection, RLS, and schedule window enforcement). | Local Docker daemon not running on Windows host; hosted CI executes database test suite | CI / student verification |
+| Diff & Security Review (`eda874d..05d772d`) | Verified: partial unique index `applications_one_active_per_applicant_job` prevents multiple active applications; prior withdrawn applications remain frozen and immutable; sequential duplicate active insert rejection verified (`reapply_after_withdrawal.test.sql:93-101`); RPC advisory lock and unique index guard concurrent submissions | Verified via pgTAP sequential insert test and partial unique index | John Wong (`Johnwz123`) |
 
 ## Traceability of Acceptance Criteria & Security Boundaries
 
@@ -35,7 +35,7 @@
 3. **`reapply-AC-03` (At most one active application enforced) — Verified**
    - **Database Constraint:** `alter table public.applications drop constraint if exists applications_one_per_applicant_job;` followed by `create unique index if not exists applications_one_active_per_applicant_job on public.applications (applicant_id, job_id) where (withdrawn_at is null);` strictly enforces at most one active application per applicant per job at the Postgres storage layer.
    - **RPC Guard & Concurrency:** `write_application_details_v3` acquires `pg_advisory_xact_lock` on `(user_id, job_id)` and rejects any submission if an active application already has `submission_state <> 'draft'` (`raise exception 'Application already submitted'`).
-   - **Verification:** Verified by pgTAP assertions in `supabase/tests/database/reapply_after_withdrawal.test.sql:6, 74-82`.
+   - **Verification:** Verified by pgTAP assertions in `supabase/tests/database/reapply_after_withdrawal.test.sql:6, 83-101`.
 
 4. **`reapply-AC-04` (Audit history preservation & distinct records) — Verified**
    - **Immutability of Withdrawn Application:** Prior withdrawn rows retain their original submission data, timestamps (`submitted_at`, `withdrawn_at`), review states, and snapshots. Database trigger `guard_application_withdrawal` rejects any updates or deletes to rows where `withdrawn_at IS NOT NULL`.
@@ -53,4 +53,4 @@
 - Independence: Fully separate reviewer execution. No shared state or implementation edits.
 - Findings: None. Zero defects, zero lint warnings, zero test regressions. Implementation faithfully implements the approved proposal, design, and plan while respecting all security boundaries and audit preservation rules.
 - Recommendation: **Approved** (all quality gates, acceptance criteria `reapply-AC-01` through `reapply-AC-05`, and security boundaries pass).
-- Human decision: Pending student owner (John Wong) decision.
+- Human decision: Accepted and approved by student owner John Wong in chat on 2026-10-16.

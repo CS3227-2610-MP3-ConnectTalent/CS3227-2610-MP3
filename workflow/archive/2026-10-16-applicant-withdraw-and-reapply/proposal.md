@@ -3,7 +3,7 @@
 - Change ID: `2026-10-16-applicant-withdraw-and-reapply`
 - Issues: [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
 - Owner: John Wong (`Johnwz123`)
-- Status: awaiting approval
+- Status: approved (approved by John Wong on 2026-10-16)
 - Date: 2026-10-16
 - Baseline: ProductSpec v1.15, 15 October 2026 ([ProductSpec.md](../../ProductSpec.md))
 - Affected capabilities: `workflow/specs/applications-and-review.md` ([`APP-001`](../../specs/applications-and-review.md#app-001-selected-job-submit-once-application), [`APP-008`](../../specs/applications-and-review.md#app-008-confirmed-applicant-withdrawal))

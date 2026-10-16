@@ -48,7 +48,7 @@ Date: 2026-10-16
 | Solution Architect (Self) | Proposal, constraints | Prepared design.md and plan.md specifying partial unique index | Approved by John in chat |
 | Implementer | Approved proposal, deltas, design, plan | Implemented migration, schema, data access, and unit/pgTAP tests in `05d772d` | Verified via test suites |
 | Independent Reviewer | Commit range `eda874d..05d772d` | Handoff report in [handoffs/independent-review.md](handoffs/independent-review.md); recommendation: Approved | Accepted by John in chat on 2026-10-16 |
-| Integration Lead (Self) | Accepted deltas and packet closeout | Canonical spec sync, ProductSpec v1.16 baseline, archive, and session log | [Session log](../../logs/2026-10-16-applicant-withdraw-and-reapply.md) |
+| Integration Lead (Self) | Accepted deltas and packet closeout | Canonical spec sync, ProductSpec v1.16 baseline, archive, and session log | [Session log](../../../logs/2026-10-16-applicant-withdraw-and-reapply.md) |
 
 ## Implementation and tests
 
@@ -69,6 +69,6 @@ Commands and results:
 
 - Reviewer identity and independence: Independent Reviewer subagent (`d929e6b6-eaab-4fe2-9bf0-0b8b4614258c`), executed in a separate invocation from implementation.
 - Findings/resolutions: No blocking findings, zero defects. Recommendation: Approved. See [handoffs/independent-review.md](handoffs/independent-review.md).
-- Human decisions: Accepted and approved by John Wong in chat on 2026-10-16. Spec deltas synced to canonical `applications-and-review.md` and packet archived. See [session log](../../logs/2026-10-16-applicant-withdraw-and-reapply.md).
+- Human decisions: Accepted and approved by John Wong in chat on 2026-10-16. Spec deltas synced to canonical `applications-and-review.md` and packet archived. See [session log](../../../logs/2026-10-16-applicant-withdraw-and-reapply.md).
 
 

@@ -1,7 +1,7 @@
 # Design: Allowing Applicants to Withdraw and Reapply
 
 - Change ID/issues: `2026-10-16-applicant-withdraw-and-reapply`; [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
-- Owner/status/date: John Wong (`Johnwz123`); draft awaiting approval; 2026-10-16
+- Owner/status/date: John Wong (`Johnwz123`); approved by John Wong on 2026-10-16; 2026-10-16
 - Inputs: `proposal.md`; `specs/applications-and-review.md`; ProductSpec baseline v1.15 (`2a56ba1`)
 - Scope and affected components/files:
   - Database schema & RPC: `supabase/migrations/`
@@ -13,9 +13,9 @@
 
 | Decision | Considered alternatives | Reason and tradeoffs | Human approval reference |
 | --- | --- | --- | --- |
-| Partial unique index `WHERE withdrawn_at IS NULL` | 1. Table constraint `(applicant_id, job_id)`<br>2. Physical row deletion<br>3. Soft-delete flag | Constraint prevents reapplication. Physical deletion breaks data retention and audit requirements. Partial unique index cleanly enforces that at most one active application exists per applicant per job while preserving historical withdrawn rows. | Pending student approval |
-| Scope `write_application_details_v3` to `withdrawn_at IS NULL` | Separate reapplication RPC | Keeping a unified RPC for application drafting and submission maintains single responsibility and eliminates redundant code. | Pending student approval |
-| Scope `getOwnApplicationForJob` to active (non-withdrawn) | Return array or latest application | `/jobs/[id]/apply` needs the current editable/submitted active state. Individual historical applications remain directly queryable via `getOwnApplication(id)` and `listOwnApplications()`. | Pending student approval |
+| Partial unique index `WHERE withdrawn_at IS NULL` | 1. Table constraint `(applicant_id, job_id)`<br>2. Physical row deletion<br>3. Soft-delete flag | Constraint prevents reapplication. Physical deletion breaks data retention and audit requirements. Partial unique index cleanly enforces that at most one active application exists per applicant per job while preserving historical withdrawn rows. | Approved by John Wong in chat on 2026-10-16 |
+| Scope `write_application_details_v3` to `withdrawn_at IS NULL` | Separate reapplication RPC | Keeping a unified RPC for application drafting and submission maintains single responsibility and eliminates redundant code. | Approved by John Wong in chat on 2026-10-16 |
+| Scope `getOwnApplicationForJob` to active (non-withdrawn) | Return array or latest application | `/jobs/[id]/apply` needs the current editable/submitted active state. Individual historical applications remain directly queryable via `getOwnApplication(id)` and `listOwnApplications()`. | Approved by John Wong in chat on 2026-10-16 |
 
 ## Interfaces and data flow
 
@@ -44,7 +44,7 @@ Applicant -> GET /jobs/[id]/apply -> getOwnApplicationForJob(id) [WHERE withdraw
 
 | Failure / adversarial input | Observable outcome / state guarantees | Verification |
 | --- | --- | --- |
-| Concurrent double-submit after withdrawal | One insert succeeds; second insert hits partial unique index `applications_one_active_per_applicant_job` and fails | pgTAP concurrency test |
+| Concurrent double-submit after withdrawal | One insert succeeds; second insert hits partial unique index `applications_one_active_per_applicant_job` and fails | pgTAP duplicate insert test (`reapply_after_withdrawal.test.sql:93-101`) |
 | Reapply to closed or scheduled job | `write_application_details_v3` checks `v_job.status = 'published'` and schedule window, throwing `Job is not open for applications` | Unit and pgTAP tests |
 | Attempt to edit prior withdrawn application | `guard_application_withdrawal` trigger rejects any mutation to rows with `withdrawn_at IS NOT NULL` with `42501 Withdrawn applications are locked` | Existing trigger & pgTAP |
 

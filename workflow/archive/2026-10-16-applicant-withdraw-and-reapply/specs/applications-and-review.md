@@ -1,11 +1,11 @@
 # Spec delta: Applications and review
 
-- Change/issues/owner/status: 2026-10-16-applicant-withdraw-and-reapply; [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90); John Wong (`Johnwz123`); draft awaiting approval
+- Change/issues/owner/status: 2026-10-16-applicant-withdraw-and-reapply; [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90); John Wong (`Johnwz123`); approved by John Wong on 2026-10-16
 - Canonical file: [../../../specs/applications-and-review.md](../../../specs/applications-and-review.md)
 - Baseline: ProductSpec v1.15, 15 October 2026 (`2a56ba1`)
 - Proposed baseline: ProductSpec v1.16, 16 October 2026
 - Dependencies/cross-capability IDs: `JMG-004` (scheduled windows), `SEC-001` (ownership & permissions)
-- Approval: Pending student owner decision
+- Approval: Approved by student owner John Wong on 2026-10-16
 
 ## MODIFIED
 
