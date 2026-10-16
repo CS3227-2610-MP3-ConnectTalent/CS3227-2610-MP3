@@ -93,4 +93,16 @@ describe("buildHRApplicationsUrl", () => {
     expect(url).toContain("sort=oldest");
     expect(url).toContain("page=2");
   });
+
+  it("omits whitespace-only search query from URL", () => {
+    const url = buildHRApplicationsUrl({
+      q: "   ",
+      invalidSearch: false,
+      withdrawal: "all",
+      sort: "newest",
+      page: 1,
+      pageSize: 10,
+    });
+    expect(url).toBe("/hr/applications");
+  });
 });

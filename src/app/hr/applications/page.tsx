@@ -26,6 +26,15 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 async function loadReviewData(
   params: ReturnType<typeof parseHRApplicationFilterParams>,
 ) {
+  const isFiltered = Boolean(
+    params.job || params.status || params.withdrawal !== "all",
+  );
+  if (!isFiltered) {
+    const applications = await listSubmittedApplications();
+    const jobs = listDistinctJobsFromApplications(applications);
+    return { jobs, applications };
+  }
+
   const [distinctJobs, applications] = await Promise.all([
     listDistinctApplicationJobs(),
     listSubmittedApplications({
@@ -100,13 +109,7 @@ function Header() {
   );
 }
 
-function ApplicationContent({
-  totalCount,
-  invalidSearch,
-  filteredCount,
-  paginated,
-  filterParams,
-}: {
+interface ApplicationContentProps {
   totalCount: number;
   invalidSearch: boolean;
   filteredCount: number;
@@ -114,10 +117,17 @@ function ApplicationContent({
     Awaited<ReturnType<typeof listSubmittedApplications>>[number]
   >;
   filterParams: HRApplicationFilterParams;
+}
+
+function ApplicationEmptyState({
+  totalCount,
+  invalidSearch,
+  filterParams,
+}: {
+  totalCount: number;
+  invalidSearch: boolean;
+  filterParams: HRApplicationFilterParams;
 }) {
-  if (totalCount === 0) {
-    return <p>No submitted applications yet.</p>;
-  }
   if (invalidSearch) {
     return (
       <p role="alert" className="text-sm text-destructive">
@@ -126,11 +136,36 @@ function ApplicationContent({
       </p>
     );
   }
-  if (filteredCount === 0) {
+  const hasActiveFilters = Boolean(
+    filterParams.q ||
+    filterParams.job ||
+    filterParams.status ||
+    filterParams.withdrawal !== "all",
+  );
+  if (!hasActiveFilters && totalCount === 0) {
+    return <p>No submitted applications yet.</p>;
+  }
+  return (
+    <p className="py-6 text-center text-muted-foreground">
+      No applications match your selected filters.
+    </p>
+  );
+}
+
+function ApplicationContent({
+  totalCount,
+  invalidSearch,
+  filteredCount,
+  paginated,
+  filterParams,
+}: ApplicationContentProps) {
+  if (invalidSearch || filteredCount === 0) {
     return (
-      <p className="py-6 text-center text-muted-foreground">
-        No applications match your selected filters.
-      </p>
+      <ApplicationEmptyState
+        totalCount={totalCount}
+        invalidSearch={invalidSearch}
+        filterParams={filterParams}
+      />
     );
   }
   return (

@@ -70,17 +70,24 @@ Follows the [log policy](README.md) and [SessionSummaryTemplate](SessionSummaryT
 | 2026-10-16 / local / `a3b3b55` | `pnpm build` (`next build`) | Passed: Exit code 0, Turbopack build succeeded; `/hr/applications` dynamic route verified | Next.js build output | Production compilation |
 | 2026-10-16 / GitHub Actions / `ca29635` | `CI` workflow (`run 38921063494`) | Passed: format, lint, typecheck, unit tests, evals, build in 1m13s | GitHub Actions log | PR #99 automated CI |
 | 2026-10-16 / GitHub Actions / `ca29635` | `Supabase CI` workflow (`run 38921063505`) | Passed: database checks, race suites, 12 Playwright tests in 3m55s | GitHub Actions log | PR #99 Supabase CI |
+| 2026-10-16 / local Node.js v24 | `pnpm vitest run hr-application` | Passed: 7 test files, 49/49 tests passed | Terminal output | Unit test coverage including follow-up edge cases |
+| 2026-10-16 / local Node.js v24 | `pnpm test:unit` | Passed: 103 test files, 642/642 tests passed | Vitest execution log | Full unit test suite regression check |
+| 2026-10-16 / local | `pnpm typecheck` (`tsc --noEmit`) | Passed: Exit code 0, 0 type errors | Terminal output | Full TypeScript compilation |
+| 2026-10-16 / local | `pnpm lint` (`eslint`) | Passed: Exit code 0, 0 errors, 0 warnings | Terminal output | ESLint complexity & function length <= 50 |
+| 2026-10-16 / local | `pnpm build` (`next build`) | Passed: Exit code 0, Turbopack build succeeded | Next.js build output | Production compilation |
 
 ## Open work, blockers and limitations
 
 - Outstanding work and owner: Ready for review and merge to develop (PR #99).
 - Blockers and missing evidence: None. All quality gates passed cleanly.
-- Review findings and disposition: All 4 findings from thorough review resolved:
-  1. Card layout: redundant duplicate `job_title` removed.
-  2. Query arrays: all filter parsers safely extract `raw[0]` when array is passed.
-  3. Diacritics: `foldDiacritics` normalization implemented for name search.
-  4. Query pushdown: `listSubmittedApplications` pushdown filters added, along with `listDistinctApplicationJobs()`.
-  ESLint `max-lines-per-function` enforced cleanly across tests and page component.
+- Review findings and disposition:
+  - Round 1 (4 findings): Card layout, query arrays, diacritics, query pushdown resolved.
+  - Round 2 (4 findings):
+    1. Filtered empty results: `ApplicationContent` and `ApplicationEmptyState` distinguish empty filter matches from truly empty applications, and validate `invalidSearch` first.
+    2. Whitespace search: `buildHRApplicationsUrl` normalizes `merged.q` so whitespace queries omit `q` from the URL.
+    3. Clear button: `ClearButton` renders when `invalidSearch: true` so users can reset invalid query parameters in one click.
+    4. Table scan optimization: `loadReviewData` skips `listDistinctApplicationJobs()` when no filters are active, avoiding redundant table scans on initial load.
+  ESLint `max-lines-per-function <= 50` and `max-lines <= 300` enforced cleanly.
 - Approval, acceptance, archive, PR, merge and deployment status: Proposal approved by John; implementation accepted by John on 2026-10-16; packet archived in `workflow/archive/2026-10-16-hr-application-filters/`; PR #99 open. Merge and deployment remain separate subsequent gates.
 - Historical interaction coverage: Full chat trajectory and transcript preserved in session context.
 

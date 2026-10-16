@@ -213,6 +213,7 @@ function ClearButton({
 }) {
   const hasFilters =
     Boolean(initialParams.q) ||
+    initialParams.invalidSearch ||
     Boolean(initialParams.job) ||
     Boolean(initialParams.status) ||
     initialParams.withdrawal !== "all" ||

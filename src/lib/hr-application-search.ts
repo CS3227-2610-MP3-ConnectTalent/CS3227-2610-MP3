@@ -239,8 +239,9 @@ export function buildHRApplicationsUrl(
   const merged = { ...params, ...updates };
   const searchParams = new URLSearchParams();
 
-  if (merged.q) {
-    searchParams.set("q", merged.q);
+  const normalizedQ = merged.q ? normalizeSearchQuery(merged.q) : "";
+  if (normalizedQ) {
+    searchParams.set("q", normalizedQ);
   }
   if (merged.job) {
     searchParams.set("job", merged.job);
