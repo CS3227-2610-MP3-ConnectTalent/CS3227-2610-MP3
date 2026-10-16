@@ -8,8 +8,8 @@
 - Evidence available and missing coverage: Full visible interactions, approved change packet, independent review handoff, git commit history, quality gate check outputs. Staging/production DB migration verification pending deployment.
 - GitHub issues: [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
 - Change packet and feature record: `workflow/archive/2026-10-16-applicant-withdraw-and-reapply/` ([record.md](../workflow/archive/2026-10-16-applicant-withdraw-and-reapply/record.md))
-- Branch and commits: `feat/90-applicant-withdraw-and-reapply`; baseline `2a56ba1`..head `7cce39c` (and closeout commit).
-- PR: PR [#91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91)
+- Branch and commits: `feat/90-applicant-withdraw-and-reapply`; baseline `2a56ba1`..head `d1b3a0d` (and review closeout commit).
+- PR: [PR #91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91)
 - Related session summaries: [2026-10-15-scheduled-job-times.md](2026-10-15-scheduled-job-times.md)
 
 ## Chronological interactions and handoffs
@@ -74,4 +74,3 @@
 - Evidence inspected and verification performed: Reviewed implementation summary, pgTAP test cases, unit tests, independent reviewer report, and quality gate check results.
 - Decision source and conditions: "I accept and approve the changes" stated by John Wong in chat on 2026-10-16.
 - Remaining concerns and next owner: Proceed with opening PR to `develop`.
-

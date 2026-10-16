@@ -2,11 +2,11 @@
 
 ## Active follow-up work
 
-Issue [#90 allow applicants to withdraw and reapply](2026-10-16-applicant-withdraw-and-reapply/record.md) proposes replacing the whole-table `(applicant_id, job_id)` unique constraint with a partial unique index `WHERE withdrawn_at IS NULL`, allowing applicants who withdrew to draft and submit a new application for the same job while preserving all historical withdrawn applications, timestamps, and notes. Pending human scope/design/plan approval.
-
 Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76) has an active upload-reliability follow-up in [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77). The [packet](2026-10-14-resume-upload-diagnostics/record.md) documents the Preview permission failure, the validated RPC-path repair, the five-second PDF deadline and safe diagnostics. The newest review fixes and approved single Upload / confirmed Delete résumé UI pass focused and full local unit checks; final GitHub/Supabase/Vercel status and review-thread closeout are pending publication. Hosted upload verification remains unverified, and its smoke test was skipped at the user's direction.
 
 ## Accepted and archived work
+
+Issue [#90 allow applicants to withdraw and reapply](../archive/2026-10-16-applicant-withdraw-and-reapply/record.md) was accepted by John on 16 October 2026 after independent review verification and passing quality gates. Replaced the whole-table `(applicant_id, job_id)` unique constraint with partial unique index `applications_one_active_per_applicant_job` on `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)`. APP-001, APP-005, APP-007, and APP-008 synced to canonical v1.16 before complete packet archive. [Closeout summary](../../logs/2026-10-16-applicant-withdraw-and-reapply.md). [PR #91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91).
 
 Issue [#88 scheduled job opening and closing times](../archive/2026-10-15-scheduled-job-times/record.md) was accepted by John on 15 October 2026 after independent review verification and passing quality gates. JMG-004 and JOB-001 synced to canonical v1.15 before complete packet archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.
 
