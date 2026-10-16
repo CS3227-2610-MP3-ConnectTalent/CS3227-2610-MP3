@@ -10,10 +10,12 @@ the product contracts are the modular specifications indexed at
 
 This is a reusable careers portal with one employer per deployment. Read the product
 overview and the relevant capability requirements before changing behavior. The
-repository includes public job browsing, Applicant accounts and applications, HR review
-of submitted applications, and signup password usability in `develop`. HR job management
-and course-required AI features remain future slices. Do not describe a planned feature
-as implemented or create requirements solely from a design idea.
+repository includes public job browsing, Applicant accounts/profiles/applications and
+private files, HR job management and submitted-application review, and course-required
+AI drafting/summaries in `develop`. Check the product index and selected revision for
+the current lifecycle rules, schedules and optional controls. An open PR is not a
+deployed feature. Do not describe planned work as implemented or create requirements
+solely from a design idea.
 
 Applicant and HR users have different data and tasks. Keep their pages, navigation,
 actions, and states straightforward and distinct. Do not build a single role-switching
