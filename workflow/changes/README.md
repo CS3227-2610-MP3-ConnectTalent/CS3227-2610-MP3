@@ -8,6 +8,8 @@ Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-Co
 
 ## Accepted and archived work
 
+Issues [#94/#95 AI security and evaluations](../archive/2026-10-16-ai-security-evaluations/record.md) were separately accepted by Paul with recorded limits on 16 October. AID-002, SEC-010 and OPS-004 synced to canonical v1.16 before complete archive. [Closeout log](../../logs/2026-10-16-ai-security-evaluations-closeout.md). All 24 approved live calls are consumed; seven failed model checks, human semantic review and hosted/accessibility limits remain recorded. Paul subsequently authorized commit/push/PR on 16 October; release remains unauthorized.
+
 Issue [#88 scheduled job opening and closing times](../archive/2026-10-15-scheduled-job-times/record.md) was accepted by John on 15 October 2026 after independent review verification and passing quality gates. JMG-004 and JOB-001 synced to canonical v1.15 before complete packet archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.
 
 Issue [#84 remaining action feedback](../archive/2026-10-15-remaining-action-feedback/record.md) was separately accepted by Paul with recorded limits on 15 October 2026 after independent review. OVR-006 synced to this branch's canonical v1.11 before complete archive; OVR-004/005/006 are reconciled in this branch at v1.14. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md).

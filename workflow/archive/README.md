@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-16 AI security and evaluations](2026-10-16-ai-security-evaluations/record.md): Paul separately accepted #94/#95 with recorded limits on 16 October after local verification and separate safety/final reviews. AID-002, SEC-010 and OPS-004 synced to v1.16 before archive. [Closeout summary](../../logs/2026-10-16-ai-security-evaluations-closeout.md). Live budget consumed; seven model-check failures and pending human/hosted/accessibility review retained. No publication/release authorization.
+
 - [2026-10-15 scheduled job opening and closing times](2026-10-15-scheduled-job-times/record.md): John accepted #88 after independent review and quality gate verification. JMG-004 and JOB-001 synced to canonical v1.15 before archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.
 
 - [2026-10-15 remaining action feedback](2026-10-15-remaining-action-feedback/record.md): Paul separately accepted #84 with recorded limits after independent review and a repaired Retry-pending P2. OVR-006 synced to that branch's canonical v1.11 before complete archive. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md). OVR-004/005/006 are reconciled in canonical v1.14; PR #86 merged to `develop`, while hosted latency and full accessibility checks remain pending.

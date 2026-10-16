@@ -198,6 +198,8 @@ Exactly one returned row establishes the assignment. Record authorized operator/
 
 ### 5.5 AI security and human control
 
+The locally implemented #94/#95 follow-up adds request-origin/media guards, a fixed provider endpoint and bounded response transport, explicit Applicant preview/adoption, and offline adversarial contracts. See [AI security and evaluations](AISecurityEvaluations.md) for the four-question evidence map, commands, actual live failures, human rubric and rollout limits. `test:ai-evals` is offline; `test:ai-evals:live` is manual operator tooling requiring its own explicit budget and pre-run safety review. The 16 October run exhausted its 24-call authorization. Do not rerun it under that approval.
+
 OpenAI's SDK is an OpenAI-compatible client for SoCLaaS. Both endpoints authorize the selected job/application using the user's RLS session before provider use. Structured contact/background fields and PDFs are excluded; user-written notes/letters may still contain personal information. Treat all job/letter text as untrusted, not authority.
 
 Strict schemas validate inputs/output; provider requests have a 20-second timeout, no automatic retry and at most one call per request. Durable SQL quota RPCs enforce three requests per user per rolling minute and 24 provider requests per deployment per rolling minute across both features. Notes ≤4,000 characters; letters ≤5,000; draft output ≤500 provider tokens; summary ≤350. Display arrays have at most five items of 240 characters. HR sentence selections are validated and rendered using source excerpts; grounding does not prove complete or correct semantic coverage.
