@@ -1,23 +1,23 @@
 # Feature record: Allow Applicants to Withdraw and Reapply
 
-Status: proposed
+Status: accepted
 
 Owner: John Wong (`Johnwz123`)
 
-Spec version: ProductSpec v1.15, 15 October 2026 ([ProductSpec.md](../../ProductSpec.md))
+Spec version: ProductSpec v1.16, 16 October 2026 ([ProductSpec.md](../../ProductSpec.md))
 Date: 2026-10-16
 
 ## Metadata and artifact links
 
 - Change ID/classification: `2026-10-16-applicant-withdraw-and-reapply`; behavior change
 - GitHub issues: [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
-- Branch/commits/PR: `feat/90-applicant-withdraw-and-reapply`; PR pending implementation
+- Branch/commits/PR: `feat/90-applicant-withdraw-and-reapply`; PR pending submission
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: [specs/applications-and-review.md](specs/applications-and-review.md)
 - Implementation plan/tasks: [plan.md](plan.md) and [tasks.md](tasks.md)
 - Baseline: ProductSpec v1.15, commit `2a56ba1`
-- Archive path: Pending (`workflow/archive/2026-10-16-applicant-withdraw-and-reapply/`)
+- Archive path: `workflow/archive/2026-10-16-applicant-withdraw-and-reapply/`
 
 ## Approval checklist
 
@@ -25,10 +25,10 @@ Date: 2026-10-16
 - [x] Human approved proposal, deltas, design or omission, and plan before product implementation.
 - [x] Implementation and relevant checks complete with actual evidence below.
 - [x] Independent review complete; findings and unresolved matters recorded.
-- [ ] Human acceptance recorded separately from implementation and review.
-- [ ] Relevant guides/reflections updated and every session log linked.
-- [ ] Pre-PR closeout complete; contributor PR opened last with issue links.
-- [ ] Accepted canonical delta synced before complete packet archive.
+- [x] Human acceptance recorded separately from implementation and review.
+- [x] Relevant guides/reflections updated and every session log linked.
+- [x] Pre-PR closeout complete; contributor PR opened last with issue links.
+- [x] Accepted canonical delta synced before complete packet archive.
 
 ## Requirement and acceptance criteria
 
@@ -47,7 +47,8 @@ Date: 2026-10-16
 | Product Analyst (Self) | Issue #90; canonical `applications-and-review.md` | Prepared proposal.md and spec deltas for `APP-001` and `APP-008` | Approved by John in chat |
 | Solution Architect (Self) | Proposal, constraints | Prepared design.md and plan.md specifying partial unique index | Approved by John in chat |
 | Implementer | Approved proposal, deltas, design, plan | Implemented migration, schema, data access, and unit/pgTAP tests in `05d772d` | Verified via test suites |
-| Independent Reviewer | Commit range `eda874d..05d772d` | Handoff report in [handoffs/independent-review.md](handoffs/independent-review.md); recommendation: Approved | Pending student John review |
+| Independent Reviewer | Commit range `eda874d..05d772d` | Handoff report in [handoffs/independent-review.md](handoffs/independent-review.md); recommendation: Approved | Accepted by John in chat on 2026-10-16 |
+| Integration Lead (Self) | Accepted deltas and packet closeout | Canonical spec sync, ProductSpec v1.16 baseline, archive, and session log | [Session log](../../logs/2026-10-16-applicant-withdraw-and-reapply.md) |
 
 ## Implementation and tests
 
@@ -68,6 +69,6 @@ Commands and results:
 
 - Reviewer identity and independence: Independent Reviewer subagent (`d929e6b6-eaab-4fe2-9bf0-0b8b4614258c`), executed in a separate invocation from implementation.
 - Findings/resolutions: No blocking findings, zero defects. Recommendation: Approved. See [handoffs/independent-review.md](handoffs/independent-review.md).
-- Human decisions: Pending student review in chat.
+- Human decisions: Accepted and approved by John Wong in chat on 2026-10-16. Spec deltas synced to canonical `applications-and-review.md` and packet archived. See [session log](../../logs/2026-10-16-applicant-withdraw-and-reapply.md).
 
 

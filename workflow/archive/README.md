@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-16 applicant withdraw and reapply](2026-10-16-applicant-withdraw-and-reapply/record.md): John accepted #90 after independent review and quality gate verification. APP-001 and APP-008 synced to canonical v1.16 before archive. [Closeout summary](../../logs/2026-10-16-applicant-withdraw-and-reapply.md). PR pending submission.
+
 - [2026-10-15 scheduled job opening and closing times](2026-10-15-scheduled-job-times/record.md): John accepted #88 after independent review and quality gate verification. JMG-004 and JOB-001 synced to canonical v1.15 before archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.
 
 - [2026-10-15 remaining action feedback](2026-10-15-remaining-action-feedback/record.md): Paul separately accepted #84 with recorded limits after independent review and a repaired Retry-pending P2. OVR-006 synced to that branch's canonical v1.11 before complete archive. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md). OVR-004/005/006 are reconciled in canonical v1.14; PR #86 merged to `develop`, while hosted latency and full accessibility checks remain pending.

@@ -45,8 +45,8 @@ None.
 ## Delta review and sync evidence
 
 - [x] Every changed rule and affected capability has a delta with stable IDs and scenarios.
-- [ ] Independent analyst/reviewer resolved ambiguity; actual reviewer and findings linked.
-- [ ] Human approval recorded before product implementation.
-- [ ] Accepted final deltas synced to canonical files and version/date policy applied before archive.
-- Sync commit/paths/decision evidence: Pending approval and implementation
+- [x] Independent analyst/reviewer resolved ambiguity; actual reviewer and findings linked.
+- [x] Human approval recorded before product implementation.
+- [x] Accepted final deltas synced to canonical files and version/date policy applied before archive.
+- Sync commit/paths/decision evidence: Synced to canonical `workflow/specs/applications-and-review.md` and ProductSpec v1.16 on 2026-10-16 following John's approval.
 
