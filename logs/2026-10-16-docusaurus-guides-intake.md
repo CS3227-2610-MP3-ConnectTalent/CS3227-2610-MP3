@@ -1,0 +1,7 @@
+# Docusaurus guide-site intake — 16 October 2026
+
+Paul requested a Docusaurus product website for the User/Developer guides using the team's MP2 structure, with application files excluded. The root Codex execution inspected the existing Pages workflow, guide headings and repository process, applied the change-intake/proposal/planning skills, and inspected MP2 at `249162a` through a temporary sparse checkout. Skills are guidance; no separate agent ran during intake.
+
+The web tool could not fetch the MP2 references. Git access and existing GitHub CLI authentication worked outside the sandbox; the restricted sandbox's CLI reported invalid authentication. Codex created documentation issue #92, fetched `origin/develop` at `2a56ba1`, and created `docs/92-docusaurus-guides`. Existing unrelated untracked profile-packet work was preserved.
+
+The [packet](../workflow/archive/2026-10-16-docusaurus-guides/record.md) proposes an isolated MP2-style `website/` documentation package using existing guide sources, a grouped sidebar, strict link/build checks, and a Pages build artifact. The plan preserves application source, database, environment files, root dependencies and reflection prose. At this intake checkpoint, concrete plan approval was pending; no site implementation, tests, package installation, commit, push, PR or deployment occurred. The later [closeout](2026-10-16-docusaurus-guides-closeout.md) records approval, implementation and acceptance. This summary is AI-generated and awaits student verification.

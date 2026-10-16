@@ -8,6 +8,8 @@ Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-Co
 
 ## Accepted and archived work
 
+Issue [#92 Docusaurus guides](../archive/2026-10-16-docusaurus-guides/record.md) was separately accepted by Paul with recorded live-publication/accessibility limits on 16 October 2026. The complete packet is archived; product sync is N/A for documentation presentation/build. Local build, browser/link/static checks and separate review passed. [Closeout](../../logs/2026-10-16-docusaurus-guides-closeout.md). Commit/push/PR and publication remain pending.
+
 Issue [#88 scheduled job opening and closing times](../archive/2026-10-15-scheduled-job-times/record.md) was accepted by John on 15 October 2026 after independent review verification and passing quality gates. JMG-004 and JOB-001 synced to canonical v1.15 before complete packet archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.
 
 Issue [#84 remaining action feedback](../archive/2026-10-15-remaining-action-feedback/record.md) was separately accepted by Paul with recorded limits on 15 October 2026 after independent review. OVR-006 synced to this branch's canonical v1.11 before complete archive; OVR-004/005/006 are reconciled in this branch at v1.14. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md).

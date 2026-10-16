@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-16 Docusaurus guides](2026-10-16-docusaurus-guides/record.md): Paul separately accepted #92 with recorded limits after local clean install/build, link/browser/static checks and independent review. Documentation-only, canonical sync N/A. The complete packet and [closeout summary](../../logs/2026-10-16-docusaurus-guides-closeout.md) preserve actual gates and failures/repairs. Commit/push/PR, publication/live-site verification and full accessibility remain separate pending operations.
+
 - [2026-10-15 scheduled job opening and closing times](2026-10-15-scheduled-job-times/record.md): John accepted #88 after independent review and quality gate verification. JMG-004 and JOB-001 synced to canonical v1.15 before archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.
 
 - [2026-10-15 remaining action feedback](2026-10-15-remaining-action-feedback/record.md): Paul separately accepted #84 with recorded limits after independent review and a repaired Retry-pending P2. OVR-006 synced to that branch's canonical v1.11 before complete archive. [Closeout summary](../../logs/2026-10-15-action-feedback-closeout.md). OVR-004/005/006 are reconciled in canonical v1.14; PR #86 merged to `develop`, while hosted latency and full accessibility checks remain pending.
