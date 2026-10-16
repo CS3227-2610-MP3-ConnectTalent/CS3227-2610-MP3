@@ -66,8 +66,9 @@ The desired outcome is to allow applicants to withdraw a submitted application a
 
 ## Approval record
 
-- [ ] Scope, issue criteria, affected IDs, and unresolved questions reviewed.
-- [ ] Proposal, deltas, design or omission reason, and plan agreed before product implementation.
+- [x] Scope, issue criteria, affected IDs, and unresolved questions reviewed.
+- [x] Proposal, deltas, design or omission reason, and plan agreed before product implementation.
 - Approver: John Wong (`Johnwz123`)
-- Decision/date/source: Pending student review in chat
+- Decision/date/source: Approved by student in chat on 2026-10-16
 - Conditions: None
+

@@ -22,7 +22,7 @@ Date: 2026-10-16
 ## Approval checklist
 
 - [x] Issue triaged and scope agreed; issue #90 recorded.
-- [ ] Human approved proposal, deltas, design or omission, and plan before product implementation.
+- [x] Human approved proposal, deltas, design or omission, and plan before product implementation.
 - [ ] Implementation and relevant checks complete with actual evidence below.
 - [ ] Independent review complete; findings and unresolved matters recorded.
 - [ ] Human acceptance recorded separately from implementation and review.
@@ -60,3 +60,4 @@ Commands and results: Pending implementation.
 - Reviewer identity and independence: Pending independent review subagent.
 - Findings/resolutions: Pending.
 - Human decisions: Pending student review in chat.
+

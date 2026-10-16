@@ -6,15 +6,15 @@
 
 ## Before implementation
 
-- [ ] T00 — Student John records approval of proposal, deltas, design, and plan. Evidence: Decision/date/source in `record.md`; dependencies: None.
+- [x] T00 — Student John records approval of proposal, deltas, design, and plan. Evidence: Decision by John in chat on 2026-10-16 recorded in `record.md`; dependencies: None.
 
 ## Ordered implementation
 
-- [ ] T01 — Write failing pgTAP database tests in `supabase/tests/database/reapply_after_withdrawal.test.sql` for partial unique index and reapplication. Depends on: T00. IDs: `APP-001`, `APP-008`; `reapply-AC-01..03`. Verification: Observed failure before migration.
-- [ ] T02 — Create database migration in `supabase/migrations/20261016000000_applicant_reapply.sql` dropping constraint `applications_one_per_applicant_job`, creating partial unique index `applications_one_active_per_applicant_job`, and updating `write_application_details_v3`. Depends on: T01. IDs: `APP-001`, `APP-008`. Verification: `supabase db lint` and pgTAP pass.
-- [ ] T03 — Update `getOwnApplicationForJob` in `src/lib/applications.ts` to filter for active applications (`withdrawn_at IS NULL`). Depends on: T02. IDs: `APP-001`; `reapply-AC-01`. Verification: Unit test.
-- [ ] T04 — Add unit tests in `tests/unit/applications.test.ts` and `tests/unit/apply-page.test.tsx` verifying reapplication flow, draft prefill, and submission. Depends on: T03. IDs: `reapply-AC-01..05`. Verification: `pnpm test:unit`.
-- [ ] T05 — Run full static checks and test suites (`pnpm typecheck`, `pnpm lint`, `pnpm test:unit`). Depends on: T04. IDs: Quality gates. Verification: Exit 0 across all checks.
+- [x] T01 — Write failing pgTAP database tests in `supabase/tests/database/reapply_after_withdrawal.test.sql` for partial unique index and reapplication. Depends on: T00. IDs: `APP-001`, `APP-008`; `reapply-AC-01..03`. Verification: Observed failure before migration.
+- [x] T02 — Create database migration in `supabase/migrations/20261016000000_applicant_reapply.sql` dropping constraint `applications_one_per_applicant_job`, creating partial unique index `applications_one_active_per_applicant_job`, and updating `write_application_details_v3`. Depends on: T01. IDs: `APP-001`, `APP-008`. Verification: `supabase db lint` and pgTAP pass.
+- [x] T03 — Update `getOwnApplicationForJob` in `src/lib/applications.ts` to filter for active applications (`withdrawn_at IS NULL`). Depends on: T02. IDs: `APP-001`; `reapply-AC-01`. Verification: Unit test.
+- [x] T04 — Add unit tests in `tests/unit/applications.test.ts` and `tests/unit/apply-page.test.tsx` verifying reapplication flow, draft prefill, and submission. Depends on: T03. IDs: `reapply-AC-01..05`. Verification: `pnpm test:unit`.
+- [x] T05 — Run full static checks and test suites (`pnpm typecheck`, `pnpm lint`, `pnpm test:unit`). Depends on: T04. IDs: Quality gates. Verification: Exit 0 across all checks.
 
 ## Review and closeout
 
@@ -26,3 +26,4 @@
 ## Post-submission
 
 - [ ] T10 — Human owner records merge/release decision. Evidence: PR merge to `develop`.
+
