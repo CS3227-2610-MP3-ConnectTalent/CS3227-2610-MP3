@@ -1,3 +1,9 @@
+---
+title: Developer Guide
+sidebar_label: Developer Guide
+hide_title: true
+---
+
 # ConnectTalent Developer Guide
 
 This guide describes the current careers-portal implementation, local setup and the team's software engineering evidence. User actions are in the [User Guide](UserGuide.md). Requirements are authoritative in [workflow/specs](../workflow/specs/README.md), integrated PR #86 branch baseline **v1.14**.
@@ -155,11 +161,11 @@ Issue #83 adds a disabled **Searching…** state to the Search submit button dur
 
 ### 5.2 Data and lifecycle
 
-[supabase/migrations](../supabase/migrations) defines jobs, role profiles, Applicant profiles, applications, HR notes/status events, file lifecycle metadata and AI invocation/audit metadata. Unique owner/job constraints enforce one application. Supabase Auth owns account identity; submitted email is snapshotted from verified Auth, not browser input.
+[supabase/migrations](../supabase/migrations) defines jobs, role profiles, Applicant profiles, applications, HR notes/status events, file lifecycle metadata and AI invocation/audit metadata. A partial unique index on `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)` enforces at most one active application while preserving withdrawn history and permitting reapplication. Supabase Auth owns account identity; submitted email is snapshotted from verified Auth, not browser input.
 
 Jobs move Draft → Published → Closed. Only draft content is editable. Applications remain owner-private until submission, which freezes contacts, background, letters and finalized file references. Revision checks and ordered locks serialize save/submit/job closure/file operations; stale requests fail rather than silently overwrite. Legacy missing snapshots remain null and display Not provided.
 
-Withdrawal retains submitted rows/files and prior review history, adds owner/time lifecycle metadata, and forbids subsequent HR processing. Repeated withdrawal reconciles the same committed state. An already dispatched AI call cannot be recalled; eligibility is rechecked before returning results.
+Withdrawal retains submitted rows/files and prior review history, adds owner/time lifecycle metadata, and forbids subsequent HR processing. Repeated withdrawal reconciles the same committed state. Applicants who have withdrawn can create and submit a new application for the same job while it remains open. An already dispatched AI call cannot be recalled; eligibility is rechecked before returning results.
 
 ### 5.3 Private PDF lifecycle
 
@@ -198,7 +204,7 @@ Exactly one returned row establishes the assignment. Record authorized operator/
 
 ### 5.5 AI security and human control
 
-The locally implemented #94/#95 follow-up adds request-origin/media guards, a fixed provider endpoint and bounded response transport, explicit Applicant preview/adoption, and offline adversarial contracts. See [AI security and evaluations](AISecurityEvaluations.md) for the four-question evidence map, commands, actual live failures, human rubric and rollout limits. `test:ai-evals` is offline; `test:ai-evals:live` is manual operator tooling requiring its own explicit budget and pre-run safety review. The 16 October run exhausted its 24-call authorization. Do not rerun it under that approval.
+The locally implemented #94/#95 follow-up adds request-origin/media guards, a fixed provider endpoint and bounded response transport, explicit Applicant preview/adoption, and offline adversarial contracts. See [AI security and evaluations](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/blob/ea85872/docs/AISecurityEvaluations.md) for the four-question evidence map, commands, actual live failures, human rubric and rollout limits. `test:ai-evals` is offline; `test:ai-evals:live` is manual operator tooling requiring its own explicit budget and pre-run safety review. The 16 October run exhausted its 24-call authorization. Do not rerun it under that approval.
 
 OpenAI's SDK is an OpenAI-compatible client for SoCLaaS. Both endpoints authorize the selected job/application using the user's RLS session before provider use. Structured contact/background fields and PDFs are excluded; user-written notes/letters may still contain personal information. Treat all job/letter text as untrusted, not authority.
 
@@ -247,16 +253,32 @@ Useful evidence: [HR review](../workflow/archive/2026-10-08-hr-application-revie
 
 [test-report.yml](../.github/workflows/test-report.yml) follows the action's trusted `workflow_run` pattern and uses `davelosert/vitest-coverage-report-action@v2` to update one PR comment with line, statement, branch, and function coverage from the exact CI run and attempt. A small default-branch downloader checks the ZIP is at most 8 MiB and each expected coverage JSON is at most 2 MiB before extraction or parsing. The 90% target is informational; coverage does not fail CI. Before reporting, the workflow verifies the unique open PR, skips stale CI runs, and checks the exact artifact. If CI did not produce coverage, it replaces the prior report with an unavailable status. A postcondition checks that the action created or updated its marked PR comment. Coverage comes from an artifact supplied by the PR's CI run, so the report is not an independent attestation of test execution or coverage. The workflow checks out only the default branch and never executes PR code. Renovate proposes weekly pnpm/npm updates after the Mend Renovate GitHub App is installed for this repository. Dependabot handles weekly GitHub Actions updates. Minor/patch updates are grouped, major updates remain separate, and every update needs review; auto-merge is not configured.
 
-[pages.yml](../.github/workflows/pages.yml) uploads `docs/` to GitHub Pages on master docs changes or manual dispatch. The site is static [index.html](index.html), not Docusaurus or the Next.js app. Preview it with `python -m http.server 8080 --directory docs` if Python is available; this is only the documentation site. GitHub Code review settings can add Codex review, but actual runs/findings and student verification must be recorded; AI review replaces neither CI nor human approval.
+[pages.yml](../.github/workflows/pages.yml) builds the Docusaurus documentation package in `website/` and publishes `website/build` to GitHub Pages from `master`. Documentation PRs build the site without deploying. The site reads the existing guide Markdown in `docs/`; the sidebar links to their sections without duplicating the guides. Only the selected public guides, overview and reflections are rendered. Repository source/evidence links open GitHub.
+
+The documentation package uses its own npm lockfile, following the MP2 structure. Run these commands from the repository root; Node 24 is required. The app continues to use pnpm.
+
+```powershell
+npm --prefix website ci
+npm --prefix website start
+```
+
+Open [localhost:3002/CS3227-2610-MP3/](http://localhost:3002/CS3227-2610-MP3/). To check the production output:
+
+```powershell
+npm --prefix website run build
+npm --prefix website run serve
+```
+
+The build checks internal document links, images and anchors. `website/build` and `.docusaurus` are generated, ignored output. After previewing, `npm --prefix website run clear` removes the generated site and caches; run it before application-wide lint/format checks so those tools do not inspect generated documentation files. Rebuild before using `serve` again. GitHub Code review settings can add Codex review, but actual runs/findings and student verification must be recorded; AI review replaces neither CI nor human approval.
 
 ## 9. Deployment and release
 
-| Environment         | Intended app/database mapping                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| Local               | Local Next.js → local Docker Supabase; synthetic users/jobs/files.                                     |
-| Preview / develop   | Vercel preview → Development Supabase. Feature previews can precede shared Development schema updates. |
-| Production / master | Production Vercel → Production Supabase.                                                               |
-| Product website     | GitHub Pages from master `docs/`; separate from application deployment.                                |
+| Environment         | Intended app/database mapping                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| Local               | Local Next.js → local Docker Supabase; synthetic users/jobs/files.                                      |
+| Preview / develop   | Vercel preview → Development Supabase. Feature previews can precede shared Development schema updates.  |
+| Production / master | Production Vercel → Production Supabase.                                                                |
+| Product website     | GitHub Pages from the master Docusaurus `website/build` artifact; separate from application deployment. |
 
 These are team-managed mappings; branch names alone do not isolate data. Verify environment-scoped credentials, actual deployment commit, schema version, email sender/callbacks and site origin. Apply reviewed migrations to the verified target only through authorized rollout. Rehearse clean migration replay and agree cutover order: older contact write RPCs were revoked, and new required-profile/file rules can reject older clients.
 
@@ -279,6 +301,6 @@ Rollback should preserve submitted/withdrawn snapshots, private files, columns a
 - Next.js create-next-app generated the initial scaffold; React/TypeScript/Tailwind and shadcn/ui provide the app/UI foundations. Supabase CLI generated the local config; Auth/PostgreSQL/Storage provide shared services.
 - Zod, PDF.js (`pdfjs-dist`), libphonenumber-js and lucide-react support validation, bounded PDF parsing, calling-code metadata and icons. `pdf-lib` generates synthetic test PDFs. Checked-in country labels avoid runtime ICU differences; no SMS or identity verification is implied.
 - Vitest/V8, Playwright, pgTAP, ESLint/SonarJS and Prettier provide tests, reporting and static checks. The installed OpenAI SDK is used as the required SoCLaaS-compatible client.
-- This guide and the User Guide adapt the organization of the two user-supplied **NUSynapxe** guide templates (author/source URL not supplied). Their clinical content, native toolchain and toolkit process were not reused as this product's features. The team should add the original attribution if available.
+- This guide and the User Guide adapt the organization of the user-supplied **NUSynapxe** guide templates. The Docusaurus `website/` package, sidebar grouping and build-to-Pages structure adapt the team's [MP2 repository](https://github.com/CS3227-2610-MP2-NUSynapxe/CS3227-2610-MP2) at commit `249162a`. Its clinical content, native application toolchain and toolkit process were not reused as this product's features.
 - The project's TDD guidance references Superpowers' red/green/refactor idea; this does not claim the Superpowers plugin was installed or used to host the app. See [CONTRIBUTING](../CONTRIBUTING.md) and archived process evidence.
 - Codex assisted with specifications, source/configuration, tests/review evidence and guide/reflection drafts. Paul and John must verify their contributions and acknowledge AI assistance in the submission; the team remains responsible for accuracy and quality. Separate reflection links are in [Reflections.md](Reflections.md).

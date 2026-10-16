@@ -1,0 +1,50 @@
+:root {
+  --ifm-color-primary: #6250b5;
+  --ifm-color-primary-dark: #5848a3;
+  --ifm-color-primary-darker: #53449a;
+  --ifm-color-primary-darkest: #44387e;
+  --ifm-color-primary-light: #7261bf;
+  --ifm-color-primary-lighter: #7b6bc3;
+  --ifm-color-primary-lightest: #9588cf;
+  --ifm-font-family-base: system-ui, sans-serif;
+  --ifm-heading-font-weight: 650;
+  --ifm-code-font-size: 90%;
+  --ifm-navbar-shadow: 0 1px 0 #e5e1f0;
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #c2b3ff;
+  --ifm-color-primary-dark: #ad99ff;
+  --ifm-color-primary-darker: #a38cff;
+  --ifm-color-primary-darkest: #835fff;
+  --ifm-color-primary-light: #d7cdff;
+  --ifm-color-primary-lighter: #e1daff;
+  --ifm-color-primary-lightest: #f5f1ff;
+  --ifm-navbar-shadow: 0 1px 0 #393344;
+}
+
+.markdown h1 {
+  letter-spacing: -0.03em;
+}
+
+.markdown h2 {
+  margin-top: 2.5rem;
+}
+
+.markdown table {
+  font-size: 0.92rem;
+}
+
+.markdown pre {
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.footer {
+  --ifm-footer-background-color: #231e33;
+}
+
+@media (max-width: 996px) {
+  .markdown h1 {
+    font-size: 2rem;
+  }
+}

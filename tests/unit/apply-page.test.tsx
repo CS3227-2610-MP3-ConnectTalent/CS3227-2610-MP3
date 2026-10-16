@@ -152,3 +152,14 @@ it("locks a submitted application and displays its read-only résumé panel", as
   expect(html).toContain('data-testid="resume-panel"');
   expect(html).toContain('data-editable="false"');
 });
+
+it("permits reapplication by presenting a fresh application form when prior application was withdrawn", async () => {
+  // getOwnApplicationForJob filters withdrawn_at IS NULL, returning null when only withdrawn exists
+  mocks.getOwnApplicationForJob.mockResolvedValue(null);
+  const html = renderToStaticMarkup(await renderPage());
+  expect(html).toContain("Apply for Synthetic engineer");
+  expect(html).toContain('data-submitted="false"');
+  expect(html).toContain('data-application-id="null"');
+  expect(mocks.getApplicantProfile).toHaveBeenCalledOnce();
+  expect(mocks.getApplicationResume).not.toHaveBeenCalled();
+});

@@ -1,3 +1,9 @@
+---
+title: User Guide
+sidebar_label: User Guide
+hide_title: true
+---
+
 # ConnectTalent User Guide
 
 ConnectTalent is a careers portal for **one employer per deployment**. Applicants browse jobs and manage applications; HR publishes jobs and reviews submissions. AI assistance is optional and does not make hiring decisions.
@@ -79,7 +85,7 @@ New forms prefill saved profile details without AI. Existing drafts take precede
 - Draft application fields may be incomplete, but your account profile must be complete.
 - Submission requires full name, verified email, phone and a nonblank cover letter of at most **5,000 characters**.
 - Draft editing/submission requires a published job. Closure stops those writes; history remains readable.
-- There is at most **one application per Applicant per job**, including after withdrawal.
+- There is at most **one active application per Applicant per job**. If you withdraw a submitted application, you can start a new draft and reapply while the job remains open.
 - Validation feedback retains typed values. Saving or generating text does not submit.
 - During a slow request, Save draft and Submit application identify the active operation and disable another submission. Résumé Upload, Replace, Remove, Use profile and Retry controls likewise show the active operation and prevent conflicting file actions until it finishes.
 

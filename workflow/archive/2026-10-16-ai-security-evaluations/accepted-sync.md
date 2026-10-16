@@ -14,3 +14,7 @@ Paul separately accepted #94/#95 through **Accept with recorded limits**, replyi
 Canonical sync occurred before moving the complete packet to `workflow/archive/2026-10-16-ai-security-evaluations/`. Files are uncommitted; no sync commit hash exists or is invented. Links and packet preservation are checked during archive closeout.
 
 Acceptance retains seven failed deterministic model checks (baseline 9/12, refined 8/12), no aggregate prompt-improvement claim, pending human semantic quality review, hosted verification and full accessibility. All 24 authorized live calls are consumed. Acceptance grants no further live run, commit, push, PR, migration, deployment or release.
+
+## Pre-PR integration
+
+After the accepted AI commit `ea85872`, develop advanced to `700b273` with PRs #93 and #91. Its independently accepted #90 baseline also used v1.16. The integration retains both accepted histories and publishes the combined canonical baseline as v1.17. No accepted behavior is reversed: APP-001/008 reapplication and AID-002/SEC-010/OPS-004 coexist. The original v1.16 sync-before-archive evidence above remains historical evidence, not a claim that upstream #90 was absent forever.

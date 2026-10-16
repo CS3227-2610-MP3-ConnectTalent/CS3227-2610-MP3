@@ -1,6 +1,6 @@
 # Applicant AI draft
 
-Baseline: ProductSpec v1.16, 16 October 2026 (accepted #94 AID-002 preview/adoption; AID-001 retained).
+Baseline: ProductSpec v1.17, 16 October 2026 (accepted #94 AID-002 preview/adoption; AID-001 retained).
 
 Every draft endpoint follows the canonical [security and privacy contract](security-and-privacy.md), including authorization before loading data, input/output validation and usage limits.
 

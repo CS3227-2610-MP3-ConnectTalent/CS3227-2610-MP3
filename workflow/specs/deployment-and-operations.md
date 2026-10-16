@@ -1,6 +1,6 @@
 # Deployment and operations
 
-Baseline: ProductSpec v1.16, 16 October 2026 (accepted #95 OPS-004; prior operations rules retained).
+Baseline: ProductSpec v1.17, 16 October 2026 (accepted #95 OPS-004; prior operations rules retained).
 
 ## OPS-001: Separate environments
 

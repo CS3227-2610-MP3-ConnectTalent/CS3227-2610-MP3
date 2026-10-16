@@ -30,6 +30,7 @@ let result: { data: unknown; error: { message: string } | null };
 let query: {
   select: ReturnType<typeof vi.fn<(fields: string) => void>>;
   eq: ReturnType<typeof vi.fn<(field: string, expected: unknown) => void>>;
+  is: ReturnType<typeof vi.fn<(field: string, expected: unknown) => void>>;
   order: ReturnType<typeof vi.fn<(field: string, options: unknown) => void>>;
   gt: ReturnType<typeof vi.fn<(field: string, value: string) => void>>;
   limit: ReturnType<typeof vi.fn<(count: number) => void>>;
@@ -41,6 +42,7 @@ function configureQuery(value: typeof result) {
   query = {
     select: vi.fn(),
     eq: vi.fn(),
+    is: vi.fn(),
     order: vi.fn(),
     gt: vi.fn(),
     limit: vi.fn(),
@@ -52,6 +54,10 @@ function configureQuery(value: typeof result) {
     },
     eq: (field: string, expected: unknown) => {
       query.eq(field, expected);
+      return builder();
+    },
+    is: (field: string, expected: unknown) => {
+      query.is(field, expected);
       return builder();
     },
     order: (field: string, options: unknown) => {
@@ -203,6 +209,7 @@ it("returns validated Applicant application lists and owner-scoped details", asy
   await expect(getOwnApplication(applicationId)).resolves.toEqual(application);
   await expect(getOwnApplicationForJob(jobId)).resolves.toEqual(application);
   expect(query.eq).toHaveBeenCalledWith("applicant_id", applicantId);
+  expect(query.is).toHaveBeenCalledWith("withdrawn_at", null);
 });
 
 it("does not query Applicant application details for malformed identifiers", async () => {

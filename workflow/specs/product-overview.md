@@ -10,7 +10,7 @@ Scenario: Given a deployed portal, when a visitor browses its openings, then the
 
 ## OVR-002: First-release actors and scope
 
-The first release MUST support multiple job openings and one application per applicant per job, including a cover letter, identity/contact details, optional education/work experience and one optional private PDF résumé. Its two user roles remain external Applicant and company HR staff. Planned AI features MUST use the course-required SoC LLM.
+The first release MUST support multiple job openings and at most one active application per applicant per job (with withdrawal and reapplication support), including a cover letter, identity/contact details, optional education/work experience and one optional private PDF résumé. Its two user roles remain external Applicant and company HR staff. Planned AI features MUST use the course-required SoC LLM.
 
 | Role      | Owns                                                                      | AI feature                                                  | Human control                                                  |
 | --------- | ------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |

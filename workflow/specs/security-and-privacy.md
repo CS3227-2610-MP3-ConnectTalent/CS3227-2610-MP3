@@ -1,6 +1,6 @@
 # Security and privacy
 
-Baseline: ProductSpec v1.16, 16 October 2026 (accepted #94 SEC-010; prior security rules retained).
+Baseline: ProductSpec v1.17, 16 October 2026 (accepted #94 SEC-010; prior security rules retained).
 
 ## SEC-001: Access boundaries
 
