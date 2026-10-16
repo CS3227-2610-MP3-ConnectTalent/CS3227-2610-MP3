@@ -51,19 +51,7 @@ const statusEventSchema = z.object({
 export type HRApplication = z.infer<typeof detailSchema>;
 export type HRApplicationSummary = z.infer<typeof listItemSchema>;
 
-export function listDistinctJobsFromApplications(
-  applications: Array<{ job_id: string; job_title: string }>,
-): Array<{ id: string; title: string }> {
-  const map = new Map<string, string>();
-  for (const app of applications) {
-    if (!map.has(app.job_id)) {
-      map.set(app.job_id, app.job_title);
-    }
-  }
-  return Array.from(map.entries())
-    .map(([id, title]) => ({ id, title }))
-    .sort((a, b) => a.title.localeCompare(b.title));
-}
+export { listDistinctJobsFromApplications } from "@/lib/hr-application-search";
 
 export async function listSubmittedApplications() {
   const { client } = await requireHR();

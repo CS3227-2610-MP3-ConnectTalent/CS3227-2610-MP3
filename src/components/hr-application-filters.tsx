@@ -110,17 +110,23 @@ interface SearchFormProps {
   router: ReturnType<typeof useRouter>;
 }
 
-function SearchForm({
+function useSearchFormHandlers({
   query,
   setQuery,
-  isPending,
   navigate,
   debounceTimerRef,
   isComposingRef,
-  initialParams,
   startTransition,
   router,
-}: SearchFormProps) {
+}: {
+  query: string;
+  setQuery: (val: string) => void;
+  navigate: (updates: Partial<HRApplicationFilterParams>, replace?: boolean) => void;
+  debounceTimerRef: MutableRefObject<NodeJS.Timeout | null>;
+  isComposingRef: MutableRefObject<boolean>;
+  startTransition: (fn: () => void) => void;
+  router: ReturnType<typeof useRouter>;
+}) {
   const onTextChange = (val: string) => {
     setQuery(val);
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
@@ -142,6 +148,12 @@ function SearchForm({
     startTransition(() => router.push("/hr/applications", { scroll: false }));
   };
 
+  return { onTextChange, onSubmit, onClear };
+}
+
+function SearchForm(props: SearchFormProps) {
+  const { onTextChange, onSubmit, onClear } = useSearchFormHandlers(props);
+
   return (
     <form
       onSubmit={onSubmit}
@@ -149,11 +161,31 @@ function SearchForm({
       className="flex flex-col gap-3 sm:flex-row sm:items-center"
     >
       <SearchInputField
-        query={query}
-        isPending={isPending}
+        query={props.query}
+        isPending={props.isPending}
         onTextChange={onTextChange}
-        isComposingRef={isComposingRef}
+        isComposingRef={props.isComposingRef}
       />
+      <SearchActions
+        isPending={props.isPending}
+        initialParams={props.initialParams}
+        onClear={onClear}
+      />
+    </form>
+  );
+}
+
+function SearchActions({
+  isPending,
+  initialParams,
+  onClear,
+}: {
+  isPending: boolean;
+  initialParams: HRApplicationFilterParams;
+  onClear: () => void;
+}) {
+  return (
+    <>
       <Button type="submit" className="h-10 shrink-0" disabled={isPending}>
         <Search size={16} aria-hidden="true" />
         <span>Search</span>
@@ -163,7 +195,7 @@ function SearchForm({
         isPending={isPending}
         onClear={onClear}
       />
-    </form>
+    </>
   );
 }
 
