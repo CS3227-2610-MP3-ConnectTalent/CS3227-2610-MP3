@@ -92,7 +92,7 @@ New forms prefill saved profile details without AI. Existing drafts take precede
 
 ### 3.3 Optional AI drafting
 
-Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. In this development version, successful generation replaces the cover letter in the form; keep a copy of text you want to retain before generating, including text typed while waiting. Verify all claims before saving or submitting. Generation does not save or submit. Notes are used for that request, not stored as application fields.
+Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. The suggestion appears in a separate editable **AI draft preview**. Your current letter stays unchanged until you choose **Use this draft** or **Replace current cover letter**. Review all claims before adoption; **Discard suggestion** keeps your existing letter. Adoption changes the form only: **Save draft** or **Submit application** is still required. Notes are used for that request, not stored as application fields. This preview change is locally tested under #94; hosted verification is pending.
 
 Structured profile/contact fields and files are not automatically sent to AI. Personal information you deliberately type in notes/letters may be included. If generation fails or is usage-limited, retain/edit the existing letter and continue manually.
 

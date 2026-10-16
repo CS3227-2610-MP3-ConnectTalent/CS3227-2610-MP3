@@ -16,6 +16,7 @@ import {
   isSoCLaaSReady,
 } from "@/lib/ai/soclaas-client";
 import { jsonNoStore, readJson } from "@/lib/ai/http";
+import { guardAiRequest } from "@/lib/ai/request-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -153,6 +154,8 @@ async function handleDraftProviderFailure(
 }
 
 export async function POST(request: Request) {
+  const rejected = guardAiRequest(request);
+  if (rejected) return rejected;
   try {
     return await createDraftRequest(request);
   } catch {

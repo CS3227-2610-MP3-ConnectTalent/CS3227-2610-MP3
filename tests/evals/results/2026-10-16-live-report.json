@@ -1,0 +1,222 @@
+{
+  "version": "ai-security-v1",
+  "mode": "live",
+  "results": [
+    {
+      "caseId": "A01",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 2603,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A01",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1900,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A02",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1721,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A02",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1112,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A03",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1207,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A03",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1352,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A04",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1988,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A04",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1393,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A05",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1341,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A05",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1724,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A06",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 2133,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "A06",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1577,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H01",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1133,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H01",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1410,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H02",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1351,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H02",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 2643,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H03",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1083,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H03",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1221,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H04",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1125,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H04",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1104,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H05",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1063,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H05",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "failed",
+      "check": "schema-and-markers",
+      "elapsedMs": 1084,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H06",
+      "category": "model-smoke",
+      "variant": "baseline",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 978,
+      "humanReview": "pending"
+    },
+    {
+      "caseId": "H06",
+      "category": "model-smoke",
+      "variant": "refined",
+      "outcome": "passed",
+      "check": "schema-and-markers",
+      "elapsedMs": 999,
+      "humanReview": "pending"
+    }
+  ]
+}

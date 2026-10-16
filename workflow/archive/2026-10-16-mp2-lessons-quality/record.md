@@ -64,4 +64,6 @@ Publication authorization: on 16 October 2026 (Asia/Singapore), Paul explicitly 
 
 ## Final archive checks
 
+Later integration checkpoint: PR #96 merged into develop `60f11de`, after this packet's baseline-specific audit. PR #100 now has an approved [integration follow-up](../2026-10-16-pr100-integration/record.md) to retain its explicit AI preview/adoption and tests while preserving #98 corrections. Earlier statements about direct replacement/unmerged #96 describe the original revision, not the current integrated source.
+
 Resolved source/destination paths were verified inside the intended workspace before moving. All five packet files retained matching SHA-256 hashes during the move. Final closeout check resolved 340 local Markdown links with zero missing files; scoped formatting and diff whitespace checks passed. Tracked changes remain limited to contribution/guide/workflow-index documentation; canonical specifications, application/database/env/site configuration and personal reflection prose are unchanged. The packet is absent from active changes and present in the archive. Build was not repeated for evidence-path-only changes; prior successful Docusaurus build remains the actual build evidence. Work remains uncommitted on docs/98-mp2-lessons-quality.

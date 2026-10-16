@@ -136,6 +136,15 @@ async function generateApplicantDraft(page: Page, jobId: string) {
   });
   await page.getByLabel("Experience notes").fill("Synthetic skill evidence");
   await page.getByRole("button", { name: "Generate draft" }).click();
+  await expect(page.getByLabel("AI draft preview")).toHaveValue(
+    "AI synthetic letter",
+  );
+  await expect(page.getByLabel("Cover letter", { exact: true })).toHaveValue(
+    "Unsaved synthetic letter",
+  );
+  await page
+    .getByRole("button", { name: "Replace current cover letter", exact: true })
+    .click();
   await expect(page.getByLabel("Cover letter", { exact: true })).toHaveValue(
     "AI synthetic letter",
   );

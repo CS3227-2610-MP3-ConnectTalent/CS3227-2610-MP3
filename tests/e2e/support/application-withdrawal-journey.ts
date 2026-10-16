@@ -30,16 +30,7 @@ async function saveApplicationDraft(
   await expect(
     page.getByRole("button", { name: "Cancel interrupted upload" }),
   ).toHaveCount(0);
-  await page.route("**/api/ai/applicant-draft", (route) =>
-    route.fulfill({ json: { draft: "Synthetic AI-assisted letter" } }),
-  );
-  await page.getByLabel("Experience notes").fill("Synthetic experience");
-  await page
-    .getByRole("button", { name: "Generate draft", exact: true })
-    .click();
-  await expect(page.getByLabel("Cover letter", { exact: true })).toHaveValue(
-    "Synthetic AI-assisted letter",
-  );
+  await adoptAiDraft(page);
   const rows = await admin
     .from("applications")
     .select("id")
@@ -52,6 +43,25 @@ async function saveApplicationDraft(
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
   await expect(page).toHaveURL(/\/applications\/[0-9a-f-]+$/);
   fixture.applicationId = new URL(page.url()).pathname.split("/").at(-1)!;
+}
+
+async function adoptAiDraft(page: Page) {
+  await page.route("**/api/ai/applicant-draft", (route) =>
+    route.fulfill({ json: { draft: "Synthetic AI-assisted letter" } }),
+  );
+  await page.getByLabel("Experience notes").fill("Synthetic experience");
+  await page
+    .getByRole("button", { name: "Generate draft", exact: true })
+    .click();
+  await expect(page.getByLabel("AI draft preview")).toHaveValue(
+    "Synthetic AI-assisted letter",
+  );
+  const letter = page.getByLabel("Cover letter", { exact: true });
+  await expect(letter).toHaveValue("");
+  await page
+    .getByRole("button", { name: "Use this draft", exact: true })
+    .click();
+  await expect(letter).toHaveValue("Synthetic AI-assisted letter");
 }
 
 async function uploadInitialResume(page: Page, fixture: WithdrawalFixture) {
