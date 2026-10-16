@@ -44,7 +44,7 @@ begin
   end if;
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_user_id::text || p_job_id::text, 0));
   select * into v_job from public.jobs where id = p_job_id for update;
-  if not found or v_job.status <> 'published'
+  if v_job.id is null or v_job.status <> 'published'
      or (v_job.opens_at is not null and v_job.opens_at > clock_timestamp())
      or (v_job.closes_at is not null and v_job.closes_at <= clock_timestamp()) then
     raise exception 'Job is not open for applications' using errcode = 'P0001';
@@ -88,7 +88,7 @@ begin
  perform application_private.verified_resume_actor(p_actor);
  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_actor::text || p_job::text, 0));
  select * into v_job from public.jobs where id = p_job for update;
- if not found or v_job.status <> 'published'
+ if v_job.id is null or v_job.status <> 'published'
     or (v_job.opens_at is not null and v_job.opens_at > clock_timestamp())
     or (v_job.closes_at is not null and v_job.closes_at <= clock_timestamp()) then
    raise exception 'Job is not open for applications';
@@ -121,7 +121,7 @@ begin
   end if;
   if v_obj.state = 'pending' and (p_revision is null or p_revision = v_obj.expected_revision) then p_revision := v_obj.expected_revision; end if;
  end if;
- if not found or v_job.status <> 'published'
+ if v_job.id is null or v_job.status <> 'published'
     or (v_job.opens_at is not null and v_job.opens_at > clock_timestamp())
     or (v_job.closes_at is not null and v_job.closes_at <= clock_timestamp()) then
    raise exception 'Job is not open for applications';
