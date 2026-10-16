@@ -65,6 +65,10 @@ beforeEach(() => {
         filters.push([column, value]);
         return builder;
       }),
+      is: vi.fn((column: string, value: unknown) => {
+        filters.push([column, String(value)]);
+        return builder;
+      }),
       maybeSingle: vi.fn(async () => {
         mocks.lookupFilters.push({ table, filters });
         return mocks.lookup(table, filters);
@@ -215,6 +219,7 @@ it.each([
         filters: [
           ["applicant_id", actor],
           ["job_id", job],
+          ["withdrawn_at", "null"],
         ],
       },
     ]);

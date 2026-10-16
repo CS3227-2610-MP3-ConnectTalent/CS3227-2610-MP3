@@ -30,6 +30,25 @@ const operation = "53000000-0000-4000-8000-000000000201";
 const file = new File(["synthetic"], "synthetic.pdf", {
   type: "application/pdf",
 });
+function createMockFrom() {
+  return (table: string) => {
+    const filters: Array<[string, string]> = [];
+    const query = {
+      select: vi.fn(() => query),
+      eq: vi.fn((column: string, value: string) => {
+        filters.push([column, value]);
+        return query;
+      }),
+      is: vi.fn((column: string, value: unknown) => {
+        filters.push([column, String(value)]);
+        return query;
+      }),
+      maybeSingle: vi.fn(() => mocks.lookup(table, filters)),
+    };
+    return query;
+  };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
@@ -44,18 +63,7 @@ beforeEach(() => {
   mocks.storageFrom.mockReturnValue({ upload: mocks.upload });
   mocks.upload.mockResolvedValue({ error: null });
   mocks.lookup.mockResolvedValue({ data: null, error: null });
-  mocks.from.mockImplementation((table: string) => {
-    const filters: Array<[string, string]> = [];
-    const query = {
-      select: vi.fn(() => query),
-      eq: vi.fn((column: string, value: string) => {
-        filters.push([column, value]);
-        return query;
-      }),
-      maybeSingle: vi.fn(() => mocks.lookup(table, filters)),
-    };
-    return query;
-  });
+  mocks.from.mockImplementation(createMockFrom());
   mocks.currentApplicant.mockResolvedValue({
     user: { id: actor },
     client: { from: mocks.from },

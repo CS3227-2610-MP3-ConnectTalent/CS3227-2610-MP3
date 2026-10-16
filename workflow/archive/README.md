@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-16 applicant withdraw and reapply](2026-10-16-applicant-withdraw-and-reapply/record.md): John accepted #90 after independent review and quality gate verification. APP-001 and APP-008 synced to canonical v1.16 before archive. [Closeout summary](../../logs/2026-10-16-applicant-withdraw-and-reapply.md). [PR #91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91).
+
 - [2026-10-16 Docusaurus guides](2026-10-16-docusaurus-guides/record.md): Paul separately accepted #92 with recorded limits after local clean install/build, link/browser/static checks and independent review. Documentation-only, canonical sync N/A. The complete packet and [closeout summary](../../logs/2026-10-16-docusaurus-guides-closeout.md) preserve actual gates and failures/repairs. Commit/push/PR, publication/live-site verification and full accessibility remain separate pending operations.
 
 - [2026-10-15 scheduled job opening and closing times](2026-10-15-scheduled-job-times/record.md): John accepted #88 after independent review and quality gate verification. JMG-004 and JOB-001 synced to canonical v1.15 before archive. [Closeout summary](../../logs/2026-10-15-scheduled-job-times.md). PR pending submission.

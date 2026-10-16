@@ -77,6 +77,7 @@ export async function getOwnApplicationForJob(
     .select(fields)
     .eq("applicant_id", user.id)
     .eq("job_id", jobId)
+    .is("withdrawn_at", null)
     .maybeSingle();
   if (error) throw new Error("Unable to load application.");
   return data ? applicationSchema.parse(data) : null;

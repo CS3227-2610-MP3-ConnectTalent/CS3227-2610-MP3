@@ -24,6 +24,7 @@ export async function isCurrentApplicationResumeOperation(
       .select("resume_id")
       .eq("applicant_id", actor)
       .eq("job_id", job)
+      .is("withdrawn_at", null)
       .maybeSingle();
     if (error) throw new Error("Application lookup failed.");
     currentResumeId = data?.resume_id;
