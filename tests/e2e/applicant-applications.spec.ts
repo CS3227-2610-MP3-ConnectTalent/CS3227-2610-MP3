@@ -192,6 +192,15 @@ async function draftWithAI(page: Page) {
     .getByLabel("Experience notes")
     .fill("Completed a synthetic TypeScript project.");
   await page.getByRole("button", { name: "Generate draft" }).click();
+  await expect(page.getByLabel("AI draft preview")).toHaveValue(
+    "AI generated synthetic draft.",
+  );
+  await expect(page.getByLabel("Cover letter", { exact: true })).toHaveValue(
+    "",
+  );
+  await page
+    .getByRole("button", { name: "Use this draft", exact: true })
+    .click();
   await expect(page.getByLabel("Cover letter")).toHaveValue(
     "AI generated synthetic draft.",
   );

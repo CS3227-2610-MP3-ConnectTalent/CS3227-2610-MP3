@@ -30,6 +30,22 @@ const jobId = "00000000-0000-4000-8000-000000000101";
 const actorId = "00000000-0000-4000-8000-000000000a12";
 const client = {};
 
+it("rejects cross-origin before any context or protected read", async () => {
+  const response = await applicantDraft(
+    new Request("https://careers.example/api/ai", {
+      method: "POST",
+      headers: {
+        origin: "https://evil.example",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ jobId, notes: "Notes" }),
+    }),
+  );
+  expect(response.status).toBe(403);
+  expect(spies.getApplicantContext).not.toHaveBeenCalled();
+  expect(spies.reserveAiInvocation).not.toHaveBeenCalled();
+});
+
 function post(body: unknown) {
   return new Request("http://localhost/api/ai", {
     method: "POST",

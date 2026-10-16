@@ -28,6 +28,25 @@ const applicationId = "00000000-0000-4000-8000-000000000a11";
 const actorId = "00000000-0000-4000-8000-000000000a12";
 const client = {};
 
+it.each([
+  [{ origin: "https://evil.example", "content-type": "application/json" }, 403],
+  [{ "content-type": "text/plain" }, 415],
+])(
+  "rejects an unsafe request before HR context or model access",
+  async (headers, status) => {
+    const response = await hrSummary(
+      new Request("https://careers.example/api/ai", {
+        method: "POST",
+        headers,
+        body: "{}",
+      }),
+    );
+    expect(response.status).toBe(status);
+    expect(spies.getHrContext).not.toHaveBeenCalled();
+    expect(spies.generateHrSummary).not.toHaveBeenCalled();
+  },
+);
+
 function post(body: unknown) {
   return new Request("http://localhost/api/ai", {
     method: "POST",

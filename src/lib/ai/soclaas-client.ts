@@ -1,6 +1,11 @@
 import "server-only";
 
 import OpenAI from "openai";
+import {
+  allowedProviderEndpoint,
+  completeAssistantContent,
+} from "./provider-policy";
+import { boundedProviderFetch } from "./provider-transport";
 
 import {
   applicantDraftMessages,
@@ -18,19 +23,7 @@ function providerConfiguration() {
   const model = process.env.SOCLAAS_MODEL?.trim();
   if (!apiKey || !baseURL || !model) return null;
 
-  let endpoint: URL;
-  try {
-    endpoint = new URL(baseURL);
-  } catch {
-    return null;
-  }
-  const localHost =
-    endpoint.hostname === "localhost" || endpoint.hostname === "127.0.0.1";
-  if (
-    endpoint.protocol !== "https:" &&
-    !(localHost && endpoint.protocol === "http:")
-  )
-    return null;
+  if (!allowedProviderEndpoint(baseURL)) return null;
   return { apiKey, baseURL, model };
 }
 
@@ -46,11 +39,13 @@ function clientForRequest() {
     baseURL: configuration.baseURL,
     timeout: providerTimeoutMs,
     maxRetries: 0,
+    fetch: boundedProviderFetch,
+    logLevel: "off",
   });
   return { client, model: configuration.model };
 }
 
-async function requestJson(
+export async function requestJson(
   messages:
     | ReturnType<typeof applicantDraftMessages>
     | ReturnType<typeof hrSummaryMessages>,
@@ -63,9 +58,7 @@ async function requestJson(
     response_format: { type: "json_object" },
     max_tokens: maxTokens,
   });
-  const content = response.choices[0]?.message.content;
-  if (typeof content !== "string" || content.length === 0)
-    throw new Error("SoCLaaS returned no JSON content.");
+  const content = completeAssistantContent(response);
   try {
     return JSON.parse(content) as unknown;
   } catch {
