@@ -9,7 +9,7 @@
 - GitHub issues: [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
 - Change packet and feature record: `workflow/archive/2026-10-16-applicant-withdraw-and-reapply/` ([record.md](../workflow/archive/2026-10-16-applicant-withdraw-and-reapply/record.md))
 - Branch and commits: `feat/90-applicant-withdraw-and-reapply`; baseline `2a56ba1`..head `7cce39c` (and closeout commit).
-- PR: Pending contributor submission to `develop`.
+- PR: PR [#91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91)
 - Related session summaries: [2026-10-15-scheduled-job-times.md](2026-10-15-scheduled-job-times.md)
 
 ## Chronological interactions and handoffs

@@ -11,7 +11,7 @@ Date: 2026-10-16
 
 - Change ID/classification: `2026-10-16-applicant-withdraw-and-reapply`; behavior change
 - GitHub issues: [#90](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/90)
-- Branch/commits/PR: `feat/90-applicant-withdraw-and-reapply`; PR pending submission
+- Branch/commits/PR: `feat/90-applicant-withdraw-and-reapply`; PR [#91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91)
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Deltas: [specs/applications-and-review.md](specs/applications-and-review.md)
