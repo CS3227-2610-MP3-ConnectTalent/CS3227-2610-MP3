@@ -16,6 +16,7 @@ import {
   createHRJobDraft,
   editHRJobDraft,
   publishHRJob,
+  unpublishHRJob,
 } from "../../src/app/hr/jobs/actions";
 
 const jobId = "20000000-0000-4000-8000-000000000b01";
@@ -52,6 +53,8 @@ it("checks HR before creating and sends only validated fields to the narrow RPC"
     p_category: "engineering",
     p_description: "Build internal tools",
     p_requirements: "TypeScript",
+    p_opens_at: null,
+    p_closes_at: null,
   });
 });
 
@@ -161,4 +164,44 @@ it("rejects invalid identifiers before publish or close RPC calls", async () => 
     "REDIRECT:/hr/jobs?error=invalid",
   );
   expect(rpc).not.toHaveBeenCalled();
+});
+
+it("supports unpublishing a scheduled job back to draft", async () => {
+  const rpc = vi.fn().mockResolvedValue({ data: jobId, error: null });
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  await expect(unpublishHRJob(form())).rejects.toThrow(
+    `REDIRECT:/hr/jobs/${jobId}?notice=unpublished`,
+  );
+  expect(rpc).toHaveBeenCalledWith("unpublish_hr_job", { p_job_id: jobId });
+});
+
+it("passes opens_at and closes_at to create and edit RPCs", async () => {
+  const rpc = vi.fn().mockResolvedValue({ data: jobId, error: null });
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  const scheduledForm = form({
+    opensAt: "2026-10-20T10:00",
+    closesAt: "2026-10-25T18:00",
+  });
+  await expect(createHRJobDraft(scheduledForm)).rejects.toThrow(
+    `REDIRECT:/hr/jobs/${jobId}?notice=created`,
+  );
+  expect(rpc).toHaveBeenCalledWith(
+    "create_hr_job_draft",
+    expect.objectContaining({
+      p_opens_at: expect.any(String),
+      p_closes_at: expect.any(String),
+    }),
+  );
+
+  rpc.mockClear();
+  await expect(editHRJobDraft(scheduledForm)).rejects.toThrow(
+    `REDIRECT:/hr/jobs/${jobId}?notice=saved`,
+  );
+  expect(rpc).toHaveBeenCalledWith(
+    "edit_hr_job_draft",
+    expect.objectContaining({
+      p_opens_at: expect.any(String),
+      p_closes_at: expect.any(String),
+    }),
+  );
 });

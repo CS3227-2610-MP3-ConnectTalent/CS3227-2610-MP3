@@ -9,15 +9,20 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/hr-auth", () => ({ requireHR: mocks.requireHR }));
-vi.mock("@/lib/hr-jobs", () => ({
-  listHRJobs: mocks.listHRJobs,
-  getHRJob: mocks.getHRJob,
-}));
+vi.mock("@/lib/hr-jobs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/hr-jobs")>();
+  return {
+    ...actual,
+    listHRJobs: mocks.listHRJobs,
+    getHRJob: mocks.getHRJob,
+  };
+});
 vi.mock("@/app/hr/jobs/actions", () => ({
   createHRJobDraft: "/create-job",
   closeHRJob: "/close-job",
   editHRJobDraft: "/edit-job",
   publishHRJob: "/publish-job",
+  unpublishHRJob: "/unpublish-job",
 }));
 vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
 vi.mock("next/link", async () => {
@@ -71,6 +76,13 @@ it("labels each HR job state in the management list", async () => {
     job,
     {
       ...job,
+      id: "scheduled-id",
+      title: "Scheduled role",
+      status: "published",
+      opens_at: "2099-01-01T00:00:00Z",
+    },
+    {
+      ...job,
       id: "published-id",
       title: "Published role",
       status: "published",
@@ -79,8 +91,10 @@ it("labels each HR job state in the management list", async () => {
   ]);
   const html = renderToStaticMarkup(await HRJobsPage());
   expect(html).toContain("Draft");
+  expect(html).toContain("Scheduled");
   expect(html).toContain("Published");
   expect(html).toContain("Closed");
+  expect(html).toContain('href="/hr/jobs/scheduled-id"');
   expect(html).toContain('href="/hr/jobs/published-id"');
 });
 
@@ -163,4 +177,22 @@ it("renders published job text and closing controls but no close action for a cl
   );
   expect(closed).toContain("Closed");
   expect(closed).not.toContain("Close job");
+});
+
+it("renders scheduled job controls with revert to draft action", async () => {
+  mocks.getHRJob.mockResolvedValueOnce({
+    ...job,
+    status: "published",
+    opens_at: "2099-01-01T00:00:00Z",
+  });
+  const scheduled = renderToStaticMarkup(
+    await HRJobDetail({
+      params: Promise.resolve({ id: job.id }),
+      searchParams: Promise.resolve({ notice: "unpublished" }),
+    }),
+  );
+  expect(scheduled).toContain("Scheduled");
+  expect(scheduled).toContain("Revert to draft");
+  expect(scheduled).toContain('action="/unpublish-job"');
+  expect(scheduled).toContain("The job was reverted to draft");
 });

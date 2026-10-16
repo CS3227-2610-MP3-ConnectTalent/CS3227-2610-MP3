@@ -3,7 +3,7 @@ import { BackToOpenRoles } from "@/components/back-to-open-roles";
 
 import { categoryLabel } from "@/lib/job-categories";
 import { requireHR } from "@/lib/hr-auth";
-import { listHRJobs } from "@/lib/hr-jobs";
+import { getHROperationalJobStatus, listHRJobs } from "@/lib/hr-jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -68,12 +68,15 @@ function JobList({ jobs }: { jobs: Jobs }) {
 }
 
 function JobRow({ job }: { job: Job }) {
+  const operationalStatus = getHROperationalJobStatus(job);
   const status =
-    job.status === "draft"
+    operationalStatus === "draft"
       ? "Draft"
-      : job.status === "published"
-        ? "Published"
-        : "Closed";
+      : operationalStatus === "scheduled"
+        ? "Scheduled"
+        : operationalStatus === "published"
+          ? "Published"
+          : "Closed";
   return (
     <li>
       <Link

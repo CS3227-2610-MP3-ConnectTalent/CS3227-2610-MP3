@@ -48,6 +48,11 @@ function JobHeading({ job, canApply }: { job: Job; canApply: boolean }) {
         {job.title}
       </h1>
       <p className="mt-3 text-lg text-muted-foreground">{job.team}</p>
+      {job.closes_at && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Applications close on {new Date(job.closes_at).toLocaleDateString()}
+        </p>
+      )}
       {canApply && <JobApplyLink id={job.id} />}
     </>
   );

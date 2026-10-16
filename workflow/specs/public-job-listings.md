@@ -1,12 +1,13 @@
 # Public job listings
 
-Baseline: ProductSpec v1.13, 15 October 2026 (integrated #81/#83 accepted changes; JOB-004 Search-action feedback, #78 public text search and #52 Applicant onboarding retained).
+Baseline: ProductSpec v1.15, 15 October 2026 (integrated #88 scheduled opening and closing times; #81/#83 accepted changes; JOB-004 Search-action feedback, #78 public text search and #52 Applicant onboarding retained).
 
 ## JOB-001: Published-only browsing
 
-The public UI and data MUST expose only this company's published openings. Applicants MUST be able to browse those openings. See [OVR-001](product-overview.md) for the employer boundary, [JMG-002 / JMG-003](job-management.md) for publication and closing, and [SEC-001](security-and-privacy.md) for access rules.
+The public UI and data MUST expose only this company's published openings within their active operational schedule window (`opens_at` is null or past/current, and `closes_at` is null or future). Draft, closed, future-scheduled, and past-deadline jobs MUST NOT appear in public listings or detail pages. Applicants MUST be able to browse active openings. If `closes_at` is specified, the listing detail MAY present the closing deadline. See [OVR-001](product-overview.md) for the employer boundary, [JMG-002 / JMG-003 / JMG-004](job-management.md) for publication, scheduling and closing, and [SEC-001](security-and-privacy.md) for access rules.
 
-Scenario: Given draft, published and closed jobs, when a visitor browses public listings, then only published jobs appear.
+Scenario: Given draft, future-scheduled, published, and closed jobs, when a visitor browses public listings, then only published jobs within their active operational schedule window appear.
+Denial scenario: Given a job whose scheduled `opens_at` is in the future or whose `closes_at` has elapsed, when an anonymous visitor or applicant requests its listing or detail, then the job is not returned.
 
 Signed-in verified Applicants with incomplete required profiles MUST be redirected from listing/category routes to My profile before querying/rendering openings under [ACC-006](accounts-and-roles.md). Guests and HR retain public published browsing; public job data remains public. Given an incomplete signed-in Applicant, direct category or listing navigation leads to profile completion; valid completion restores browsing.
 
