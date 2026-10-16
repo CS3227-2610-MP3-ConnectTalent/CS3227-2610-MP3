@@ -68,7 +68,7 @@ Existing data: All currently active applications have `withdrawn_at IS NULL`. An
 ## Rollout and rollback
 
 - Rollout: Apply database migration via standard migration replay. Deploy application code changes.
-- Rollback: Revert `write_application_details_v3` and recreate `applications_one_per_applicant_job` unique constraint (provided no applicant has two active applications, which the partial index already guarantees).
+- Rollback: Revert application code and RPC definitions. Because post-release reapplication may result in coexisting withdrawn and active rows for the same `(applicant_id, job_id)`, recreating the original whole-table `UNIQUE (applicant_id, job_id)` constraint directly would fail on those rows without violating data retention. Rollback therefore retains the partial unique index `applications_one_active_per_applicant_job` (which strictly prevents multiple active rows while preserving historical records intact) unless duplicate historical rows are explicitly partitioned or archived first.
 
 ## Review and unresolved decisions
 
