@@ -3,7 +3,7 @@
 This document is the main reflection index for ConnectTalent. Each individual reflection should explain decisions, concrete evidence, limitations and lessons across the three assignment themes.
 
 - [Paul Cheng’s reflection](PaulReflections.md) — AI-assisted draft covering the Applicant/HR workflow, profiles/private résumés, withdrawal, specifications, security and review. Fact-checked against repository evidence on 12 October 2026; Paul's personal verification of wording, contribution and conclusions remains pending.
-- [John’s reflection](JohnReflections.md) — incomplete outline for John to write and verify, including his AI-feature work and team contributions.
+- [John’s reflection](JohnReflections.md) — individual reflection covering AI security (SoCLaaS prompt injection hardening, two-phase reservation quotas, extractive hallucination prevention), Spec-Driven Development, and basic multi-agent software engineering, verified against repository commits and evidence.
 
 The development process used a primary Codex execution and actual separate reviewer executions for bounded tasks. Role instructions and profiles alone do not establish that another agent ran. The individual reflections distinguish this development workflow from the SoCLaaS features inside the product.
 

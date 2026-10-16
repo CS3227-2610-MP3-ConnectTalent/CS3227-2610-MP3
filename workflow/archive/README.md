@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-17 John's Reflections](2026-10-17-john-reflections/record.md): John accepted #101 after comprehensive documentation and verification across AI Security, SDD, and Multi-Agent SE. 46 valid markdown links, ESLint passed; canonical sync N/A. [Summary](../../logs/2026-10-17-john-reflections.md).
+
 - [2026-10-16 PR #100 documentation integration](2026-10-16-pr100-integration/record.md): Paul separately accepted with recorded limits and authorized commit/push. Three conflict paths reconciled with merged #96; 609 unit tests, 12 critical browser cases, site build and separate review passed; branches 90.25%. Canonical sync N/A. [Summary](../../logs/2026-10-16-pr100-integration.md). Original CI startup cause and new remote CI result remain unverified; merge/release are separate gates.
 
 - [2026-10-16 MP2 lessons / MP3 documentation quality](2026-10-16-mp2-lessons-quality/record.md): Paul separately accepted #98 with recorded limits after source/link/format checks, Docusaurus build and independent review/fixes. Documentation-only; canonical sync N/A. [Closeout summary](../../logs/2026-10-16-mp2-lessons-quality-closeout.md). Hosted/personal verification and publication remain separate.
