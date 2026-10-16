@@ -20,7 +20,7 @@ Use a browser; no desktop installation is required. Local accounts do not automa
 
 Job details, **My profile** and **Manage jobs** have a **Back to open roles** link at the top. Applicants with an incomplete profile remain on **My profile** until they save the required details.
 
-**Verification status, 12 October 2026:** instructions were checked against current `develop` source and specifications. Authenticated hosted workflows were not verified in this review; the team must smoke-test the deployment before evaluator use.
+**Verification status, 16 October 2026:** these instructions were checked against the development source and accepted specifications. Authenticated hosted workflows remain unverified in this review; the team must check the deployed version before evaluator use.
 
 ### 1.2 Create and verify an Applicant account
 
@@ -69,7 +69,7 @@ Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards i
 
 ### 3.1 Browse jobs
 
-Guests can browse; signed-in Applicants complete their profile first. Open **Careers**, use category links to filter, and open a job to read title, team, description and requirements. Choose **Apply for this role** and sign in if necessary. Draft/closed jobs are hidden publicly. HR is not offered Applicant apply controls.
+Guests can browse; signed-in Applicants complete their profile first. Open **Careers**, use category links to filter, and open a job to read title, team, description and requirements. Choose **Apply for this role** and sign in if necessary. Draft/closed jobs, jobs scheduled to open later and jobs past their closing time are hidden publicly. HR is not offered Applicant apply controls.
 
 Use **Search open roles** to find a phrase in a job's title, team, description or requirements. Matching ignores case and repeated whitespace; the whole phrase must appear in one field. Search and category filters work together. Use up to 100 characters; punctuation is treated literally.
 
@@ -84,14 +84,15 @@ New forms prefill saved profile details without AI. Existing drafts take precede
 - **Save draft** persists a private record for later visits; HR cannot read it.
 - Draft application fields may be incomplete, but your account profile must be complete.
 - Submission requires full name, verified email, phone and a nonblank cover letter of at most **5,000 characters**.
-- Draft editing/submission requires a published job. Closure stops those writes; history remains readable.
+- Draft editing/submission requires a published job within its opening/closing window. Closure stops those writes; history remains readable.
 - There is at most **one active application per Applicant per job**. If you withdraw a submitted application, you can start a new draft and reapply while the job remains open.
 - Validation feedback retains typed values. Saving or generating text does not submit.
+- Choose **Save draft** before leaving or refreshing if you want to keep typed text. Uploading a résumé does not save the other fields; there is no automatic text save.
 - During a slow request, Save draft and Submit application identify the active operation and disable another submission. Résumé Upload, Replace, Remove, Use profile and Retry controls likewise show the active operation and prevent conflicting file actions until it finishes.
 
 ### 3.3 Optional AI drafting
 
-Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. Review any overwrite prompt; generation fills the editable letter, so verify all claims. It does not save or submit. Notes are used for that request, not stored as application fields.
+Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. In this development version, successful generation replaces the cover letter in the form; keep a copy of text you want to retain before generating, including text typed while waiting. Verify all claims before saving or submitting. Generation does not save or submit. Notes are used for that request, not stored as application fields.
 
 Structured profile/contact fields and files are not automatically sent to AI. Personal information you deliberately type in notes/letters may be included. If generation fails or is usage-limited, retain/edit the existing letter and continue manually.
 
@@ -102,7 +103,7 @@ The résumé section is below work experience and above AI drafting. Choose **Ch
 - PDF only; maximum **1 MiB (1,048,576 bytes)**. The PDF must open without entering a password. Encrypted PDFs that open without a password are accepted; password-required or unreadable PDFs are rejected.
 - Upload is optional. It may create a private draft for the file without saving other typed fields.
 - Before submission, choose another PDF and press **Upload résumé** to replace the attachment. Choose **Delete résumé** to remove it; deletion asks for confirmation. Invalid replacements preserve the prior finalized attachment.
-- After an upload failure, press **Upload résumé** again to retry the selected file while preserving typed text. If the outcome is uncertain, reload to inspect the saved attachment before making further changes.
+- After an upload failure, press **Upload résumé** again to retry the selected file while preserving typed text. If you choose to reload to inspect an uncertain attachment outcome, first copy any unsaved text you want to keep; a file upload does not save it.
 - There is no permanent cancellation button. Downloads are private attachments, not public links or inline previews. Structural validation is not malware scanning.
 
 **My profile** also allows optional private PDF upload. **Use profile résumé** explicitly copies it into the application. Later profile replacement/removal does not alter that copy. Files are not parsed for autofill or sent to AI.
@@ -117,7 +118,7 @@ In **My applications**, choose **View application** to see your own record and c
 
 Open the individual submitted application and choose **Withdraw application**. **Keep application** cancels; **Confirm withdrawal** proceeds. The list itself has status/View only.
 
-Withdrawal is permanent, works after closure and does not erase data/files. You cannot undo it or reapply to that job. Your submitted record remains readable as history.
+Withdrawal is permanent for that application, works after closure and does not erase data/files. You cannot undo it. While the job remains published and within its opening/closing window, you may start a new application for the same job. Your withdrawn submission remains readable and unchanged as history; reapplying creates a separate record.
 
 ## 4. HR workflow
 
@@ -129,16 +130,18 @@ There is no public HR signup or role switch. An administrator assigns HR to a ve
 
 Open **Dashboard** to see job totals by Draft, Published and Closed, submitted applications by review status, and a separate Withdrawn total. The per-job table includes jobs with no applications and closed jobs; choose a job title to open its details. Use **Manage jobs** or **Application review** to continue into the existing HR workflows. The dashboard is read-only and does not show applicant names, contact details, application text, HR notes or résumé information.
 
-### 4.2 Manage jobs
+### 4.3 Manage jobs
 
 1. Open **Manage jobs**, then **Create draft**.
-2. Enter title, team, category, description and requirements; choose **Save draft**.
+2. Enter title, team, category, description and requirements. Optionally set **Scheduled opening time** and **Scheduled closing time** under **Schedule (optional)**, then choose **Save draft**.
 3. Reopen to edit, then explicitly **Publish job** when ready.
 4. On a published job, choose **Close job** when applications should stop.
 
-All fields are required. Title allows 160 characters, team 120, description/requirements 10,000 each. Drafts are hidden from Applicants. Published/closed content is fixed. Closed jobs cannot be reopened, republished or deleted. Closure retains existing applications and allowed history/review/download/withdrawal access.
+Title, team, category, description and requirements are required. Title allows 160 characters, team 120, description/requirements 10,000 each. The schedule fields are optional: a blank opening time opens the job when published; a blank closing time keeps it open until HR closes it. If both are set, closing must be after opening. Check the displayed saved times before publishing.
 
-### 4.3 Review applications
+A published job with a future opening time displays **Scheduled** to HR and stays hidden from Applicants. Before it opens, **Revert to draft** allows you to return it to an editable draft and revise its content or schedule. Once active, content is fixed. At the closing time it stops appearing publicly and stops accepting drafts/submissions. **Close job** also stops applications manually. Closed jobs cannot be reopened, republished or deleted; existing history/review/download/withdrawal access remains available.
+
+### 4.4 Review applications
 
 Open **Application review**, then a submission. HR sees submitted applications and withdrawn history, never unsubmitted drafts or mutable private Applicant profiles/profile files.
 
@@ -149,7 +152,7 @@ The detail contains submitted contacts/background, original/current letter secti
 - **Submitted** is initial-only. HR can change among the other three without a required reason.
 - Reload after a stale-state rejection before retrying.
 
-### 4.4 Optional AI summary
+### 4.5 Optional AI summary
 
 Choose **Summarize** or **Refresh summary** for advisory evidence, requirements not addressed and follow-up questions. Verify against the original letter and requirements. AI does not rank applicants or update status. Failure leaves letter/status unchanged.
 
@@ -157,17 +160,18 @@ Withdrawn submissions remain readable but cannot receive new notes, status chang
 
 ## 5. Lifecycle reference
 
-| State                              | Meaning / next actions                                                                                     |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Job: Draft                         | HR edits or publishes; publicly hidden.                                                                    |
-| Job: Published                     | Public, accepts drafts/submissions; HR may close. Content fixed.                                           |
-| Job: Closed                        | Publicly hidden; no new submissions/draft writes. History retained.                                        |
-| Application: Draft                 | Owner-only, editable while job published; HR cannot read it.                                               |
-| Application: Submitted             | Frozen Applicant content shared with HR; initial review status Submitted.                                  |
-| In review / Shortlisted / Rejected | Human-selected HR review status, visible to owner.                                                         |
-| Application: Withdrawn             | Terminal retained history; overrides displayed review status. No undo/reapplication/further HR processing. |
+| State                              | Meaning / next actions                                                                                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Job: Draft                         | HR edits or publishes; publicly hidden.                                                                                                  |
+| Job: Scheduled                     | Published with a future opening time; publicly hidden. HR can revert to draft before opening or close it.                                |
+| Job: Published                     | Within its active opening/closing window; public, accepts drafts/submissions. HR may close. Content fixed.                               |
+| Job: Closed                        | Publicly hidden; no new submissions/draft writes. History retained.                                                                      |
+| Application: Draft                 | Owner-only, editable while the job is active; HR cannot read it.                                                                         |
+| Application: Submitted             | Frozen Applicant content shared with HR; initial review status Submitted.                                                                |
+| In review / Shortlisted / Rejected | Human-selected HR review status, visible to owner.                                                                                       |
+| Application: Withdrawn             | This record is frozen retained history; no undo or further HR processing. A separate new application is allowed while the job is active. |
 
-Closing a job differs from withdrawing an application. Neither erases records or resets the one-application rule.
+Closing a job prevents new applications. Withdrawal freezes one submitted record and permits a separate application while the job is still active. At most one non-withdrawn application per Applicant per job is allowed.
 
 ## 6. Privacy and evaluator testing
 
@@ -191,8 +195,8 @@ For hosted smoke testing, use separate authorized Applicant/HR accounts: complet
 | File type or filename rejected        | Select a `.pdf` file recognised as PDF; use a simple filename of at most 120 characters.                                                                                                  |
 | File could not be received completely | Select the file again and retry.                                                                                                                                                          |
 | PDF checking unavailable or timed out | Retry later. This is a server validation problem; the message does not mean your file is invalid. The failed upload does not replace your previous attachment or clear typed form fields. |
-| Interrupted upload                    | Press Upload résumé again to retry the selected file; if uncertain, reload to check the attachment. Unsaved text is not automatically stored.                                             |
-| Save/status rejected                  | Reload to inspect current revision, job and submission/withdrawal state.                                                                                                                  |
+| Interrupted upload                    | Retry Upload résumé first. Before refreshing to inspect the attachment, copy unsaved text; uploads do not save text.                                                                      |
+| Save/status rejected                  | Preserve unsaved text before reloading to inspect the current revision, job and submission/withdrawal state.                                                                              |
 | Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                                                                                     |
 | No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                                                                                    |
 | AI unavailable/limited                | Continue manually; wait after limits.                                                                                                                                                     |

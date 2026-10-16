@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-16 MP2 lessons / MP3 documentation quality](2026-10-16-mp2-lessons-quality/record.md): Paul separately accepted #98 with recorded limits after source/link/format checks, Docusaurus build and independent review/fixes. Documentation-only; canonical sync N/A. [Closeout summary](../../logs/2026-10-16-mp2-lessons-quality-closeout.md). Hosted/personal verification and publication remain separate.
+
 - [2026-10-16 applicant withdraw and reapply](2026-10-16-applicant-withdraw-and-reapply/record.md): John accepted #90 after independent review and quality gate verification. APP-001 and APP-008 synced to canonical v1.16 before archive. [Closeout summary](../../logs/2026-10-16-applicant-withdraw-and-reapply.md). [PR #91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91).
 
 - [2026-10-16 Docusaurus guides](2026-10-16-docusaurus-guides/record.md): Paul separately accepted #92 with recorded limits after local clean install/build, link/browser/static checks and independent review. Documentation-only, canonical sync N/A. The complete packet and [closeout summary](../../logs/2026-10-16-docusaurus-guides-closeout.md) preserve actual gates and failures/repairs. Commit/push/PR, publication/live-site verification and full accessibility remain separate pending operations.

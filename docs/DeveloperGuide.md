@@ -111,11 +111,11 @@ One employer uses this deployment to advertise multiple jobs and review applicat
 - Submitted-only HR review, private add-only notes, human status changes, retained terminal owner withdrawal.
 - Optional Applicant cover-letter drafting and advisory HR summaries through server-only SoCLaaS.
 
-Non-goals: multi-tenancy, public HR signup, job reopening/deletion, submitted-content editing, withdrawal undo/reapplication, PDF extraction/AI résumé processing, automatic hiring or AI status writes. No application-data erasure workflow is implemented.
+Non-goals: multi-tenancy, public HR signup, job reopening/deletion, submitted-content editing, withdrawal undo, PDF extraction/AI résumé processing, automatic hiring or AI status writes. Reapplication is supported through a new record while the job is active; it does not restore or alter the withdrawn submission. No application-data erasure workflow is implemented.
 
 ## 4. Specifications and implementation map
 
-The [product index](../workflow/ProductSpec.md) links nine modules. Stable IDs connect issues, deltas, tasks, tests and review. A documentation-only rewrite does not change baseline v1.8.
+The [product index](../workflow/ProductSpec.md) links nine modules and identifies the current accepted baseline. Stable IDs connect issues, deltas, tasks, tests and review. This documentation-only correction does not change product requirements.
 
 | Specification / IDs                                                | Implementation                                                                                                    |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -246,6 +246,8 @@ Units check validation/normalization, projections, recovery and error handling. 
 Useful evidence: [HR review](../workflow/archive/2026-10-08-hr-application-review/record.md), [job management](../workflow/archive/2026-10-09-hr-job-management/record.md), [withdrawal](../workflow/archive/2026-10-10-application-form-withdrawal/record.md), [required profile](../workflow/archive/2026-10-10-required-applicant-profile/record.md), [résumé-first](../workflow/archive/2026-10-10-unsaved-profile-resume/record.md), [lost-response repair](../workflow/archive/2026-10-10-first-upload-retry/record.md). Counts belong to their recorded revisions; do not present them as fresh runs or hosted proof. Full assistive-technology testing and deployment smoke results require separate evidence.
 
 ## 8. Documentation site and CI
+
+Use the [release quality checklist](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/blob/develop/docs/ReleaseQualityChecklist.md) before evaluator handover. It maps MP2's feedback to MP3-specific checks, including unsaved-input sequences, guide/screen parity, submitted-record immutability and exact deployment/migration evidence. The checklist is repository evidence rather than an additional Docusaurus page; its link becomes available on `develop` after this documentation change is merged. Passing builds, an archived packet and a Vercel deployment are separate from an authenticated hosted workflow check. Pending work stays pending.
 
 [ci.yml](../.github/workflows/ci.yml) runs format, lint, Next type generation, typecheck, Vitest coverage/artifacts and build on PRs/pushes to develop/master. [supabase-checks.yml](../.github/workflows/supabase-checks.yml) uses disposable local Supabase for migration replay, database lint/tests and race suites; critical browser journeys run for PRs/pushes, with full browser runs nightly/manually. Generated local fixture credentials are masked; hosted production credentials are not used for these tests.
 

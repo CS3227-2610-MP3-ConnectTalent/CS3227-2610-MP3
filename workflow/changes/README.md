@@ -6,6 +6,8 @@ Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-Co
 
 ## Accepted and archived work
 
+Issue [#98 MP2 lessons / MP3 guide quality](../archive/2026-10-16-mp2-lessons-quality/record.md) was separately accepted by Paul with recorded limits on 16 October after documentation build, static checks and separate review/fixes. Guide inconsistencies corrected; release checklist added. Documentation-only, canonical sync N/A. [Closeout](../../logs/2026-10-16-mp2-lessons-quality-closeout.md). Hosted/personal/accessibility and #96 integration checks remain separate; no commit/push/PR authorized.
+
 Issue [#90 allow applicants to withdraw and reapply](../archive/2026-10-16-applicant-withdraw-and-reapply/record.md) was accepted by John on 16 October 2026 after independent review verification and passing quality gates. Replaced the whole-table `(applicant_id, job_id)` unique constraint with partial unique index `applications_one_active_per_applicant_job` on `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)`. APP-001, APP-005, APP-007, and APP-008 synced to canonical v1.16 before complete packet archive. [Closeout summary](../../logs/2026-10-16-applicant-withdraw-and-reapply.md). [PR #91](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/91).
 
 Issue [#92 Docusaurus guides](../archive/2026-10-16-docusaurus-guides/record.md) was separately accepted by Paul with recorded live-publication/accessibility limits on 16 October 2026. The complete packet is archived; product sync is N/A for documentation presentation/build. Local build, browser/link/static checks and separate review passed. [Closeout](../../logs/2026-10-16-docusaurus-guides-closeout.md). Commit/push/PR and publication remain pending.
