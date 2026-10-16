@@ -157,6 +157,8 @@ function ApplicationDraftForm(props: DraftProps) {
           />
           <ApplicationResumeFields {...props} />
           <ApplicantAiDraft
+            key={props.jobId}
+            currentCoverLetter={props.coverLetter}
             jobId={props.jobId}
             onDraft={props.setCoverLetter}
           />

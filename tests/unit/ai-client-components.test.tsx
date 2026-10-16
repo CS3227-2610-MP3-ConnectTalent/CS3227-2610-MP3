@@ -25,10 +25,13 @@ function array(
   return Array.isArray(value) ? value : [value as never];
 }
 
-function applicantControls(onDraft = vi.fn()) {
+function applicantControls(
+  onDraft = vi.fn(),
+  jobId = "80000000-0000-4000-8000-000000000b01",
+) {
   const root = componentState(() =>
     ApplicantAiDraft({
-      jobId: "80000000-0000-4000-8000-000000000b01",
+      jobId,
       onDraft,
     }),
   );
@@ -96,7 +99,7 @@ it("keeps the Applicant AI draft disabled until notes are entered", () => {
   expect(withNotes.controlsProps.notes).toBe("  Synthetic experience  ");
 });
 
-it("adds a validated AI draft only to the editable form and shows review guidance", async () => {
+it("previews a draft without replacing the letter until explicit adoption", async () => {
   const onDraft = vi.fn();
   vi.stubGlobal(
     "fetch",
@@ -112,11 +115,15 @@ it("adds a validated AI draft only to the editable form and shows review guidanc
   );
   const ready = applicantControls(onDraft);
   (findButton(ready.controls).props.onClick as () => void)();
-  await vi.waitFor(() =>
-    expect(onDraft).toHaveBeenCalledWith("Synthetic editable draft"),
-  );
+  await vi.waitFor(() => expect(mocks.states[3]).toBe(false));
+  expect(onDraft).not.toHaveBeenCalled();
   const rerendered = applicantControls(onDraft);
-  const children = array(rerendered.controls.props.children);
+  const preview = array(rerendered.root.props.children)[2];
+  expect(preview?.props?.draft).toBe("Synthetic editable draft");
+  (preview?.props?.onAdopt as () => void)();
+  expect(onDraft).toHaveBeenCalledWith("Synthetic editable draft");
+  const afterAdoption = applicantControls(onDraft);
+  const children = array(afterAdoption.controls.props.children);
   const noticeElement = children.at(-1) as {
     type: (props: Record<string, unknown>) => unknown;
     props: Record<string, unknown>;
@@ -158,6 +165,31 @@ it("shows safe API and JSON errors without invoking the Applicant draft callback
       expect(String(message.props.value)).toContain(expected);
     });
   }
+  expect(onDraft).not.toHaveBeenCalled();
+});
+
+it("does not offer an old target's response for adoption on another job", async () => {
+  const onDraft = vi.fn();
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ draft: "Synthetic suggestion" })),
+      ),
+  );
+  const initial = applicantControls(onDraft);
+  (initial.controlsProps.setNotes as (value: string) => void)(
+    "Synthetic notes",
+  );
+  const ready = applicantControls(onDraft);
+  (findButton(ready.controls).props.onClick as () => void)();
+  await vi.waitFor(() => expect(mocks.states[3]).toBe(false));
+  const other = applicantControls(
+    onDraft,
+    "80000000-0000-4000-8000-000000000b02",
+  );
+  expect(array(other.root.props.children)[2]).toBe(false);
   expect(onDraft).not.toHaveBeenCalled();
 });
 

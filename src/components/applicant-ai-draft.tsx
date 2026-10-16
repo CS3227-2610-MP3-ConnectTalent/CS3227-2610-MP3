@@ -2,27 +2,41 @@
 
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { AiDraftPreview } from "@/components/ai-draft-preview";
+import { applicantDraftResponseSchema } from "@/lib/ai/schemas";
 
-export function ApplicantAiDraft({
-  jobId,
-  onDraft,
-}: {
+type DraftProps = {
   jobId: string;
   onDraft: (draft: string) => void;
-}) {
+  currentCoverLetter?: string;
+};
+type Preview = { jobId: string; draft: string };
+
+function useDraftState(jobId: string, onDraft: DraftProps["onDraft"]) {
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<Preview | null>(null);
+
+  function adopt() {
+    if (!preview || preview.jobId !== jobId || busy || !preview.draft.trim())
+      return;
+    onDraft(preview.draft);
+    setPreview(null);
+    setNotice(
+      "Draft added to the editable cover letter. Check every date, skill, and achievement before saving or submitting.",
+    );
+  }
 
   async function generate() {
     setError("");
     setNotice("");
     setBusy(true);
     try {
-      onDraft(await requestDraft(jobId, notes));
+      setPreview({ jobId, draft: await requestDraft(jobId, notes) });
       setNotice(
-        "Draft added to the editable cover letter. Check every date, skill, and achievement before saving or submitting.",
+        "Suggestion ready. Review the preview before choosing whether to use it.",
       );
     } catch (caught) {
       setError(errorMessage(caught));
@@ -31,6 +45,37 @@ export function ApplicantAiDraft({
     }
   }
 
+  return {
+    notes,
+    setNotes,
+    error,
+    notice,
+    busy,
+    preview,
+    setPreview,
+    setNotice,
+    adopt,
+    generate,
+  };
+}
+
+export function ApplicantAiDraft({
+  jobId,
+  onDraft,
+  currentCoverLetter = "",
+}: DraftProps) {
+  const {
+    notes,
+    setNotes,
+    error,
+    notice,
+    busy,
+    preview,
+    setPreview,
+    setNotice,
+    adopt,
+    generate,
+  } = useDraftState(jobId, onDraft);
   return (
     <section
       className="space-y-3 rounded-lg border p-4"
@@ -45,6 +90,19 @@ export function ApplicantAiDraft({
         error={error}
         notice={notice}
       />
+      {preview?.jobId === jobId && (
+        <AiDraftPreview
+          draft={preview.draft}
+          replacing={currentCoverLetter.length > 0}
+          busy={busy}
+          onEdit={(draft) => setPreview({ jobId, draft })}
+          onAdopt={adopt}
+          onDiscard={() => {
+            setPreview(null);
+            setNotice("Suggestion discarded. Your cover letter is unchanged.");
+          }}
+        />
+      )}
     </section>
   );
 }
@@ -73,12 +131,7 @@ const fallbackMessage =
   "AI drafting is temporarily unavailable. Your notes are still here; try again later.";
 
 function isDraftResult(value: unknown): value is { draft: string } {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "draft" in value &&
-    typeof value.draft === "string"
-  );
+  return applicantDraftResponseSchema.safeParse(value).success;
 }
 
 function getApiError(value: unknown) {
