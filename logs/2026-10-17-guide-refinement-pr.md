@@ -9,18 +9,19 @@ Closes #103
    - Re-targeted the User Guide specifically for end users (Applicants and HR Reviewers).
    - Relocated developer/local environment details (localhost endpoints, Mailpit on port 54324, local HR seed instructions, local vs. hosted database isolation notes, internal test tracking references, evaluator smoke test protocols, and developer troubleshooting entries) into the Developer Guide.
    - Preserved all content without deletion; retitled Section 6 to "Privacy and acceptable use".
+   - Documented HR application review search, job/status/withdrawal filters, sorting, and pagination in Section 4.4.
 2. **Developer Guide Section 3 Expansion (Product Definition)**:
    - Added Target User Profile and Personas (Guest / Job Seeker, Registered Applicant, HR Specialist / Reviewer, System Administrator / Evaluator).
    - Added Prioritized User Stories across functional areas with explicit priority tiers (`* * *`, `* *`, `*`).
-   - Added Formal Use Cases (UC01 through UC12) with Actors, Preconditions, Main Success Scenarios, and Extensions.
-   - Added Gherkin syntax behavioral product specifications across 10 feature areas.
+   - Added 12 Formal Use Cases (UC01 through UC12) with Actors, Preconditions, Main Success Scenarios, and Extensions.
+   - Added 12 corresponding Gherkin syntax behavioral product specifications matching UC01–UC12 1:1 across all feature areas.
    - Added Non-Functional Specifications (performance, security, data integrity, usability).
    - Added `"gherkin"` to `prism.additionalLanguages` in `website/docusaurus.config.js`.
 3. **Developer Guide Section 5 Expansion (Architecture and Data Design)**:
-   - Added Mermaid Entity-Relationship Diagram (`erDiagram`) for PostgreSQL tables.
+   - Added Mermaid Entity-Relationship Diagram (`erDiagram`) reflecting exact PostgreSQL migration schema tables and columns.
    - Added 4 Sequence Diagrams (Application Submission & Freeze, Sandboxed PDF Résumé Validation, AI Cover Letter Generation & Explicit Adoption, HR Review & Notes) and 1 State Diagram (`stateDiagram-v2`).
    - Resolved Mermaid syntax formatting by ensuring no unquoted statement-terminating semicolons appear in diagram messages.
-   - Added 6 Key Architectural and Design Decisions structured with Decision, Rationale, Alternatives Considered, and Trade-offs.
+   - Added 6 Key Architectural and Design Decisions structured with Decision, Rationale, Alternatives Considered, and Trade-offs (including AI runtime service-key use for quota reservation/audit RPCs in 5.7.6).
 4. **Developer Guide Section 7 Expansion (Testing Strategy)**:
    - Added Test Pyramid flowchart and Automated Test Inventory table.
    - Added High-Risk Coverage Matrix mapping critical failure modes to mitigations.

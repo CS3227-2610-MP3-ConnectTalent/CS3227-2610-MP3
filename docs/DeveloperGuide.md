@@ -108,7 +108,7 @@ One employer uses this deployment to advertise multiple jobs and review applicat
 - Verified Applicant signup, sign-in/out, password recovery and required private profile onboarding.
 - New-form profile autofill; private drafts; required submitted contacts and immutable letter/background/file snapshots.
 - Optional private profile/application PDF files, explicit independent reuse, upload-before-save and lost-response recovery.
-- Submitted-only HR review, private add-only notes, human status changes, retained terminal owner withdrawal.
+- Submitted-only HR review with candidate search, job/status/withdrawal filters, sorting and pagination; private add-only notes, human status changes, and retained terminal owner withdrawal.
 - Optional Applicant cover-letter drafting and advisory HR summaries through server-only SoCLaaS.
 
 Non-goals: multi-tenancy, public HR signup, job reopening/deletion, submitted-content editing, withdrawal undo, PDF extraction/AI résumé processing, automatic hiring or AI status writes. Reapplication is supported through a new record while the job is active; it does not restore or alter the withdrawn submission. No application-data erasure workflow is implemented.
@@ -430,7 +430,28 @@ Feature: Applicant Account Verification and Required Profile Onboarding
     And clicks "Save profile"
     Then the profile update is rejected
     And descriptive telephone formatting guidance is displayed
-    And the applicant profile remains incomplete
+```
+
+```gherkin
+Feature: Applicant Profile Maintenance and Telephony Validation
+  As an authenticated applicant
+  I want to maintain my contact details, background information, and international telephony
+  So that future applications prefill accurately with verified contact information
+
+  Scenario: Update Profile Details and Validate Telephony
+    Given an applicant has completed onboarding
+    When the applicant navigates to "My profile"
+    And updates education, work experience, and phone calling code with valid national digits
+    And selects "Save profile"
+    Then the profile record is updated successfully
+    And subsequent job applications prefill with the updated profile values
+
+  Scenario: Rejection of Disallowed Portfolio URL Schemes
+    Given an applicant is updating their profile
+    When the applicant enters a portfolio URL containing embedded credentials or non-HTTP protocols
+    And clicks "Save profile"
+    Then the system rejects the portfolio URL
+    And displays guidance to supply a valid HTTP or HTTPS address without credentials
 ```
 
 ```gherkin
@@ -452,6 +473,35 @@ Feature: Public Job Search and Vacancy Lifecycle Visibility
     Then the scheduled job is hidden from public listings and search
     When the scheduled opening time passes
     Then the job automatically becomes visible in public search without manual republishing
+```
+
+```gherkin
+Feature: HR Job Vacancy Authoring, Scheduling, and Lifecycle Management
+  As an HR reviewer
+  I want to create, schedule, publish, and close job postings
+  So that talent acquisition campaigns are accurately controlled over time
+
+  Scenario: Author Draft Job and Publish Immediately
+    Given an authenticated HR reviewer
+    When the reviewer creates a job draft with title, team, category, description, and requirements
+    And leaves scheduled opening and closing times blank
+    And clicks "Publish job"
+    Then the job status transitions to "Published"
+    And the vacancy becomes immediately discoverable in the public careers portal
+
+  Scenario: Scheduled Vacancy Opening and Revert to Draft
+    Given an HR reviewer authors a job with a scheduled opening time in the future
+    When the reviewer publishes the vacancy
+    Then the job status is set to "Scheduled"
+    And the job remains hidden from public applicants
+    When the HR reviewer chooses "Revert to draft" prior to the opening time
+    Then the status returns to "Draft" allowing further edits
+
+  Scenario: Explicit Vacancy Closure
+    Given a job is currently active in "Published" status
+    When an HR reviewer selects "Close job"
+    Then the job status changes to "Closed"
+    And the vacancy ceases accepting new application drafts and submissions immediately
 ```
 
 ```gherkin
@@ -552,6 +602,26 @@ Feature: HR Application Review and Attributed Private Notes
     Then the note is stored with the reviewer's authenticated user ID and timestamp
     And the note appears in the internal application review feed
     And the note is strictly inaccessible to the applicant via API or UI
+```
+
+```gherkin
+Feature: HR Candidate Review Status Progression and Audit Logging
+  As an HR reviewer
+  I want to update candidate review statuses and preserve transition history
+  So that hiring decisions maintain an accountable and auditable progression timeline
+
+  Scenario: Progress Application Review Status
+    Given an HR reviewer is evaluating an application in "Submitted" status
+    When the reviewer selects "In review" and clicks "Update status"
+    Then the application review status updates to "In review"
+    And a corresponding record is inserted into the status transition audit log
+    And the applicant can view the updated review status in "My applications"
+
+  Scenario: Disallow Status Progression on Withdrawn Application
+    Given an application has been withdrawn by the applicant
+    When an HR reviewer attempts to update its review status
+    Then the status transition is rejected
+    And the withdrawn terminal state remains unchanged
 ```
 
 ```gherkin
@@ -665,12 +735,13 @@ erDiagram
     auth_users ||--o| applicant_profiles : "onboards"
     auth_users ||--o{ applications : "submits"
     auth_users ||--o{ application_notes : "authors"
-    auth_users ||--o{ application_status_history : "records"
+    auth_users ||--o{ application_status_events : "records"
     jobs ||--o{ applications : "receives"
     applications ||--o{ application_notes : "contains"
-    applications ||--o{ application_status_history : "tracks"
-    applications ||--o| application_resumes : "references"
-    applicant_profiles ||--o| profile_resumes : "references"
+    applications ||--o{ application_status_events : "tracks"
+    applications ||--o{ application_submission_events : "logs"
+    applications ||--o| application_resume_objects : "attaches"
+    applicant_profiles ||--o| profile_resume_objects : "attaches"
 
     profiles {
         uuid user_id PK
@@ -681,12 +752,11 @@ erDiagram
     applicant_profiles {
         uuid user_id PK
         text full_name
-        text phone_country_code
-        text phone_national_number
+        text phone
         text portfolio_url
         text education
         text work_experience
-        text resume_path
+        uuid resume_id FK
         timestamptz updated_at
     }
 
@@ -698,27 +768,33 @@ erDiagram
         text description
         text requirements
         text status
-        timestamptz scheduled_open_at
-        timestamptz scheduled_close_at
+        timestamptz opens_at
+        timestamptz closes_at
         timestamptz created_at
+        timestamptz published_at
     }
 
     applications {
         uuid id PK
         uuid job_id FK
         uuid applicant_id FK
-        text status
-        text full_name_snapshot
-        text email_snapshot
-        text phone_country_code_snapshot
-        text phone_national_number_snapshot
-        text portfolio_url_snapshot
-        text education_snapshot
-        text work_experience_snapshot
+        text job_title
+        text submission_state
+        text full_name
+        text submitted_email
+        text phone
+        text portfolio_url
+        text education
+        text work_experience
         text cover_letter
-        text resume_path_snapshot
+        text original_submitted_letter
+        uuid resume_id FK
+        text review_status
+        int review_revision
+        int revision
         timestamptz submitted_at
         timestamptz withdrawn_at
+        uuid withdrawn_by FK
         timestamptz updated_at
     }
 
@@ -726,36 +802,59 @@ erDiagram
         uuid id PK
         uuid application_id FK
         uuid author_id FK
-        text note_text
+        text body
         timestamptz created_at
     }
 
-    application_status_history {
+    application_status_events {
         uuid id PK
         uuid application_id FK
         uuid actor_id FK
         text from_status
         text to_status
+        text outcome
         timestamptz created_at
     }
 
-    application_resumes {
+    application_submission_events {
         uuid id PK
         uuid application_id FK
-        text storage_path
-        text file_name
-        int file_size_bytes
-        text mime_type
+        uuid actor_id
         timestamptz created_at
     }
 
-    profile_resumes {
+    ai_invocations {
         uuid id PK
-        uuid user_id FK
-        text storage_path
-        text file_name
-        int file_size_bytes
-        text mime_type
+        uuid actor_id
+        text operation
+        uuid target_id
+        text outcome
+        timestamptz created_at
+        timestamptz completed_at
+    }
+
+    application_resume_objects {
+        uuid id PK
+        uuid application_id FK
+        uuid applicant_id FK
+        text object_path
+        text filename
+        int byte_size
+        text sha256
+        int expected_revision
+        text state
+        timestamptz created_at
+    }
+
+    profile_resume_objects {
+        uuid id PK
+        uuid applicant_id FK
+        text object_path
+        text filename
+        int byte_size
+        text sha256
+        uuid expected_resume_id
+        text state
         timestamptz created_at
     }
 ```
@@ -916,7 +1015,7 @@ sequenceDiagram
     HR->>UI: Enters feedback in "Add note" and clicks submit
     UI->>Action: POST addNote(applicationId, text)
     Action->>Action: Validate text length (at most 2000 characters)
-    Action->>DB: INSERT INTO application_notes (application_id, author_id, text, created_at)
+    Action->>DB: INSERT INTO application_notes (application_id, author_id, body, created_at)
     DB-->>Action: Note persisted
     Action-->>UI: Append-only note rendered in review timeline
 ```
@@ -975,16 +1074,16 @@ This section documents the key architectural and technical design decisions made
 
 #### 5.7.5 Add-Only Attributed HR Notes and Status Auditing
 
-- **Decision**: Model HR application notes as strictly add-only records attributed to the authenticated reviewer's user ID with server-generated timestamps. Maintain status changes in a dedicated transition ledger (`application_status_history`).
+- **Decision**: Model HR application notes as strictly add-only records attributed to the authenticated reviewer's user ID with server-generated timestamps. Maintain status changes in a dedicated transition ledger (`application_status_events`).
 - **Rationale**: Hiring assessments require tamper-proof accountability. Allowing notes to be edited or deleted could enable retrospective alterations during disputed hiring processes. Recording each status transition maintains an immutable timeline of candidate progression.
 - **Alternatives Considered**: Single mutable status and notes fields directly on the `applications` row. Rejected because overwriting status and notes erases historical context and attribution.
 - **Trade-off**: Requires dedicated audit tables and multiple query joins, but satisfies organizational compliance and accountability requirements.
 
 #### 5.7.6 Separation of Synthetic Fixtures, Test Keys, and Deployment Environments
 
-- **Decision**: Enforce strict isolation between local Docker development, ephemeral preview environments, and production Supabase deployments. Restrict privileged service-role keys exclusively to local test runners (`TEST_SUPABASE_SERVICE_ROLE_KEY`) and server-side file maintenance, while requiring public publishable keys for standard client operations.
-- **Rationale**: Prevents accidental data contamination, credential leakage, or execution of destructive seed scripts against hosted preview or production databases.
-- **Alternatives Considered**: Shared cloud databases across development branches or bundling service-role keys in build bundles. Rejected because shared databases cause race conditions between features, and bundled service keys would expose complete administrative database control to client browsers.
+- **Decision**: Enforce strict isolation between local Docker development, ephemeral preview environments, and production Supabase deployments. Restrict privileged server runtime keys (`SUPABASE_SECRET_KEY` or legacy `SUPABASE_SERVICE_ROLE_KEY`) exclusively to server-side file maintenance (narrowly checked résumé mutations and orphan cleanup) and AI quota reservation/audit RPCs (`reserve_ai_invocation` and `finalize_ai_invocation`). Local test runners and local HR seeding use a separate ignored administrative key (`TEST_SUPABASE_SERVICE_ROLE_KEY`), while public publishable keys (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) are required for standard client operations governed by Supabase Auth and RLS.
+- **Rationale**: Prevents accidental data contamination, credential leakage, or execution of destructive seed scripts against hosted preview or production databases. Restricting privileged runtime keys on the server strictly to necessary storage cleanup and AI rate-limit auditing ensures that standard application queries cannot bypass Row-Level Security, while operators are clearly aware that AI quota enforcement and audit trails depend on server secret keys.
+- **Alternatives Considered**: Shared cloud databases across development branches, bundling service-role keys in client bundles, or running AI quota queries with user-scoped clients. Rejected because shared databases cause race conditions between features, bundled keys expose complete administrative database control to client browsers, and user-scoped clients cannot reliably enforce cross-user rolling quota tables without exposing audit records.
 - **Trade-off**: Requires developers to run local Supabase Docker containers and configure environment-specific `.env` files, but guarantees data privacy and environment isolation.
 
 ## 6. Software engineering process

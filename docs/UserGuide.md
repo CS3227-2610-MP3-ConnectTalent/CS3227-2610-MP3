@@ -142,7 +142,16 @@ A published job with a future opening time displays **Scheduled** to HR and stay
 
 Open **Application review**, then a submission. HR sees submitted applications and withdrawn history, never unsubmitted drafts or mutable private Applicant profiles/profile files.
 
-The detail contains submitted contacts/background, original/current letter sections, application résumé, private notes and status history. Current submissions are immutable; two letter sections do not enable editing.
+The **Application review** dashboard provides search, filtering, sorting, and pagination across submissions:
+
+- **Search**: Type an applicant name (debounced 300 ms, up to 100 characters) to filter results by candidate name.
+- **Filter by job**: Select a specific job listing from the dropdown or choose **All jobs**.
+- **Filter by status**: Filter candidates by review status (**All statuses**, **Submitted**, **In review**, **Shortlisted**, or **Rejected**).
+- **Filter by withdrawal**: View **All applications**, **Active only**, or **Withdrawn only**.
+- **Sort**: Order submissions by **Newest first** or **Oldest first**.
+- **Pagination**: Results are displayed 10 applications per page with page navigation controls.
+
+Selecting an application opens its detailed view containing submitted contacts/background, original/current letter sections, application résumé, private notes and status history. Current submissions are immutable; two letter sections do not enable editing.
 
 - **Add a note** / **Add note**: add-only, at most 2,000 characters, with author/time. Applicants cannot see notes.
 - **Change review status** / **Update status**: select **In review**, **Shortlisted** or **Rejected** as a separate human action.
