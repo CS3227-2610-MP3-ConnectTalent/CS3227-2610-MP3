@@ -145,7 +145,7 @@ Open **Application review**, then a submission. HR sees submitted applications a
 The **Application review** dashboard provides search, filtering, sorting, and pagination across submissions:
 
 - **Search**: Type an applicant name (debounced 300 ms, up to 100 characters) to filter results by candidate name.
-- **Filter by job**: Select a specific job listing from the dropdown or choose **All jobs**.
+- **Filter by role**: Select a specific job listing from the dropdown or choose **All roles**.
 - **Filter by status**: Filter candidates by review status (**All statuses**, **Submitted**, **In review**, **Shortlisted**, or **Rejected**).
 - **Filter by withdrawal**: View **All applications**, **Active only**, or **Withdrawn only**.
 - **Sort**: Order submissions by **Newest first** or **Oldest first**.

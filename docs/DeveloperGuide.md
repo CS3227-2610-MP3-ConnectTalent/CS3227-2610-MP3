@@ -287,7 +287,7 @@ Priorities reflect product necessity:
 - **Preconditions**: Application draft exists or profile edit view is open.
 - **Main Success Scenario**:
   1. Applicant selects a PDF file and clicks **Upload résumé**.
-  2. Browser submits raw binary PDF body with `x-resume-intent: upload` and `x-resume-filename` headers to the secure upload endpoint (`/api/applications/[id]/resume` or `/api/profile/resume`).
+  2. Browser submits raw binary PDF body with `x-resume-intent: upload` and `x-resume-filename` headers to the secure upload endpoint (`/api/jobs/[id]/resume`, `/api/applications/[id]/resume`, or `/api/profile/resume`).
   3. Server inspects file size (maximum 1 MiB) and passes buffer to an isolated Node worker thread (`node:worker_threads`).
   4. Worker executes PDF structural validation via PDF.js under strict memory and execution deadlines without rendering or executing embedded scripts.
   5. File passes structural inspection without requiring passwords; server creates a pending tracking record in the database, uploads file bytes to private Storage, and finalizes the tracking record to link the file to the draft.
