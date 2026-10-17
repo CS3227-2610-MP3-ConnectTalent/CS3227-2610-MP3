@@ -24,7 +24,8 @@ async function runHRApplicationReview(page: Page) {
   });
   const fixture = createReviewFixture();
   try {
-    await setupReviewFixture(admin, fixture);
+    await insertReviewJobs(admin, fixture);
+    await createReviewUsers(admin, localAdminKey!, fixture);
     const urls = await createApplicantApplications(page, fixture);
     await reviewSubmittedApplication(page, fixture, urls.draftUrl);
     await closeJobAndUpdateStatus(page, admin, fixture.submittedJobId);
@@ -61,11 +62,6 @@ function createReviewFixture(): ReviewFixture {
     draftTitle: `HR draft ${suffix}`,
     userIds: [],
   };
-}
-
-async function setupReviewFixture(admin: AdminClient, fixture: ReviewFixture) {
-  await insertReviewJobs(admin, fixture);
-  await createReviewUsers(admin, localAdminKey!, fixture);
 }
 
 async function insertReviewJobs(admin: AdminClient, fixture: ReviewFixture) {
@@ -150,7 +146,9 @@ async function reviewSubmittedApplication(
   await expect(
     page.getByRole("heading", { name: "Application review" }),
   ).toBeVisible();
-  await expect(page.getByText(fixture.submittedTitle)).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: new RegExp(fixture.submittedTitle) }),
+  ).toBeVisible();
   await expect(page.getByText(fixture.draftTitle)).toHaveCount(0);
   expect(
     (
@@ -264,11 +262,11 @@ async function closeJobAndUpdateStatus(
   admin: AdminClient,
   jobId: string,
 ) {
-  const { error } = await admin
+  const res = await admin
     .from("jobs")
     .update({ status: "closed" })
     .eq("id", jobId);
-  expect(error).toBeNull();
+  expect(res.error).toBeNull();
   await page.reload();
   await expect(page.getByText("Private synthetic HR note")).toBeVisible();
   await page.getByLabel("New status").selectOption("shortlisted");

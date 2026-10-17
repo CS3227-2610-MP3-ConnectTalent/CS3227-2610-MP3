@@ -3,12 +3,18 @@ import { z } from "zod";
 import { requireHR } from "@/lib/hr-auth";
 import { hrReviewStatusSchema } from "@/lib/hr-input";
 import { fetchAllPages, sortByTimestampAndId } from "@/lib/supabase/pagination";
+import { listDistinctJobsFromApplications } from "@/lib/hr-application-search";
 
 const listItemSchema = z.object({
   withdrawn_at: z.string().nullable(),
   withdrawn_by: z.uuid().nullable(),
   id: z.uuid(),
   applicant_id: z.uuid(),
+  full_name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   job_id: z.uuid(),
   job_title: z.string(),
   submitted_at: z.string(),
@@ -18,7 +24,6 @@ const listItemSchema = z.object({
 const detailSchema = listItemSchema.extend({
   education: z.string().nullable(),
   work_experience: z.string().nullable(),
-  full_name: z.string().nullable(),
   submitted_email: z.string().nullable(),
   phone: z.string().nullable(),
   portfolio_url: z.string().nullable(),
@@ -45,8 +50,20 @@ const statusEventSchema = z.object({
 });
 
 export type HRApplication = z.infer<typeof detailSchema>;
+export type HRApplicationSummary = z.infer<typeof listItemSchema>;
 
-export async function listSubmittedApplications() {
+export { listDistinctJobsFromApplications };
+
+export interface HRApplicationQueryOptions {
+  jobId?: string;
+  status?: z.infer<typeof hrReviewStatusSchema>;
+  withdrawal?: "active" | "withdrawn" | "all";
+  nameQuery?: string;
+}
+
+export async function listSubmittedApplications(
+  options?: HRApplicationQueryOptions,
+) {
   const { client } = await requireHR();
   let data: unknown[];
   try {
@@ -54,9 +71,23 @@ export async function listSubmittedApplications() {
       let query = client
         .from("applications")
         .select(
-          "withdrawn_at,withdrawn_by,id,applicant_id,job_id,job_title,submitted_at,review_status",
+          "withdrawn_at,withdrawn_by,id,applicant_id,full_name,job_id,job_title,submitted_at,review_status",
         )
         .eq("submission_state", "submitted");
+      if (options?.withdrawal === "active") {
+        query = query.is("withdrawn_at", null);
+      } else if (options?.withdrawal === "withdrawn") {
+        query = query.not("withdrawn_at", "is", null);
+      }
+      if (options?.jobId) {
+        query = query.eq("job_id", options.jobId);
+      }
+      if (options?.status) {
+        query = query.eq("review_status", options.status);
+      }
+      if (options?.nameQuery) {
+        query = query.ilike("full_name", `%${options.nameQuery}%`);
+      }
       if (afterId !== null) query = query.gt("id", afterId);
       return query.order("id", { ascending: true }).limit(pageSize);
     });
@@ -68,6 +99,27 @@ export async function listSubmittedApplications() {
     (application) => application.submitted_at,
     false,
   );
+}
+
+export async function listDistinctApplicationJobs(): Promise<
+  Array<{ id: string; title: string }>
+> {
+  const { client } = await requireHR();
+  try {
+    const data = await fetchAllPages((afterId, pageSize) => {
+      let query = client
+        .from("applications")
+        .select("id,job_id,job_title")
+        .eq("submission_state", "submitted");
+      if (afterId !== null) query = query.gt("id", afterId);
+      return query.order("id", { ascending: true }).limit(pageSize);
+    });
+    return listDistinctJobsFromApplications(
+      data as Array<{ job_id: string; job_title: string }>,
+    );
+  } catch {
+    return [];
+  }
 }
 
 export async function getSubmittedApplication(id: string) {

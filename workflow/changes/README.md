@@ -6,6 +6,8 @@ Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-Co
 
 ## Accepted and archived work
 
+Issue [#97 HR application search, filters, sorting, and pagination](../archive/2026-10-16-hr-application-filters/record.md) was accepted by John on 16 October 2026 after independent review verification and passing quality gates. APP-010 synced to canonical v1.17 before complete packet archive. [Closeout summary](../../logs/2026-10-16-hr-application-filters.md). [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99).
+
 Issue #98 / PR #100: [accepted documentation integration](../archive/2026-10-16-pr100-integration/record.md). Paul accepted with recorded limits and authorized commit/push on 16 October. Three conflicts resolved; 609 unit/12 browser checks, site build and review passed; branches 90.25%. Canonical sync N/A; remote CI remains pending.
 
 Issue [#98 MP2 lessons / MP3 guide quality](../archive/2026-10-16-mp2-lessons-quality/record.md) was separately accepted by Paul with recorded limits on 16 October after documentation build, static checks and separate review/fixes. Guide inconsistencies corrected; release checklist added. Documentation-only, canonical sync N/A. [Closeout](../../logs/2026-10-16-mp2-lessons-quality-closeout.md). PR #100 is open. Hosted/personal/accessibility limits remain; accepted integration with merged #96 is preserved in the [archived PR #100 follow-up](../archive/2026-10-16-pr100-integration/record.md).
