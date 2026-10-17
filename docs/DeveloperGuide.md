@@ -134,12 +134,12 @@ Priorities reflect product necessity:
 
 #### 3.4.1 Account, Identity and Profile Onboarding Stories
 
-| Priority | Persona Role | User Story Text                                                                                                                                                               | Business Rationale and Acceptance Criteria                                                                                                                  |
-| :------: | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `* * *`  | Applicant    | As an applicant, I want to create and verify my account using email and password, so that my applications and profile remain securely private to me.                          | Enforces password complexity; requires email link verification before application access; public signup creates Applicant accounts only.                    |
-| `* * *`  | Applicant    | As an authenticated applicant, I want to complete my required profile details (name and international phone number), so that future applications can be accurately contacted. | Directs incomplete profiles strictly to profile onboarding; gates application and vacancy apply actions until profile fields are saved.                     |
-|  `* *`   | Applicant    | As an applicant, I want to store my education, work experience, portfolio URL, and a default PDF résumé in my profile, so that I can reuse them across multiple applications. | Profile persists optional background fields and private PDF; validates telephone calling code and national number syntax via international phone standards. |
-|  `* *`   | User         | As a registered user, I want to recover my password via email verification, so that I can regain account access without compromising my role.                                 | Password recovery link verifies identity; password update preserves existing account role and does not alter submitted applications.                        |
+| Priority | Persona Role | User Story Text                                                                                                                                                               | Business Rationale and Acceptance Criteria                                                                                                                        |
+| :------: | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | Applicant    | As an applicant, I want to create and verify my account using email and password, so that my applications and profile remain securely private to me.                          | Enforces password length constraint (8–72 characters); requires email link verification before application access; public signup creates Applicant accounts only. |
+| `* * *`  | Applicant    | As an authenticated applicant, I want to complete my required profile details (name and international phone number), so that future applications can be accurately contacted. | Directs incomplete profiles strictly to profile onboarding; gates application and vacancy apply actions until profile fields are saved.                           |
+|  `* *`   | Applicant    | As an applicant, I want to store my education, work experience, portfolio URL, and a default PDF résumé in my profile, so that I can reuse them across multiple applications. | Profile persists optional background fields and private PDF; validates telephone calling code and 7–15-digit international format.                                |
+|  `* *`   | User         | As a registered user, I want to recover my password via email verification, so that I can regain account access without compromising my role.                                 | Password recovery link verifies identity; password update preserves existing account role and does not alter submitted applications.                              |
 
 #### 3.4.2 Job Discovery, Search and Category Filtering Stories
 
@@ -199,7 +199,7 @@ Priorities reflect product necessity:
 - **Actor**: Unauthenticated Job Seeker
 - **Preconditions**: User has an accessible email address.
 - **Main Success Scenario**:
-  1. User accesses sign-up page, enters email address, password (minimum complexity requirements), and password confirmation.
+  1. User accesses sign-up page, enters email address, password (8–72 characters length constraint), and password confirmation.
   2. System validates input, creates pending Auth record, and dispatches verification link.
   3. User opens verification link in browser on the requesting host.
   4. System verifies email, establishes authenticated session with `Applicant` role, and redirects to **My profile**.
@@ -221,7 +221,7 @@ Priorities reflect product necessity:
   1. Applicant navigates to **My profile**.
   2. Applicant edits telephone calling code, national digits, portfolio URL, education, or work experience.
   3. Applicant selects **Save profile**.
-  4. System validates phone number format according to international telephony standards, updates profile record, and displays success notification.
+  4. System validates phone number format as a known calling code plus a 7–15-digit international format, updates profile record, and displays success notification.
 - **Extensions**:
   - 2a. Telephone number contains invalid characters or combined calling code and national digits total outside 7–15 digits.
     - System rejects update and displays field-level formatting instructions requiring a valid E.164-compatible phone number (7–15 digits).
@@ -409,7 +409,7 @@ Feature: Applicant Account Verification and Required Profile Onboarding
 
   Scenario: Applicant Signup and Verification Email Dispatch
     Given a visitor enters an unregistered email "candidate@example.com"
-    And enters matching passwords satisfying complexity rules
+    And enters matching passwords satisfying the 8–72 characters length constraint
     When the visitor submits the account creation form
     Then a new unverified applicant account is initialized
     And a verification email containing a secure callback link is dispatched
@@ -534,7 +534,7 @@ Feature: Private PDF Résumé Upload and Sandboxed Structural Validation
   Scenario: Successful PDF Attachment Upload
     Given an applicant selects a valid PDF file within 1 MiB size limit
     When the applicant selects "Upload résumé"
-    Then the server delegates parsing to an isolated worker process
+    Then the server delegates parsing to a bounded worker thread
     And the worker verifies PDF structure without executing embedded code
     And the file is uploaded to the private storage bucket
     And a secure reference is attached to the application record
@@ -664,7 +664,7 @@ Feature: HR Grounded Advisory AI Application Summary
    - Action controls provide instant visual feedback (e.g. pending labels and disabled duplicate submission states) to prevent repeated user requests during network transit.
 2. **Security and Access Control**:
    - Supabase Auth manages cryptographically hashed credentials; role authorization is enforced strictly via PostgreSQL Row-Level Security (RLS) policies and server-side route guards.
-   - Résumé PDF parsing executes in an isolated Node worker process with constrained memory heap limits and strict execution deadlines, mitigating parser-level vulnerabilities.
+   - Résumé PDF parsing executes in a bounded Node worker thread with constrained memory heap limits and strict execution deadlines, mitigating parser-level vulnerabilities.
    - All third-party AI provider credentials remain exclusively server-side; API endpoints validate session authorization prior to dispatching requests.
 3. **Data Integrity and Auditability**:
    - Applications execute snapshot freezing upon submission: applicant contact details, background, cover letter, and résumé references are permanently recorded as submitted snapshots.
@@ -672,7 +672,7 @@ Feature: HR Grounded Advisory AI Application Summary
    - HR notes are add-only and immutable; status transitions maintain complete actor and timestamp logs.
 4. **Ergonomics and Usability**:
    - Responsive layouts accommodate mobile, tablet, and desktop viewports with accessible color contrast and readable typography.
-   - Contextual error messages guide users through input correction (e.g. phone formatting, PDF file type, or password complexity) without clearing unsaved form fields.
+   - Contextual error messages guide users through input correction (e.g. phone formatting, PDF file type, or password length) without clearing unsaved form fields.
 
 ## 4. Specifications and implementation map
 
@@ -924,14 +924,9 @@ sequenceDiagram
     Client->>Action: POST submission payload
     Action->>Guard: Verify Applicant session and profile readiness
     Guard-->>Action: Authorized Complete Applicant
-    Action->>DB: BEGIN TRANSACTION
-    Action->>DB: Lock application draft row (SELECT FOR UPDATE)
-    Action->>DB: Verify target job is Published and active
-    Action->>DB: Verify at most one active application (partial unique index)
-    Action->>DB: Write frozen candidate snapshots and cover letter
-    Action->>DB: UPDATE status = 'Submitted', submitted_at = NOW()
-    Action->>DB: COMMIT
-    DB-->>Action: Submission committed successfully
+    Action->>DB: Execute submit_application_details_v3 RPC
+    Note over DB: Database-internal transaction: acquires advisory transaction lock, locks job row (FOR UPDATE), checks publication status, locks existing application row (FOR UPDATE), checks revision, freezes candidate snapshots, updates submission_state = 'submitted' and submitted_at = NOW()
+    DB-->>Action: Returns application ID on committed success
     Action-->>Client: Success response (application immutable)
     Client->>Applicant: Render submitted read-only confirmation
 ```
@@ -942,10 +937,10 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Applicant
-    participant UI as Résumé Upload Component
-    participant Route as Server Upload Route (/api/applications/[id]/resume or /api/profile/resume)
+    participant UI as Résumé Upload Component (ResumePanel)
+    participant Route as Server Upload Route (/api/jobs/[id]/resume, /api/applications/[id]/resume, or /api/profile/resume)
     participant Worker as Isolated Node Worker Thread
-    participant Storage as Supabase Private Storage Bucket
+    participant Storage as Supabase Private Storage (application-resumes or profile-resumes bucket)
     participant DB as PostgreSQL Database
 
     Applicant->>UI: Selects PDF file and clicks "Upload résumé"
@@ -959,12 +954,21 @@ sequenceDiagram
         Route-->>UI: Rejection response and typed form text preserved
     else PDF is structurally valid
         Worker-->>Route: Validation passed (page count, safe metadata)
-        Route->>DB: Reserve pending file tracking record (prepare_application_resume)
-        DB-->>Route: Pending tracking record created
-        Route->>Storage: Store file bytes in private bucket (application-resumes)
-        Storage-->>Route: Storage write confirmed
-        Route->>DB: Finalize tracking record to ready (finalize_application_resume)
-        DB-->>Route: File finalized and linked to application
+        alt Application or Job-scoped upload (/api/jobs/[id]/resume or /api/applications/[id]/resume)
+            Route->>DB: Reserve pending application tracking record (prepare_application_resume)
+            DB-->>Route: Pending tracking record created
+            Route->>Storage: Store file bytes in private "application-resumes" bucket
+            Storage-->>Route: Storage write confirmed
+            Route->>DB: Finalize tracking record to ready (finalize_application_resume)
+            DB-->>Route: File finalized and linked to application draft
+        else Profile onboarding upload (/api/profile/resume)
+            Route->>DB: Reserve pending profile tracking record (prepare_profile_resume)
+            DB-->>Route: Pending tracking record created
+            Route->>Storage: Store file bytes in private "profile-resumes" bucket
+            Storage-->>Route: Storage write confirmed
+            Route->>DB: Finalize tracking record to ready (finalize_profile_resume)
+            DB-->>Route: File finalized and linked to profile
+        end
         Route-->>UI: Secure download URI reference
         UI->>Applicant: Display upload success and attachment badge
     end
@@ -987,16 +991,22 @@ sequenceDiagram
     API->>Quota: Check and reserve rolling rate limit (reserve_ai_invocation)
     alt Rate limit reached or unready
         Quota-->>API: Quota rejected / 429 Retry-After
-        API-->>UI: Rate limit or service unavailable error
+        API-->>UI: Rate limit or service unavailable error (429 / 503)
     else Quota approved
         Quota-->>API: Reservation approved (invocationId)
         API->>API: Assemble system prompt with job title and requirements (exclude private files)
         API->>SoCLaaS: Dispatch completion request (20s timeout, max tokens)
-        alt Provider error or schema validation failure
-            SoCLaaS-->>API: Error response or invalid output schema
+        alt Provider timeout or error
+            SoCLaaS-->>API: Upstream timeout or provider error
             API->>Quota: Finalize invocation as failed (finalize_ai_invocation)
             Quota-->>API: Failure recorded
-            API-->>UI: Return advisory error response (503 / 429)
+            API-->>UI: Service unavailable error (503 Service Unavailable)
+        else Output fails schema validation
+            SoCLaaS-->>API: Completion response text
+            API->>API: Parse schema (fails applicantDraftResponseSchema)
+            API->>Quota: Finalize invocation as failed (finalize_ai_invocation)
+            Quota-->>API: Failure recorded
+            API-->>UI: Validation failure error (502 Bad Gateway)
         else Provider success and valid output schema
             SoCLaaS-->>API: Completion response text
             API->>API: Validate output schema and enforce token limits
@@ -1167,15 +1177,14 @@ flowchart TD
 
 The automated test suite exercises all layers of the application without requiring production credentials or live external provider calls:
 
-| Layer / Test Suite                   | Target Scope                         | Verified Invariants and Scenarios                                                                                                                                                                                                        |
-| ------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Domain & Unit Tests**              | `tests/unit/` (Vitest)               | Input validation schemas (Zod), international telephony normalization (`libphonenumber-js`), job search phrase sanitization and matching, PDF worker error code mapping, and UI hook state management.                                   |
-| **Database & Security Tests**        | `supabase/tests/database/` (pgTAP)   | PostgreSQL Row-Level Security (RLS) enforcement across all tables, authenticated role separation (Applicant vs HR), private draft invisibility, immutable submitted snapshot constraints, and partial unique indexing.                   |
-| **Integration & Concurrency Suites** | `tests/integration/` (Node / Docker) | Lock ordering on application save/submit, rolling window AI quota exhaustion, concurrent withdrawal handling, first-upload retry coordination, and profile résumé replication isolation.                                                 |
-| **System & Browser Journeys**        | `tests/e2e/` (Playwright)            | Critical user journeys: account signup, verification callbacks, profile onboarding gates, job listing search/filter, draft editing, PDF résumé upload/replace, application submission, HR review, notes, status changes, and withdrawal. |
-| **AI Contract & Adversarial Evals**  | `test:ai-evals` (Vitest)             | Offline contract verification: prompt construction, system boundary containment, exclusion of private files, strict schema adherence, and graceful fallback on provider errors without live quota consumption.                           |
-| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                    |
-| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                    |
+| Layer / Test Suite                   | Target Scope                         | Verified Invariants and Scenarios                                                                                                                                                                                                          |
+| ------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Domain & Unit Tests**              | `tests/unit/` (Vitest)               | Input validation schemas (Zod), international telephony format validation (known calling code and 7–15-digit E.164-like format), job search phrase sanitization and matching, PDF worker error code mapping, and UI hook state management. |
+| **Database & Security Tests**        | `supabase/tests/database/` (pgTAP)   | PostgreSQL Row-Level Security (RLS) enforcement across all tables, authenticated role separation (Applicant vs HR), private draft invisibility, immutable submitted snapshot constraints, and partial unique indexing.                     |
+| **Integration & Concurrency Suites** | `tests/integration/` (Node / Docker) | Lock ordering on application save/submit, rolling window AI quota exhaustion, concurrent withdrawal handling, first-upload retry coordination, and profile résumé replication isolation.                                                   |
+| **System & Browser Journeys**        | `tests/e2e/` (Playwright)            | Critical user journeys: account signup, verification callbacks, profile onboarding gates, job listing search/filter, draft editing, PDF résumé upload/replace, application submission, HR review, notes, status changes, and withdrawal.   |
+| **AI Contract & Adversarial Evals**  | `test:ai-evals` (Vitest)             | Offline contract verification: prompt construction, system boundary containment, exclusion of private files, strict schema adherence, and graceful fallback on provider errors without live quota consumption.                             |
+| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate automation configuration checks (`.github/renovate.json`), and CI helper functions without live network credentials.                                       |
 
 ### 7.3 High-Risk Coverage Matrix
 
@@ -1186,7 +1195,7 @@ The automated test suite exercises all layers of the application without requiri
 | **Untrusted / Malicious PDF Uploads**     | Malformed PDF triggering parser crashes, memory exhaustion, or code execution.                  | Validated in an isolated Node worker thread (`node:worker_threads`) with strict execution deadlines (5s) and capped V8 memory limits (64 MiB old / 16 MiB young); verified via unit tests rejecting password-protected or corrupt files with safe error codes.                    |
 | **Prompt Injection / Untrusted Content**  | Malicious text in job listings or notes attempting to manipulate AI summary output.             | Evaluated via offline adversarial evals (`test:ai-evals`); strict output schema parsing; client-side escaping; zero automated mutation authority.                                                                                                                                 |
 | **Accidental Data Loss on Withdrawal**    | Withdrawing an application destroying candidate records or preventing subsequent reapplication. | Verified via pgTAP database tests (`supabase/tests/database/reapply_after_withdrawal.test.sql`) asserting partial unique index behavior and reapplication; E2E browser journeys verify withdrawal transition, immutable snapshot retention, and post-withdrawal lock enforcement. |
-| **Telephony Normalization Inaccuracies**  | Incompatible calling codes or malformed national phone numbers preventing candidate contact.    | Verified via comprehensive unit tests exercising international calling code parsing and validation against standard telephone numbering plans.                                                                                                                                    |
+| **Telephony Format Inaccuracies**         | Incompatible calling codes or malformed national phone numbers preventing candidate contact.    | Verified via unit tests (`tests/unit/`) exercising country calling code resolution and international phone format validation (known calling code plus 7–15-digit shape).                                                                                                          |
 
 ### 7.4 Quality Verification Gates
 

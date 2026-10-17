@@ -32,13 +32,18 @@ Closes #103
    - Added 8 comprehensive Manual Testing Walkthrough Scenarios and the Hosted Smoke Testing Protocol.
    - Added Developer Troubleshooting and FAQ table.
 5. **PR Review Remediation**:
-   - Systematically addressed all 33 review comments on PR #104.
+   - Systematically addressed all 33 initial and 8 follow-up review comments on PR #104.
    - Modeled résumé tracking histories as zero-to-many with `resume_id` current pointers in ERD.
    - Documented `Scheduled` as a derived operational display label for `jobs.status = 'published'` with future opening times.
-   - Documented the raw binary PDF body upload protocol (`Content-Type: application/pdf`, `x-resume-*` headers).
-   - Documented mandatory `finalize_ai_invocation` success and failure branches before API response in AI draft sequence.
+   - Documented all three raw binary PDF body upload paths (`/api/jobs/[id]/resume`, `/api/applications/[id]/resume`, `/api/profile/resume`) with respective storage buckets (`application-resumes` vs `profile-resumes`) and RPCs.
+   - Clarified bounded worker thread boundary (`node:worker_threads`) across Gherkin scenarios and non-functional specifications.
+   - Described password rules strictly as 8–72 characters length constraints without overstating complexity rules.
+   - Described telephony validation accurately as known calling codes plus 7–15-digit international formats.
+   - Represented application submission as one database-internal transactional RPC (`submit_application_details_v3`) establishing advisory-lock -> job-row -> application-row lock order.
+   - Split AI draft sequence failure paths into 503 (provider error/timeout) and 502 (schema validation failure) with mandatory `finalize_ai_invocation` audit.
+   - Removed Dependabot claim and duplicate rows from CI utility test inventory (`tests/ci/`).
+   - Kept archive README index entry pending until separate student acceptance decision is recorded.
    - Routed note creation through the protected security-definer RPC `append_hr_application_note` in HR review sequence and decisions.
-   - Documented always-run CI utility tests (`tests/ci/`) in test inventory and quality verification gates flowchart.
    - Verified that all use cases, diagrams, endpoints, and schema attributes reflect exact implementation in code, eliminating documentation drift.
 
 ## Verification
