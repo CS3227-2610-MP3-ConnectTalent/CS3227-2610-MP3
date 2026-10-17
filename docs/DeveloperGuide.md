@@ -1064,7 +1064,7 @@ stateDiagram-v2
     Withdrawn --> [*] : Retained immutable historical record
 ```
 
-*Note: Withdrawn applications are terminal historical records. Reapplying on an active job creates a separate application record rather than reopening the withdrawn record.*
+_Note: Withdrawn applications are terminal historical records. Reapplying on an active job creates a separate application record rather than reopening the withdrawn record._
 
 ### 5.7 Architectural and Design Decisions
 
@@ -1175,7 +1175,7 @@ The automated test suite exercises all layers of the application without requiri
 | **System & Browser Journeys**        | `tests/e2e/` (Playwright)            | Critical user journeys: account signup, verification callbacks, profile onboarding gates, job listing search/filter, draft editing, PDF résumé upload/replace, application submission, HR review, notes, status changes, and withdrawal. |
 | **AI Contract & Adversarial Evals**  | `test:ai-evals` (Vitest)             | Offline contract verification: prompt construction, system boundary containment, exclusion of private files, strict schema adherence, and graceful fallback on provider errors without live quota consumption.                           |
 | **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                    |
-| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                     |
+| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                    |
 
 ### 7.3 High-Risk Coverage Matrix
 
