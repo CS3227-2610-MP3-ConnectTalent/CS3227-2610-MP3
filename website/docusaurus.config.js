@@ -111,7 +111,7 @@ const config = {
     },
     tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
     prism: {
-      additionalLanguages: ["bash", "json", "powershell", "sql"],
+      additionalLanguages: ["bash", "gherkin", "json", "powershell", "sql"],
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },

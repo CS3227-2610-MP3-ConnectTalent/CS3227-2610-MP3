@@ -6,6 +6,7 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-17 Guide refinement and developer guide expansion](2026-10-17-guide-refinement/record.md): PR #104 is open with student acceptance decision pending; comprehensive documentation refinement completed across User Guide and Developer Guide, enabling Docusaurus Gherkin syntax highlighting, adding Mermaid ERD/sequences/state diagrams, 12 formal use cases & Gherkin specs, testing strategy, and remediating PR code review comments. Documentation-only, canonical sync N/A. [Dated summary](../../logs/2026-10-17-guide-refinement-pr.md). [PR #104](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/104).
 - [2026-10-17 John's Reflections](2026-10-17-john-reflections/record.md): John accepted #101 after comprehensive documentation and verification across AI Security, SDD, and Multi-Agent SE. 46 valid markdown links, ESLint passed; canonical sync N/A. [Summary](../../logs/2026-10-17-john-reflections.md).
 - [2026-10-16 HR application search, filters, sorting, and pagination](2026-10-16-hr-application-filters/record.md): John accepted #97 after independent review and quality gate verification. APP-010 synced to canonical v1.17 before archive. [Closeout summary](../../logs/2026-10-16-hr-application-filters.md). [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99).
 

@@ -38,7 +38,7 @@ Do not overwrite an existing `.env.local`; copy the example only for first setup
 pnpm dev
 ```
 
-Open the printed URL, usually `http://localhost:3000`. Local Supabase API is `http://127.0.0.1:54321`, Studio `http://127.0.0.1:54323`, Mailpit `http://127.0.0.1:54324`. Mailpit captures local verification/recovery emails instead of sending them to Gmail. Use the same browser/host when requesting and opening Auth links.
+Open the printed URL, usually `http://localhost:3000`. Local accounts do not automatically work on the hosted website; Local, Development and Production databases maintain separate accounts. Local Supabase API is `http://127.0.0.1:54321`, Studio `http://127.0.0.1:54323`, Mailpit `http://127.0.0.1:54324`. Mailpit captures local verification and password recovery emails on port 54324 instead of sending them to Gmail. Recovery preserves your role; check Mailpit when testing recovery locally. Use the same browser/host when requesting and opening Auth links. Verification status note (16 October 2026): instructions are checked against development source and accepted specifications; authenticated hosted workflows remain unverified until checked on the deployed version.
 
 For existing local data, apply reviewed pending migrations with `pnpm exec supabase migration up --local`. If merged migrations have older timestamps, inspect history before using `--include-all`. `pnpm db:reset` deliberately erases/recreates the local database and reapplies migrations/seed; it is not the default fix for an error. Stop with `pnpm db:stop`.
 
@@ -108,10 +108,571 @@ One employer uses this deployment to advertise multiple jobs and review applicat
 - Verified Applicant signup, sign-in/out, password recovery and required private profile onboarding.
 - New-form profile autofill; private drafts; required submitted contacts and immutable letter/background/file snapshots.
 - Optional private profile/application PDF files, explicit independent reuse, upload-before-save and lost-response recovery.
-- Submitted-only HR review, private add-only notes, human status changes, retained terminal owner withdrawal.
+- Submitted-only HR review with candidate search, job/status/withdrawal filters, sorting and pagination; private add-only notes, human status changes, and retained terminal owner withdrawal.
 - Optional Applicant cover-letter drafting and advisory HR summaries through server-only SoCLaaS.
 
 Non-goals: multi-tenancy, public HR signup, job reopening/deletion, submitted-content editing, withdrawal undo, PDF extraction/AI résumé processing, automatic hiring or AI status writes. Reapplication is supported through a new record while the job is active; it does not restore or alter the withdrawn submission. No application-data erasure workflow is implemented.
+
+### 3.3 Target User Profile and Personas
+
+ConnectTalent is built for single-organization talent acquisition, serving two primary operational user roles alongside administrative personnel:
+
+| Persona Role                         | Operational Responsibilities                                                                                                                                                                                                                                              | Technical Profile                                                                                                            | Key Requirements and Ergonomic Needs                                                                                                                                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Guest / Job Seeker**               | Browse published vacancies, search across titles and job requirements, filter by team categories.                                                                                                                                                                         | General public user; accesses via desktop or mobile web browsers.                                                            | Immediate access to published openings without forced authentication; fast phrase search; responsive filtering.                                                                                                    |
+| **Registered Applicant**             | Complete profile details, upload private PDF résumé, draft job applications, generate AI-assisted cover letter drafts, submit immutable applications, track review status, and withdraw when necessary.                                                                   | Comfortable with modern web applications; demands confidentiality of contact details and draft materials.                    | Pre-filled application forms from profile; private drafts unreadable by HR; clear visual confirmation of submission; explicit preview before adopting AI suggestions; clear status tracking.                       |
+| **HR Specialist / Reviewer**         | Author job postings, configure optional scheduled opening/closing windows, publish and close vacancies, inspect submitted applications, download applicant résumés, record attributed private notes, update candidate review statuses, and request advisory AI summaries. | Human resources professional; demands efficient batch review, clear audit trails, and distraction-free candidate inspection. | Fast navigation across candidate submissions; strict separation from unsubmitted drafts; immutable applicant snapshots; add-only private notes invisible to applicants; AI-assisted summary with source grounding. |
+| **System Administrator / Evaluator** | Provision dedicated HR roles via database administrative queries, configure deployment environment secrets, oversee AI rate limits and audit logs, and conduct verification runs.                                                                                         | Experienced with cloud operations, PostgreSQL access, and deployment workflows.                                              | Strict server-side and database-level authorization (RLS); clear separation between synthetic local seeds and production credentials; least-privilege administrative access.                                       |
+
+### 3.4 Prioritized User Stories
+
+Priorities reflect product necessity:
+
+- `* * *` : Essential / High Priority (Core MVP)
+- `* *` : Important / Medium Priority
+- `*` : Desirable / Low Priority
+
+#### 3.4.1 Account, Identity and Profile Onboarding Stories
+
+| Priority | Persona Role | User Story Text                                                                                                                                                               | Business Rationale and Acceptance Criteria                                                                                                                        |
+| :------: | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | Applicant    | As an applicant, I want to create and verify my account using email and password, so that my applications and profile remain securely private to me.                          | Enforces password length constraint (8–72 characters); requires email link verification before application access; public signup creates Applicant accounts only. |
+| `* * *`  | Applicant    | As an authenticated applicant, I want to complete my required profile details (name and international phone number), so that future applications can be accurately contacted. | Directs incomplete profiles strictly to profile onboarding; gates application and vacancy apply actions until profile fields are saved.                           |
+|  `* *`   | Applicant    | As an applicant, I want to store my education, work experience, portfolio URL, and a default PDF résumé in my profile, so that I can reuse them across multiple applications. | Profile persists optional background fields and private PDF; validates telephone calling code and 7–15-digit international format.                                |
+|  `* *`   | User         | As a registered user, I want to recover my password via email verification, so that I can regain account access without compromising my role.                                 | Password recovery link verifies identity; password update preserves existing account role and does not alter submitted applications.                              |
+
+#### 3.4.2 Job Discovery, Search and Category Filtering Stories
+
+| Priority | Persona Role      | User Story Text                                                                                                                                                        | Business Rationale and Acceptance Criteria                                                                                                            |
+| :------: | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | Guest / Applicant | As a visitor, I want to browse currently open vacancies and filter by department category, so that I can discover relevant career opportunities.                       | Only published jobs within their active scheduling window are visible; category filter groups vacancies cleanly.                                      |
+| `* * *`  | Guest / Applicant | As a visitor, I want to search open roles using keyword phrases across titles, teams, descriptions, and requirements, so that I can quickly locate specific positions. | Case-insensitive literal phrase matching; server-side sanitization; debounced input updates URL search params for bookmarking and history navigation. |
+|  `* *`   | Guest / Applicant | As a visitor, I want clear feedback while search queries or navigation actions are loading, so that I know the system is actively retrieving results.                  | Action buttons display pending feedback (such as searching indicators) and disable duplicate submissions during transit.                              |
+
+#### 3.4.3 Job Lifecycle and HR Management Stories
+
+| Priority | Persona Role | User Story Text                                                                                                                                                        | Business Rationale and Acceptance Criteria                                                                                                      |
+| :------: | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want to create draft job listings with title, team, category, description, and requirements, so that openings can be prepared before publication. | Only authenticated HR users can access job management; drafts remain hidden from public listings and search.                                    |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want to publish draft vacancies and optionally schedule future opening and closing times, so that application windows are managed automatically.  | Scheduled jobs become visible only once the opening time arrives; past closing time, public view and submissions are automatically disabled.    |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want to manually close an active job, so that applications cease immediately while retaining historical records.                                  | Manual closure immediately halts new drafts and submissions; existing submitted records remain readable to HR and applicants.                   |
+|  `* *`   | HR Reviewer  | As an HR reviewer, I want to revert a scheduled job back to draft status before it opens, so that content or scheduling details can be revised.                        | Reverting is allowed only before the opening time; once open, published listing content is immutable to preserve candidate application context. |
+
+#### 3.4.4 Application Drafting, Résumé and Submission Stories
+
+| Priority | Persona Role | User Story Text                                                                                                                                               | Business Rationale and Acceptance Criteria                                                                                                                |
+| :------: | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | Applicant    | As an applicant, I want new application forms to prefill my saved profile data, so that I can apply efficiently without retyping common information.          | Automatically populates contact details, background, and gives option to attach profile résumé; existing drafts take precedence over later profile edits. |
+| `* * *`  | Applicant    | As an applicant, I want to save private draft applications, so that I can complete my submission over multiple sessions without HR viewing incomplete drafts. | Private drafts are accessible only to the applicant; server enforces row-level security so HR cannot inspect unsubmitted drafts.                          |
+| `* * *`  | Applicant    | As an applicant, I want to upload a private PDF résumé directly to my application or profile, so that reviewers can inspect my full credentials.              | Validates PDF structure and byte limits in an isolated sandboxed worker; rejects password-protected or corrupt files; stores in private buckets.          |
+| `* * *`  | Applicant    | As an applicant, I want to submit my application with mandatory contact details and cover letter, so that HR can evaluate my candidacy.                       | Submission freezes candidate details, contact snapshots, and attached résumé; prevents post-submission editing while job is open.                         |
+|  `* *`   | Applicant    | As an applicant, I want upload retry recovery if network interruption occurs during résumé upload, so that I do not lose typed cover letter content.          | Separates file upload state from form text saving; allows retrying failed upload without clearing typed application fields.                               |
+
+#### 3.4.5 Application Withdrawal and Reapplication Stories
+
+| Priority | Persona Role | User Story Text                                                                                                                                              | Business Rationale and Acceptance Criteria                                                                                                    |
+| :------: | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | Applicant    | As an applicant, I want to withdraw a submitted application if my circumstances change, so that HR knows I am no longer actively pursuing the role.          | Withdrawal requires confirmation; marks the submission permanently withdrawn; retains immutable audit history for both applicant and HR.      |
+|  `* *`   | Applicant    | As an applicant, I want to submit a new application for a job I previously withdrew from, provided the role remains open, so that I can reapply if eligible. | Database enforces at most one active application per applicant per job via partial unique index; permits new draft creation after withdrawal. |
+
+#### 3.4.6 HR Application Review, Attributed Notes and Status Stories
+
+| Priority | Persona Role | User Story Text                                                                                                                                                            | Business Rationale and Acceptance Criteria                                                                                              |
+| :------: | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want to view all submitted applications and their review statuses on a central dashboard, so that candidate pipelines can be tracked.                 | Dashboard displays metrics across jobs and review states; application review table lists submitted candidates with immutable snapshots. |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want to add private, attributed notes to an application, so that internal hiring deliberations are documented without exposing them to the applicant. | Notes are append-only, timestamped, attributed to the authoring HR reviewer, and protected by RLS against applicant reads.              |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want to transition application review status between In Review, Shortlisted, and Rejected, so that candidates are categorized accurately.             | Transitions are recorded in status history; applicant can view updated status on their application detail; Submitted is initial-only.   |
+|  `* *`   | HR Reviewer  | As an HR reviewer, I want withdrawn applications to remain readable as historical records while blocking new notes or status changes, so that records are preserved.       | Freezes review actions on withdrawn applications; maintains view access for candidate history and audit compliance.                     |
+
+#### 3.4.7 Advisory AI Drafting and Grounded Summary Stories
+
+| Priority | Persona Role | User Story Text                                                                                                                                                           | Business Rationale and Acceptance Criteria                                                                                                        |
+| :------: | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `* * *`  | Applicant    | As an applicant, I want optional AI assistance to generate a draft cover letter from my supplied experience notes, so that I have a structured starting point.            | Requires explicit human review; renders suggestion in separate preview; existing letter remains untouched until user chooses to adopt suggestion. |
+| `* * *`  | HR Reviewer  | As an HR reviewer, I want an optional AI summary of candidate submissions with grounded evidence excerpts, so that I can identify strengths and follow-up topics quickly. | Server-only execution; strictly advisory with no mutation authority; returns grounded source excerpts and potential follow-up questions.          |
+|  `* *`   | System Admin | As an administrator, I want durable rate limits and token caps enforced on AI operations, so that third-party provider quotas and budgets are protected.                  | Enforces per-user and deployment-wide rolling window request limits; validates inputs and outputs against strict schemas.                         |
+
+### 3.5 Formal Use Cases
+
+#### UC01: Verified Applicant Registration and Onboarding Gate
+
+- **Actor**: Unauthenticated Job Seeker
+- **Preconditions**: User has an accessible email address.
+- **Main Success Scenario**:
+  1. User accesses sign-up page, enters email address, password (8–72 characters length constraint), and password confirmation.
+  2. System validates input, creates pending Auth record, and dispatches verification link.
+  3. User opens verification link in browser on the requesting host.
+  4. System verifies email, establishes authenticated session with `Applicant` role, and redirects to **My profile**.
+  5. User is restricted to **My profile** until mandatory profile fields (full name and formatted international phone number) are entered and saved.
+  6. Upon saving, system persists the validated fields, making the derived profile readiness check pass and unlocking access to Careers and application workflows.
+- **Extensions**:
+  - 1a. Password does not meet length requirements or confirmation does not match.
+    - System keeps entered email, displays clear inline validation guidance, and keeps form open.
+  - 3a. Verification link expired or opened in inconsistent context.
+    - System redirects to sign-in with a notice advising the user to check their details and verify their email before trying again.
+  - 5a. User attempts to navigate directly to job application routes before completing profile.
+    - Server guard intercepts request and redirects back to **My profile** with an onboarding prompt.
+
+#### UC02: Applicant Profile Maintenance and Telephony Normalization
+
+- **Actor**: Authenticated Complete Applicant
+- **Preconditions**: Applicant is signed in with a completed profile.
+- **Main Success Scenario**:
+  1. Applicant navigates to **My profile**.
+  2. Applicant edits telephone calling code, national digits, portfolio URL, education, or work experience.
+  3. Applicant selects **Save profile**.
+  4. System validates phone number format as a known calling code plus a 7–15-digit international format, updates profile record, and displays success notification.
+- **Extensions**:
+  - 2a. Telephone number contains invalid characters or combined calling code and national digits total outside 7–15 digits.
+    - System rejects update and displays field-level formatting instructions requiring a valid E.164-compatible phone number (7–15 digits).
+  - 2b. Portfolio URL contains embedded credentials or invalid scheme.
+    - System rejects update and prompts for valid HTTP(S) URL.
+
+#### UC03: Public Job Discovery, Category Filtering and Keyword Search
+
+- **Actor**: Guest or Authenticated Applicant
+- **Preconditions**: One or more jobs are in `Published` status within their active schedule window.
+- **Main Success Scenario**:
+  1. Visitor opens **Careers** portal.
+  2. System displays active published vacancies with title, team, category, and description.
+  3. Visitor selects a category filter (e.g. Engineering, Sales, Legal, HR, Other).
+  4. System refreshes list to display vacancies matching the selected category.
+  5. Visitor enters a keyword phrase into the search input.
+  6. System debounces input, normalizes whitespace, sanitizes search terms, and updates URL parameters.
+  7. Results matching the phrase across title, team, description, or requirements are displayed.
+- **Extensions**:
+  - 2a. Job is in `Draft` status or scheduled with a future opening time.
+    - System excludes the job from public queries; direct URL requests return not found.
+  - 7a. No open jobs match the combined search and category criteria.
+    - System renders an informative empty state suggesting query adjustments without throwing errors.
+
+#### UC04: HR Job Draft Creation, Scheduling and Publication
+
+- **Actor**: Authenticated HR Reviewer
+- **Preconditions**: User holds the verified `hr` role.
+- **Main Success Scenario**:
+  1. HR reviewer navigates to **Manage jobs** and selects **Create draft**.
+  2. HR enters title, team, category, description, and requirements.
+  3. HR optionally specifies scheduled opening and scheduled closing timestamps.
+  4. HR saves the draft; system validates required fields and persists job with status `Draft`.
+  5. HR reviews draft and selects **Publish job**.
+  6. System persists job status as `published`; if scheduled opening is in the future, the HR interface derives and displays the operational label `Scheduled` (public listings remain hidden until `opens_at`), and if opening is empty or in the past, the vacancy becomes immediately visible in public search.
+- **Extensions**:
+  - 3a. Scheduled closing time is chronologically earlier than or equal to scheduled opening time.
+    - System rejects save with schedule validation warning.
+  - 5a. HR chooses to revert a job with operational label `Scheduled` before its opening time.
+    - System returns stored job status to `draft`, allowing further content revisions.
+  - 6a. HR selects **Close job** on an active listing.
+    - System sets status to `Closed`; public listings and submissions cease immediately while historical applications remain accessible.
+
+#### UC05: Application Draft Creation, Profile Autofill and Persistence
+
+- **Actor**: Authenticated Complete Applicant
+- **Preconditions**: Job is currently `Published` and active; applicant has no active application for this job.
+- **Main Success Scenario**:
+  1. Applicant navigates to an open vacancy and chooses **Apply for this role**.
+  2. System checks profile readiness and verifies no active application exists.
+  3. System initializes an in-memory application form, prefilling name, email, phone, and optional background from saved profile without creating a database row.
+  4. Applicant enters or edits cover letter text and selects **Save draft**.
+  5. System validates draft ownership and persists a private draft application record. HR cannot view the draft.
+- **Extensions**:
+  - 1a. Applicant already has an active submitted application for the job.
+    - System displays existing application detail view and prevents creating duplicate draft.
+  - 4a. Applicant navigates away before saving.
+    - Form remains unpersisted; unsaved typed text is discarded without warning upon navigation or refresh.
+
+#### UC06: Private PDF Résumé Upload and Structural Validation
+
+- **Actor**: Authenticated Applicant
+- **Preconditions**: Application draft exists or profile edit view is open.
+- **Main Success Scenario**:
+  1. Applicant selects a PDF file and clicks **Upload résumé**.
+  2. Browser submits raw binary PDF body with `x-resume-intent: upload` and `x-resume-filename` headers to the secure upload endpoint (`/api/jobs/[id]/resume`, `/api/applications/[id]/resume`, or `/api/profile/resume`).
+  3. Server inspects file size (maximum 1 MiB) and passes buffer to an isolated Node worker thread (`node:worker_threads`).
+  4. Worker executes PDF structural validation via PDF.js under strict memory and execution deadlines without rendering or executing embedded scripts.
+  5. File passes structural inspection without requiring passwords; server creates a pending tracking record in the database, uploads file bytes to private Storage, and finalizes the tracking record to link the file to the draft.
+  6. UI renders private download link and update controls.
+- **Extensions**:
+  - 3a. File exceeds 1 MiB byte limit.
+    - Server rejects upload with HTTP 413 Payload Too Large; previous attachment is preserved.
+  - 4a. PDF requires a password to open or is structurally unreadable.
+    - Server rejects upload with HTTP 422 Unprocessable Entity; displays guidance that password-protected files are not accepted.
+  - 4b. Worker execution exceeds timeout or worker crashes.
+    - Server terminates worker, returns safe 503/504 error code without exposing internal diagnostics, and preserves typed form content.
+
+#### UC07: Application Submission and Content Snapshot Freezing
+
+- **Actor**: Authenticated Applicant
+- **Preconditions**: Active application draft exists with required fields completed; job remains open and active.
+- **Main Success Scenario**:
+  1. Applicant reviews application details and selects **Submit application**.
+  2. Server executes transactional validation: verifies applicant profile readiness, non-empty cover letter within length limits, and job active status.
+  3. Server takes an immutable snapshot of applicant full name, verified email, formatted phone number, background fields, cover letter, and finalized résumé reference.
+  4. Server atomically updates application status to `Submitted`, records submission timestamp, and invalidates draft state.
+  5. Applicant view updates to read-only submitted detail; application becomes visible in HR review queue.
+- **Extensions**:
+  - 2a. Job reached closing time or was closed by HR before submission commit.
+    - Server rejects submission with notification that the listing is closed; draft text is preserved.
+  - 2b. Mandatory fields (e.g. cover letter or verified phone) are missing.
+    - Form highlights missing fields with validation feedback; status remains draft.
+
+#### UC08: Application Withdrawal and Safe Reapplication
+
+- **Actor**: Authenticated Applicant
+- **Preconditions**: Applicant has an existing `Submitted` application.
+- **Main Success Scenario**:
+  1. Applicant navigates to **My applications** and opens the submitted application.
+  2. Applicant selects **Withdraw application**.
+  3. System presents confirmation dialog explaining that withdrawal is permanent for this record.
+  4. Applicant confirms withdrawal.
+  5. Server marks record status as `Withdrawn`, timestamps `withdrawn_at`, and preserves the frozen snapshot and review history as audit records.
+  6. While the vacancy remains open and active, applicant is permitted to initiate a fresh application for the same role if desired.
+- **Extensions**:
+  - 4a. Applicant chooses **Keep application**.
+    - System cancels dialog and keeps submission active in review.
+  - 6a. Applicant attempts to reapply after the job has closed.
+    - System forbids new draft creation for closed vacancies.
+
+#### UC09: HR Application Review and Attributed Private Notes
+
+- **Actor**: Authenticated HR Reviewer
+- **Preconditions**: One or more submitted applications exist.
+- **Main Success Scenario**:
+  1. HR reviewer navigates to **Application review** and selects an applicant submission.
+  2. System loads immutable candidate snapshot, cover letter, and secure download link for attached résumé.
+  3. Reviewer enters assessment feedback into **Add note** (up to character limit) and submits.
+  4. Server persists note as an add-only record attributed to the reviewer's authenticated user ID with timestamp.
+  5. Note renders in chronological internal notes feed; applicant cannot access or view notes.
+- **Extensions**:
+  - 2a. Application was withdrawn by applicant.
+    - Snapshot and existing notes remain readable as historical records; **Add note** control is disabled.
+  - 3a. Note exceeds maximum allowable character limit.
+    - Validation prevents submission and prompts user to shorten the note.
+
+#### UC10: HR Review Status Progression and Auditing
+
+- **Actor**: Authenticated HR Reviewer
+- **Preconditions**: Submitted application is open in HR review.
+- **Main Success Scenario**:
+  1. HR reviewer reviews candidate credentials and selects a new review status: `In review`, `Shortlisted`, or `Rejected`.
+  2. Server verifies caller holds `hr` role, updates application review status, and inserts an audit entry into status transition history.
+  3. Updated status badge displays immediately in HR interface and becomes visible to the applicant in their application view.
+- **Extensions**:
+  - 1a. Reviewer attempts to transition a withdrawn application.
+    - Server rejects transition; withdrawn state is terminal.
+  - 2a. Concurrent update detected.
+    - Server handles conflict cleanly and prompts reviewer to refresh view.
+
+#### UC11: Applicant AI Cover Letter Drafting with Explicit Preview Adoption
+
+- **Actor**: Authenticated Applicant
+- **Preconditions**: Application draft is open; AI feature is enabled; user is within rolling request quota.
+- **Main Success Scenario**:
+  1. Applicant opens **Draft with AI** panel on the application form.
+  2. Applicant inputs experience notes (up to character limit) describing their background and role interest.
+  3. Applicant selects **Generate draft**.
+  4. Server validates rate quota, constructs scoped prompt with job title, published job requirements, and applicant notes (excluding job description, private profile fields, and files), and dispatches request to SoCLaaS provider.
+  5. Provider returns generated draft adhering to strict token constraints.
+  6. System displays output in a separate **AI draft preview** container; current cover letter remains unchanged.
+  7. Applicant reviews suggestion and chooses **Use this draft** (or **Replace current cover letter**).
+  8. System copies preview text into the active cover letter textarea for manual editing; applicant explicitly saves draft or submits.
+- **Extensions**:
+  - 3a. User exceeds rolling rate quota (e.g. 3 requests per rolling minute).
+    - Server returns rate limit message; applicant is advised to wait before retrying or continue manually.
+  - 6a. Applicant selects **Discard suggestion**.
+    - System clears preview container; existing cover letter text remains completely untouched.
+
+#### UC12: HR Grounded AI Application Summary and Advisory Excerpts
+
+- **Actor**: Authenticated HR Reviewer
+- **Preconditions**: Submitted application is open in review; AI feature is enabled.
+- **Main Success Scenario**:
+  1. HR reviewer selects **Summarize** (or **Refresh summary** for subsequent runs) on candidate submission view.
+  2. Server verifies HR authorization, checks deployment quota, and compiles submitted cover letter and job requirements.
+  3. Server dispatches request to SoCLaaS provider with strict formatting instructions and brevity limits.
+  4. Provider returns two arrays of zero-based sentence IDs (evidence and unaddressed requirements) adhering to strict output constraints without generating prose or text.
+  5. Server validates returned IDs, extracts grounded excerpts from candidate submission and job requirements, and deterministically generates neutral interview follow-up questions.
+  6. System renders advisory summary cards alongside original candidate materials.
+- **Extensions**:
+  - 1a. AI provider is unreachable or returns error.
+    - System displays non-disruptive advisory error message; candidate application and review controls remain fully functional.
+  - 4a. Summary is generated for informational reference only.
+    - AI has zero authority to mutate review status, candidate ranking, or application records; human reviewer retains sole decision authority.
+
+### 3.6 Product Specifications in Gherkin Syntax
+
+```gherkin
+Feature: Applicant Account Verification and Required Profile Onboarding
+  As a prospective job applicant
+  I want to create a verified account and complete mandatory onboarding
+  So that my private details are protected and my applications can be contacted
+
+  Scenario: Applicant Signup and Verification Email Dispatch
+    Given a visitor enters an unregistered email "candidate@example.com"
+    And enters matching passwords satisfying the 8–72 characters length constraint
+    When the visitor submits the account creation form
+    Then a new unverified applicant account is initialized
+    And a verification email containing a secure callback link is dispatched
+    And public signup does not grant HR administrative privileges
+
+  Scenario: Incomplete Profile Onboarding Gate Enforcement
+    Given a newly verified applicant signs in for the first time
+    When the applicant navigates to any application or careers route
+    Then the system redirects the applicant to "My profile"
+    And displays guidance that full name and international phone number are required
+    When the applicant provides a valid full name and formatted international telephone number
+    And selects "Save profile"
+    Then the derived profile readiness check passes
+    And access to career listings and application submission is unlocked
+
+  Scenario: Rejection of Invalid International Telephone Format
+    Given an applicant is updating their profile
+    When the applicant enters an invalid calling code or non-numeric national phone number
+    And clicks "Save profile"
+    Then the profile update is rejected
+    And descriptive telephone formatting guidance is displayed
+```
+
+```gherkin
+Feature: Applicant Profile Maintenance and Telephony Validation
+  As an authenticated applicant
+  I want to maintain my contact details, background information, and international telephony
+  So that future applications prefill accurately with verified contact information
+
+  Scenario: Update Profile Details and Validate Telephony
+    Given an applicant has completed onboarding
+    When the applicant navigates to "My profile"
+    And updates education, work experience, and phone calling code with valid national digits
+    And selects "Save profile"
+    Then the profile record is updated successfully
+    And subsequent job applications prefill with the updated profile values
+
+  Scenario: Rejection of Disallowed Portfolio URL Schemes
+    Given an applicant is updating their profile
+    When the applicant enters a portfolio URL containing embedded credentials or non-HTTP protocols
+    And clicks "Save profile"
+    Then the system rejects the portfolio URL
+    And displays guidance to supply a valid HTTP or HTTPS address without credentials
+```
+
+```gherkin
+Feature: Public Job Search and Vacancy Lifecycle Visibility
+  As a careers portal visitor
+  I want to search and filter published job listings
+  So that I can identify active positions matching my skills
+
+  Scenario: Search Published Jobs by Keyword Phrase
+    Given multiple jobs exist in "Published", "Draft", and "Closed" statuses
+    When a visitor enters search phrase "Full Stack"
+    Then only jobs in "Published" status matching "Full Stack" in title, team, description, or requirements are displayed
+    And draft jobs and closed jobs are strictly excluded from results
+    And the URL search parameters update to reflect the query
+
+  Scenario: Scheduled Vacancy Opening and Automatic Visibility
+    Given a job is published with a scheduled opening time in the future
+    When visitors browse the careers portal prior to the opening time
+    Then the scheduled job is hidden from public listings and search
+    When the scheduled opening time passes
+    Then the job automatically becomes visible in public search without manual republishing
+```
+
+```gherkin
+Feature: HR Job Vacancy Authoring, Scheduling, and Lifecycle Management
+  As an HR reviewer
+  I want to create, schedule, publish, and close job postings
+  So that talent acquisition campaigns are accurately controlled over time
+
+  Scenario: Author Draft Job and Publish Immediately
+    Given an authenticated HR reviewer
+    When the reviewer creates a job draft with title, team, category, description, and requirements
+    And leaves scheduled opening and closing times blank
+    And clicks "Publish job"
+    Then the job status transitions to "Published"
+    And the vacancy becomes immediately discoverable in the public careers portal
+
+  Scenario: Scheduled Vacancy Opening and Revert to Draft
+    Given an HR reviewer authors a job with a scheduled opening time in the future
+    When the reviewer publishes the vacancy
+    Then the job displays the derived operational label "Scheduled" while persisted as published
+    And the job remains hidden from public applicants
+    When the HR reviewer chooses "Revert to draft" prior to the opening time
+    Then the status returns to "Draft" allowing further edits
+
+  Scenario: Explicit Vacancy Closure
+    Given a job is currently active in "Published" status
+    When an HR reviewer selects "Close job"
+    Then the job status changes to "Closed"
+    And the vacancy ceases accepting new application drafts and submissions immediately
+```
+
+```gherkin
+Feature: Application Drafting and Private Form Persistence
+  As a registered applicant
+  I want to save private draft applications
+  So that I can compose my materials iteratively without premature disclosure
+
+  Scenario: New Application Profile Prefill
+    Given an applicant with a completed profile opens an application for an open role
+    When the application form renders
+    Then full name, verified email, phone number, and background fields are prefilled from profile
+    And the form fields are initialized in memory without creating a database row until an explicit save or upload
+    And any subsequent draft saved by the applicant remains completely invisible to HR reviewers
+
+  Scenario: Explicit Draft Saving and Field Preservation
+    Given an applicant is composing a cover letter in a draft application
+    When the applicant enters custom text and clicks "Save draft"
+    Then the draft is persisted to the database
+    And subsequent updates to the applicant's profile do not overwrite the saved draft content
+```
+
+```gherkin
+Feature: Private PDF Résumé Upload and Sandboxed Structural Validation
+  As an applicant
+  I want to attach a private PDF résumé to my application
+  So that reviewers can evaluate my qualifications securely
+
+  Scenario: Successful PDF Attachment Upload
+    Given an applicant selects a valid PDF file within 1 MiB size limit
+    When the applicant selects "Upload résumé"
+    Then the server delegates parsing to a bounded worker thread
+    And the worker verifies PDF structure without executing embedded code
+    And the file is uploaded to the private storage bucket
+    And a secure reference is attached to the application record
+
+  Scenario: Rejection of Password-Protected PDF
+    Given an applicant attempts to upload a PDF that requires a password to open
+    When the server worker validates the file
+    Then the upload is rejected with a validation notice
+    And no storage bytes are finalized
+    And any previously attached valid résumé remains intact
+```
+
+```gherkin
+Feature: Application Submission and Immutable Snapshot Freezing
+  As an applicant
+  I want to submit my completed application
+  So that HR can review my qualifications
+
+  Scenario: Submit Application and Freeze Submitted Snapshot
+    Given an applicant has an open draft for an active published job
+    And the cover letter and required contact details are filled
+    When the applicant selects "Submit application"
+    Then the application status transitions to "Submitted"
+    And candidate contact details, background, cover letter, and résumé reference freeze into an immutable snapshot
+    And the applicant is prevented from modifying the submitted text
+    And the submission becomes visible in the HR review dashboard
+
+  Scenario: Reject Submission on Closed Vacancy
+    Given a job reaches its scheduled closing time or is manually closed by HR
+    When an applicant attempts to submit an existing draft application
+    Then the submission is rejected
+    And the system informs the applicant that the vacancy has closed
+    And existing draft text is preserved without corruption
+```
+
+```gherkin
+Feature: Application Withdrawal and Safe Reapplication
+  As an applicant
+  I want to withdraw a submitted application and retain the option to reapply
+  So that my active candidacy accurately reflects my availability
+
+  Scenario: Permanent Application Withdrawal
+    Given an applicant has an application in "Submitted" status
+    When the applicant opens the application and confirms withdrawal
+    Then the application status transitions to "Withdrawn"
+    And the withdrawal timestamp is recorded
+    And the snapshot and review history remain preserved for compliance
+    And HR review actions on the withdrawn application are disabled
+
+  Scenario: Reapplication After Withdrawal on an Open Job
+    Given an applicant has a "Withdrawn" application for an active published job
+    When the applicant visits the job listing and chooses to apply again
+    Then a new separate draft application is created
+    And the previously withdrawn application record remains unchanged in history
+```
+
+```gherkin
+Feature: HR Application Review and Attributed Private Notes
+  As an HR reviewer
+  I want to document candidate assessments with attributed internal notes
+  So that hiring deliberations are organized and private from candidates
+
+  Scenario: Record Add-Only Internal Note
+    Given an HR reviewer is viewing a submitted application
+    When the reviewer enters assessment notes and clicks "Add note"
+    Then the note is stored with the reviewer's authenticated user ID and timestamp
+    And the note appears in the internal application review feed
+    And the note is strictly inaccessible to the applicant via API or UI
+```
+
+```gherkin
+Feature: HR Candidate Review Status Progression and Audit Logging
+  As an HR reviewer
+  I want to update candidate review statuses and preserve transition history
+  So that hiring decisions maintain an accountable and auditable progression timeline
+
+  Scenario: Progress Application Review Status
+    Given an HR reviewer is evaluating an application in "Submitted" status
+    When the reviewer selects "In review" and clicks "Update status"
+    Then the application review status updates to "In review"
+    And a corresponding record is inserted into the status transition audit log
+    And the applicant can view the updated review status in "My applications"
+
+  Scenario: Disallow Status Progression on Withdrawn Application
+    Given an application has been withdrawn by the applicant
+    When an HR reviewer attempts to update its review status
+    Then the status transition is rejected
+    And the withdrawn terminal state remains unchanged
+```
+
+```gherkin
+Feature: AI Cover Letter Drafting with Explicit Preview Adoption
+  As an applicant
+  I want optional AI assistance to generate a cover letter draft
+  So that I have an initial framework to refine manually
+
+  Scenario: Generate AI Draft and Explicitly Adopt into Form
+    Given an applicant has entered experience notes in "Draft with AI"
+    When the applicant clicks "Generate draft"
+    Then an advisory draft is generated within token constraints
+    And the draft is presented in a separate "AI draft preview" container
+    And the active cover letter textarea remains unchanged
+    When the applicant clicks "Use this draft"
+    Then the preview text is transferred to the cover letter textarea
+    And the applicant can edit and explicitly save the draft
+```
+
+```gherkin
+Feature: HR Grounded Advisory AI Application Summary
+  As an HR reviewer
+  I want an advisory AI summary highlighting candidate qualifications
+  So that I can prepare interview discussions efficiently
+
+  Scenario: Generate Grounded Summary for Candidate Application
+    Given an HR reviewer is inspecting a submitted application
+    When the reviewer clicks "Summarize"
+    Then the provider returns selected sentence IDs without generating prose
+    And the server maps IDs to source excerpts and generates neutral follow-up questions
+    And the candidate's review status remains completely unchanged
+    And AI possesses zero automated authority to reject, shortlist, or grade candidates
+```
+
+### 3.7 Non-Functional Specifications
+
+1. **Performance and Responsiveness**:
+   - Public job searches execute debounced client updates with rapid server filtering; pagination and category switching render without full page refresh lag.
+   - Action controls provide instant visual feedback (e.g. pending labels and disabled duplicate submission states) to prevent repeated user requests during network transit.
+2. **Security and Access Control**:
+   - Supabase Auth manages cryptographically hashed credentials; role authorization is enforced strictly via PostgreSQL Row-Level Security (RLS) policies and server-side route guards.
+   - Résumé PDF parsing executes in a bounded Node worker thread with constrained memory heap limits and strict execution deadlines, mitigating parser-level vulnerabilities.
+   - All third-party AI provider credentials remain exclusively server-side; API endpoints validate session authorization prior to dispatching requests.
+3. **Data Integrity and Auditability**:
+   - Applications execute snapshot freezing upon submission: applicant contact details, background, cover letter, and résumé references are permanently recorded as submitted snapshots.
+   - Database uniqueness constraints enforce at most one active application per candidate per vacancy via partial indexing, preserving withdrawn records for historical auditability.
+   - HR notes are add-only and immutable; status transitions maintain complete actor and timestamp logs.
+4. **Ergonomics and Usability**:
+   - Responsive layouts accommodate mobile, tablet, and desktop viewports with accessible color contrast and readable typography.
+   - Contextual error messages guide users through input correction (e.g. phone formatting, PDF file type, or password length) without clearing unsaved form fields.
 
 ## 4. Specifications and implementation map
 
@@ -167,6 +728,140 @@ Jobs move Draft → Published → Closed. Only draft content is editable. Applic
 
 Withdrawal retains submitted rows/files and prior review history, adds owner/time lifecycle metadata, and forbids subsequent HR processing. Repeated withdrawal reconciles the same committed state. Applicants who have withdrawn can create and submit a new application for the same job while it remains open. An already dispatched AI call cannot be recalled; eligibility is rechecked before returning results.
 
+#### 5.2.1 Relational Entity-Relationship Model
+
+```mermaid
+erDiagram
+    auth_users ||--o| profiles : "has role"
+    auth_users ||--o| applicant_profiles : "onboards"
+    auth_users ||--o{ applications : "submits"
+    auth_users ||--o{ application_notes : "authors"
+    auth_users ||--o{ application_status_events : "records"
+    jobs ||--o{ applications : "receives"
+    applications ||--o{ application_notes : "contains"
+    applications ||--o{ application_status_events : "tracks"
+    applications ||--o{ application_submission_events : "logs"
+    applications ||--o{ application_resume_objects : "tracks history"
+    applications |o--o| application_resume_objects : "current resume (resume_id)"
+    applicant_profiles ||--o{ profile_resume_objects : "tracks history"
+    applicant_profiles |o--o| profile_resume_objects : "current resume (resume_id)"
+
+    profiles {
+        uuid user_id PK
+        text role
+        timestamptz created_at
+    }
+
+    applicant_profiles {
+        uuid user_id PK
+        text full_name
+        text phone
+        text portfolio_url
+        text education
+        text work_experience
+        uuid resume_id FK
+        timestamptz updated_at
+    }
+
+    jobs {
+        uuid id PK
+        text title
+        text team
+        text category
+        text description
+        text requirements
+        text status
+        timestamptz opens_at
+        timestamptz closes_at
+        timestamptz created_at
+        timestamptz published_at
+    }
+
+    applications {
+        uuid id PK
+        uuid job_id FK
+        uuid applicant_id FK
+        text job_title
+        text submission_state
+        text full_name
+        text submitted_email
+        text phone
+        text portfolio_url
+        text education
+        text work_experience
+        text cover_letter
+        text original_submitted_letter
+        uuid resume_id FK
+        text review_status
+        int review_revision
+        int revision
+        timestamptz submitted_at
+        timestamptz withdrawn_at
+        uuid withdrawn_by FK
+        timestamptz updated_at
+    }
+
+    application_notes {
+        uuid id PK
+        uuid application_id FK
+        uuid author_id FK
+        text body
+        timestamptz created_at
+    }
+
+    application_status_events {
+        uuid id PK
+        uuid application_id FK
+        uuid actor_id FK
+        text from_status
+        text to_status
+        text outcome
+        timestamptz created_at
+    }
+
+    application_submission_events {
+        uuid id PK
+        uuid application_id FK
+        uuid actor_id
+        timestamptz created_at
+    }
+
+    ai_invocations {
+        uuid id PK
+        uuid actor_id
+        text operation
+        uuid target_id
+        text outcome
+        timestamptz created_at
+        timestamptz completed_at
+    }
+
+    application_resume_objects {
+        uuid id PK
+        uuid application_id FK
+        uuid applicant_id FK
+        text object_path
+        text filename
+        int byte_size
+        text sha256
+        int expected_revision
+        text state
+        timestamptz created_at
+    }
+
+    profile_resume_objects {
+        uuid id PK
+        uuid applicant_id FK
+        text object_path
+        text filename
+        int byte_size
+        text sha256
+        uuid expected_resume_id
+        text state
+        timestamptz created_at
+    }
+```
+
 ### 5.3 Private PDF lifecycle
 
 PDFs are optional, ≤1 MiB, validated structurally with filename/type/byte limits in a bounded worker. Buckets `application-resumes` and `profile-resumes` are private. User-session RLS/Storage controls downloads; browsers do not receive privileged keys or public/signed file URLs.
@@ -212,6 +907,221 @@ Strict schemas validate inputs/output; provider requests have a 20-second timeou
 
 AI has no tools or status/submission/note mutation authority. Outputs are escaped and advisory. Metadata-only audit/quota records exclude private content; errors return safe messages. The [AI packet](../workflow/archive/2026-10-09-soclaas-ai/record.md) and [security spec](../workflow/specs/security-and-privacy.md) retain actual checks and limitations.
 
+### 5.6 Operational Sequence and State Diagrams
+
+#### 5.6.1 Application Submission and Snapshot Freeze Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Applicant
+    participant Client as Next.js Client Form
+    participant Action as Server Submit Action
+    participant Guard as Server Readiness and Role Guard
+    participant DB as PostgreSQL (Supabase)
+
+    Applicant->>Client: Clicks "Submit application"
+    Client->>Action: POST submission payload
+    Action->>Guard: Verify Applicant session and profile readiness
+    Guard-->>Action: Authorized Complete Applicant
+    Action->>DB: Execute submit_application_details_v3 RPC
+    Note over DB: Database-internal transaction: acquires advisory transaction lock, locks job row (FOR UPDATE), checks publication status, locks existing application row (FOR UPDATE), checks revision, freezes candidate snapshots, updates submission_state = 'submitted' and submitted_at = NOW()
+    DB-->>Action: Returns application ID on committed success
+    Action-->>Client: Success response (application immutable)
+    Client->>Applicant: Render submitted read-only confirmation
+```
+
+#### 5.6.2 Sandboxed PDF Résumé Upload and Validation Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Applicant
+    participant UI as Résumé Upload Component (ResumePanel)
+    participant Route as Server Upload Route (/api/jobs/[id]/resume, /api/applications/[id]/resume, or /api/profile/resume)
+    participant Worker as Isolated Node Worker Thread
+    participant Storage as Supabase Private Storage (application-resumes or profile-resumes bucket)
+    participant DB as PostgreSQL Database
+
+    Applicant->>UI: Selects PDF file and clicks "Upload résumé"
+    UI->>Route: POST raw binary PDF stream (headers: x-resume-intent, x-resume-filename, Content-Type: application/pdf)
+    Route->>Route: Validate byte size (at most 1 MiB) and magic bytes
+    Route->>Worker: Dispatch buffer for sandboxed structural parse
+    Note over Worker: Runs in bounded node:worker_threads Worker with 5s timeout and V8 heap limits (64MB old / 16MB young)
+    Worker->>Worker: Parse PDF structure via PDF.js (no execution or password prompt)
+    alt PDF requires password or is unreadable
+        Worker-->>Route: Structural validation failure (Safe code 422)
+        Route-->>UI: Rejection response and typed form text preserved
+    else PDF is structurally valid
+        Worker-->>Route: Validation passed (page count, safe metadata)
+        alt Application or Job-scoped upload (/api/jobs/[id]/resume or /api/applications/[id]/resume)
+            Route->>DB: Reserve pending application tracking record (prepare_application_resume)
+            DB-->>Route: Pending tracking record created
+            Route->>Storage: Store file bytes in private "application-resumes" bucket
+            Storage-->>Route: Storage write confirmed
+            Route->>DB: Finalize tracking record to ready (finalize_application_resume)
+            DB-->>Route: File finalized and linked to application draft
+        else Profile onboarding upload (/api/profile/resume)
+            Route->>DB: Reserve pending profile tracking record (prepare_profile_resume)
+            DB-->>Route: Pending tracking record created
+            Route->>Storage: Store file bytes in private "profile-resumes" bucket
+            Storage-->>Route: Storage write confirmed
+            Route->>DB: Finalize tracking record to ready (finalize_profile_resume)
+            DB-->>Route: File finalized and linked to profile
+        end
+        Route-->>UI: Secure download URI reference
+        UI->>Applicant: Display upload success and attachment badge
+    end
+```
+
+#### 5.6.3 AI Cover Letter Generation and Explicit Adoption Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Applicant
+    participant UI as Draft with AI Panel
+    participant API as /api/ai/applicant-draft
+    participant Quota as Quota and Audit Helper (PostgreSQL)
+    participant SoCLaaS as SoCLaaS Provider (OpenAI SDK)
+
+    Applicant->>UI: Enters experience notes and clicks "Generate draft"
+    UI->>API: POST notes + target job ID
+    API->>API: Verify authenticated Applicant session
+    API->>Quota: Check and reserve rolling rate limit (reserve_ai_invocation)
+    alt Rate limit reached or unready
+        Quota-->>API: Quota rejected / 429 Retry-After
+        API-->>UI: Rate limit or service unavailable error (429 / 503)
+    else Quota approved
+        Quota-->>API: Reservation approved (invocationId)
+        API->>API: Assemble system prompt with job title and requirements (exclude private files)
+        API->>SoCLaaS: Dispatch completion request (20s timeout, max tokens)
+        alt Provider timeout or error
+            SoCLaaS-->>API: Upstream timeout or provider error
+            API->>Quota: Finalize invocation as failed (finalize_ai_invocation)
+            Quota-->>API: Failure recorded
+            API-->>UI: Service unavailable error (503 Service Unavailable)
+        else Output fails schema validation
+            SoCLaaS-->>API: Completion response text
+            API->>API: Parse schema (fails applicantDraftResponseSchema)
+            API->>Quota: Finalize invocation as failed (finalize_ai_invocation)
+            Quota-->>API: Failure recorded
+            API-->>UI: Validation failure error (502 Bad Gateway)
+        else Provider success and valid output schema
+            SoCLaaS-->>API: Completion response text
+            API->>API: Validate output schema and enforce token limits
+            API->>Quota: Finalize invocation as success (finalize_ai_invocation)
+            Quota-->>API: Success audit recorded
+            API-->>UI: Return generated draft suggestion (200 OK)
+            UI->>Applicant: Render suggestion in separate "AI draft preview"
+            alt Applicant chooses Discard
+                Applicant->>UI: Clicks "Discard suggestion"
+                UI->>UI: Clear preview and keep active cover letter untouched
+            else Applicant chooses Adopt
+                Applicant->>UI: Clicks "Use this draft" (or "Replace current cover letter")
+                UI->>UI: Copy preview text into cover letter textarea
+                UI->>Applicant: Ready for manual editing and explicit Save/Submit
+            end
+        end
+    end
+```
+
+#### 5.6.4 HR Application Review and Attributed Notes Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor HR as HR Reviewer
+    participant UI as Application Review View
+    participant Action as HR Server Action
+    participant RLS as PostgreSQL RLS and Schema
+    participant DB as PostgreSQL Database
+
+    HR->>UI: Opens candidate application
+    UI->>Action: GET application detail
+    Action->>RLS: auth.getUser() role == 'hr'
+    RLS->>DB: Query frozen submitted snapshot and résumé reference
+    DB-->>UI: Render read-only candidate materials and download link
+    HR->>UI: Enters feedback in "Add note" and clicks submit
+    UI->>Action: POST addNote(applicationId, text)
+    Action->>Action: Validate text length (at most 2000 characters)
+    Action->>DB: Call protected RPC append_hr_application_note(applicationId, text)
+    Note over DB: Security-definer RPC verifies verified HR actor, locks submitted application for update, and derives author_id & created_at
+    DB-->>Action: Returns new note ID
+    Action-->>UI: Append-only note rendered in review timeline
+```
+
+#### 5.6.5 Application Lifecycle and Reapplication State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft : Applicant initiates application
+    Draft --> Draft : Save draft / update text / attach résumé
+    Draft --> Submitted : Submit application (snapshots freeze)
+    Submitted --> InReview : HR updates status
+    Submitted --> Shortlisted : HR updates status
+    Submitted --> Rejected : HR updates status
+    InReview --> Shortlisted : HR updates status
+    InReview --> Rejected : HR updates status
+    Shortlisted --> InReview : HR updates status
+    Rejected --> InReview : HR updates status
+    Shortlisted --> Rejected : HR updates status
+    Rejected --> Shortlisted : HR updates status
+    Submitted --> Withdrawn : Applicant withdraws
+    InReview --> Withdrawn : Applicant withdraws
+    Shortlisted --> Withdrawn : Applicant withdraws
+    Rejected --> Withdrawn : Applicant withdraws
+    Withdrawn --> [*] : Retained immutable historical record
+```
+
+_Note: Withdrawn applications are terminal historical records. Reapplying on an active job creates a separate application record rather than reopening the withdrawn record._
+
+### 5.7 Architectural and Design Decisions
+
+This section documents the key architectural and technical design decisions made throughout ConnectTalent, detailing their rationale, alternatives considered, and trade-offs.
+
+#### 5.7.1 Server-Side Role Enforcement and Supabase Row-Level Security (RLS)
+
+- **Decision**: Enforce role-based access control (RBAC) at two independent server layers: server-side Next.js route/action guards and PostgreSQL Row-Level Security (RLS) policies on every database table.
+- **Rationale**: Relying on UI-level hiding of controls or client-side checks provides zero security guarantees against direct API calls or compromised client sessions. PostgreSQL RLS ensures that even if an application route check is misconfigured, the database engine refuses unauthorized reads and writes at the row level.
+- **Alternatives Considered**: Client-only navigation guards or middleware-only session inspection. Rejected because client checks can be bypassed via direct HTTP calls, and Next.js middleware cannot evaluate granular database row ownership without incurring high latency.
+- **Trade-off**: Requires passing the authenticated user context to database queries and defining explicit SQL policies for every role, but establishes a hardened defence-in-depth perimeter.
+
+#### 5.7.2 Immutable Submission Snapshots and Retained Withdrawal History
+
+- **Decision**: On application submission, snapshot all candidate contact and qualification fields (`full_name`, `submitted_email` from verified Auth, normalized `phone`, `portfolio_url`, `education`, and `work_experience`), freeze the active `cover_letter` along with `original_submitted_letter`, and attach an immutable foreign key reference (`resume_id`) pointing to an independently retained `application_resume_objects` row. Retain withdrawn application records as immutable audit rows while allowing new applications via a partial unique index: `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)`.
+- **Rationale**: Candidates may later update their account profiles or delete their profile résumés. Without snapshotting, an applicant's submitted historical record would be altered retroactively, compromising legal and compliance audit trails. Retaining withdrawn applications while permitting reapplication protects candidate historical context while preventing duplicate concurrent submissions.
+- **Alternatives Considered**: Referencing mutable applicant profile foreign keys directly, or deleting application rows upon withdrawal. Rejected because foreign key references cause retroactive data corruption when profiles change, and row deletion permanently destroys audit logs.
+- **Trade-off**: Increases database storage requirements due to column redundancy, but guarantees that once an application is submitted, its contents are immutable and verifiable.
+
+#### 5.7.3 Isolated Worker Thread for Untrusted PDF Structural Validation
+
+- **Decision**: Execute structural PDF validation inside an isolated Node worker thread (`node:worker_threads`) using PDF.js with a strict 5-second deadline and capped V8 memory limits (64 MiB old generation / 16 MiB young generation), terminating the worker after every execution.
+- **Rationale**: User-uploaded PDFs represent untrusted binary input that could exploit vulnerabilities or trigger long-running execution in PDF parsing engines. Running parsing inside a bounded worker thread isolates memory allocation under V8 heap limits, prevents page traversal from blocking the Next.js event loop, and enforces a hard 5-second termination timer.
+- **Alternatives Considered**: In-process main-thread PDF parsing, or external child process / microservice. In-process parsing was rejected because CPU-intensive page traversal blocks the main event loop and memory spikes risk process exhaustion. An external microservice or OS child process was deferred as disproportionately heavy for the workload.
+- **Trade-off**: A worker thread shares the host Node.js OS process so native segfaults in underlying C++ addons could affect the host; however, PDF.js runs in pure JavaScript within V8, making worker thread heap bounding and termination an effective and lightweight sandbox without child process OS overhead.
+
+#### 5.7.4 Human-in-the-Loop AI Advisory Architecture
+
+- **Decision**: Restrict all generative AI capabilities (applicant cover letter drafting and HR candidate summarization) strictly to advisory roles. Provide an explicit **AI draft preview** container requiring manual review and deliberate adoption before overwriting application text. Give AI zero automated authority to mutate review statuses, submit applications, or reject candidates.
+- **Rationale**: Generative language models can hallucinate, omit critical nuances, or exhibit unintended bias. Keeping a human in the loop ensures that applicants remain solely responsible for claims in their cover letters, and HR professionals retain complete responsibility for employment evaluations.
+- **Alternatives Considered**: Automatic cover letter prefill directly into the active form textarea, or automated candidate scoring/screening. Rejected because automatic prefill risks unreviewed adoption of fabricated qualifications, and automated hiring screening introduces significant ethical, fairness, and compliance liabilities.
+- **Trade-off**: Requires additional UI containers and explicit user clicks to adopt suggestions, but eliminates automated hiring risks and enforces human oversight.
+
+#### 5.7.5 Add-Only Attributed HR Notes and Status Auditing
+
+- **Decision**: Model HR application notes as strictly add-only records created via the protected security-definer RPC `append_hr_application_note`. The RPC verifies verified HR credentials, locks the submitted non-withdrawn application, automatically derives `author_id` from the authenticated session, and timestamps the note. Direct `INSERT` privileges on `application_notes` are revoked from authenticated users. Maintain status changes in a dedicated transition ledger (`application_status_events`) via `change_hr_application_status`.
+- **Rationale**: Hiring assessments require tamper-proof accountability. Allowing notes to be edited or deleted could enable retrospective alterations during disputed hiring processes. Recording each status transition maintains an immutable timeline of candidate progression.
+- **Alternatives Considered**: Single mutable status and notes fields directly on the `applications` row. Rejected because overwriting status and notes erases historical context and attribution.
+- **Trade-off**: Requires dedicated audit tables and multiple query joins, but satisfies organizational compliance and accountability requirements.
+
+#### 5.7.6 Separation of Synthetic Fixtures, Test Keys, and Deployment Environments
+
+- **Decision**: Maintain strict separation between local Docker development, ephemeral preview environments, and production Supabase projects as a mandatory deployment and operational practice. Restrict privileged server runtime keys (`SUPABASE_SECRET_KEY` or legacy `SUPABASE_SERVICE_ROLE_KEY`) exclusively to server-side file maintenance (narrowly checked résumé mutations and orphan cleanup) and AI quota reservation/audit RPCs (`reserve_ai_invocation` and `finalize_ai_invocation`). Local test runners and local HR seeding use a separate ignored administrative key (`TEST_SUPABASE_SERVICE_ROLE_KEY`), while public publishable keys (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) are required for standard client operations governed by Supabase Auth and RLS.
+- **Rationale**: Prevents accidental data contamination, credential leakage, or execution of destructive seed scripts against hosted preview or production databases. Restricting privileged runtime keys on the server strictly to necessary storage cleanup and AI rate-limit auditing ensures that standard application queries cannot bypass Row-Level Security, while operators are clearly aware that AI quota enforcement and audit trails depend on server secret keys.
+- **Alternatives Considered**: Shared cloud databases across development branches, bundling service-role keys in client bundles, or running AI quota queries with user-scoped clients. Rejected because shared databases cause race conditions between features, bundled keys expose complete administrative database control to client browsers, and user-scoped clients cannot reliably enforce cross-user rolling quota tables without exposing audit records.
+- **Trade-off**: Requires operators and developers to maintain disciplined environment configuration and separate hosted Supabase projects across preview and production deployments, as isolation is governed by environment variable provisioning rather than programmatic platform validation.
+
 ## 6. Software engineering process
 
 ### 6.1 Handmade Spec-Driven Development
@@ -246,6 +1156,175 @@ A contributor change is ready for PR only after issue traceability, concrete app
 Units check validation/normalization, projections, recovery and error handling. pgTAP checks database grants/RLS, immutable snapshots, role/draft/file privacy and lifecycle guards. Browser journeys verify durable user outcomes, onboarding, role separation, uploads, withdrawal, HR review and advisory AI behavior. Race suites exercise lock ordering and stale/concurrent writes. Tests use synthetic fixtures; AI endpoint tests use a local mock rather than consuming live provider quota.
 
 Useful evidence: [HR review](../workflow/archive/2026-10-08-hr-application-review/record.md), [job management](../workflow/archive/2026-10-09-hr-job-management/record.md), [withdrawal](../workflow/archive/2026-10-10-application-form-withdrawal/record.md), [required profile](../workflow/archive/2026-10-10-required-applicant-profile/record.md), [résumé-first](../workflow/archive/2026-10-10-unsaved-profile-resume/record.md), [lost-response repair](../workflow/archive/2026-10-10-first-upload-retry/record.md). Counts belong to their recorded revisions; do not present them as fresh runs or hosted proof. Full assistive-technology testing and deployment smoke results require separate evidence.
+
+### 7.1 Test Pyramid and Verification Layers
+
+Testing is distributed across four distinct tiers of automated verification:
+
+```mermaid
+flowchart TD
+    E2E["System & Browser Journeys<br/>(Playwright Chromium End-to-End User Journeys)"]
+    Race["Integration & Concurrency Race Suites<br/>(PostgreSQL Locking, Quota Limits, First-Upload Retry)"]
+    DB["Database & Security Policies<br/>(pgTAP Tests, Row-Level Security, Role Grants)"]
+    Unit["Domain & Service Unit Tests<br/>(Vitest Unit Suites, Normalization, Zod Schemas)"]
+
+    E2E --> Race
+    Race --> DB
+    DB --> Unit
+```
+
+### 7.2 Automated Test Inventory
+
+The automated test suite exercises all layers of the application without requiring production credentials or live external provider calls:
+
+| Layer / Test Suite                   | Target Scope                         | Verified Invariants and Scenarios                                                                                                                                                                                                          |
+| ------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Domain & Unit Tests**              | `tests/unit/` (Vitest)               | Input validation schemas (Zod), international telephony format validation (known calling code and 7–15-digit E.164-like format), job search phrase sanitization and matching, PDF worker error code mapping, and UI hook state management. |
+| **Database & Security Tests**        | `supabase/tests/database/` (pgTAP)   | PostgreSQL Row-Level Security (RLS) enforcement across all tables, authenticated role separation (Applicant vs HR), private draft invisibility, immutable submitted snapshot constraints, and partial unique indexing.                     |
+| **Integration & Concurrency Suites** | `tests/integration/` (Node / Docker) | Lock ordering on application save/submit, rolling window AI quota exhaustion, concurrent withdrawal handling, first-upload retry coordination, and profile résumé replication isolation.                                                   |
+| **System & Browser Journeys**        | `tests/e2e/` (Playwright)            | Critical user journeys: account signup, verification callbacks, profile onboarding gates, job listing search/filter, draft editing, PDF résumé upload/replace, application submission, HR review, notes, status changes, and withdrawal.   |
+| **AI Contract & Adversarial Evals**  | `test:ai-evals` (Vitest)             | Offline contract verification: prompt construction, system boundary containment, exclusion of private files, strict schema adherence, and graceful fallback on provider errors without live quota consumption.                             |
+| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate automation configuration checks (`.github/renovate.json`), and CI helper functions without live network credentials.                                       |
+
+### 7.3 High-Risk Coverage Matrix
+
+| Risk Domain                               | Potential Failure Mode                                                                          | Mitigation and Test Verification                                                                                                                                                                                                                                                  |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Concurrent Submission / Stale Writes**  | Multiple concurrent save/submit requests corrupting application state or bypassing job closure. | Verified via integration race suites (`tests/integration/`) asserting transaction lock acquisition and strict revision check failures on stale writes.                                                                                                                            |
+| **Role Escalation / Cross-Tenant Access** | Applicant reading another candidate's draft or accessing HR management endpoints.               | Enforced by PostgreSQL RLS policies verified by pgTAP tests (`supabase/tests/database/`), alongside Next.js server route guards.                                                                                                                                                  |
+| **Untrusted / Malicious PDF Uploads**     | Malformed PDF triggering parser crashes, memory exhaustion, or code execution.                  | Validated in an isolated Node worker thread (`node:worker_threads`) with strict execution deadlines (5s) and capped V8 memory limits (64 MiB old / 16 MiB young); verified via unit tests rejecting password-protected or corrupt files with safe error codes.                    |
+| **Prompt Injection / Untrusted Content**  | Malicious text in job listings or notes attempting to manipulate AI summary output.             | Evaluated via offline adversarial evals (`test:ai-evals`); strict output schema parsing; client-side escaping; zero automated mutation authority.                                                                                                                                 |
+| **Accidental Data Loss on Withdrawal**    | Withdrawing an application destroying candidate records or preventing subsequent reapplication. | Verified via pgTAP database tests (`supabase/tests/database/reapply_after_withdrawal.test.sql`) asserting partial unique index behavior and reapplication; E2E browser journeys verify withdrawal transition, immutable snapshot retention, and post-withdrawal lock enforcement. |
+| **Telephony Format Inaccuracies**         | Incompatible calling codes or malformed national phone numbers preventing candidate contact.    | Verified via unit tests (`tests/unit/`) exercising country calling code resolution and international phone format validation (known calling code plus 7–15-digit shape).                                                                                                          |
+
+### 7.4 Quality Verification Gates
+
+The engineering pipeline enforces automated quality gates across two independent GitHub Actions workflows executed on pull requests and pushes to `develop` and `master`:
+
+```mermaid
+flowchart TD
+    subgraph CI["ci.yml (Application CI - Sequential Steps)"]
+        direction TB
+        Format["Format Check<br/>(Prettier)"] --> Lint["Static Analysis<br/>(ESLint)"]
+        Lint --> Types["Type Verification<br/>(Next Typegen & TSC)"]
+        Types --> Units["Unit Testing & Coverage<br/>(Vitest)"]
+        Units --> CIUtils["CI Utility Tests<br/>(Python unittest, always-run)"]
+        CIUtils --> AIEvals["Offline AI Contracts<br/>(evals)"]
+        AIEvals --> BuildCheck["Production Build<br/>(Next.js)"]
+    end
+
+    subgraph SupabaseCI["supabase-checks.yml (Supabase CI - Parallel Sibling Jobs)"]
+        direction TB
+        subgraph DBJob["database-checks"]
+            DBReset["DB Reset & Lint"] --> DBTests["pgTAP Database Tests"]
+        end
+        subgraph IntJob["integration-checks"]
+            IntSuites["Integration Race Suites"]
+        end
+        subgraph E2EJob["browser-tests"]
+            E2ETests["Playwright E2E (Chromium)"]
+        end
+    end
+```
+
+1. **Application CI Workflow (`.github/workflows/ci.yml`)**:
+   - **Format Check (`pnpm format:check`)**: Verifies formatting across all source, test, and documentation files via Prettier.
+   - **Static Analysis & Complexity (`pnpm lint`)**: Enforces ESLint rules, Next.js conventions, and source length limits.
+   - **Type Verification (`pnpm exec next typegen && pnpm typecheck`)**: Generates Next.js route types and executes strict TypeScript type checking.
+   - **Unit Testing & Coverage (`pnpm test:unit:coverage`)**: Executes Vitest unit tests and generates coverage reports against the informational 90% target.
+   - **CI Utility Tests (`python -m unittest discover -s tests/ci -p "test_*.py" -v`)**: Always-run offline Python unit tests (`if: always()`) verifying artifact-download utilities and automation configuration contracts without network dependencies.
+   - **Offline AI Security Contracts (`pnpm test:ai-evals`)**: Verifies offline prompt and response schemas, sanitization, and graceful fallbacks.
+   - **Production Build (`pnpm build`)**: Verifies clean Next.js bundle compilation and static generation without warnings.
+
+2. **Supabase CI Workflow (`.github/workflows/supabase-checks.yml`)**:
+   Runs three parallel, independent sibling jobs against disposable local Supabase instances without inter-job dependencies:
+   - **Database Checks (`database-checks`)**: Starts local Supabase, resets and replays migrations, lints the database schema (`supabase db lint`), and executes all pgTAP security policies and RLS tests (`supabase test db --local`).
+   - **Integration Race Suites (`integration-checks`)**: Validates transaction serialization, database locking, AI rate-limiting RPCs, and retry coordination under concurrency (`pnpm test:integration`).
+   - **Browser Journeys (`browser-tests`)**: Runs critical end-to-end user journeys headlessly in Playwright Chromium (`pnpm test:e2e:critical`).
+
+### 7.5 Manual Testing Walkthrough Scenarios
+
+Testers and evaluators can manually execute these end-to-end scenarios to verify release candidates:
+
+#### Scenario 1: First-Run Setup, Signup and Email Verification
+
+1. Launch the local or hosted application.
+2. Select **Create account** and submit a new applicant email and password.
+3. In local environments, open Mailpit (`http://127.0.0.1:54324`) to inspect the delivered verification email; on hosted deployments, open the email inbox.
+4. Open the verification link in the browser. Verify that the session authenticates and immediately redirects to **My profile**.
+
+#### Scenario 2: Applicant Profile Onboarding Gate
+
+1. While authenticated on **My profile**, attempt to navigate directly to open roles or application URLs.
+2. Verify that the server guard intercepts navigation and redirects back to **My profile**.
+3. Attempt to submit with invalid phone digits; verify inline validation feedback appears.
+4. Enter valid full name and formatted international telephone number, then click **Save profile**.
+5. Verify that profile completion unlocks access to the Careers portal and application features.
+
+#### Scenario 3: HR Job Creation, Scheduling and Visibility
+
+1. Authenticate with an authorized HR account.
+2. Navigate to **Manage jobs** and click **Create draft**.
+3. Fill in title, team, category, description, and requirements.
+4. Set a scheduled future opening time and click **Save draft**, then **Publish job**.
+5. Verify the job displays the derived operational label **Scheduled** to HR.
+6. In a separate guest browser window, navigate to Careers and verify the scheduled job is hidden from public view.
+7. Return to HR interface and click **Revert to draft**; verify job returns to draft status for editing.
+8. Clear the scheduled opening time, click **Save draft** to persist the cleared opening schedule, and then click **Publish job**; verify the vacancy appears immediately on the public Careers portal.
+
+#### Scenario 4: Application Form Autofill, Draft Saving and Résumé Attachment
+
+1. Sign in as an applicant with a completed profile and open an active vacancy.
+2. Click **Apply for this role**; verify full name, email, and phone number are prefilled.
+3. Enter cover letter text and click **Save draft**.
+4. In the résumé attachment panel, select a valid PDF file (up to 1 MiB) and click **Upload résumé**.
+5. Verify that upload completes and renders a private download link.
+6. Attempt to upload a password-protected PDF; verify the server rejects the upload with a clear validation message while preserving typed cover letter text.
+
+#### Scenario 5: Optional AI Cover Letter Generation and Explicit Adoption
+
+1. Open the **Draft with AI** panel on the active application form.
+2. Enter experience notes and click **Generate draft**.
+3. Verify that the suggestion renders in the separate **AI draft preview** container while the existing cover letter textarea remains unchanged.
+4. Click **Replace current cover letter** (or **Use this draft** if the cover letter was empty); verify preview text copies into the cover letter textarea for editing.
+5. Click **Save draft** to persist the updated text.
+
+#### Scenario 6: Application Submission and Immutable Snapshot Freezing
+
+1. Review the application and click **Submit application**.
+2. Verify that application status updates to **Submitted** (the Applicant interface displays the Submitted badge).
+3. Verify that the form controls switch to read-only mode and prevent further edits.
+4. Sign in as HR, open **Application review**, and select the submission.
+5. Verify that candidate contact details, background, cover letter, and attached résumé match the submitted snapshot.
+
+#### Scenario 7: HR Review, Attributed Notes and Status Transitions
+
+1. In HR **Application review**, enter assessment notes into **Add note** and submit.
+2. Verify that the note appears in the internal review timeline with the HR reviewer's identity and timestamp.
+3. Update candidate review status to **In review**, then **Shortlisted**.
+4. Sign in as the applicant, open **My applications**, and verify that the updated review status is displayed, while HR notes remain strictly hidden.
+
+#### Scenario 8: Application Withdrawal and Reapplication
+
+1. As the applicant, open the submitted application detail view and select **Withdraw application**.
+2. Confirm withdrawal in the modal dialog.
+3. Verify that status updates to **Withdrawn** and the application remains visible as read-only historical record.
+4. Return to the same active job on the Careers portal and select **Apply for this role**.
+5. Verify that a fresh application draft is initialized, while the previously withdrawn submission remains intact in application history.
+
+#### Hosted Smoke Testing Protocol
+
+For hosted smoke testing, use separate authorized Applicant/HR accounts: complete a profile; create/publish a synthetic job; save/upload/submit; review/note/change status; close; check history; withdraw; verify HR can read but cannot process the withdrawn record. Record the actual deployment and results. Source checks and earlier local tests do not prove this passed online.
+
+### 7.6 Developer Troubleshooting and FAQ
+
+| Problem / Observation                       | Underlying Cause                                                                                | Developer Resolution                                                                                                           |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| No local verification or recovery email     | Local Supabase does not dispatch emails to external mail providers (e.g. Gmail).                | Open Mailpit web interface on `http://127.0.0.1:54324` to view captured emails and follow confirmation links.                  |
+| Local login fails on hosted deployment      | Local, Development and Production Supabase projects maintain isolated authentication databases. | Accounts created in local Docker do not exist on hosted environments; create dedicated test accounts per environment.          |
+| Playwright E2E tests skip locally           | `TEST_SUPABASE_SERVICE_ROLE_KEY` is not present in the current terminal shell environment.      | Export the service role key from `.env.local` into the terminal session before running `pnpm test:e2e`.                        |
+| Migration conflicts on branch switch        | Pending migrations on local database diverge from checked-out branch.                           | Run `pnpm exec supabase migration up --local` to apply pending migrations; reserve `pnpm db:reset` only for clean rebuilds.    |
+| AI test suite fails on live provider limits | Live provider quota exceeded or SoCLaaS credentials unavailable.                                | Use the offline contract suite `pnpm test:ai-evals` which mocks responses; avoid running live evals without authorized budget. |
 
 ## 8. Documentation site and CI
 
