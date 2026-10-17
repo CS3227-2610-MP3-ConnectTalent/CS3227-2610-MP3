@@ -32,12 +32,18 @@ Closes #103
    - Added 8 comprehensive Manual Testing Walkthrough Scenarios and the Hosted Smoke Testing Protocol.
    - Added Developer Troubleshooting and FAQ table.
 5. **PR Review Remediation**:
-   - Systematically addressed all 26 review comments on PR #104.
+   - Systematically addressed all 33 review comments on PR #104.
+   - Modeled résumé tracking histories as zero-to-many with `resume_id` current pointers in ERD.
+   - Documented `Scheduled` as a derived operational display label for `jobs.status = 'published'` with future opening times.
+   - Documented the raw binary PDF body upload protocol (`Content-Type: application/pdf`, `x-resume-*` headers).
+   - Documented mandatory `finalize_ai_invocation` success and failure branches before API response in AI draft sequence.
+   - Routed note creation through the protected security-definer RPC `append_hr_application_note` in HR review sequence and decisions.
+   - Documented always-run CI utility tests (`tests/ci/`) in test inventory and quality verification gates flowchart.
    - Verified that all use cases, diagrams, endpoints, and schema attributes reflect exact implementation in code, eliminating documentation drift.
 
 ## Verification
 - Verified code formatting with `pnpm exec prettier --check docs/UserGuide.md docs/DeveloperGuide.md website/docusaurus.config.js` (0 errors).
-- Verified documentation build with `npm --prefix website run build` (compiled successfully in 1.12m server / 3.82m client, 0 broken links, 0 diagram syntax errors).
+- Verified documentation build with `npm --prefix website run build` (compiled successfully with 0 broken links and 0 diagram syntax errors).
 - Cleaned persistent build caches with `npm --prefix website run clear`.
 
 Target base branch: `develop`

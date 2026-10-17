@@ -256,12 +256,12 @@ Priorities reflect product necessity:
   3. HR optionally specifies scheduled opening and scheduled closing timestamps.
   4. HR saves the draft; system validates required fields and persists job with status `Draft`.
   5. HR reviews draft and selects **Publish job**.
-  6. If scheduled opening is empty or in the past, status transitions to `Published`; if opening is in the future, status transitions to `Scheduled`.
+  6. System persists job status as `published`; if scheduled opening is in the future, the HR interface derives and displays the operational label `Scheduled` (public listings remain hidden until `opens_at`), and if opening is empty or in the past, the vacancy becomes immediately visible in public search.
 - **Extensions**:
   - 3a. Scheduled closing time is chronologically earlier than or equal to scheduled opening time.
     - System rejects save with schedule validation warning.
-  - 5a. HR chooses to revert a `Scheduled` job before its opening time.
-    - System returns job to `Draft` status, allowing further content revisions.
+  - 5a. HR chooses to revert a job with operational label `Scheduled` before its opening time.
+    - System returns stored job status to `draft`, allowing further content revisions.
   - 6a. HR selects **Close job** on an active listing.
     - System sets status to `Closed`; public listings and submissions cease immediately while historical applications remain accessible.
 
@@ -287,8 +287,8 @@ Priorities reflect product necessity:
 - **Preconditions**: Application draft exists or profile edit view is open.
 - **Main Success Scenario**:
   1. Applicant selects a PDF file and clicks **Upload résumé**.
-  2. Browser submits file to secure upload endpoint.
-  3. Server inspects file size (maximum 1 MiB) and passes buffer to an isolated worker process.
+  2. Browser submits raw binary PDF body with `x-resume-intent: upload` and `x-resume-filename` headers to the secure upload endpoint (`/api/applications/[id]/resume` or `/api/profile/resume`).
+  3. Server inspects file size (maximum 1 MiB) and passes buffer to an isolated Node worker thread (`node:worker_threads`).
   4. Worker executes PDF structural validation via PDF.js under strict memory and execution deadlines without rendering or executing embedded scripts.
   5. File passes structural inspection without requiring passwords; server creates a pending tracking record in the database, uploads file bytes to private Storage, and finalizes the tracking record to link the file to the draft.
   6. UI renders private download link and update controls.
@@ -493,7 +493,7 @@ Feature: HR Job Vacancy Authoring, Scheduling, and Lifecycle Management
   Scenario: Scheduled Vacancy Opening and Revert to Draft
     Given an HR reviewer authors a job with a scheduled opening time in the future
     When the reviewer publishes the vacancy
-    Then the job status is set to "Scheduled"
+    Then the job displays the derived operational label "Scheduled" while persisted as published
     And the job remains hidden from public applicants
     When the HR reviewer chooses "Revert to draft" prior to the opening time
     Then the status returns to "Draft" allowing further edits
@@ -741,8 +741,10 @@ erDiagram
     applications ||--o{ application_notes : "contains"
     applications ||--o{ application_status_events : "tracks"
     applications ||--o{ application_submission_events : "logs"
-    applications ||--o| application_resume_objects : "attaches"
-    applicant_profiles ||--o| profile_resume_objects : "attaches"
+    applications ||--o{ application_resume_objects : "tracks history"
+    applications |o--o| application_resume_objects : "current resume (resume_id)"
+    applicant_profiles ||--o{ profile_resume_objects : "tracks history"
+    applicant_profiles |o--o| profile_resume_objects : "current resume (resume_id)"
 
     profiles {
         uuid user_id PK
@@ -947,7 +949,7 @@ sequenceDiagram
     participant DB as PostgreSQL Database
 
     Applicant->>UI: Selects PDF file and clicks "Upload résumé"
-    UI->>Route: POST multipart/form-data (file buffer)
+    UI->>Route: POST raw binary PDF stream (headers: x-resume-intent, x-resume-filename, Content-Type: application/pdf)
     Route->>Route: Validate byte size (at most 1 MiB) and magic bytes
     Route->>Worker: Dispatch buffer for sandboxed structural parse
     Note over Worker: Runs in bounded node:worker_threads Worker with 5s timeout and V8 heap limits (64MB old / 16MB young)
@@ -982,21 +984,35 @@ sequenceDiagram
     Applicant->>UI: Enters experience notes and clicks "Generate draft"
     UI->>API: POST notes + target job ID
     API->>API: Verify authenticated Applicant session
-    API->>Quota: Check and increment rolling rate limit (durable SQL RPC)
-    Quota-->>API: Quota approved
-    API->>API: Assemble system prompt with job title and requirements (exclude private files)
-    API->>SoCLaaS: Dispatch completion request (20s timeout, max tokens)
-    SoCLaaS-->>API: Completion response text
-    API->>API: Validate output schema and enforce token limits
-    API-->>UI: Return generated draft suggestion
-    UI->>Applicant: Render suggestion in separate "AI draft preview"
-    alt Applicant chooses Discard
-        Applicant->>UI: Clicks "Discard suggestion"
-        UI->>UI: Clear preview and keep active cover letter untouched
-    else Applicant chooses Adopt
-        Applicant->>UI: Clicks "Use this draft" (or "Replace current cover letter")
-        UI->>UI: Copy preview text into cover letter textarea
-        UI->>Applicant: Ready for manual editing and explicit Save/Submit
+    API->>Quota: Check and reserve rolling rate limit (reserve_ai_invocation)
+    alt Rate limit reached or unready
+        Quota-->>API: Quota rejected / 429 Retry-After
+        API-->>UI: Rate limit or service unavailable error
+    else Quota approved
+        Quota-->>API: Reservation approved (invocationId)
+        API->>API: Assemble system prompt with job title and requirements (exclude private files)
+        API->>SoCLaaS: Dispatch completion request (20s timeout, max tokens)
+        alt Provider error or schema validation failure
+            SoCLaaS-->>API: Error response or invalid output schema
+            API->>Quota: Finalize invocation as failed (finalize_ai_invocation)
+            Quota-->>API: Failure recorded
+            API-->>UI: Return advisory error response (503 / 429)
+        else Provider success and valid output schema
+            SoCLaaS-->>API: Completion response text
+            API->>API: Validate output schema and enforce token limits
+            API->>Quota: Finalize invocation as success (finalize_ai_invocation)
+            Quota-->>API: Success audit recorded
+            API-->>UI: Return generated draft suggestion (200 OK)
+            UI->>Applicant: Render suggestion in separate "AI draft preview"
+            alt Applicant chooses Discard
+                Applicant->>UI: Clicks "Discard suggestion"
+                UI->>UI: Clear preview and keep active cover letter untouched
+            else Applicant chooses Adopt
+                Applicant->>UI: Clicks "Use this draft" (or "Replace current cover letter")
+                UI->>UI: Copy preview text into cover letter textarea
+                UI->>Applicant: Ready for manual editing and explicit Save/Submit
+            end
+        end
     end
 ```
 
@@ -1019,8 +1035,9 @@ sequenceDiagram
     HR->>UI: Enters feedback in "Add note" and clicks submit
     UI->>Action: POST addNote(applicationId, text)
     Action->>Action: Validate text length (at most 2000 characters)
-    Action->>DB: INSERT INTO application_notes (application_id, author_id, body, created_at)
-    DB-->>Action: Note persisted
+    Action->>DB: Call protected RPC append_hr_application_note(applicationId, text)
+    Note over DB: Security-definer RPC verifies verified HR actor, locks submitted application for update, and derives author_id & created_at
+    DB-->>Action: Returns new note ID
     Action-->>UI: Append-only note rendered in review timeline
 ```
 
@@ -1047,7 +1064,7 @@ stateDiagram-v2
     Withdrawn --> [*] : Retained immutable historical record
 ```
 
-_Note: Withdrawn applications are terminal historical records. Reapplying on an active job creates a separate application record rather than reopening the withdrawn record._
+*Note: Withdrawn applications are terminal historical records. Reapplying on an active job creates a separate application record rather than reopening the withdrawn record.*
 
 ### 5.7 Architectural and Design Decisions
 
@@ -1083,7 +1100,7 @@ This section documents the key architectural and technical design decisions made
 
 #### 5.7.5 Add-Only Attributed HR Notes and Status Auditing
 
-- **Decision**: Model HR application notes as strictly add-only records attributed to the authenticated reviewer's user ID with server-generated timestamps. Maintain status changes in a dedicated transition ledger (`application_status_events`).
+- **Decision**: Model HR application notes as strictly add-only records created via the protected security-definer RPC `append_hr_application_note`. The RPC verifies verified HR credentials, locks the submitted non-withdrawn application, automatically derives `author_id` from the authenticated session, and timestamps the note. Direct `INSERT` privileges on `application_notes` are revoked from authenticated users. Maintain status changes in a dedicated transition ledger (`application_status_events`) via `change_hr_application_status`.
 - **Rationale**: Hiring assessments require tamper-proof accountability. Allowing notes to be edited or deleted could enable retrospective alterations during disputed hiring processes. Recording each status transition maintains an immutable timeline of candidate progression.
 - **Alternatives Considered**: Single mutable status and notes fields directly on the `applications` row. Rejected because overwriting status and notes erases historical context and attribution.
 - **Trade-off**: Requires dedicated audit tables and multiple query joins, but satisfies organizational compliance and accountability requirements.
@@ -1157,6 +1174,8 @@ The automated test suite exercises all layers of the application without requiri
 | **Integration & Concurrency Suites** | `tests/integration/` (Node / Docker) | Lock ordering on application save/submit, rolling window AI quota exhaustion, concurrent withdrawal handling, first-upload retry coordination, and profile résumé replication isolation.                                                 |
 | **System & Browser Journeys**        | `tests/e2e/` (Playwright)            | Critical user journeys: account signup, verification callbacks, profile onboarding gates, job listing search/filter, draft editing, PDF résumé upload/replace, application submission, HR review, notes, status changes, and withdrawal. |
 | **AI Contract & Adversarial Evals**  | `test:ai-evals` (Vitest)             | Offline contract verification: prompt construction, system boundary containment, exclusion of private files, strict schema adherence, and graceful fallback on provider errors without live quota consumption.                           |
+| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                    |
+| **CI Utility Tests**                 | `tests/ci/` (Python `unittest`)      | Always-run offline repository utilities: artifact download validation, Renovate/Dependabot automation configuration checks, and CI helper functions without live network credentials.                                                     |
 
 ### 7.3 High-Risk Coverage Matrix
 
@@ -1180,7 +1199,8 @@ flowchart TD
         Format["Format Check<br/>(Prettier)"] --> Lint["Static Analysis<br/>(ESLint)"]
         Lint --> Types["Type Verification<br/>(Next Typegen & TSC)"]
         Types --> Units["Unit Testing & Coverage<br/>(Vitest)"]
-        Units --> AIEvals["Offline AI Contracts<br/>(evals)"]
+        Units --> CIUtils["CI Utility Tests<br/>(Python unittest, always-run)"]
+        CIUtils --> AIEvals["Offline AI Contracts<br/>(evals)"]
         AIEvals --> BuildCheck["Production Build<br/>(Next.js)"]
     end
 
@@ -1203,6 +1223,7 @@ flowchart TD
    - **Static Analysis & Complexity (`pnpm lint`)**: Enforces ESLint rules, Next.js conventions, and source length limits.
    - **Type Verification (`pnpm exec next typegen && pnpm typecheck`)**: Generates Next.js route types and executes strict TypeScript type checking.
    - **Unit Testing & Coverage (`pnpm test:unit:coverage`)**: Executes Vitest unit tests and generates coverage reports against the informational 90% target.
+   - **CI Utility Tests (`python -m unittest discover -s tests/ci -p "test_*.py" -v`)**: Always-run offline Python unit tests (`if: always()`) verifying artifact-download utilities and automation configuration contracts without network dependencies.
    - **Offline AI Security Contracts (`pnpm test:ai-evals`)**: Verifies offline prompt and response schemas, sanitization, and graceful fallbacks.
    - **Production Build (`pnpm build`)**: Verifies clean Next.js bundle compilation and static generation without warnings.
 
@@ -1237,7 +1258,7 @@ Testers and evaluators can manually execute these end-to-end scenarios to verify
 2. Navigate to **Manage jobs** and click **Create draft**.
 3. Fill in title, team, category, description, and requirements.
 4. Set a scheduled future opening time and click **Save draft**, then **Publish job**.
-5. Verify the job displays status **Scheduled** to HR.
+5. Verify the job displays the derived operational label **Scheduled** to HR.
 6. In a separate guest browser window, navigate to Careers and verify the scheduled job is hidden from public view.
 7. Return to HR interface and click **Revert to draft**; verify job returns to draft status for editing.
 8. Clear the scheduled opening time, click **Save draft** to persist the cleared opening schedule, and then click **Publish job**; verify the vacancy appears immediately on the public Careers portal.

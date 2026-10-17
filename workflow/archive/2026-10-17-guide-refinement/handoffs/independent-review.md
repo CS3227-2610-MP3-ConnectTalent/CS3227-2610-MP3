@@ -1,24 +1,27 @@
 # Independent review handoff: Guide refinement and developer guide expansion
 
 - Issue: [#103](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/103)
-- Reviewer: Independent Reviewer
+- Reviewer: Independent Reviewer (`mp3-independent-verification` role)
 - Date: 17 October 2026
 
-## Review Findings & Verification
+## Review Scope & Findings
 
-1. **Review Comments Resolution**:
-   - All 26 review comments on PR #104 were systematically inspected against repository implementation and addressed.
-   - Identified and corrected ERD table and column names against migrations (`application_status_events`, `application_resume_objects`, `profile_resume_objects`, `opens_at`/`closes_at`).
-   - Verified that PDF validation is implemented in `src/lib/resume-pdf-check.ts` via `node:worker_threads` Worker with memory limits and 5s timeout, not child processes.
-   - Verified that upload endpoints are `/api/applications/[id]/resume` and `/api/profile/resume`.
-   - Verified that reapplication is handled via a partial unique index and creates a new application record rather than reopening a withdrawn application.
-   - Verified that database tests reside in `supabase/tests/database/` and E2E journeys assert withdrawal locking while pgTAP verifies reapplication.
-   - Verified that CI workflows `.github/workflows/ci.yml` and `.github/workflows/supabase-checks.yml` run independently with parallel sibling jobs.
-   - Verified that `AiDraftPreview` button is **Replace current cover letter** when cover letter is nonempty (or **Use this draft** when empty).
-   - Verified that HR AI summary button is **Summarize** (or **Refresh summary**).
-   - Verified that public vacancy card listing renders title, team, category, and description, without a posting date.
-2. **Quality Gates**:
-   - `pnpm exec prettier --check docs/UserGuide.md docs/DeveloperGuide.md website/docusaurus.config.js`: PASSED (0 errors).
-   - `npm --prefix website run build`: PASSED (0 broken links, valid Mermaid SVG rendering).
-   - No documentation drift detected. All specifications, diagrams, and use cases match the deployed repository codebase.
+Conducted independent verification of `docs/DeveloperGuide.md`, `docs/UserGuide.md`, and `workflow/archive/2026-10-17-guide-refinement/` against repository code in `src/`, `supabase/migrations/`, `tests/`, and `.github/workflows/`.
 
+### Verified Invariants
+
+1. **Schema & Database Model**:
+   - Table names match migrations: `application_status_events`, `application_resume_objects`, `profile_resume_objects`.
+   - Cardinalities in Mermaid ERD correctly represent zero-to-many tracking histories (`applications ||--o{ application_resume_objects`, `applicant_profiles ||--o{ profile_resume_objects`) and zero-to-one current object pointers via `resume_id`.
+   - Note creation in Diagram 5.6.4 and Decision 5.7.5 correctly routes through the security-definer RPC `append_hr_application_note(applicationId, text)`, acknowledging that direct `INSERT` on `application_notes` is revoked from authenticated clients.
+2. **Runtime Endpoints & Execution Boundaries**:
+   - Upload sequence Diagram 5.6.2 and UC06 reflect raw binary body upload (`Content-Type: application/pdf`, `x-resume-intent`, `x-resume-filename`) consumed by `readResumeFile` without `multipart/form-data` parsing.
+   - PDF validation is documented as an isolated Node worker thread (`node:worker_threads`) with strict V8 heap limits ($64\text{ MiB}$ old gen / $16\text{ MiB}$ young gen) and a 5-second termination timer.
+   - AI draft route Diagram 5.6.3 documents mandatory audit finalization (`finalize_ai_invocation(..., 'success')` on valid output, and `finalize_ai_invocation(..., 'failed')` on provider error or schema validation failure) prior to returning responses.
+   - Operational label `Scheduled` is correctly documented as a derived display state from `jobs.status = 'published'` with future `opens_at`.
+3. **CI Workflows & Test Inventory**:
+   - Test inventory includes always-run CI utility tests under `tests/ci/`.
+   - Quality verification gates diagram accurately illustrates two independent GitHub Actions workflows (`ci.yml` and `supabase-checks.yml`) with parallel sibling jobs (`database-checks`, `integration-checks`, `browser-tests`).
+4. **Static Verification**:
+   - Prettier formatting verified: exit code 0.
+   - Docusaurus site build verified: exit code 0, 0 broken links, 0 diagram syntax errors.
