@@ -75,7 +75,7 @@ export function responseMessage(
   error: unknown,
   reference: unknown,
 ) {
-  if (ok) return "Résumé change saved. Review the attachment below.";
+  if (ok) return "Résumé change saved. Review the attachment.";
   const message =
     typeof error === "string" ? error : "Résumé change could not be saved.";
   return isReferenceCode(reference)
