@@ -1,6 +1,8 @@
 # Guide Refinement and Developer Guide Expansion PR Preparation — 17 October 2026
 
-Following the user's explicit instructions ("Looks good, can you create a branch and commit the changes... push these changes first and create a PR"), this change completes documentation refinements across the User Guide and Developer Guide.
+Following the user's explicit instructions ("Looks good, can you create a branch and commit the changes... push these changes first and create a PR"), this change completes documentation refinements across the User Guide and Developer Guide for Issue #103.
+
+Closes #103
 
 ## Summary of Changes
 1. **User Guide Refinement**:
@@ -33,3 +35,4 @@ Following the user's explicit instructions ("Looks good, can you create a branch
 
 Target base branch: `develop`
 Head branch: `docs/refine-user-and-developer-guides`
+
