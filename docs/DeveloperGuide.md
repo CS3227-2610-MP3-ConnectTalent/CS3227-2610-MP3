@@ -204,12 +204,12 @@ Priorities reflect product necessity:
   3. User opens verification link in browser on the requesting host.
   4. System verifies email, establishes authenticated session with `Applicant` role, and redirects to **My profile**.
   5. User is restricted to **My profile** until mandatory profile fields (full name and formatted international phone number) are entered and saved.
-  6. Upon saving, system updates readiness flag and unlocks access to Careers and application workflows.
+  6. Upon saving, system persists the validated fields, making the derived profile readiness check pass and unlocking access to Careers and application workflows.
 - **Extensions**:
   - 1a. Password does not meet length requirements or confirmation does not match.
     - System keeps entered email, displays clear inline validation guidance, and keeps form open.
   - 3a. Verification link expired or opened in inconsistent context.
-    - System prompts user to request a fresh verification link.
+    - System redirects to sign-in with a notice advising the user to check their details and verify their email before trying again.
   - 5a. User attempts to navigate directly to job application routes before completing profile.
     - Server guard intercepts request and redirects back to **My profile** with an onboarding prompt.
 
@@ -290,7 +290,7 @@ Priorities reflect product necessity:
   2. Browser submits file to secure upload endpoint.
   3. Server inspects file size (maximum 1 MiB) and passes buffer to an isolated worker process.
   4. Worker executes PDF structural validation via PDF.js under strict memory and execution deadlines without rendering or executing embedded scripts.
-  5. File passes structural inspection without requiring passwords; server uploads file to private Storage bucket and links storage reference to draft record.
+  5. File passes structural inspection without requiring passwords; server creates a pending tracking record in the database, uploads file bytes to private Storage, and finalizes the tracking record to link the file to the draft.
   6. UI renders private download link and update controls.
 - **Extensions**:
   - 3a. File exceeds 1 MiB byte limit.
@@ -371,7 +371,7 @@ Priorities reflect product necessity:
   1. Applicant opens **Draft with AI** panel on the application form.
   2. Applicant inputs experience notes (up to character limit) describing their background and role interest.
   3. Applicant selects **Generate draft**.
-  4. Server validates rate quota, constructs scoped prompt with job description and applicant notes (excluding private profile fields and files), and dispatches request to SoCLaaS provider.
+  4. Server validates rate quota, constructs scoped prompt with job title, published job requirements, and applicant notes (excluding job description, private profile fields, and files), and dispatches request to SoCLaaS provider.
   5. Provider returns generated draft adhering to strict token constraints.
   6. System displays output in a separate **AI draft preview** container; current cover letter remains unchanged.
   7. Applicant reviews suggestion and chooses **Use this draft** (or **Replace current cover letter**).
@@ -390,8 +390,9 @@ Priorities reflect product necessity:
   1. HR reviewer selects **Summarize application** on candidate submission view.
   2. Server verifies HR authorization, checks deployment quota, and compiles submitted cover letter and job requirements.
   3. Server dispatches request to SoCLaaS provider with strict formatting instructions and brevity limits.
-  4. Provider generates summary points with verifiable source text excerpts and suggested interview follow-up questions.
-  5. System validates output against structured schema and renders advisory summary cards alongside original candidate materials.
+  4. Provider returns two arrays of zero-based sentence IDs (evidence and unaddressed requirements) adhering to strict output constraints without generating prose or text.
+  5. Server validates returned IDs, extracts grounded excerpts from candidate submission and job requirements, and deterministically generates neutral interview follow-up questions.
+  6. System renders advisory summary cards alongside original candidate materials.
 - **Extensions**:
   - 1a. AI provider is unreachable or returns error.
     - System displays non-disruptive advisory error message; candidate application and review controls remain fully functional.
@@ -421,7 +422,7 @@ Feature: Applicant Account Verification and Required Profile Onboarding
     And displays guidance that full name and international phone number are required
     When the applicant provides a valid full name and formatted international telephone number
     And selects "Save profile"
-    Then the profile status updates to complete
+    Then the derived profile readiness check passes
     And access to career listings and application submission is unlocked
 
   Scenario: Rejection of Invalid International Telephone Format
@@ -650,8 +651,8 @@ Feature: HR Grounded Advisory AI Application Summary
   Scenario: Generate Grounded Summary for Candidate Application
     Given an HR reviewer is inspecting a submitted application
     When the reviewer clicks "Summarize application"
-    Then an advisory summary is generated containing grounded excerpts from candidate submission
-    And suggested interview follow-up questions are displayed
+    Then the provider returns selected sentence IDs without generating prose
+    And the server maps IDs to source excerpts and generates neutral follow-up questions
     And the candidate's review status remains completely unchanged
     And AI possesses zero automated authority to reject, shortlist, or grade candidates
 ```
@@ -956,9 +957,12 @@ sequenceDiagram
         Route-->>UI: Rejection response and typed form text preserved
     else PDF is structurally valid
         Worker-->>Route: Validation passed (page count, safe metadata)
-        Route->>Storage: Store file in private bucket (application-resumes)
-        Route->>DB: Reserve and finalize file tracking record
-        DB-->>Route: File record persisted
+        Route->>DB: Reserve pending file tracking record (prepare_application_resume)
+        DB-->>Route: Pending tracking record created
+        Route->>Storage: Store file bytes in private bucket (application-resumes)
+        Storage-->>Route: Storage write confirmed
+        Route->>DB: Finalize tracking record to ready (finalize_application_resume)
+        DB-->>Route: File finalized and linked to application
         Route-->>UI: Secure download URI reference
         UI->>Applicant: Display upload success and attachment badge
     end
@@ -980,7 +984,7 @@ sequenceDiagram
     API->>API: Verify authenticated Applicant session
     API->>Quota: Check and increment rolling rate limit (durable SQL RPC)
     Quota-->>API: Quota approved
-    API->>API: Assemble system prompt with job context (exclude private files)
+    API->>API: Assemble system prompt with job title and requirements (exclude private files)
     API->>SoCLaaS: Dispatch completion request (20s timeout, max tokens)
     SoCLaaS-->>API: Completion response text
     API->>API: Validate output schema and enforce token limits
@@ -1053,7 +1057,7 @@ This section documents the key architectural and technical design decisions made
 
 #### 5.7.2 Immutable Submission Snapshots and Retained Withdrawal History
 
-- **Decision**: On application submission, copy all candidate profile fields (full name, verified email, telephone calling code, national number, portfolio URL, education, work experience, cover letter, and résumé storage path) into dedicated snapshot columns in `applications`. Retain withdrawn application records as immutable audit rows while allowing new applications via a partial unique index: `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)`.
+- **Decision**: On application submission, snapshot all candidate contact and qualification fields (`full_name`, `submitted_email` from verified Auth, normalized `phone`, `portfolio_url`, `education`, and `work_experience`), freeze the active `cover_letter` along with `original_submitted_letter`, and attach an immutable foreign key reference (`resume_id`) pointing to an independently retained `application_resume_objects` row. Retain withdrawn application records as immutable audit rows while allowing new applications via a partial unique index: `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)`.
 - **Rationale**: Candidates may later update their account profiles or delete their profile résumés. Without snapshotting, an applicant's submitted historical record would be altered retroactively, compromising legal and compliance audit trails. Retaining withdrawn applications while permitting reapplication protects candidate historical context while preventing duplicate concurrent submissions.
 - **Alternatives Considered**: Referencing mutable applicant profile foreign keys directly, or deleting application rows upon withdrawal. Rejected because foreign key references cause retroactive data corruption when profiles change, and row deletion permanently destroys audit logs.
 - **Trade-off**: Increases database storage requirements due to column redundancy, but guarantees that once an application is submitted, its contents are immutable and verifiable.
@@ -1228,7 +1232,7 @@ Testers and evaluators can manually execute these end-to-end scenarios to verify
 1. Open the **Draft with AI** panel on the active application form.
 2. Enter experience notes and click **Generate draft**.
 3. Verify that the suggestion renders in the separate **AI draft preview** container while the existing cover letter textarea remains unchanged.
-4. Click **Use this draft**; verify preview text copies into the cover letter textarea for editing.
+4. Click **Replace current cover letter** (or **Use this draft** if the cover letter was empty); verify preview text copies into the cover letter textarea for editing.
 5. Click **Save draft** to persist the updated text.
 
 #### Scenario 6: Application Submission and Immutable Snapshot Freezing
