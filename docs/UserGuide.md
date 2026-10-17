@@ -14,13 +14,10 @@ ConnectTalent is a careers portal for **one employer per deployment**. Applicant
 
 - **Application:** [cs3227-mp3.vercel.app](https://cs3227-mp3.vercel.app/), supplied by the team for hosted access.
 - **Product/documentation website:** [GitHub Pages](https://cs3227-2610-mp3-connecttalent.github.io/CS3227-2610-MP3/). This is not the application login page.
-- **Local development:** usually [localhost:3000](http://localhost:3000); see [local setup](DeveloperGuide.md#2-getting-started).
 
-Use a browser; no desktop installation is required. Local accounts do not automatically work on the hosted website.
+Use a modern web browser; no desktop installation is required.
 
 Job details, **My profile** and **Manage jobs** have a **Back to open roles** link at the top. Applicants with an incomplete profile remain on **My profile** until they save the required details.
-
-**Verification status, 16 October 2026:** these instructions were checked against the development source and accepted specifications. Authenticated hosted workflows remain unverified in this review; the team must check the deployed version before evaluator use.
 
 ### 1.2 Create and verify an Applicant account
 
@@ -29,7 +26,7 @@ Job details, **My profile** and **Manage jobs** have a **Back to open roles** li
 3. Submit, then open the email verification link in the browser and on the host used for signup.
 4. Complete **My profile**.
 
-A password mismatch keeps the entered email available for correction. Eye controls show/hide passwords. Public signup creates an Applicant only. Local verification emails appear in [Mailpit](http://127.0.0.1:54324), not Gmail; hosted delivery depends on the team's email configuration.
+A password mismatch keeps the entered email available for correction. Eye controls show/hide passwords. Public signup creates an Applicant only. Verification email delivery depends on the employer's email configuration.
 
 ### 1.3 Complete your profile
 
@@ -52,7 +49,7 @@ Both roles use **Sign in**. Use **Sign out** in the header when finished; if an 
 
 Server-backed sign-in, account and HR form actions show an action-specific loading label and disable that form's submit button while its request is pending. If validation or an action error appears, correct it and retry. Loading feedback does not mean the action succeeded; wait for the resulting page or message.
 
-For recovery, choose **Forgot password?**, enter email, open the recovery message in the requesting browser, enter matching new passwords of 8–72 characters, then sign in again. The request acknowledgement is the same for registered and unregistered addresses. Invalid/expired links require another request. Recovery preserves your role; local messages appear in Mailpit.
+For recovery, choose **Forgot password?**, enter email, open the recovery message in the requesting browser, enter matching new passwords of 8–72 characters, then sign in again. The request acknowledgement is the same for registered and unregistered addresses. Invalid/expired links require another request. Recovery preserves your role.
 
 ## 2. Interface overview
 
@@ -92,7 +89,7 @@ New forms prefill saved profile details without AI. Existing drafts take precede
 
 ### 3.3 Optional AI drafting
 
-Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. The suggestion appears in a separate editable **AI draft preview**. Your current letter stays unchanged until you choose **Use this draft** or **Replace current cover letter**. Review all claims before adoption; **Discard suggestion** keeps your existing letter. Adoption changes the form only: **Save draft** or **Submit application** is still required. Notes are used for that request, not stored as application fields. This preview change is locally tested under #94; hosted verification is pending.
+Inside **Draft with AI**, enter up to **4,000 characters** of **Experience notes**, then choose **Generate draft**. The suggestion appears in a separate editable **AI draft preview**. Your current letter stays unchanged until you choose **Use this draft** or **Replace current cover letter**. Review all claims before adoption; **Discard suggestion** keeps your existing letter. Adoption changes the form only: **Save draft** or **Submit application** is still required. Notes are used for that request, not stored as application fields.
 
 Structured profile/contact fields and files are not automatically sent to AI. Personal information you deliberately type in notes/letters may be included. If generation fails or is usage-limited, retain/edit the existing letter and continue manually.
 
@@ -124,7 +121,7 @@ Withdrawal is permanent for that application, works after closure and does not e
 
 ### 4.1 HR access
 
-There is no public HR signup or role switch. An administrator assigns HR to a verified dedicated account without Applicant applications. Ask the team for authorized evaluator access; this guide publishes no shared password. Developers can use the [local-only HR seed](DeveloperGuide.md#23-local-hr-account).
+There is no public HR signup or role switch. An administrator assigns HR to a verified dedicated account without Applicant applications. Ask the team for authorized evaluator access; this guide publishes no shared password.
 
 ### 4.2 HR dashboard
 
@@ -173,20 +170,17 @@ Withdrawn submissions remain readable but cannot receive new notes, status chang
 
 Closing a job prevents new applications. Withdrawal freezes one submitted record and permits a separate application while the job is still active. At most one non-withdrawn application per Applicant per job is allowed.
 
-## 6. Privacy and evaluator testing
+## 6. Privacy and acceptable use
 
 Applicants access their own records; HR accesses submitted snapshots and private review data. Use synthetic details/PDFs for tests. Do not share account credentials or upload another person's résumé.
 
 AI is limited to three requests per user per rolling minute and 24 provider requests per deployment per rolling minute across both features. Wait after a limit message. Structured contact/background fields and files are excluded from automatic AI payloads; deliberately supplied notes/letters remain AI input.
 
-For hosted smoke testing, use separate authorized Applicant/HR accounts: complete a profile; create/publish a synthetic job; save/upload/submit; review/note/change status; close; check history; withdraw; verify HR can read but cannot process the withdrawn record. Record the actual deployment and results. Source checks and earlier local tests do not prove this passed online.
-
 ## 7. Troubleshooting and FAQ
 
 | Problem                               | What to do                                                                                                                                                                                |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No local verification email           | Open Mailpit on port 54324; local emails do not go to Gmail.                                                                                                                              |
-| No hosted verification/recovery email | Check spam; ask the team to check delivery/redirects. Request a fresh expired link.                                                                                                       |
+| No verification or recovery email     | Check spam folder; ask the team to check delivery and callback redirects. Request a fresh link if expired.                                                                                |
 | Every tab returns to My profile       | Save required name and formatted phone. File upload alone is not completion.                                                                                                              |
 | No HR navigation                      | Ask the administrator to check the role in the correct environment.                                                                                                                       |
 | File exceeds 1 MiB                    | Choose a smaller PDF.                                                                                                                                                                     |
@@ -200,6 +194,5 @@ For hosted smoke testing, use separate authorized Applicant/HR accounts: complet
 | Cannot edit submission                | Intentional: text/details/files freeze on submission.                                                                                                                                     |
 | No Withdraw control                   | Open an individual submitted application; drafts/list do not offer it.                                                                                                                    |
 | AI unavailable/limited                | Continue manually; wait after limits.                                                                                                                                                     |
-| Local login fails online              | Local, Development and Production databases have separate accounts.                                                                                                                       |
 
 See the [Developer Guide](DeveloperGuide.md) for setup/security/tests and [Reflections](Reflections.md) for individual work.
