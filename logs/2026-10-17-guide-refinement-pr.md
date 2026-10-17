@@ -1,8 +1,11 @@
 # Guide Refinement and Developer Guide Expansion PR Preparation — 17 October 2026
 
-Following the user's explicit instructions ("Looks good, can you create a branch and commit the changes... push these changes first and create a PR"), this change completes documentation refinements across the User Guide and Developer Guide for Issue #103.
+Following the user's explicit instructions ("Looks good, can you create a branch and commit the changes... push these changes first and create a PR", and "There are a lot of review comments in the PR. Can you fetch them, then address and fix them, then commit and push the changes, then resolve the review comments that have been addressed"), this change completes documentation refinements across the User Guide and Developer Guide for Issue #103 and addresses all 26 PR #104 review comments.
 
 Closes #103
+
+- Evidence packet: [workflow/archive/2026-10-17-guide-refinement/record.md](../workflow/archive/2026-10-17-guide-refinement/record.md)
+- PR: [#104](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/104)
 
 ## Summary of Changes
 1. **User Guide Refinement**:
@@ -18,16 +21,19 @@ Closes #103
    - Added Non-Functional Specifications (performance, security, data integrity, usability).
    - Added `"gherkin"` to `prism.additionalLanguages` in `website/docusaurus.config.js`.
 3. **Developer Guide Section 5 Expansion (Architecture and Data Design)**:
-   - Added Mermaid Entity-Relationship Diagram (`erDiagram`) reflecting exact PostgreSQL migration schema tables and columns.
-   - Added 4 Sequence Diagrams (Application Submission & Freeze, Sandboxed PDF Résumé Validation, AI Cover Letter Generation & Explicit Adoption, HR Review & Notes) and 1 State Diagram (`stateDiagram-v2`).
+   - Added Mermaid Entity-Relationship Diagram (`erDiagram`) reflecting exact PostgreSQL migration schema tables and columns (`application_status_events`, `application_resume_objects`, `profile_resume_objects`, etc.).
+   - Added 4 Sequence Diagrams (Application Submission & Freeze, Sandboxed PDF Résumé Validation via `node:worker_threads` Worker with memory caps and 5s deadline, AI Cover Letter Generation & Explicit Adoption, HR Review & Notes) and 1 State Diagram (`stateDiagram-v2`).
    - Resolved Mermaid syntax formatting by ensuring no unquoted statement-terminating semicolons appear in diagram messages.
-   - Added 6 Key Architectural and Design Decisions structured with Decision, Rationale, Alternatives Considered, and Trade-offs (including AI runtime service-key use for quota reservation/audit RPCs in 5.7.6).
+   - Added 6 Key Architectural and Design Decisions structured with Decision, Rationale, Alternatives Considered, and Trade-offs (including AI runtime service-key use for quota reservation/audit RPCs in 5.7.6 and operational environment separation practice).
 4. **Developer Guide Section 7 Expansion (Testing Strategy)**:
-   - Added Test Pyramid flowchart and Automated Test Inventory table.
-   - Added High-Risk Coverage Matrix mapping critical failure modes to mitigations.
-   - Added Quality Verification Gates flowchart and numbered gate definitions.
+   - Added Test Pyramid flowchart and Automated Test Inventory table pointing to `supabase/tests/database/`.
+   - Added High-Risk Coverage Matrix mapping critical failure modes to mitigations (attributing reapplication to pgTAP tests and withdrawal lock enforcement to E2E).
+   - Added Quality Verification Gates flowchart depicting parallel CI workflows (`ci.yml` and `supabase-checks.yml`) and numbered gate definitions.
    - Added 8 comprehensive Manual Testing Walkthrough Scenarios and the Hosted Smoke Testing Protocol.
    - Added Developer Troubleshooting and FAQ table.
+5. **PR Review Remediation**:
+   - Systematically addressed all 26 review comments on PR #104.
+   - Verified that all use cases, diagrams, endpoints, and schema attributes reflect exact implementation in code, eliminating documentation drift.
 
 ## Verification
 - Verified code formatting with `pnpm exec prettier --check docs/UserGuide.md docs/DeveloperGuide.md website/docusaurus.config.js` (0 errors).

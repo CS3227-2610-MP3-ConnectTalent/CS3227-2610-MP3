@@ -223,8 +223,8 @@ Priorities reflect product necessity:
   3. Applicant selects **Save profile**.
   4. System validates phone number format according to international telephony standards, updates profile record, and displays success notification.
 - **Extensions**:
-  - 2a. Telephone national number contains invalid characters or does not match selected country code digit length.
-    - System rejects update and displays field-level formatting instructions.
+  - 2a. Telephone number contains invalid characters or combined calling code and national digits total outside 7–15 digits.
+    - System rejects update and displays field-level formatting instructions requiring a valid E.164-compatible phone number (7–15 digits).
   - 2b. Portfolio URL contains embedded credentials or invalid scheme.
     - System rejects update and prompts for valid HTTP(S) URL.
 
@@ -234,7 +234,7 @@ Priorities reflect product necessity:
 - **Preconditions**: One or more jobs are in `Published` status within their active schedule window.
 - **Main Success Scenario**:
   1. Visitor opens **Careers** portal.
-  2. System displays active published vacancies with title, team, category, and posting date.
+  2. System displays active published vacancies with title, team, category, and description.
   3. Visitor selects a category filter (e.g. Engineering, Sales, Legal, HR, Other).
   4. System refreshes list to display vacancies matching the selected category.
   5. Visitor enters a keyword phrase into the search input.
@@ -272,14 +272,14 @@ Priorities reflect product necessity:
 - **Main Success Scenario**:
   1. Applicant navigates to an open vacancy and chooses **Apply for this role**.
   2. System checks profile readiness and verifies no active application exists.
-  3. System initializes a private application form, prefilling name, email, phone, and optional background from saved profile.
+  3. System initializes an in-memory application form, prefilling name, email, phone, and optional background from saved profile without creating a database row.
   4. Applicant enters or edits cover letter text and selects **Save draft**.
-  5. System validates draft ownership and persists changes privately. HR cannot view the draft.
+  5. System validates draft ownership and persists a private draft application record. HR cannot view the draft.
 - **Extensions**:
   - 1a. Applicant already has an active submitted application for the job.
     - System displays existing application detail view and prevents creating duplicate draft.
   - 4a. Applicant navigates away before saving.
-    - Form remains unpersisted; applicant is prompted to save draft before exit.
+    - Form remains unpersisted; unsaved typed text is discarded without warning upon navigation or refresh.
 
 #### UC06: Private PDF Résumé Upload and Structural Validation
 
@@ -387,7 +387,7 @@ Priorities reflect product necessity:
 - **Actor**: Authenticated HR Reviewer
 - **Preconditions**: Submitted application is open in review; AI feature is enabled.
 - **Main Success Scenario**:
-  1. HR reviewer selects **Summarize application** on candidate submission view.
+  1. HR reviewer selects **Summarize** (or **Refresh summary** for subsequent runs) on candidate submission view.
   2. Server verifies HR authorization, checks deployment quota, and compiles submitted cover letter and job requirements.
   3. Server dispatches request to SoCLaaS provider with strict formatting instructions and brevity limits.
   4. Provider returns two arrays of zero-based sentence IDs (evidence and unaddressed requirements) adhering to strict output constraints without generating prose or text.
@@ -515,8 +515,8 @@ Feature: Application Drafting and Private Form Persistence
     Given an applicant with a completed profile opens an application for an open role
     When the application form renders
     Then full name, verified email, phone number, and background fields are prefilled from profile
-    And a private draft application is instantiated for the applicant and job
-    And the draft remains completely invisible to HR reviewers
+    And the form fields are initialized in memory without creating a database row until an explicit save or upload
+    And any subsequent draft saved by the applicant remains completely invisible to HR reviewers
 
   Scenario: Explicit Draft Saving and Field Preservation
     Given an applicant is composing a cover letter in a draft application
@@ -650,7 +650,7 @@ Feature: HR Grounded Advisory AI Application Summary
 
   Scenario: Generate Grounded Summary for Candidate Application
     Given an HR reviewer is inspecting a submitted application
-    When the reviewer clicks "Summarize application"
+    When the reviewer clicks "Summarize"
     Then the provider returns selected sentence IDs without generating prose
     And the server maps IDs to source excerpts and generates neutral follow-up questions
     And the candidate's review status remains completely unchanged
@@ -941,8 +941,8 @@ sequenceDiagram
     autonumber
     actor Applicant
     participant UI as Résumé Upload Component
-    participant Route as Server Upload Route (/api/resumes)
-    participant Worker as Isolated Node Worker Process
+    participant Route as Server Upload Route (/api/applications/[id]/resume or /api/profile/resume)
+    participant Worker as Isolated Node Worker Thread
     participant Storage as Supabase Private Storage Bucket
     participant DB as PostgreSQL Database
 
@@ -950,7 +950,7 @@ sequenceDiagram
     UI->>Route: POST multipart/form-data (file buffer)
     Route->>Route: Validate byte size (at most 1 MiB) and magic bytes
     Route->>Worker: Dispatch buffer for sandboxed structural parse
-    Note over Worker: Runs in isolated child process with 5s timeout and V8 heap cap
+    Note over Worker: Runs in bounded node:worker_threads Worker with 5s timeout and V8 heap limits (64MB old / 16MB young)
     Worker->>Worker: Parse PDF structure via PDF.js (no execution or password prompt)
     alt PDF requires password or is unreadable
         Worker-->>Route: Structural validation failure (Safe code 422)
@@ -994,7 +994,7 @@ sequenceDiagram
         Applicant->>UI: Clicks "Discard suggestion"
         UI->>UI: Clear preview and keep active cover letter untouched
     else Applicant chooses Adopt
-        Applicant->>UI: Clicks "Use this draft"
+        Applicant->>UI: Clicks "Use this draft" (or "Replace current cover letter")
         UI->>UI: Copy preview text into cover letter textarea
         UI->>Applicant: Ready for manual editing and explicit Save/Submit
     end
@@ -1031,18 +1031,23 @@ stateDiagram-v2
     [*] --> Draft : Applicant initiates application
     Draft --> Draft : Save draft / update text / attach résumé
     Draft --> Submitted : Submit application (snapshots freeze)
-    Submitted --> InReview : HR starts review
+    Submitted --> InReview : HR updates status
+    Submitted --> Shortlisted : HR updates status
+    Submitted --> Rejected : HR updates status
     InReview --> Shortlisted : HR updates status
     InReview --> Rejected : HR updates status
     Shortlisted --> InReview : HR updates status
     Rejected --> InReview : HR updates status
+    Shortlisted --> Rejected : HR updates status
+    Rejected --> Shortlisted : HR updates status
     Submitted --> Withdrawn : Applicant withdraws
     InReview --> Withdrawn : Applicant withdraws
     Shortlisted --> Withdrawn : Applicant withdraws
     Rejected --> Withdrawn : Applicant withdraws
-    Withdrawn --> [*] : Retained immutable history
-    Withdrawn --> Draft : Reapply on active open job
+    Withdrawn --> [*] : Retained immutable historical record
 ```
+
+_Note: Withdrawn applications are terminal historical records. Reapplying on an active job creates a separate application record rather than reopening the withdrawn record._
 
 ### 5.7 Architectural and Design Decisions
 
@@ -1062,12 +1067,12 @@ This section documents the key architectural and technical design decisions made
 - **Alternatives Considered**: Referencing mutable applicant profile foreign keys directly, or deleting application rows upon withdrawal. Rejected because foreign key references cause retroactive data corruption when profiles change, and row deletion permanently destroys audit logs.
 - **Trade-off**: Increases database storage requirements due to column redundancy, but guarantees that once an application is submitted, its contents are immutable and verifiable.
 
-#### 5.7.3 Isolated Worker Process for Untrusted PDF Structural Validation
+#### 5.7.3 Isolated Worker Thread for Untrusted PDF Structural Validation
 
-- **Decision**: Execute structural PDF validation inside an isolated Node child process using PDF.js with a strict 5-second deadline and capped V8 memory limits (64 MiB total / 16 MiB young generation), terminating the worker after every execution.
-- **Rationale**: User-uploaded PDFs represent untrusted binary input that could exploit vulnerabilities in complex PDF parsing engines. Running parsing inside a sandboxed child process ensures that memory exhaustion, infinite loops, or engine crashes do not take down the main Next.js web process.
-- **Alternatives Considered**: In-process PDF parsing or relying solely on file extension / MIME type checking. Rejected because in-process parsing exposes the main application process to memory leaks and denial-of-service, and MIME types can be trivially spoofed.
-- **Trade-off**: Incurs minor IPC serialization and process instantiation overhead per upload, but provides process-level isolation against malicious or malformed documents.
+- **Decision**: Execute structural PDF validation inside an isolated Node worker thread (`node:worker_threads`) using PDF.js with a strict 5-second deadline and capped V8 memory limits (64 MiB old generation / 16 MiB young generation), terminating the worker after every execution.
+- **Rationale**: User-uploaded PDFs represent untrusted binary input that could exploit vulnerabilities or trigger long-running execution in PDF parsing engines. Running parsing inside a bounded worker thread isolates memory allocation under V8 heap limits, prevents page traversal from blocking the Next.js event loop, and enforces a hard 5-second termination timer.
+- **Alternatives Considered**: In-process main-thread PDF parsing, or external child process / microservice. In-process parsing was rejected because CPU-intensive page traversal blocks the main event loop and memory spikes risk process exhaustion. An external microservice or OS child process was deferred as disproportionately heavy for the workload.
+- **Trade-off**: A worker thread shares the host Node.js OS process so native segfaults in underlying C++ addons could affect the host; however, PDF.js runs in pure JavaScript within V8, making worker thread heap bounding and termination an effective and lightweight sandbox without child process OS overhead.
 
 #### 5.7.4 Human-in-the-Loop AI Advisory Architecture
 
@@ -1085,10 +1090,10 @@ This section documents the key architectural and technical design decisions made
 
 #### 5.7.6 Separation of Synthetic Fixtures, Test Keys, and Deployment Environments
 
-- **Decision**: Enforce strict isolation between local Docker development, ephemeral preview environments, and production Supabase deployments. Restrict privileged server runtime keys (`SUPABASE_SECRET_KEY` or legacy `SUPABASE_SERVICE_ROLE_KEY`) exclusively to server-side file maintenance (narrowly checked résumé mutations and orphan cleanup) and AI quota reservation/audit RPCs (`reserve_ai_invocation` and `finalize_ai_invocation`). Local test runners and local HR seeding use a separate ignored administrative key (`TEST_SUPABASE_SERVICE_ROLE_KEY`), while public publishable keys (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) are required for standard client operations governed by Supabase Auth and RLS.
+- **Decision**: Maintain strict separation between local Docker development, ephemeral preview environments, and production Supabase projects as a mandatory deployment and operational practice. Restrict privileged server runtime keys (`SUPABASE_SECRET_KEY` or legacy `SUPABASE_SERVICE_ROLE_KEY`) exclusively to server-side file maintenance (narrowly checked résumé mutations and orphan cleanup) and AI quota reservation/audit RPCs (`reserve_ai_invocation` and `finalize_ai_invocation`). Local test runners and local HR seeding use a separate ignored administrative key (`TEST_SUPABASE_SERVICE_ROLE_KEY`), while public publishable keys (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) are required for standard client operations governed by Supabase Auth and RLS.
 - **Rationale**: Prevents accidental data contamination, credential leakage, or execution of destructive seed scripts against hosted preview or production databases. Restricting privileged runtime keys on the server strictly to necessary storage cleanup and AI rate-limit auditing ensures that standard application queries cannot bypass Row-Level Security, while operators are clearly aware that AI quota enforcement and audit trails depend on server secret keys.
 - **Alternatives Considered**: Shared cloud databases across development branches, bundling service-role keys in client bundles, or running AI quota queries with user-scoped clients. Rejected because shared databases cause race conditions between features, bundled keys expose complete administrative database control to client browsers, and user-scoped clients cannot reliably enforce cross-user rolling quota tables without exposing audit records.
-- **Trade-off**: Requires developers to run local Supabase Docker containers and configure environment-specific `.env` files, but guarantees data privacy and environment isolation.
+- **Trade-off**: Requires operators and developers to maintain disciplined environment configuration and separate hosted Supabase projects across preview and production deployments, as isolation is governed by environment variable provisioning rather than programmatic platform validation.
 
 ## 6. Software engineering process
 
@@ -1148,45 +1153,64 @@ The automated test suite exercises all layers of the application without requiri
 | Layer / Test Suite                   | Target Scope                         | Verified Invariants and Scenarios                                                                                                                                                                                                        |
 | ------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Domain & Unit Tests**              | `tests/unit/` (Vitest)               | Input validation schemas (Zod), international telephony normalization (`libphonenumber-js`), job search phrase sanitization and matching, PDF worker error code mapping, and UI hook state management.                                   |
-| **Database & Security Tests**        | `tests/db/` (pgTAP)                  | PostgreSQL Row-Level Security (RLS) enforcement across all tables, authenticated role separation (Applicant vs HR), private draft invisibility, immutable submitted snapshot constraints, and partial unique indexing.                   |
+| **Database & Security Tests**        | `supabase/tests/database/` (pgTAP)   | PostgreSQL Row-Level Security (RLS) enforcement across all tables, authenticated role separation (Applicant vs HR), private draft invisibility, immutable submitted snapshot constraints, and partial unique indexing.                   |
 | **Integration & Concurrency Suites** | `tests/integration/` (Node / Docker) | Lock ordering on application save/submit, rolling window AI quota exhaustion, concurrent withdrawal handling, first-upload retry coordination, and profile résumé replication isolation.                                                 |
 | **System & Browser Journeys**        | `tests/e2e/` (Playwright)            | Critical user journeys: account signup, verification callbacks, profile onboarding gates, job listing search/filter, draft editing, PDF résumé upload/replace, application submission, HR review, notes, status changes, and withdrawal. |
 | **AI Contract & Adversarial Evals**  | `test:ai-evals` (Vitest)             | Offline contract verification: prompt construction, system boundary containment, exclusion of private files, strict schema adherence, and graceful fallback on provider errors without live quota consumption.                           |
 
 ### 7.3 High-Risk Coverage Matrix
 
-| Risk Domain                               | Potential Failure Mode                                                                          | Mitigation and Test Verification                                                                                                                                                            |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Concurrent Submission / Stale Writes**  | Multiple concurrent save/submit requests corrupting application state or bypassing job closure. | Verified via integration race suites (`tests/integration/`) asserting transaction lock acquisition and strict revision check failures on stale writes.                                      |
-| **Role Escalation / Cross-Tenant Access** | Applicant reading another candidate's draft or accessing HR management endpoints.               | Enforced by PostgreSQL RLS policies verified by pgTAP tests (`tests/db/`), alongside Next.js server route guards.                                                                           |
-| **Untrusted / Malicious PDF Uploads**     | Malformed PDF triggering parser crashes, memory exhaustion, or code execution.                  | Validated in an isolated child process worker with strict execution deadlines and memory caps; verified via unit tests rejecting password-protected or corrupt files with safe error codes. |
-| **Prompt Injection / Untrusted Content**  | Malicious text in job listings or notes attempting to manipulate AI summary output.             | Evaluated via offline adversarial evals (`test:ai-evals`); strict output schema parsing; client-side escaping; zero automated mutation authority.                                           |
-| **Accidental Data Loss on Withdrawal**    | Withdrawing an application destroying candidate records or preventing subsequent reapplication. | Verified via database partial unique index tests and E2E journeys asserting status transitions to `Withdrawn`, snapshot retention, and successful subsequent reapplication.                 |
-| **Telephony Normalization Inaccuracies**  | Incompatible calling codes or malformed national phone numbers preventing candidate contact.    | Verified via comprehensive unit tests exercising international calling code parsing and validation against standard telephone numbering plans.                                              |
+| Risk Domain                               | Potential Failure Mode                                                                          | Mitigation and Test Verification                                                                                                                                                                                                                                                  |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Concurrent Submission / Stale Writes**  | Multiple concurrent save/submit requests corrupting application state or bypassing job closure. | Verified via integration race suites (`tests/integration/`) asserting transaction lock acquisition and strict revision check failures on stale writes.                                                                                                                            |
+| **Role Escalation / Cross-Tenant Access** | Applicant reading another candidate's draft or accessing HR management endpoints.               | Enforced by PostgreSQL RLS policies verified by pgTAP tests (`supabase/tests/database/`), alongside Next.js server route guards.                                                                                                                                                  |
+| **Untrusted / Malicious PDF Uploads**     | Malformed PDF triggering parser crashes, memory exhaustion, or code execution.                  | Validated in an isolated Node worker thread (`node:worker_threads`) with strict execution deadlines (5s) and capped V8 memory limits (64 MiB old / 16 MiB young); verified via unit tests rejecting password-protected or corrupt files with safe error codes.                    |
+| **Prompt Injection / Untrusted Content**  | Malicious text in job listings or notes attempting to manipulate AI summary output.             | Evaluated via offline adversarial evals (`test:ai-evals`); strict output schema parsing; client-side escaping; zero automated mutation authority.                                                                                                                                 |
+| **Accidental Data Loss on Withdrawal**    | Withdrawing an application destroying candidate records or preventing subsequent reapplication. | Verified via pgTAP database tests (`supabase/tests/database/reapply_after_withdrawal.test.sql`) asserting partial unique index behavior and reapplication; E2E browser journeys verify withdrawal transition, immutable snapshot retention, and post-withdrawal lock enforcement. |
+| **Telephony Normalization Inaccuracies**  | Incompatible calling codes or malformed national phone numbers preventing candidate contact.    | Verified via comprehensive unit tests exercising international calling code parsing and validation against standard telephone numbering plans.                                                                                                                                    |
 
 ### 7.4 Quality Verification Gates
 
-The engineering pipeline enforces automated quality gates configured in continuous integration:
+The engineering pipeline enforces automated quality gates across two independent GitHub Actions workflows executed on pull requests and pushes to `develop` and `master`:
 
 ```mermaid
-flowchart LR
-    Format["Format Check<br/>(Prettier)"] --> Lint["Static Analysis<br/>(ESLint)"]
-    Lint --> Types["Type Verification<br/>(Next Typegen & TSC)"]
-    Types --> Units["Unit Testing<br/>(Vitest & Coverage)"]
-    Units --> DBTests["Database Policies<br/>(pgTAP Supabase)"]
-    DBTests --> Races["Integration Races<br/>(Concurrency Suites)"]
-    Races --> E2ETests["Browser Journeys<br/>(Playwright Critical)"]
-    E2ETests --> BuildCheck["Production Build<br/>(Next.js Build)"]
+flowchart TD
+    subgraph CI["ci.yml (Application CI - Sequential Steps)"]
+        direction TB
+        Format["Format Check<br/>(Prettier)"] --> Lint["Static Analysis<br/>(ESLint)"]
+        Lint --> Types["Type Verification<br/>(Next Typegen & TSC)"]
+        Types --> Units["Unit Testing & Coverage<br/>(Vitest)"]
+        Units --> AIEvals["Offline AI Contracts<br/>(evals)"]
+        AIEvals --> BuildCheck["Production Build<br/>(Next.js)"]
+    end
+
+    subgraph SupabaseCI["supabase-checks.yml (Supabase CI - Parallel Sibling Jobs)"]
+        direction TB
+        subgraph DBJob["database-checks"]
+            DBReset["DB Reset & Lint"] --> DBTests["pgTAP Database Tests"]
+        end
+        subgraph IntJob["integration-checks"]
+            IntSuites["Integration Race Suites"]
+        end
+        subgraph E2EJob["browser-tests"]
+            E2ETests["Playwright E2E (Chromium)"]
+        end
+    end
 ```
 
-1. **Prettier Formatting Check (`pnpm format:check`)**: Ensures uniform formatting across all source, test, and documentation files.
-2. **ESLint & Complexity Linting (`pnpm lint`)**: Verifies code quality, Next.js rules, and file complexity/size limits.
-3. **Type Generation and Check (`pnpm exec next typegen && pnpm typecheck`)**: Compiles route types and performs strict TypeScript type validation.
-4. **Unit Test Suite & Coverage (`pnpm test:unit:coverage`)**: Executes Vitest unit tests and generates coverage metrics against the informational 90% target.
-5. **Database Policy Verification (`pnpm test:db`)**: Executes local pgTAP database tests against a disposable local Supabase instance.
-6. **Concurrency Race Suites (`pnpm test:integration`)**: Validates transaction serialization, AI rate-limiting RPCs, and retry handling under concurrent load.
-7. **Playwright Browser Journeys (`pnpm test:e2e:critical`)**: Exercises critical end-to-end user journeys headlessly in Chromium.
-8. **Production Build (`pnpm build`)**: Verifies clean Next.js production build and page generation without runtime warnings.
+1. **Application CI Workflow (`.github/workflows/ci.yml`)**:
+   - **Format Check (`pnpm format:check`)**: Verifies formatting across all source, test, and documentation files via Prettier.
+   - **Static Analysis & Complexity (`pnpm lint`)**: Enforces ESLint rules, Next.js conventions, and source length limits.
+   - **Type Verification (`pnpm exec next typegen && pnpm typecheck`)**: Generates Next.js route types and executes strict TypeScript type checking.
+   - **Unit Testing & Coverage (`pnpm test:unit:coverage`)**: Executes Vitest unit tests and generates coverage reports against the informational 90% target.
+   - **Offline AI Security Contracts (`pnpm test:ai-evals`)**: Verifies offline prompt and response schemas, sanitization, and graceful fallbacks.
+   - **Production Build (`pnpm build`)**: Verifies clean Next.js bundle compilation and static generation without warnings.
+
+2. **Supabase CI Workflow (`.github/workflows/supabase-checks.yml`)**:
+   Runs three parallel, independent sibling jobs against disposable local Supabase instances without inter-job dependencies:
+   - **Database Checks (`database-checks`)**: Starts local Supabase, resets and replays migrations, lints the database schema (`supabase db lint`), and executes all pgTAP security policies and RLS tests (`supabase test db --local`).
+   - **Integration Race Suites (`integration-checks`)**: Validates transaction serialization, database locking, AI rate-limiting RPCs, and retry coordination under concurrency (`pnpm test:integration`).
+   - **Browser Journeys (`browser-tests`)**: Runs critical end-to-end user journeys headlessly in Playwright Chromium (`pnpm test:e2e:critical`).
 
 ### 7.5 Manual Testing Walkthrough Scenarios
 
@@ -1216,7 +1240,7 @@ Testers and evaluators can manually execute these end-to-end scenarios to verify
 5. Verify the job displays status **Scheduled** to HR.
 6. In a separate guest browser window, navigate to Careers and verify the scheduled job is hidden from public view.
 7. Return to HR interface and click **Revert to draft**; verify job returns to draft status for editing.
-8. Clear the scheduled opening time and publish again; verify the vacancy appears immediately on the public Careers portal.
+8. Clear the scheduled opening time, click **Save draft** to persist the cleared opening schedule, and then click **Publish job**; verify the vacancy appears immediately on the public Careers portal.
 
 #### Scenario 4: Application Form Autofill, Draft Saving and Résumé Attachment
 
@@ -1238,7 +1262,7 @@ Testers and evaluators can manually execute these end-to-end scenarios to verify
 #### Scenario 6: Application Submission and Immutable Snapshot Freezing
 
 1. Review the application and click **Submit application**.
-2. Verify that application status updates to **Submitted** with a confirmation timestamp.
+2. Verify that application status updates to **Submitted** (the Applicant interface displays the Submitted badge).
 3. Verify that the form controls switch to read-only mode and prevent further edits.
 4. Sign in as HR, open **Application review**, and select the submission.
 5. Verify that candidate contact details, background, cover letter, and attached résumé match the submitted snapshot.
