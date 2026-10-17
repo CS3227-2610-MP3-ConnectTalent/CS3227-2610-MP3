@@ -154,7 +154,7 @@ it("uploads a selected file to the profile endpoint and applies returned metadat
     attachment,
     pending: false,
     uploadFailed: false,
-    message: "Résumé change saved. Review the attachment below.",
+    message: "Résumé change saved. Review the attachment.",
   });
 });
 
