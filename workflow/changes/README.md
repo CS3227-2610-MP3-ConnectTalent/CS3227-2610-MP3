@@ -2,6 +2,8 @@
 
 ## Active follow-up work
 
+Issue [#111 scheduled job timezone handling](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/111) is assigned to John. Its [2026-10-18-scheduled-job-timezone packet](2026-10-18-scheduled-job-timezone/record.md) records the approved browser-local interpretation and display contract, UTC persistence, and JMG-004/JOB-001 acceptance criteria. Implementation, independent review, student acceptance, canonical sync, and PR remain pending.
+
 Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76) has an active upload-reliability follow-up in [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77). The [packet](2026-10-14-resume-upload-diagnostics/record.md) documents the Preview permission failure, the validated RPC-path repair, the five-second PDF deadline and safe diagnostics. The newest review fixes and approved single Upload / confirmed Delete résumé UI pass focused and full local unit checks; final GitHub/Supabase/Vercel status and review-thread closeout are pending publication. Hosted upload verification remains unverified, and its smoke test was skipped at the user's direction.
 
 ## Accepted and archived work
