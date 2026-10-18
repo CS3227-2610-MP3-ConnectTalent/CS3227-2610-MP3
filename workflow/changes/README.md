@@ -6,6 +6,8 @@ Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-Co
 
 ## Accepted and archived work
 
+Issue [#108 release history/profile test](../archive/2026-10-18-release-history-profile-test/record.md): Paul separately accepted and authorized commit/push/PR on 18 October after 41 full Chromium cases, 642 unit tests, site/static checks and independent review. Complete packet archived, canonical sync N/A. Repair must enter develop through Create a merge commit to preserve master ancestry; repository merge/release remain separate gates.
+
 Issue [#97 HR application search, filters, sorting, and pagination](../archive/2026-10-16-hr-application-filters/record.md) was accepted by John on 16 October 2026 after independent review verification and passing quality gates. APP-010 synced to canonical v1.17 before complete packet archive. [Closeout summary](../../logs/2026-10-16-hr-application-filters.md). [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99).
 
 Issue #98 / PR #100: [accepted documentation integration](../archive/2026-10-16-pr100-integration/record.md). Paul accepted with recorded limits and authorized commit/push on 16 October. Three conflicts resolved; 609 unit/12 browser checks, site build and review passed; branches 90.25%. Canonical sync N/A; remote CI remains pending.
