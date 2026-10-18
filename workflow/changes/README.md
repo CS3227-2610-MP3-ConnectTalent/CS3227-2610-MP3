@@ -2,11 +2,11 @@
 
 ## Active follow-up work
 
-Issue [#111 scheduled job timezone handling](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/111) is assigned to John. Its [2026-10-18-scheduled-job-timezone packet](2026-10-18-scheduled-job-timezone/record.md) records the approved browser-local interpretation and display contract, UTC persistence, and JMG-004/JOB-001 acceptance criteria. Implementation, independent review, student acceptance, canonical sync, and PR remain pending.
-
 Issue [#76 résumé validation and errors](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/76) has an active upload-reliability follow-up in [PR #77](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/77). The [packet](2026-10-14-resume-upload-diagnostics/record.md) documents the Preview permission failure, the validated RPC-path repair, the five-second PDF deadline and safe diagnostics. The newest review fixes and approved single Upload / confirmed Delete résumé UI pass focused and full local unit checks; final GitHub/Supabase/Vercel status and review-thread closeout are pending publication. Hosted upload verification remains unverified, and its smoke test was skipped at the user's direction.
 
 ## Accepted and archived work
+
+Issue [#111 scheduled job timezone handling](../archive/2026-10-18-scheduled-job-timezone/record.md) was separately accepted by John via “Accept with recorded limits” on 18 October 2026 after independent review and local checks. JMG-004 synced to canonical ProductSpec v1.18 in `7373aac` before the complete packet archive. [Closeout summary](../../logs/2026-10-18-scheduled-job-timezone.md). The issue-linked PR submission is the final contributor action; see issue #111 for its link. A Next build, hydrated-browser test, no-JavaScript browser smoke and hosted smoke were not run.
 
 Issue [#97 HR application search, filters, sorting, and pagination](../archive/2026-10-16-hr-application-filters/record.md) was accepted by John on 16 October 2026 after independent review verification and passing quality gates. APP-010 synced to canonical v1.17 before complete packet archive. [Closeout summary](../../logs/2026-10-16-hr-application-filters.md). [PR #99](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/99).
 

@@ -1,23 +1,23 @@
 # Feature record: Scheduled job timezone handling
 
-Status: in progress; approved browser-local timezone contract with labeled UTC no-JavaScript fallback
+Status: accepted with recorded limits; canonical ProductSpec v1.18 synced; complete packet archived
 
 Owner: John (Johnwz123)
 
-Spec version: ProductSpec v1.17; [ProductSpec.md](../../ProductSpec.md)
+Spec version: ProductSpec v1.18; [ProductSpec.md](../../ProductSpec.md)
 Date: 2026-10-18
 
 ## Metadata and artifact links
 
 - Change ID/classification: `2026-10-18-scheduled-job-timezone`; defect restoration and behavior clarification
 - GitHub issue: [#111](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/111), assigned to Johnwz123
-- Branch/commits/PR: `fix/111-scheduled-job-timezone`; baseline `1f6d87224aeb04194961919f59499f83f7fddb9d`; approved packet `09ba17a`; implementation `252b731`; fallback remediation `96d30b0`; action-test coverage `db5d617`; PR pending
+- Branch/commits/PR: `fix/111-scheduled-job-timezone`; baseline `1f6d87224aeb04194961919f59499f83f7fddb9d`; approved packet `09ba17a`; implementation `252b731`; fallback remediation `96d30b0`; action-test coverage `db5d617`; canonical sync `7373aac`; final closeout is this record/index/log commit; issue #111 links the PR submitted as the final contributor action
 - Proposal: [proposal.md](proposal.md)
 - Design: [design.md](design.md)
 - Proposed delta: [specs/job-management.md](specs/job-management.md)
 - Plan/tasks: [plan.md](plan.md), [tasks.md](tasks.md)
 - Baseline: ProductSpec v1.17, 16 October 2026; `develop` at `1f6d87224aeb04194961919f59499f83f7fddb9d`
-- Archive path: pending approval, implementation, review, acceptance and closeout
+- Archive path: `workflow/archive/2026-10-18-scheduled-job-timezone/` (this complete packet); accepted sync preceded archive
 
 ## Approval checklist
 
@@ -25,10 +25,10 @@ Date: 2026-10-18
 - [x] Human approval of proposal, timezone delta, design and plan. John approved browser-local entry/display and UTC storage in chat on 2026-10-18.
 - [x] Initial implementation and approved follow-up passed focused tests, the full suite, TypeScript, repository lint and Prettier; the final test-only delta also passed focused tests, lint and formatting.
 - [x] Independent review complete for `09ba17a..252b731` and follow-up complete through `db5d617`; initial P2 no-JavaScript form regression is resolved, with no new findings. See [T05 handoff](handoffs/T05-independent-review.md) and [T05b handoff](handoffs/T05b-independent-review.md).
-- [ ] Human acceptance recorded separately.
-- [ ] Dated session summary and applicable guide/reflection updates complete.
-- [ ] Pre-PR closeout complete and PR opened last.
-- [ ] Accepted canonical delta synced before archive.
+- [x] Human acceptance recorded separately: John selected “Accept with recorded limits” in direct chat on 2026-10-18 after the independent follow-up review and local checks. Conditions/limits: no Next production build, hydrated-browser test, no-JavaScript browser smoke, or hosted smoke; these evidence gaps are accepted and remain explicit.
+- [x] Dated session summary and applicable guide/reflection updates complete; no separate guide/reflection change was applicable.
+- [x] Pre-PR closeout artifacts complete; issue-linked PR submission is the final contributor action. PR URL will be linked from issue #111.
+- [x] Accepted canonical JMG-004 delta synced to ProductSpec v1.18 before complete packet archive.
 
 ## Requirement and acceptance criteria
 
@@ -71,6 +71,7 @@ Commands and results:
 - `bun node_modules/eslint/bin/eslint.js`: passed repository-wide after fallback remediation and final formatting.
 - `bun node_modules/vitest/vitest.mjs run`: final run after action-level edit/clear coverage passed all 104 files / 652 tests. Two earlier full-suite attempts timed out in PDF parser tests; both affected files passed alone (2 files / 23 tests), and subsequent full runs passed.
 - Prettier initially reported formatting issues; changed files were formatted, then `bun node_modules/prettier/bin/prettier.cjs --check ...` passed after final packet edits.
+- Post-acceptance closeout docs: Prettier `--check` passed for ProductSpec, canonical and proposed JMG-004, both workflow indexes, the complete archived packet and the dated log. A PowerShell relative-link scan checked 14 Markdown files and found no broken local links; `git diff --check` found no whitespace errors.
 - Next.js local documentation read: Server and Client Components and Server Action forms guides; no code changed.
 - Supabase skill reviewed; no Supabase schema, RLS, RPC or storage change is proposed.
 - `bun run test:unit -- tests/unit/hr-job-input.test.ts`: the package script could not start because `node` is not installed; direct Bun invocation was used. A Next production build and interactive browser hydration smoke were not run.
@@ -82,20 +83,20 @@ Known limitations: no interactive browser/no-JavaScript browser smoke, hosted sm
 ## Review and decision
 
 - Reviewer findings/fixes: initial separate review of `09ba17a..252b731` found a P2 no-JavaScript form regression. John selected the labeled UTC fallback; remediation is committed at `96d30b0`. Follow-up review through `db5d617` confirmed the P2 is resolved, found no new issues, and passed the focused suite at 5 files / 45 tests. See [T05 handoff](handoffs/T05-independent-review.md) and [T05b handoff](handoffs/T05b-independent-review.md).
-- Human decision/date: John approved HR-browser-local interpretation, UTC database storage, and viewer-browser-local display, then selected the labeled UTC no-JavaScript fallback on 2026-10-18 in direct chat.
-- Guide/reflection/log updates: dated summary records both review runs at [logs/2026-10-18-scheduled-job-timezone.md](../../../logs/2026-10-18-scheduled-job-timezone.md); final acceptance and archive links will be recorded after the student decision. No separate guide/reflection change is currently required.
+- Human decision/date: John approved HR-browser-local interpretation, UTC database storage, and viewer-browser-local display; selected the labeled UTC no-JavaScript fallback; and separately accepted the reviewed implementation via “Accept with recorded limits” on 2026-10-18 in direct chat. The accepted limitations are no Next production build, hydrated-browser test, no-JavaScript browser smoke, or hosted smoke.
+- Guide/reflection/log updates: the complete dated summary is [logs/2026-10-18-scheduled-job-timezone.md](../../../logs/2026-10-18-scheduled-job-timezone.md). No separate guide/reflection change is applicable.
 
 ## Session evidence index
 
 | Date/session              | Summary log link                                                  | Work / prompts / decisions covered                                                                                                                         | Verification status / missing coverage                              |
 | ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| 2026-10-18 active session | [summary log](../../../logs/2026-10-18-scheduled-job-timezone.md) | Created issue #111, approved browser-local/UTC behavior and the UTC no-JavaScript fallback, implemented, tested, and received independent follow-up review | P2 resolved; student acceptance, canonical sync and archive pending |
+| 2026-10-18 active session | [summary log](../../../logs/2026-10-18-scheduled-job-timezone.md) | Created issue #111, received browser-local/UTC and fallback decisions, implemented and tested the change, completed independent review, recorded John's separate acceptance, synced v1.18, and archived the packet | P2 resolved; acceptance conditions and missing build/browser/hosted evidence remain explicit |
 
 ## Canonical sync and archive
 
-- Accepted delta/human decision: proposed browser-local input and display with UTC storage, approved by John on 2026-10-18; canonical sync awaits John's separate implementation acceptance.
-- Canonical sync commit/files/version/date: pending; proposed v1.18 if accepted.
-- Sync verification: pending.
-- Archive decision/date/path: pending approval and closeout.
-- Navigation repairs after moving: pending.
-- Outstanding work: request and record John's separate implementation acceptance; finalize session log and issue status; sync the accepted canonical delta, archive the packet, complete pre-PR closeout, push the branch, and open the issue-linked PR.
+- Accepted delta/human decision: [accepted JMG-004 delta](specs/job-management.md); John selected “Accept with recorded limits” in direct chat on 2026-10-18 after independent review and local checks.
+- Canonical sync commit/files/version/date: `7373aac` (`docs(spec): sync accepted job timezone rules`); `workflow/ProductSpec.md`, `workflow/specs/README.md`, and `workflow/specs/job-management.md`; ProductSpec v1.18, 18 October 2026.
+- Sync verification: accepted JMG-004 clauses were compared with the canonical rule; IDs retained; ProductSpec and capability index versions updated together; links and formatting checked before archive.
+- Archive decision/date/path: complete packet archived on 2026-10-18 at `workflow/archive/2026-10-18-scheduled-job-timezone/` after accepted sync.
+- Navigation repairs after moving: active change entry removed, archive index entry added, and packet/session-log links point to the archived location; relative links verified.
+- Outstanding work: repository PR review and required CI, merge, staging/production smoke, deployment, and release are separate later gates. No Next production build, hydrated-browser test, no-JavaScript browser smoke, or hosted smoke was run for this closeout.

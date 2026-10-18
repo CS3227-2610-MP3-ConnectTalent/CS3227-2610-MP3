@@ -1,7 +1,7 @@
 # Implementation plan: Scheduled job timezone handling
 
 - Change/issues: `2026-10-18-scheduled-job-timezone`; [#111](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/111)
-- Owner/status/date: John (Johnwz123); approved / in progress; 2026-10-18
+- Owner/status/date: John (Johnwz123); approved and accepted with recorded limits / closeout; 2026-10-18
 - Approved inputs: proposal.md, design.md, and specs/job-management.md; John approved browser-local interpretation/display with UTC storage, then selected the labeled UTC no-JavaScript fallback after review on 2026-10-18
 - Baseline and affected IDs: ProductSpec v1.17 at `1f6d872`; JMG-004, JOB-001, OVR-004; sched-tz-AC-01 through AC-05
 - Constraints: no code before owner approval; preserve current UTC storage and server authorization; no database/schema/RLS changes; work only in issue #111 scope
@@ -18,9 +18,10 @@
 | T05             | T04        | Separate reviewer      | AC-01–04; JMG-004, JOB-001, OVR-004 | Initial review of `09ba17a..252b731`                                                                                                                                                   | Complete; found P2 no-JavaScript form regression; see handoffs/T05-independent-review.md                                                                                                           |
 | T05a            | T05        | Implementer            | AC-02/04/05; JMG-004, OVR-004       | Test and implement named SSR UTC fallback, explicit parser conversion, and enhanced UTC hidden fields                                                                                  | Complete: pre-fix regressions failed; focused 44/44, full 651/651, type/lint/format pass                                                                                                           |
 | T05b            | T05a       | Separate reviewer      | AC-01–05; JMG-004, JOB-001, OVR-004 | Review remediation and final acceptance evidence                                                                                                                                       | Complete on `db5d617`; P2 resolved, no new findings, focused suite 5 files / 45 tests; see `handoffs/T05b-independent-review.md`                                                                   |
-| T06             | T05b       | John / student owner   | All ACs                             | Review final evidence and record acceptance or conditions                                                                                                                              | Pending                                                                                                                                                                                            |
-| T07             | T06        | Owner                  | Accepted JMG-004 delta              | Sync accepted delta to canonical specs and version; complete session log and archive packet                                                                                            | Canonical/link checks pending                                                                                                                                                                      |
-| T08             | T07        | Authorized contributor | #111                                | Commit final closeout and open issue-linked PR to develop with Closes #111                                                                                                             | PR pending                                                                                                                                                                                         |
+| T06             | T05b       | John / student owner   | All ACs                             | Review final evidence and record acceptance or conditions                                                                                                                              | Complete: John selected “Accept with recorded limits” in direct chat on 2026-10-18; limits are recorded in record.md                                                                               |
+| T07             | T06        | Owner                  | Accepted JMG-004 delta              | Sync accepted delta to canonical specs and version; complete session log and archive packet                                                                                            | Complete: canonical sync `7373aac`, ProductSpec v1.18, packet archived; navigation and relative links checked                                                                                      |
+| T08             | T07        | Authorized contributor | #111                                | Commit final closeout and push the issue-linked branch after checks; prepare the PR from the required template                                                                           | Final closeout commit and push evidence recorded in the archived record                                                                                                                           |
+| T09             | T08        | Authorized contributor | #111                                | Open PR to `develop` with Conventional Commit title and `Closes #111` as the final contributor action                                                                                   | Prepared from `.github/pull_request_template.md`; see issue #111 for the resulting PR link                                                                                                        |
 
 ## Integration and handoffs
 
@@ -29,9 +30,9 @@ All edits stay in the HR parser/editor and HR/public job-detail display. Persist
 ## Approval and completion evidence
 
 - [x] Human approved browser-local/UTC scheduling and selected the labeled UTC no-JavaScript fallback before remediation (John, direct chat, 2026-10-18).
-- [x] tasks.md mirrors the ordered work and pending approval gate.
-- [ ] Independent review and human acceptance are separate tasks with actual evidence.
-- [ ] Closeout, guides/logs, canonical sync and archive are complete.
-- [ ] Issue-linked PR opened after closeout.
+- [x] tasks.md mirrors the ordered work and records completed closeout tasks separately from the final PR action.
+- [x] Independent review and human acceptance are separate tasks with actual evidence; see T05b and the acceptance recorded in record.md.
+- [x] Closeout, session log, canonical sync and complete packet archive are recorded in record.md.
+- [x] Issue-linked PR title/body is prepared from the repository template; creation is the final contributor action after push.
 - Approval/date/source: John approved browser-local interpretation/display and UTC storage by direct chat on 2026-10-18.
 - Changes to this plan: none.
