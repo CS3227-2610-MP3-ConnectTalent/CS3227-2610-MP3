@@ -108,6 +108,49 @@ it("persists native no-JavaScript schedules as explicit UTC instants", async () 
   );
 });
 
+it("edits and clears no-JavaScript schedule fields through the edit RPC", async () => {
+  const rpc = vi.fn().mockResolvedValue({ data: null, error: null });
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+
+  await expect(
+    editHRJobDraft(
+      form({
+        opensAt: "",
+        opensAtLocal: "2026-10-20T10:00",
+        opensAtMode: "",
+        closesAt: "",
+        closesAtLocal: "2026-10-25T18:00",
+        closesAtMode: "",
+      }),
+    ),
+  ).rejects.toThrow(`REDIRECT:/hr/jobs/${jobId}?notice=saved`);
+  expect(rpc).toHaveBeenLastCalledWith(
+    "edit_hr_job_draft",
+    expect.objectContaining({
+      p_opens_at: "2026-10-20T10:00:00.000Z",
+      p_closes_at: "2026-10-25T18:00:00.000Z",
+    }),
+  );
+
+  rpc.mockClear();
+  await expect(
+    editHRJobDraft(
+      form({
+        opensAt: "",
+        opensAtLocal: "",
+        opensAtMode: "",
+        closesAt: "",
+        closesAtLocal: "",
+        closesAtMode: "",
+      }),
+    ),
+  ).rejects.toThrow(`REDIRECT:/hr/jobs/${jobId}?notice=saved`);
+  expect(rpc).toHaveBeenLastCalledWith(
+    "edit_hr_job_draft",
+    expect.objectContaining({ p_opens_at: null, p_closes_at: null }),
+  );
+});
+
 it("uses distinct edit, publish and close RPCs", async () => {
   const rpc = vi.fn().mockResolvedValue({ data: jobId, error: null });
   mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
