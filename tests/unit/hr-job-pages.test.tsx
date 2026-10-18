@@ -141,6 +141,10 @@ it("renders a safe unavailable state and not found for HR job details", async ()
 });
 
 it("renders editable draft controls and save or publish feedback", async () => {
+  mocks.getHRJob.mockResolvedValueOnce({
+    ...job,
+    opens_at: "2026-01-15T01:00:00.000Z",
+  });
   const html = renderToStaticMarkup(
     await HRJobDetail({
       params: Promise.resolve({ id: job.id }),
@@ -153,6 +157,12 @@ it("renders editable draft controls and save or publish feedback", async () => {
   expect(html).toContain("Edit draft");
   expect(html).toContain("Publish job");
   expect(html).toContain(`value="${job.id}"`);
+  expect(html).toContain('type="datetime-local"');
+  expect(html).toContain('name="opensAtLocal"');
+  expect(html).toContain('value="2026-01-15T01:00"');
+  expect(html).toContain('name="opensAt" value=""');
+  expect(html).toContain('name="opensAtMode" value=""');
+  expect(html).toContain("Without JavaScript, schedule times use UTC.");
 });
 
 it("renders published job text and closing controls but no close action for a closed job", async () => {
@@ -184,6 +194,7 @@ it("renders scheduled job controls with revert to draft action", async () => {
     ...job,
     status: "published",
     opens_at: "2099-01-01T00:00:00Z",
+    closes_at: "2099-02-01T00:00:00Z",
   });
   const scheduled = renderToStaticMarkup(
     await HRJobDetail({
@@ -192,6 +203,9 @@ it("renders scheduled job controls with revert to draft action", async () => {
     }),
   );
   expect(scheduled).toContain("Scheduled");
+  expect(scheduled).toContain("Scheduled to open on");
+  expect(scheduled).toContain("UTC");
+  expect(scheduled).toContain('dateTime="2099-01-01T00:00:00Z"');
   expect(scheduled).toContain("Revert to draft");
   expect(scheduled).toContain('action="/unpublish-job"');
   expect(scheduled).toContain("The job was reverted to draft");

@@ -112,6 +112,20 @@ it("renders an unavailable public job as not found", async () => {
   expect(mocks.getAccountNavigation).not.toHaveBeenCalled();
 });
 
+it("shows the public closing deadline with a timezone-explicit UTC fallback", async () => {
+  mocks.getPublishedJob.mockResolvedValueOnce({
+    ...job,
+    closes_at: "2026-01-15T01:00:00.000Z",
+  });
+
+  const element = await JobDetail({ params: Promise.resolve({ id: job.id }) });
+  const html = renderToStaticMarkup(element);
+
+  expect(html).toContain("Applications close on");
+  expect(html).toContain("Jan 15, 2026, 1:00 AM UTC");
+  expect(html).toContain('dateTime="2026-01-15T01:00:00.000Z"');
+});
+
 it.each([
   [{ kind: "guest" }, true],
   [{ kind: "signed-in", role: "applicant", incomplete: false }, true],

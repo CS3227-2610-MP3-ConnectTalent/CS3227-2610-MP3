@@ -48,10 +48,75 @@ describe("HR job text fields", () => {
   });
 });
 
+describe("HR no-JavaScript schedule inputs", () => {
+  it("interprets no-JavaScript native schedule fields as UTC in any server timezone", () => {
+    const data = fields({
+      opensAt: "",
+      opensAtLocal: "2026-10-20T10:00",
+      opensAtMode: "",
+      closesAt: "",
+      closesAtLocal: "2026-10-25T18:00",
+      closesAtMode: "",
+    });
+    const initialTimeZone = process.env.TZ;
+
+    try {
+      for (const timeZone of ["America/Los_Angeles", "Asia/Singapore"]) {
+        process.env.TZ = timeZone;
+        const parsed = parseHRJobFields(data);
+
+        expect(parsed.success).toBe(true);
+        if (parsed.success) {
+          expect(parsed.value.opens_at).toBe("2026-10-20T10:00:00.000Z");
+          expect(parsed.value.closes_at).toBe("2026-10-25T18:00:00.000Z");
+        }
+      }
+    } finally {
+      if (initialTimeZone === undefined) delete process.env.TZ;
+      else process.env.TZ = initialTimeZone;
+    }
+  });
+
+  it("does not use a UTC fallback for an enhanced submission missing its conversion", () => {
+    expect(
+      parseHRJobFields(
+        fields({
+          opensAt: "",
+          opensAtLocal: "2026-03-08T02:30",
+          opensAtMode: "browser",
+        }),
+      ).success,
+    ).toBe(false);
+  });
+
+  it("allows no-JavaScript clearing of optional schedule fields", () => {
+    const parsed = parseHRJobFields(
+      fields({ opensAt: "", opensAtLocal: "", opensAtMode: "" }),
+    );
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.value.opens_at).toBeNull();
+  });
+});
+
 describe("HR job valid schedule inputs", () => {
+  it("normalizes an explicit input timezone to a UTC instant", () => {
+    const parsed = parseHRJobFields(
+      fields({ opensAt: "2026-10-20T10:00:00+08:00" }),
+    );
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.value.opens_at).toBe("2026-10-20T02:00:00.000Z");
+    }
+  });
+
   it("accepts valid optional opensAt and closesAt datetime fields", () => {
     const parsed = parseHRJobFields(
-      fields({ opensAt: "2026-10-20T10:00", closesAt: "2026-10-25T18:00" }),
+      fields({
+        opensAt: "2026-10-20T10:00:00.000Z",
+        closesAt: "2026-10-25T18:00:00.000Z",
+      }),
     );
     expect(parsed.success).toBe(true);
     if (parsed.success) {
@@ -72,13 +137,13 @@ describe("HR job valid schedule inputs", () => {
     }
 
     const parsedOpens = parseHRJobFields(
-      fields({ opensAt: "2026-10-20T10:00" }),
+      fields({ opensAt: "2026-10-20T10:00:00.000Z" }),
     );
     expect(parsedOpens.success).toBe(true);
     expect(parsedOpens.success && parsedOpens.value.opens_at).toBeTruthy();
 
     const parsedCloses = parseHRJobFields(
-      fields({ closesAt: "2026-10-25T18:00" }),
+      fields({ closesAt: "2026-10-25T18:00:00.000Z" }),
     );
     expect(parsedCloses.success).toBe(true);
     expect(parsedCloses.success && parsedCloses.value.closes_at).toBeTruthy();
@@ -86,6 +151,12 @@ describe("HR job valid schedule inputs", () => {
 });
 
 describe("HR job invalid schedule inputs", () => {
+  it("rejects timezone-less datetime-local values at the server boundary", () => {
+    expect(
+      parseHRJobFields(fields({ opensAt: "2026-10-20T10:00" })).success,
+    ).toBe(false);
+  });
+
   it("rejects invalid date strings and closesAt before or equal to opensAt", () => {
     expect(parseHRJobFields(fields({ opensAt: "not-a-date" })).success).toBe(
       false,
@@ -95,12 +166,18 @@ describe("HR job invalid schedule inputs", () => {
     );
     expect(
       parseHRJobFields(
-        fields({ opensAt: "2026-10-25T18:00", closesAt: "2026-10-20T10:00" }),
+        fields({
+          opensAt: "2026-10-25T18:00:00.000Z",
+          closesAt: "2026-10-20T10:00:00.000Z",
+        }),
       ).success,
     ).toBe(false);
     expect(
       parseHRJobFields(
-        fields({ opensAt: "2026-10-20T10:00", closesAt: "2026-10-20T10:00" }),
+        fields({
+          opensAt: "2026-10-20T10:00:00.000Z",
+          closesAt: "2026-10-20T10:00:00.000Z",
+        }),
       ).success,
     ).toBe(false);
   });
