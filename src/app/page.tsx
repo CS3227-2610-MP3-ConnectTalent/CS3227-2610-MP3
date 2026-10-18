@@ -1,29 +1,82 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
+import { isJobCategory } from "@/lib/job-categories";
+import { invalidJobSearchKey, parseJobSearch } from "@/lib/job-search";
+import { listPublishedJobs } from "@/lib/jobs";
+import { JobListingFilters } from "@/components/job-listing-filters";
+import { JobResults } from "@/components/job-listing-results";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+type SearchParams = Promise<{
+  category?: string | string[];
+  q?: string | string[];
+  authError?: string;
+}>;
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { category: rawCategory, q, authError } = await searchParams;
+  const category = isJobCategory(rawCategory) ? rawCategory : undefined;
+  const invalidCategory = rawCategory !== undefined && !category;
+  const search = parseJobSearch(q);
+  const jobs =
+    invalidCategory || search.invalid
+      ? []
+      : await listPublishedJobs(category, search.query);
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-8 px-6 py-16">
-      <div className="space-y-4">
-        <Badge variant="secondary">Project scaffold</Badge>
-        <h1 className="text-4xl font-semibold tracking-tight">Job Application Portal</h1>
-        <p className="max-w-2xl text-muted-foreground">
-          A starting point for the applicant and HR workflows. Authentication,
-          applications, and AI features will be added in later implementation slices.
+    <main className="careers-shell mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
+      {authError === "sign-out" && <SignOutError />}
+      <CareerHero />
+      <JobListingFilters
+        initial={{
+          query: search.query,
+          invalid: search.invalid || invalidCategory,
+          invalidKey:
+            search.invalid || invalidCategory
+              ? invalidJobSearchKey(rawCategory, q)
+              : undefined,
+          category: typeof rawCategory === "string" ? rawCategory : undefined,
+        }}
+        invalidCategory={invalidCategory}
+      >
+        <JobResults
+          jobs={jobs}
+          invalidCategory={invalidCategory}
+          query={search.query}
+          invalidSearch={search.invalid}
+        />
+      </JobListingFilters>
+    </main>
+  );
+}
+
+function SignOutError() {
+  return (
+    <p role="alert" className="mb-8 rounded-lg border p-4">
+      Sign out could not be completed. Try again.
+    </p>
+  );
+}
+
+function CareerHero() {
+  return (
+    <section className="careers-hero mb-10 overflow-hidden rounded-3xl px-6 py-9 sm:px-10 sm:py-12">
+      <div className="relative z-10 max-w-2xl">
+        <span className="mb-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
+          <Sparkles size={15} aria-hidden="true" /> Build what comes next
+        </span>
+        <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
+          Find your next role.
+        </h1>
+        <p className="mt-5 max-w-lg text-base leading-relaxed sm:text-lg">
+          Explore our teams. Find work that moves you forward.
+          <br className="hidden sm:block" /> Your next chapter starts with a
+          conversation.
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Planned first release</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-            <li>One published job opening and one application per applicant</li>
-            <li>Text-only cover letters with applicant-controlled SoC LLM drafts</li>
-            <li>HR review with SoC LLM summaries and human decisions</li>
-          </ul>
-        </CardContent>
-      </Card>
-    </main>
+      <div className="hero-orbit" aria-hidden="true" />
+    </section>
   );
 }

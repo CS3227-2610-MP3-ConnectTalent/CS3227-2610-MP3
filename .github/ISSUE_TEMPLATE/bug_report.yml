@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a reproducible defect and its impact.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form records intake, not approval to implement. Human scope/design/plan approval is a later gate. Triage assigns configured labels and ownership. Do not include credentials or private applicant data.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Cite the expected requirement or explain what should happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happened and frequency.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: List steps, safe sample inputs and observed failure; state if unreproducible.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include app version/commit, browser/OS, role and staging/production context.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Provide sanitized logs/screenshots or links; omit secrets and private applicant data.
+    validations:
+      required: false
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Affected requirements
+      description: List canonical requirement IDs or state unknown for triage.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and security implications
+      description: Describe affected users, severity, authorization/privacy concerns and any containment.
+    validations:
+      required: true
+  - type: textarea
+    id: owner
+    attributes:
+      label: Student owner
+      description: Name the proposed owner or state unassigned for triage.
+    validations:
+      required: true

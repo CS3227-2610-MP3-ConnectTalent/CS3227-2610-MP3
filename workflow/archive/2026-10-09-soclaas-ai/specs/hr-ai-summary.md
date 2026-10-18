@@ -1,0 +1,34 @@
+# Spec delta: HR AI summary
+
+- Change/issues/owner/status: 2026-10-09-soclaas-ai; #10; John; delta and plan approved, implementation accepted, synced to ProductSpec v1.1 and archived
+- Canonical file: [hr-ai-summary.md](../../../specs/hr-ai-summary.md)
+- Baseline: ProductSpec v1.0, 8 October 2026, commit 0a0f5c4; AIS-001/AIS-002
+- Proposed baseline: v1.1
+- Dependencies/cross-capability IDs: APP-003/APP-004, SEC-001 through SEC-007, OPS-002
+- Approval: John approved the written delta in chat on 2026-10-09.
+
+## MODIFIED
+
+### AIS-001: Selected submitted-letter inputs
+
+- Before: The summary accepts only the selected submitted cover letter and that job’s published requirements.
+- After: The HR summary MUST accept only one authorized submitted application’s current cover_letter value, which becomes immutable at submission or at the rollout cutoff, and that job’s published requirements. For existing applications, the current value MUST be frozen without overwriting original_submitted_letter, which remains the first-submission snapshot. The server MUST verify the HR role before loading either field and MUST load no HR notes, status history, other application, or unrelated personal data.
+- Rationale/acceptance IDs: Preserve any allowed edits made before rollout while giving future summaries a stable source; AI-AC-03/AI-AC-06.
+- Scenario: Given authorized HR and one submitted application, when summary is requested, then model input contains only that application’s frozen current letter and its job’s fixed published requirements.
+- Denial/failure scenario: Given an Applicant, anonymous visitor, unsubmitted application, or inaccessible application ID, when summary is requested, then no protected application data or model call is produced.
+
+### AIS-002: Evidence summary without hiring decisions
+
+- Before: The summary returns evidence mentioned, requirements not addressed and follow-up questions; it does not score, rank, reject, or change status, and HR retains the original application and status decision.
+- After: The model response MUST contain only two arrays of integer sentence IDs: evidence IDs into the selected submitted letter and gap IDs into that job's published requirements. The server MUST reject extra fields, non-integers, duplicate IDs, more than five IDs in either array, and IDs outside the corresponding source range. The server MUST map accepted IDs to bounded excerpts from those exact sources and generate neutral follow-up questions itself; no model-authored free text is returned in the HR summary. The displayed object MUST contain exactly three arrays: evidence_mentioned, requirements_not_addressed, and follow_up_questions. Each MUST contain no more than five strings, and each string MUST contain no more than 240 characters. The output MUST NOT score, rank, recommend hiring/rejection, change status, create notes, or trigger another action. HR MUST see the summary beside the source letter and a notice to verify every point against that letter. HR alone changes status through the separate human action.
+- Rationale/acceptance IDs: Prevent model-authored decision paraphrases from entering displayed sections while preserving bounded, source-visible evidence and human oversight. Model sentence selection can still be factually wrong; HR must verify it against the original. AI-AC-03/AI-AC-05/AI-AC-06.
+- Scenario: Given valid model JSON, when HR receives the summary, then the three bounded sections appear beside the submitted letter with a verification notice and no status change.
+- Denial/failure scenario: Given malformed output, provider failure, or adversarial letter text requesting private data or a hiring action, when summary generation fails or completes, then no private data is added, no partial result is shown, and application status remains unchanged.
+
+## Delta review and sync evidence
+
+- [x] John approved this written delta on 2026-10-09.
+- [x] John approved the extractive model-output refinement in chat on 2026-10-09 after independent review found recommendation paraphrases passing the previous lexical filter.
+- [x] Current-letter cutoff behavior and migration compatibility were verified against the implementation and its database/lifecycle evidence.
+- [x] John accepted the reviewed implementation on 2026-10-09; AIS-001/AIS-002 were synced in `7f326eb` to ProductSpec v1.1.
+- Sync commit/paths/decision evidence: `7f326eb`; `workflow/specs/hr-ai-summary.md`; John’s post-review acceptance is recorded in `../record.md`.

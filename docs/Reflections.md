@@ -1,23 +1,10 @@
-# Reflections
+# Reflections on AI Security, SDD and Basic Multi-Agent SE
 
-Initial notes, 2 October 2026. These notes record design decisions made during scaffolding; they do not claim implementation results. Both students should add concrete examples, failed attempts, test evidence, and personal reflections as development proceeds.
+This document is the main reflection index for ConnectTalent. Each individual reflection should explain decisions, concrete evidence, limitations and lessons across the three assignment themes.
 
-## AI security
+- [Paul Cheng’s reflection](PaulReflections.md) — AI-assisted draft covering the Applicant/HR workflow, profiles/private résumés, withdrawal, specifications, security and review. Fact-checked against repository evidence on 12 October 2026; Paul's personal verification of wording, contribution and conclusions remains pending.
+- [John’s reflection](JohnReflections.md) — individual reflection covering AI security (SoCLaaS prompt injection hardening, two-phase reservation quotas, extractive hallucination prevention), Spec-Driven Development, and basic multi-agent software engineering, verified against repository commits and evidence.
 
-The main trust boundary will be applicant-controlled notes and cover letters entering a model request. A letter could impersonate an instruction, ask for HR notes, or demand a status change. We therefore specified that HR notes never enter the prompt, the model has no tools, and status changes use a separate human-controlled endpoint. Authorization and data minimization need deterministic tests; prompt wording alone cannot prove security. We have not implemented or tested these controls yet.
+The development process used a primary Codex execution and actual separate reviewer executions for bounded tasks. Role instructions and profiles alone do not establish that another agent ran. The individual reflections distinguish this development workflow from the SoCLaaS features inside the product.
 
-## Spec-driven development
-
-The first spec names both roles, one-application constraint, AI input/output boundaries, and release evidence. This made a course requirement conflict visible: the earlier scaffold assumed direct OpenAI use, while MP3 requires SoCLaaS. We changed the planned provider before implementing AI routes. A future spec revision must fix exact SoCLaaS quotas and model behavior before rate-limit code is written. Acceptance tests should challenge the intent, such as cross-user access and data leakage, rather than merely asserting the shape of a response.
-
-## Basic multi-agent SE
-
-The proposed analyst → implementer → independent reviewer handoff records the spec version, assumptions, changed files, and test evidence. A malicious instruction can enter through repository text, applicant data, or an agent's summary. The human owner must verify source material and review sensitive changes. This process is defined in `../workflow/AgentProcess.md`; actual agent runs, disagreements, and decisions still need to be recorded.
-
-## Evidence to add before submission
-
-- Concrete prompt-injection cases and observed SoCLaaS behavior
-- Authorization, RLS, data-minimization, output, and rate-limit test results
-- Actual agent handoffs and one example of a review finding that changed implementation
-- Each student's own role work and team-level contribution
-- Staging/production separation and deployment evidence
+Local acceptance, a PR or a successful test does not establish a production release. The linked evidence records preserve remaining hosted rollout and verification work. This index and the individual drafts are not a claim that the assignment is complete.

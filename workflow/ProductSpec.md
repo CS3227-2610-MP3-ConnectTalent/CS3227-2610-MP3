@@ -1,60 +1,57 @@
 # Product specification
 
-Version: 0.1 (scaffold baseline, 2 October 2026)
+Current integrated branch baseline: **1.18**, dated **18 October 2026**. Accepted #111 scheduled-job timezone handling (`JMG-004`) joins the baseline. Accepted #97 HR application review filtering, search, sorting, and pagination (`APP-010`) joins the baseline. Accepted #90 applicant withdraw and reapply (`APP-001`, `APP-008`) joins the baseline. Accepted #88 scheduled opening and closing times (`JMG-004`, `JOB-001`) remains part of this baseline. Merged PRs #82, #85 and #86 establish OVR-004, JOB-004/OVR-005 and OVR-006. Accepted #76 PDF validation/safe errors, #78 public job search, HR dashboard, résumé/profile, onboarding and withdrawal requirements remain. The #81, #83, #84, and #88 packets preserve their independent approval and acceptance histories. PR #77 carries the accepted #76 implementation and upload-reliability follow-up; this branch does not establish PR #77 merge, hosted upload success or release. Accepted #94/#95 AI boundaries, explicit preview adoption and evaluation requirements coexist with #90 and #97 in this integrated baseline.
 
-## Scope
+John separately accepted #111 via “Accept with recorded limits” on 18 October 2026 after independent review and local checks. JMG-004 now defines browser-local schedule input and display, UTC persistence, a labeled UTC no-JavaScript fallback, and server-timezone independence. The [complete archived packet](archive/2026-10-18-scheduled-job-timezone/record.md) records review and acceptance evidence. A Next production build, hydrated-browser test, no-JavaScript browser smoke and hosted smoke were not run; merge, deployment and release remain separate.
 
-A single published job opening accepts one text-only application per applicant. Two user roles are supported: Applicant and HR. The planned AI features use the course-required SoC LLM. This document defines intended behavior; the current scaffold implements only a placeholder home page.
+John separately accepted #97 on 16 October 2026 after independent review verification, remediation of ESLint findings, and passing quality gates (typecheck, lint, 566 unit tests, Turbopack build). APP-010 introduces server-side search by applicant name with 300ms debouncing, input sanitization, and diacritic folding, multi-filter by job opening, review status, and withdrawal state, toggleable newest/oldest sorting, 10-item pagination with accessible controls, applicant full name display on cards, and full URL parameter synchronization. [The complete #97 packet](archive/2026-10-16-hr-application-filters/record.md) preserves local coverage, unit tests, and independent review evidence.
 
-| Role | Owns | AI feature | Human control |
-| --- | --- | --- | --- |
-| Applicant | Own application and final cover letter | Draft from applicant notes and the published job | Edit and explicitly submit final text |
-| HR | Review and status of submitted applications | Summarize a submitted letter against published requirements | Read the original and decide status |
+Paul separately accepted #94/#95 via “Accept with recorded limits” on 16 October 2026 after local verification and two separate reviews. SEC-010 adds AI request/provider boundaries, AID-002 requires explicit preview adoption, and OPS-004 defines synthetic offline/live evaluation evidence. [Accepted packet](archive/2026-10-16-ai-security-evaluations/record.md) preserves actual approval/acceptance sources and all seven model-check failures. The approved 24-call budget is consumed; human semantic review, hosted verification and full accessibility remain pending. No Git publication or release is implied.
 
-Assign one student primary responsibility for each role. Record team-level work and reviews in feature records; the names are still to be filled in by the team.
+John separately accepted #90 on 16 October 2026 after independent review verification and local quality gates (typecheck, lint, 538 unit tests). APP-001 and APP-008 allow applicants who previously withdrew their submitted application to start, draft, and submit a new independent application for the same job while it remains open and active, enforced by a partial unique index (`WHERE withdrawn_at IS NULL`). Prior withdrawn applications remain immutable and visible to the applicant and HR. [The complete #90 packet](archive/2026-10-16-applicant-withdraw-and-reapply/record.md) preserves local coverage, unit tests, and independent review evidence.
 
-## Core behavior
+John separately accepted #88 with recorded verification limits on 15 October 2026 after independent review verification and local checks. JMG-004 allows HR to configure optional opening and closing times, enforcing schedule window validity, public listing invisibility outside active windows, submission rejection, draft unpublishing before opening, and permanent closure preservation. JOB-001 restricts public browsing to open jobs within their active operational schedule window. [The complete #88 packet](archive/2026-10-15-scheduled-job-times/record.md) preserves local coverage, unit tests, and independent review evidence.
 
-1. Public sign-up creates an Applicant account. HR accounts are assigned only through a controlled administrative step.
-2. An Applicant reads the published job, drafts and edits a cover letter, and submits at most one application for that job.
-3. An Applicant reads only their own application and cannot change its HR status.
-4. HR reads submitted applications, writes HR-only notes, and updates status through a separate authorized action.
-5. The Applicant AI draft accepts only that applicant's notes and the published job text. A draft never submits an application.
-6. The HR AI summary accepts only the selected submitted cover letter and published requirements. It returns evidence mentioned, requirements not addressed in the letter, and possible follow-up questions. It does not score, rank, reject, or change status.
+Paul separately accepted #84 with recorded verification limits on 15 October 2026 after independent review and a repaired Retry-pending finding. [The complete #84 packet](archive/2026-10-15-remaining-action-feedback/record.md) preserves local coverage and browser evidence.
 
-No resume upload, email automation, or AI hiring decision is in the first release.
+Paul separately accepted #81 via “Accept with recorded limits” on 15 October 2026 after local checks and independent review. OVR-004 requires action-specific pending feedback and disables the submitted control while preserving validation and retry paths. The [accepted packet](archive/2026-10-14-pending-action-feedback/record.md) records the resolved review findings and hosted/accessibility limits. PR #82 later merged to `develop`; acceptance and archival alone did not establish that merge.
 
-## Data and access
+Paul separately accepted #83 with its recorded browser-held total-network-failure limit on 15 October 2026 after independent re-review. [The #83 packet](archive/2026-10-15-navigation-loading/record.md) records local tests and the unverified hosted/accessibility checks. PR #85 subsequently merged to `develop`; acceptance alone did not establish that merge or release.
 
-| Data | Applicant access | HR access |
-| --- | --- | --- |
-| Published job and requirements | Read | Read |
-| Application and cover letter | Own record only | Read for review |
-| HR notes | None | Read/write by authorized HR |
-| Role assignment | Cannot set or change | Controlled administration only |
-| Audit events | None | Read as authorized |
+Paul separately accepted the #83 View role follow-up with recorded hosted/accessibility limits on 15 October 2026 after independent review. OVR-005 now includes View role; JOB-004 keeps the pending/results announcement while its duplicate visible line is removed. [The follow-up packet](archive/2026-10-15-view-role-loading/record.md) records the test-first check, independent review and acceptance. PR #85 subsequently merged to `develop`; acceptance alone did not establish that merge or release.
 
-The database must enforce row-level security in addition to server-side authorization. A database constraint must enforce one application per applicant for the published job. The browser must never receive a key that bypasses row-level security or the SoC LLM key.
+Paul separately accepted #76 via “Accept with recorded limits” on 14 October 2026. APP-007 accepts structurally valid PDFs that open without a password, rejects password-required documents, and distinguishes safe file errors from validation service failures/timeouts. APP-006 inherits the same file rules. The [accepted packet](archive/2026-10-13-resume-error-messages/record.md) preserves tests, independent review and hosted/Linux verification limits. No deployment or release is implied.
 
-## AI and security contract
+Paul separately accepted #78 on 14 October 2026 with recorded hosted and accessibility limits after independent review. JOB-004 adds literal public job text search with combined category filtering, URL restoration, debouncing and safe invalid-query feedback. The [accepted packet](archive/2026-10-14-job-listing-search/record.md) records checks, the fixed review finding and pending hosted validation. Canonical sync and archive do not establish PR merge or deployment.
 
-- Authenticate and authorize at each AI endpoint before loading data or making a model call.
-- Treat applicant notes and cover letters as untrusted data, including text that impersonates system messages or asks the model to ignore instructions.
-- Do not give the model tools or database access. AI endpoints return text/structured data only and cannot mutate application status.
-- Validate input lengths and structured output with Zod. Render model text as escaped text, never raw HTML.
-- Exclude HR notes, other applications, secrets, and unrelated personal data from model requests.
-- Apply per-user usage limits, model output caps, timeouts, and clear retry/error handling. Exact thresholds must be set after reviewing SoC LLM quotas.
-- Log actor, operation, target, timestamp, and outcome without logging cover-letter text or API keys.
-- Use synthetic applicant records for development and security tests.
+John Wong confirmed the HR dashboard was fully approved on 12 October 2026 after the recorded local checks; canonical sync and archive completed on 13 October. APP-009 adds a read-only HR overview with per-job and status counts through existing authorized reads. The [archived #68 packet](archive/2026-10-12-hr-dashboard/record.md) preserves the stated acceptance, known E2E/formatting failures, and the fact that independent reviewer identity and findings were not supplied. Sync/archive does not establish hosted validation, merge, or release.
 
-## Acceptance evidence required before release
+Paul separately accepted #53 via “Accept with recorded limits” on 10 October 2026 and authorized one combined PR for #49/#50/#52/#53. APP-006/007 and SEC-009 now cover optional private profile PDFs, explicit independent snapshot reuse and upload before Save draft without saving typed fields. [Accepted résumé packet](archive/2026-10-10-unsaved-profile-resume/record.md) preserves approval, review, acceptance and hosted/cleanup/accessibility limits. The earlier #53-pending entries below describe historical baselines; #52's required-profile rules remain authoritative.
 
-1. Anonymous users cannot access protected records or AI endpoints.
-2. Applicant A cannot read Applicant B's application or AI draft; an Applicant cannot invoke the HR summary.
-3. HR summary requests contain only the selected letter and published requirements; adversarial letters cannot expose HR notes or change status.
-4. Malformed AI output is rejected safely; script-like output is displayed as text.
-5. Oversized and repeated AI requests are limited, including behavior when the SoC LLM is unavailable or returns a quota error.
-6. Browser flows demonstrate distinct Applicant and HR interfaces and human-controlled submission/status changes.
-7. Staging and production use separate app/database settings. The deployed release, guides, tests, and reflections describe the same behavior.
+Paul separately accepted #52 via “Accept with recorded limits” on 10 October 2026 after final independent review. ACC-006 requires profile-only onboarding for incomplete Applicants; ACC-001/005, JOB-001/003 and APP-005/006 define verification routing, navigation, required phone/country input and autofill. [Accepted packet](archive/2026-10-10-required-applicant-profile/record.md) preserves the approved amendment, checks and resolved legacy-withdrawal finding. Hosted rollout, clean-reset rehearsal and full accessibility testing remain pending. #53 remains separately unaccepted and is not synced by this acceptance.
 
-Record tests and observed results in feature records. These criteria are not yet met by the scaffold.
+This product is a careers site for one employer per deployment, with external Applicant and company HR roles. The first release supports multiple job openings and at most one active application per applicant per job (with withdrawal and reapplication support), with identity/background snapshots and an optional private PDF résumé. AI drafting and summary features use the course-required SoC LLM and retain human control over submission and hiring status.
+
+Paul separately accepted #49/#50 locally with recorded limits on 10 October 2026. APP-002/003/007/008, SEC-001 and AIS-001 now define form/retry controls and terminal confirmed Applicant withdrawal, retaining records while denying further HR processing. The [accepted packet](archive/2026-10-10-application-form-withdrawal/record.md) preserves review, acceptance and verification. Hosted rollout, clean-reset rehearsal and full accessibility audit remain pending; sync/archive is not deployment or release.
+
+Paul separately accepted the #50 placement correction via “Accept correction” on 10 October 2026. APP-008 now puts withdrawal only inside individual submitted application details; My applications keeps status and View. The [archived correction](archive/2026-10-10-withdrawal-placement/record.md) preserves checks and acceptance. #53 remains implemented but separately unaccepted; its proposed rules are not part of this baseline.
+
+The canonical requirements now live in the capability specifications below. The split on 6 October 2026 preserved v0.6 behavior, its nine release acceptance items, role boundaries, and non-goals. The accepted 7 October 2026 change added password confirmation and email verification, persistent private drafts, submitted-letter edits until job closure, and corresponding visibility rules. The locally accepted 8 October 2026 HR change defines controlled HR assignment, submitted-only review, private append-only notes, human status actions and the team's Vercel/Supabase environment mapping. The later accepted signup change retains the email after a password mismatch, adds accessible password visibility controls, and keeps passwords out of server action error state. The accepted recovery change adds a shared Applicant/HR email reset flow with neutral acknowledgement and user-scoped password update. The accepted 9 October 2026 change adds SoCLaaS-assisted Applicant drafting before submission, freezes submitted applications, and constrains HR summaries to validated excerpts from the selected frozen letter and published requirements. The separately accepted #39 change adds private saved identity/contact details, a trusted verified-email snapshot on submission, immutable submitted fields, legacy missing-field display and structured-contact exclusion from AI and logs. This filename remains the entry point for historical references. Specifications describe intended behavior, not evidence that hosted migration or release gates are complete.
+
+| Capability                                             | Canonical specification                                         | IDs |
+| ------------------------------------------------------ | --------------------------------------------------------------- | --- |
+| Product boundary, actors, scope and non-goals          | [Product overview](specs/product-overview.md)                   | OVR |
+| Signup and role assignment                             | [Accounts and roles](specs/accounts-and-roles.md)               | ACC |
+| Public browsing, category/text filtering and details   | [Public job listings](specs/public-job-listings.md)             | JOB |
+| HR job lifecycle                                       | [Job management](specs/job-management.md)                       | JMG |
+| Applications and HR review                             | [Applications and review](specs/applications-and-review.md)     | APP |
+| Applicant-controlled AI drafting                       | [Applicant AI draft](specs/applicant-ai-draft.md)               | AID |
+| HR AI summary                                          | [HR AI summary](specs/hr-ai-summary.md)                         | AIS |
+| Cross-cutting authorization, privacy and AI safeguards | [Security and privacy](specs/security-and-privacy.md)           | SEC |
+| Environments, operations and release evidence          | [Deployment and operations](specs/deployment-and-operations.md) | OPS |
+
+See [specification conventions and the change traces](specs/README.md) for ID rules, version policy and source-to-destination coverage. Applicant process ownership is Paul Cheng; HR process ownership remains unresolved in this index. The application quota is three requests per user and 24 per deployment per rolling minute as specified in SEC-006; the configured provider key may impose a separate limit.
+
+Combined branch integration: accepted #36 ACC-005 navigation and #39 APP-005 contact/privacy requirements coexist in v1.3. The #40 packet records this integration; hosted validation remains separate.
+
+Paul Cheng separately accepted #44 locally with recorded limits on9October2026. APP-006/007 and SEC-009 extend the canonical profile, background and private-attachment rules; OVR-002/003 and APP-001 now permit the optional PDF. [Accepted packet](archive/2026-10-09-profile-resume/record.md) preserves evidence and hosted/cleanup/process limitations. This sync does not establish deployment or release.

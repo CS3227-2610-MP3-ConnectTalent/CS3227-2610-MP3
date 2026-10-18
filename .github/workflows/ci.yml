@@ -2,8 +2,12 @@ name: CI
 
 on:
   pull_request:
+    branches: [develop, master]
   push:
-    branches: [main, master]
+    branches: [develop, master]
+
+permissions:
+  contents: read
 
 jobs:
   app:
@@ -14,9 +18,39 @@ jobs:
         with:
           runtime: node@24
           require-lockfile: true
+      - name: Format check
+        run: pnpm format:check
       - name: Lint
         run: pnpm lint
+      - name: Generate Next.js types
+        run: pnpm exec next typegen
       - name: Typecheck
         run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test:unit:coverage
+      - name: CI utility tests
+        # Offline only: no provider credentials or local human-review material.
+        if: always()
+        run: python -m unittest discover -s tests/ci -p "test_*.py" -v
+      - name: Offline AI security contracts
+        run: pnpm test:ai-evals
+      - name: Upload safe AI contract report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ai-contracts-${{ github.run_attempt }}
+          path: test-results/ai-evals/offline-report.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Build
         run: pnpm build
+      - name: Upload Vitest reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: vitest-reports-${{ github.run_attempt }}
+          path: |
+            coverage/coverage-summary.json
+            coverage/coverage-final.json
+          if-no-files-found: ignore
+          retention-days: 14
