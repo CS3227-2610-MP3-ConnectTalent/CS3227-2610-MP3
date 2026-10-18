@@ -31,7 +31,7 @@ jobs:
 
       - name: Resolve the unique current PR and verify this is its newest CI run
         id: preflight
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const run = context.payload.workflow_run;
@@ -207,7 +207,7 @@ jobs:
           steps.preflight.outputs.artifact-available == 'true' &&
           steps.preflight.outputs.marker-collision != 'true' &&
           steps.download.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: core.setOutput('started-at', new Date().toISOString());
 
@@ -219,7 +219,7 @@ jobs:
           steps.preflight.outputs.marker-collision != 'true' &&
           steps.download.outcome == 'success'
         continue-on-error: true
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
           RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -281,7 +281,7 @@ jobs:
           steps.download.outcome == 'success' &&
           steps.report.outcome == 'success'
         continue-on-error: true
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
           RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -350,7 +350,7 @@ jobs:
            steps.action-head.outputs.head-current == 'false' ||
            steps.report.outcome == 'failure' ||
            steps.verify.outcome == 'failure')
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.preflight.outputs.pr-number }}
           RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
