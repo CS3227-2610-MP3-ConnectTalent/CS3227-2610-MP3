@@ -7,11 +7,11 @@
 
 ## Decisions and alternatives
 
-| Decision | Considered alternatives | Reason and tradeoffs | Human approval reference |
-| --- | --- | --- | --- |
-| Schedule timezone | HR-browser local timezone for entry; each viewer's browser timezone for display | Matches each user's local clock. The same event is shown as different local wall-clock values but remains one UTC instant. | Approved by John in chat on 2026-10-18 |
-| Conversion boundary | Convert the HR browser's `datetime-local` wall-clock value to a UTC ISO instant in a client component; send that explicit instant through the existing Server Action | The server receives an offset-bearing ISO instant and never interprets a timezone-less wall-clock value. | Approved by John in chat on 2026-10-18 |
-| Rendering | Browser-local date/time plus the browser's IANA timezone identifier; deterministic UTC fallback before hydration | The client is the only runtime with the viewer's timezone. The UTC fallback remains accurate without JavaScript and avoids server/client hydration mismatch. | Approved by John in chat on 2026-10-18 |
+| Decision            | Considered alternatives                                                                                                                                              | Reason and tradeoffs                                                                                                                                         | Human approval reference               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| Schedule timezone   | HR-browser local timezone for entry; each viewer's browser timezone for display                                                                                      | Matches each user's local clock. The same event is shown as different local wall-clock values but remains one UTC instant.                                   | Approved by John in chat on 2026-10-18 |
+| Conversion boundary | Convert the HR browser's `datetime-local` wall-clock value to a UTC ISO instant in a client component; send that explicit instant through the existing Server Action | The server receives an offset-bearing ISO instant and never interprets a timezone-less wall-clock value.                                                     | Approved by John in chat on 2026-10-18 |
+| Rendering           | Browser-local date/time plus the browser's IANA timezone identifier; deterministic UTC fallback before hydration                                                     | The client is the only runtime with the viewer's timezone. The UTC fallback remains accurate without JavaScript and avoids server/client hydration mismatch. | Approved by John in chat on 2026-10-18 |
 
 ## Interfaces and data flow
 
@@ -28,14 +28,14 @@ N/A for authorization/data access: the change does not alter server-action autho
 
 ## Failure behavior
 
-| Failure / adversarial input | Observable outcome / state guarantees | Verification |
-| --- | --- | --- |
-| Malformed or impossible wall-clock value | Reject input through the existing safe invalid-form path; no write | sched-tz-AC-04 |
-| Local wall time falls inside a daylight-saving gap | Detect that local construction normalized to a different wall time; show a field error and do not submit an invalid instant | sched-tz-AC-04 |
-| Local wall time repeats during a daylight-saving overlap | JavaScript's local `Date` chooses the earlier occurrence; display the selected timezone and retain the resulting UTC instant | Documented limitation; focused test if feasible |
-| Closing instant not after opening instant after timezone conversion | Keep the existing validation error; no write | sched-tz-AC-04 |
-| Server timezone differs from HR/viewer browser timezone | Input conversion and UTC persistence follow the HR browser; rendering follows the viewer browser | sched-tz-AC-01 / 02 / 03 |
-| Browser cannot expose an IANA timezone identifier | Continue using browser-local Date/Intl behavior and label the value "your local time" | Local component test or code review |
+| Failure / adversarial input                                         | Observable outcome / state guarantees                                                                                        | Verification                                    |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Malformed or impossible wall-clock value                            | Reject input through the existing safe invalid-form path; no write                                                           | sched-tz-AC-04                                  |
+| Local wall time falls inside a daylight-saving gap                  | Detect that local construction normalized to a different wall time; show a field error and do not submit an invalid instant  | sched-tz-AC-04                                  |
+| Local wall time repeats during a daylight-saving overlap            | JavaScript's local `Date` chooses the earlier occurrence; display the selected timezone and retain the resulting UTC instant | Documented limitation; focused test if feasible |
+| Closing instant not after opening instant after timezone conversion | Keep the existing validation error; no write                                                                                 | sched-tz-AC-04                                  |
+| Server timezone differs from HR/viewer browser timezone             | Input conversion and UTC persistence follow the HR browser; rendering follows the viewer browser                             | sched-tz-AC-01 / 02 / 03                        |
+| Browser cannot expose an IANA timezone identifier                   | Continue using browser-local Date/Intl behavior and label the value "your local time"                                        | Local component test or code review             |
 
 ## Migration and backward compatibility
 

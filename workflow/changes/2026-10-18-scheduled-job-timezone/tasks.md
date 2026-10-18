@@ -10,10 +10,10 @@
 
 ## Ordered implementation
 
-- [ ] T01 — Add and observe failing tests for browser-local-to-UTC conversion, DST gap rejection, and server rejection of timezone-less input. Depends on T00. IDs: JMG-004, sched-tz-AC-01/04. Files: `tests/unit/hr-job-input.test.ts`, new `tests/unit/local-date-time.test.ts`. Verification: focused Vitest run demonstrates current server parser interprets timezone-less input using process timezone.
-- [ ] T02 — Implement browser-local input conversion and HR edit-form round-trip using a hidden UTC ISO field. Depends on T01. IDs: JMG-004, sched-tz-AC-01/02. Files: parser, local-time helper/client component, job editor, tests. Verification: focused tests cover UTC output and unchanged-value round-trip.
-- [ ] T03 — Render HR and public schedule deadlines in each viewer's local timezone and identify it, with UTC server-render fallback. Depends on T00/T02. IDs: JMG-004, JOB-001, sched-tz-AC-03. Files: HR/public job detail pages and `tests/unit/hr-job-pages.test.tsx`. Verification: assertions show local formatting and an unambiguous timezone label.
-- [ ] T04 — Run relevant final checks and document results. Depends on T01-T03. IDs: all. Files: record.md and changed files. Verification: focused unit tests, `pnpm typecheck`, `pnpm lint`, formatter check; report unavailable tools as not run.
+- [x] T01 — Add and observe failing tests for browser-local-to-UTC conversion, DST gap rejection, and server rejection of timezone-less input. Depends on T00. IDs: JMG-004, sched-tz-AC-01/04. Files: `tests/unit/hr-job-input.test.ts`, new `tests/unit/local-date-time.test.ts`. Evidence: before parser change, focused test expected timezone-less input to be rejected but received success; after change, focused regression tests pass.
+- [x] T02 — Implement browser-local input conversion and HR edit-form round-trip using a hidden UTC ISO field. Depends on T01. IDs: JMG-004, sched-tz-AC-01/02. Files: parser, local-time helper/client component, job editor, tests. Evidence: local date/time helper tests verify conversion in Los Angeles and Singapore; HR page test verifies stored UTC remains in the hidden form field.
+- [x] T03 — Render HR and public schedule deadlines in each viewer's local timezone and identify it, with UTC server-render fallback. Depends on T00/T02. IDs: JMG-004, JOB-001, sched-tz-AC-03. Files: HR/public job detail pages and `tests/unit/hr-job-pages.test.tsx`. Evidence: page tests verify timezone-labeled UTC fallback markup; browser-local formatter is covered by utility tests.
+- [x] T04 — Run relevant final checks and document results. Depends on T01-T03. IDs: all. Files: record.md and changed files. Verification: focused unit tests (5 files / 39 tests), TypeScript, repository lint and Prettier pass. Full suite has two resume-PDF parser timeouts; both affected test files pass alone. Next build and browser hydration smoke were not run. Evidence: record.md.
 
 ## Review and closeout
 

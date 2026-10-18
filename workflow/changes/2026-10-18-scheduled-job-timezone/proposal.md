@@ -22,11 +22,11 @@ The HR form collects timezone-less `datetime-local` values. The server parses th
 
 ## Alternatives and dependencies
 
-| Alternative | Benefit / cost / risk | Decision and reason |
-| --- | --- | --- |
+| Alternative                                                                                                | Benefit / cost / risk                                                                                                                                                                                                    | Decision and reason                                                                          |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
 | Use the HR browser timezone for entry and each viewer's browser timezone for display; persist UTC instants | Matches each user's local clock while keeping one absolute instant in storage; viewers in different zones see different wall-clock values for the same event. A job's actual opening/closing instant remains consistent. | Chosen by John in chat on 2026-10-18; all schedule displays identify the browser's timezone. |
-| Use one explicit employer timezone for input, edit and display | Gives every user the same announced wall-clock time; requires a fixed product timezone and makes the experience independent of browser settings. | Rejected for this change because John selected per-user local interpretation and display. |
-| Keep current implicit runtime behavior | No code cost; preserves the defect and ambiguous contract | Rejected |
+| Use one explicit employer timezone for input, edit and display                                             | Gives every user the same announced wall-clock time; requires a fixed product timezone and makes the experience independent of browser settings.                                                                         | Rejected for this change because John selected per-user local interpretation and display.    |
+| Keep current implicit runtime behavior                                                                     | No code cost; preserves the defect and ambiguous contract                                                                                                                                                                | Rejected                                                                                     |
 
 - Assumptions: persisted schedule values remain UTC instants; the browser's IANA timezone defines local interpretation and display.
 - Dependencies: issue #111; John's 2026-10-18 chat decision approves the bounded behavior and plan before implementation.
@@ -35,12 +35,12 @@ The HR form collects timezone-less `datetime-local` values. The server parses th
 
 ## Acceptance evidence and artifacts
 
-| Acceptance ID | Issue criterion and canonical requirement IDs | Given / When / Then outcome | Required evidence and owner |
-| --- | --- | --- | --- |
-| sched-tz-AC-01 | #111; JMG-004 | Given a schedule input and the approved timezone contract, when it is parsed on a server configured for a different timezone, then the resulting UTC instant is the same approved wall time. | Focused parser unit test; implementer |
-| sched-tz-AC-02 | #111; JMG-004 | Given an existing UTC schedule, when HR opens and saves the draft again, then the input round-trips without a time shift and identifies the approved timezone. | Editor/parser tests; implementer |
-| sched-tz-AC-03 | #111; JMG-004, JOB-001 | Given a scheduled job, when HR or a public visitor sees its deadline, then the instant is rendered in that viewer's browser timezone and the timezone is identified. | HR/public formatting tests; implementer |
-| sched-tz-AC-04 | #111; JMG-004 | Given invalid or reversed schedule values, when HR saves, then existing validation rejects the values and does not change scheduling rules. | Focused validation tests; implementer |
+| Acceptance ID  | Issue criterion and canonical requirement IDs | Given / When / Then outcome                                                                                                                                                                  | Required evidence and owner             |
+| -------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| sched-tz-AC-01 | #111; JMG-004                                 | Given a schedule input and the approved timezone contract, when it is parsed on a server configured for a different timezone, then the resulting UTC instant is the same approved wall time. | Focused parser unit test; implementer   |
+| sched-tz-AC-02 | #111; JMG-004                                 | Given an existing UTC schedule, when HR opens and saves the draft again, then the input round-trips without a time shift and identifies the approved timezone.                               | Editor/parser tests; implementer        |
+| sched-tz-AC-03 | #111; JMG-004, JOB-001                        | Given a scheduled job, when HR or a public visitor sees its deadline, then the instant is rendered in that viewer's browser timezone and the timezone is identified.                         | HR/public formatting tests; implementer |
+| sched-tz-AC-04 | #111; JMG-004                                 | Given invalid or reversed schedule values, when HR saves, then existing validation rejects the values and does not change scheduling rules.                                                  | Focused validation tests; implementer   |
 
 - Proposed spec delta: `specs/job-management.md` clarifies JMG-004 using the approved browser-local/UTC contract.
 - Design: [design.md](design.md).

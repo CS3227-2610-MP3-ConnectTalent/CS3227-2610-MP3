@@ -3,23 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 import type { HRJob } from "@/lib/hr-jobs";
 import { PendingSubmitButton } from "@/components/pending-submit-button";
-
-function toDatetimeLocal(iso?: string | null): string {
-  if (!iso) return "";
-  try {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const year = d.getFullYear();
-    const month = pad(d.getMonth() + 1);
-    const day = pad(d.getDate());
-    const hours = pad(d.getHours());
-    const minutes = pad(d.getMinutes());
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  } catch {
-    return "";
-  }
-}
+import { LocalScheduleInput } from "@/components/local-schedule-time";
 
 export function JobEditor({
   job,
@@ -124,34 +108,20 @@ function JobScheduleFields({ job }: { job?: HRJob }) {
   return (
     <fieldset className="space-y-4 rounded-lg border p-4">
       <legend className="px-1 font-medium">Schedule (optional)</legend>
-      <div className="space-y-2">
-        <label htmlFor="job-opens-at" className="font-medium">
-          Scheduled opening time
-        </label>
-        <Input
-          id="job-opens-at"
-          name="opensAt"
-          type="datetime-local"
-          defaultValue={toDatetimeLocal(job?.opens_at)}
-        />
-        <p className="text-xs text-muted-foreground">
-          Leave blank to open applications immediately when published.
-        </p>
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="job-closes-at" className="font-medium">
-          Scheduled closing time
-        </label>
-        <Input
-          id="job-closes-at"
-          name="closesAt"
-          type="datetime-local"
-          defaultValue={toDatetimeLocal(job?.closes_at)}
-        />
-        <p className="text-xs text-muted-foreground">
-          Leave blank to keep the job open until closed manually.
-        </p>
-      </div>
+      <LocalScheduleInput
+        id="job-opens-at"
+        name="opensAt"
+        label="Scheduled opening time"
+        value={job?.opens_at}
+        helpText="Leave blank to open applications immediately when published."
+      />
+      <LocalScheduleInput
+        id="job-closes-at"
+        name="closesAt"
+        label="Scheduled closing time"
+        value={job?.closes_at}
+        helpText="Leave blank to keep the job open until closed manually."
+      />
     </fieldset>
   );
 }

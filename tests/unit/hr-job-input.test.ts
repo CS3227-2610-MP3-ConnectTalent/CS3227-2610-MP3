@@ -49,9 +49,23 @@ describe("HR job text fields", () => {
 });
 
 describe("HR job valid schedule inputs", () => {
+  it("normalizes an explicit input timezone to a UTC instant", () => {
+    const parsed = parseHRJobFields(
+      fields({ opensAt: "2026-10-20T10:00:00+08:00" }),
+    );
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.value.opens_at).toBe("2026-10-20T02:00:00.000Z");
+    }
+  });
+
   it("accepts valid optional opensAt and closesAt datetime fields", () => {
     const parsed = parseHRJobFields(
-      fields({ opensAt: "2026-10-20T10:00", closesAt: "2026-10-25T18:00" }),
+      fields({
+        opensAt: "2026-10-20T10:00:00.000Z",
+        closesAt: "2026-10-25T18:00:00.000Z",
+      }),
     );
     expect(parsed.success).toBe(true);
     if (parsed.success) {
@@ -72,13 +86,13 @@ describe("HR job valid schedule inputs", () => {
     }
 
     const parsedOpens = parseHRJobFields(
-      fields({ opensAt: "2026-10-20T10:00" }),
+      fields({ opensAt: "2026-10-20T10:00:00.000Z" }),
     );
     expect(parsedOpens.success).toBe(true);
     expect(parsedOpens.success && parsedOpens.value.opens_at).toBeTruthy();
 
     const parsedCloses = parseHRJobFields(
-      fields({ closesAt: "2026-10-25T18:00" }),
+      fields({ closesAt: "2026-10-25T18:00:00.000Z" }),
     );
     expect(parsedCloses.success).toBe(true);
     expect(parsedCloses.success && parsedCloses.value.closes_at).toBeTruthy();
@@ -86,6 +100,12 @@ describe("HR job valid schedule inputs", () => {
 });
 
 describe("HR job invalid schedule inputs", () => {
+  it("rejects timezone-less datetime-local values at the server boundary", () => {
+    expect(
+      parseHRJobFields(fields({ opensAt: "2026-10-20T10:00" })).success,
+    ).toBe(false);
+  });
+
   it("rejects invalid date strings and closesAt before or equal to opensAt", () => {
     expect(parseHRJobFields(fields({ opensAt: "not-a-date" })).success).toBe(
       false,
@@ -95,12 +115,18 @@ describe("HR job invalid schedule inputs", () => {
     );
     expect(
       parseHRJobFields(
-        fields({ opensAt: "2026-10-25T18:00", closesAt: "2026-10-20T10:00" }),
+        fields({
+          opensAt: "2026-10-25T18:00:00.000Z",
+          closesAt: "2026-10-20T10:00:00.000Z",
+        }),
       ).success,
     ).toBe(false);
     expect(
       parseHRJobFields(
-        fields({ opensAt: "2026-10-20T10:00", closesAt: "2026-10-20T10:00" }),
+        fields({
+          opensAt: "2026-10-20T10:00:00.000Z",
+          closesAt: "2026-10-20T10:00:00.000Z",
+        }),
       ).success,
     ).toBe(false);
   });

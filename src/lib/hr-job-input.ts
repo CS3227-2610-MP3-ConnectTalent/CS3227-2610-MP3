@@ -7,13 +7,16 @@ const categories = JOB_CATEGORIES.map((category) => category.value) as [
   ...JobCategory[],
 ];
 const text = (max: number) => z.string().trim().min(1).max(max);
+const isoDateTimeSchema = z.iso.datetime({ offset: true });
 
 function parseOptionalDatetime(val: unknown): string | null | undefined {
   if (val === null || val === undefined) return null;
   if (typeof val !== "string") return undefined;
   const trimmed = val.trim();
   if (trimmed === "") return null;
-  const d = new Date(trimmed);
+  const parsed = isoDateTimeSchema.safeParse(trimmed);
+  if (!parsed.success) return undefined;
+  const d = new Date(parsed.data);
   if (Number.isNaN(d.getTime())) return undefined;
   return d.toISOString();
 }
@@ -21,7 +24,7 @@ function parseOptionalDatetime(val: unknown): string | null | undefined {
 const optionalDatetimeSchema = z.custom<string | null>(
   (val) =>
     val === null ||
-    (typeof val === "string" && !Number.isNaN(new Date(val).getTime())),
+    (typeof val === "string" && isoDateTimeSchema.safeParse(val).success),
 );
 
 const jobFieldsSchema = z

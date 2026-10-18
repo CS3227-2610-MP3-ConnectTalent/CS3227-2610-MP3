@@ -179,8 +179,8 @@ it("passes opens_at and closes_at to create and edit RPCs", async () => {
   const rpc = vi.fn().mockResolvedValue({ data: jobId, error: null });
   mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
   const scheduledForm = form({
-    opensAt: "2026-10-20T10:00",
-    closesAt: "2026-10-25T18:00",
+    opensAt: "2026-10-20T10:00:00.000Z",
+    closesAt: "2026-10-25T18:00:00.000Z",
   });
   await expect(createHRJobDraft(scheduledForm)).rejects.toThrow(
     `REDIRECT:/hr/jobs/${jobId}?notice=created`,

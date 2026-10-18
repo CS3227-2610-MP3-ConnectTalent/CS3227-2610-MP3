@@ -9,6 +9,7 @@ import {
 } from "@/app/hr/jobs/actions";
 import { JobEditor } from "@/app/hr/jobs/job-editor";
 import { PendingSubmitButton } from "@/components/pending-submit-button";
+import { LocalScheduleTime } from "@/components/local-schedule-time";
 import { categoryLabel } from "@/lib/job-categories";
 import { requireHR } from "@/lib/hr-auth";
 import { getHRJob, getHROperationalJobStatus } from "@/lib/hr-jobs";
@@ -71,15 +72,6 @@ function JobDetailContent({
   );
 }
 
-function formatTimestamp(iso?: string | null): string {
-  if (!iso) return "";
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return "";
-  }
-}
-
 function JobHeader({ job }: { job: Job }) {
   const operationalStatus = getHROperationalJobStatus(job);
   const statusLabel =
@@ -100,13 +92,18 @@ function JobHeader({ job }: { job: Job }) {
       <p className="font-medium">{statusLabel}</p>
       {operationalStatus === "scheduled" && job.opens_at && (
         <p className="text-sm text-muted-foreground">
-          Scheduled to open on {formatTimestamp(job.opens_at)}
-          {job.closes_at && ` (closes ${formatTimestamp(job.closes_at)})`}
+          Scheduled to open on <LocalScheduleTime value={job.opens_at} />
+          {job.closes_at && (
+            <>
+              {" "}
+              (closes <LocalScheduleTime value={job.closes_at} />)
+            </>
+          )}
         </p>
       )}
       {operationalStatus === "published" && job.closes_at && (
         <p className="text-sm text-muted-foreground">
-          Applications close on {formatTimestamp(job.closes_at)}
+          Applications close on <LocalScheduleTime value={job.closes_at} />
         </p>
       )}
     </header>

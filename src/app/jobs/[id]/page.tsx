@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { BackToOpenRoles } from "@/components/back-to-open-roles";
+import { LocalScheduleTime } from "@/components/local-schedule-time";
 import { PendingLinkStatus } from "@/components/pending-link-status";
 import { getAccountNavigation } from "@/lib/account-navigation";
 import { categoryLabel } from "@/lib/job-categories";
@@ -50,7 +51,7 @@ function JobHeading({ job, canApply }: { job: Job; canApply: boolean }) {
       <p className="mt-3 text-lg text-muted-foreground">{job.team}</p>
       {job.closes_at && (
         <p className="mt-2 text-sm text-muted-foreground">
-          Applications close on {new Date(job.closes_at).toLocaleDateString()}
+          Applications close on <LocalScheduleTime value={job.closes_at} />
         </p>
       )}
       {canApply && <JobApplyLink id={job.id} />}
