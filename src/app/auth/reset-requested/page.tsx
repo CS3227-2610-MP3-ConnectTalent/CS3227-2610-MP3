@@ -9,10 +9,6 @@ export default function ResetRequested() {
         link may arrive. If nothing arrives, check your spam folder or try again
         later.
       </p>
-      <p>
-        Local development email appears in Supabase Mailpit, not your personal
-        inbox.
-      </p>
       <Link href="/auth/forgot-password" className="underline">
         Request another link
       </Link>
