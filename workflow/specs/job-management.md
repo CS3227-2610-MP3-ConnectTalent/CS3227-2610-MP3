@@ -1,6 +1,6 @@
 # Job management
 
-Baseline: ProductSpec v1.15, 15 October 2026 (integrated #88 scheduled opening and closing times).
+Baseline: ProductSpec v1.18, 18 October 2026 (integrated #111 schedule timezone handling).
 
 Job fields and categories are defined in [JOB-002 / JOB-003](public-job-listings.md). Canonical permissions for every state are in [SEC-001 / SEC-002](security-and-privacy.md).
 
@@ -25,6 +25,8 @@ Scenario: Given a published job with an existing application, when HR closes it,
 ## JMG-004: Scheduled opening and closing windows
 
 HR MAY optionally set an opening date and time (`opens_at`) and/or a closing date and time (`closes_at`) for a job listing. If set, `closes_at` MUST be strictly after `opens_at`. A published job with a future `opens_at` MUST be treated as `Scheduled`; it MUST NOT appear in public listings or accept application saves/submissions until `opens_at` arrives. While in the `Scheduled` state, HR MAY edit the schedule or revert the job back to `Draft`. Once `opens_at` arrives (or immediately if `opens_at` is omitted), the job MUST become active and live, and its content and requirements MUST stay permanently fixed. When `closes_at` arrives, the job MUST automatically stop appearing in public listings and stop accepting application drafts or submissions. Closing MUST preserve all existing applications. HR MAY explicitly close an active or scheduled job at any time before `closes_at`. Reopening closed jobs MUST remain denied.
+
+When JavaScript is available, HR's opening and closing date/time inputs MUST be interpreted in the HR user's browser-local timezone and converted to UTC instants before submission. The database MUST store these instants as UTC. HR and public job-detail views MUST display each instant in the current viewer's browser-local timezone and identify that timezone. The server process timezone MUST NOT affect parsing, persistence, edit-form values, or displayed schedule times. Native HR forms MUST remain usable without JavaScript: the server MUST render schedule inputs in UTC and label that fallback; no-JavaScript submissions MUST be interpreted explicitly as UTC, and empty fields MUST continue to clear optional values. Nonexistent browser-local times in a daylight-saving gap MUST be rejected; when a local time occurs twice, the browser's earlier occurrence MUST be used. Existing ordering, publication, application, and closure rules remain unchanged; `closes_at` MUST be strictly after `opens_at` after conversion.
 
 Scenario: Given an HR user, when they publish a job with `opens_at` in the future, then the job displays as "Scheduled" in HR views and does not appear in public listings or accept applications until `opens_at`.
 Scenario: Given a scheduled job before `opens_at`, when HR reverts it to draft, then the job returns to draft status and its content and schedule can be edited.

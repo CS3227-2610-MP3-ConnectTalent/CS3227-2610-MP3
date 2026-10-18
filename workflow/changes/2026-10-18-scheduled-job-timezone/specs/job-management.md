@@ -1,11 +1,11 @@
 # Proposed spec delta: Job management schedule timezone
 
-- Change/issues/owner/status: `2026-10-18-scheduled-job-timezone`; [#111](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/111); John (Johnwz123); approved for implementation
+- Change/issues/owner/status: `2026-10-18-scheduled-job-timezone`; [#111](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/111); John (Johnwz123); accepted with recorded limits on 2026-10-18
 - Canonical file: [job-management.md](../../../specs/job-management.md)
 - Baseline: ProductSpec v1.17; canonical JMG-004
-- Proposed baseline: v1.18 if accepted
+- Accepted baseline: v1.18
 - Dependencies/cross-capability IDs: JOB-001 in `public-job-listings.md`
-- Approval: approved by John in chat on 2026-10-18; canonical sync remains gated on implementation review and separate acceptance
+- Approval: John approved the proposed behavior in direct chat on 2026-10-18. After independent review and local checks, John separately accepted the implementation with recorded limits in direct chat on 2026-10-18; see record.md.
 
 ## MODIFIED JMG-004 — Scheduled opening and closing windows
 
@@ -13,7 +13,7 @@
 
 JMG-004 defines optional `opens_at` and `closes_at` values and the operational behavior of scheduled jobs, but does not define the timezone used to interpret timezone-less HR input or render schedule values.
 
-### Proposed after (recommended contract; pending approval)
+### Accepted after
 
 When JavaScript is available, HR's opening and closing date/time inputs MUST be interpreted in the HR user's browser-local timezone and converted to UTC instants before submission. The database MUST continue to store those instants as UTC. When schedule values are shown, HR and public job-detail views MUST display the instant in the current viewer's browser-local timezone and identify that timezone. Server process timezone MUST NOT affect parsing, persistence, edit-form values, or displayed schedule times. Native HR forms MUST remain usable without JavaScript: the server MUST render schedule inputs in UTC, label that fallback, and interpret no-JavaScript submissions explicitly as UTC. Empty no-JavaScript schedule fields MUST continue to clear optional values. Existing ordering, publication, application, and closure rules remain unchanged; `closes_at` MUST be strictly after `opens_at` after conversion.
 
