@@ -20,7 +20,7 @@
 
 - [x] T05 — Separate test engineer reviewed `09ba17a..252b731`, independently ran the focused suite, and found a P2 no-JavaScript native form regression. Evidence: `handoffs/T05-independent-review.md`.
 - [x] T05a — Added failing native no-JavaScript SSR/parser/action tests, then restored UTC-labeled native create/edit/clear and explicit UTC server parsing; browser-enhanced submissions still require converted UTC. Pre-fix run failed 3 regression assertions; final focused suite passed 44/44, full suite 651/651. Evidence: record.md.
-- [ ] T05b — A separate reviewer rechecks the remediation and final acceptance coverage. Evidence: follow-up review handoff and commit range.
+- [x] T05b — Separate test engineer rechecked `09ba17a..96d30b0` and the test-only `db5d617` delta. The reviewer confirmed the P2 is resolved and found no new issues; independently passed the focused suite at final head (5 files / 45 tests). Evidence: `handoffs/T05b-independent-review.md`.
 - [ ] T06 — John records student acceptance separately from implementation/review after T05b.
 - [ ] T07 — Sync the accepted delta to canonical JMG-004 and product index/version; complete logs and archive packet after checking links.
 - [ ] T08 — Commit final closeout and open issue-linked PR to `develop` with `Closes #111` after closeout. Merge and release remain separate decisions.
