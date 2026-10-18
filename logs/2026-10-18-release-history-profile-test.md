@@ -27,6 +27,8 @@
 
 ## Files, decisions and verification
 
+Publication preparation execution: authorized merge commit `68e3271` created with the verified two parents `1f6d872` and `d48f699`. Both master/develop ancestor checks passed afterward; the staged source/config/schema exclusions were empty. This later result completes the commit-ancestry condition that remained pending at the review checkpoint. Final evidence is saved before push/PR opening; actual publication outcome is reported through tool-confirmed chat, not inferred here.
+
 Acceptance/publication follow-up: Paul replied **Accept and publish repair PR** to `call_2wOndANslWGM2IQqKx9C3AXq` on 18 October 2026 (Asia/Singapore). Primary recorded the separate decision, archived the complete packet and repaired links before authorized publication. Exact remote master/develop hashes were rechecked and unchanged. The approved merge commit will retain parents `1f6d872` and `d48f699`; final ancestry is checked after the actual commit, not assumed here. No repository PR merge or production operation is authorized.
 
 - `tests/e2e/support/profile-resume-journey.ts`: two broad status locators become form-scoped/exact-success assertions; existing file/persistence/role checks retained.
