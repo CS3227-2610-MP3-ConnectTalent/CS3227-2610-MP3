@@ -8,6 +8,7 @@ import {
   formatUtcDateTime,
   getBrowserTimeZone,
   isoToLocalDateTime,
+  isoToUtcDateTimeLocal,
   localDateTimeToIso,
   normalizeIsoTimestamp,
 } from "@/lib/local-date-time";
@@ -15,8 +16,7 @@ import {
 const INVALID_LOCAL_TIME_MESSAGE =
   "This date and time is invalid in your local timezone. Choose another time.";
 const subscribeToNoChanges = () => () => {};
-const getServerLocalDateTime = () => "";
-const getServerTimeZone = () => "your local time";
+const getServerTimeZone = () => "UTC fallback";
 
 export function LocalScheduleInput({
   id,
@@ -31,7 +31,7 @@ export function LocalScheduleInput({
   value?: string | null;
   helpText: string;
 }) {
-  const { localValue, utcValue, timeZone, invalid, onChange } =
+  const { localValue, utcValue, timeZone, enhanced, invalid, onChange } =
     useLocalScheduleInput(value);
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
@@ -44,23 +44,53 @@ export function LocalScheduleInput({
       </label>
       <LocalScheduleDateTimeControl
         id={id}
+        name={`${name}Local`}
         value={localValue}
         invalid={invalid}
         onChange={onChange}
         errorId={errorId}
         helpId={helpId}
       />
-      <input type="hidden" name={name} value={utcValue} />
+      <ScheduleInputMetadata
+        name={name}
+        utcValue={utcValue}
+        enhanced={enhanced}
+        timeZone={timeZone}
+      />
       <ScheduleInputMessage
         error={error}
         errorId={errorId}
         helpId={helpId}
         helpText={helpText}
       />
-      <p className="text-xs text-muted-foreground">
-        Uses your browser timezone ({timeZone}).
-      </p>
     </div>
+  );
+}
+
+function ScheduleInputMetadata({
+  name,
+  utcValue,
+  enhanced,
+  timeZone,
+}: {
+  name: string;
+  utcValue: string;
+  enhanced: boolean;
+  timeZone: string;
+}) {
+  return (
+    <>
+      <input type="hidden" name={name} value={utcValue} />
+      <input
+        type="hidden"
+        name={`${name}Mode`}
+        value={enhanced ? "browser" : ""}
+      />
+      <p className="text-xs text-muted-foreground">
+        Uses your browser timezone ({timeZone}). Without JavaScript, schedule
+        times use UTC.
+      </p>
+    </>
   );
 }
 
@@ -69,17 +99,27 @@ function useLocalScheduleInput(value?: string | null) {
   const initialLocalValue = useSyncExternalStore(
     subscribeToNoChanges,
     () => isoToLocalDateTime(value),
-    getServerLocalDateTime,
+    () => isoToUtcDateTimeLocal(value),
   );
   const timeZone = useSyncExternalStore(
     subscribeToNoChanges,
     getBrowserTimeZone,
     getServerTimeZone,
   );
+  const enhanced = useSyncExternalStore(
+    subscribeToNoChanges,
+    () => true,
+    () => false,
+  );
+  const initialUtcValue = useSyncExternalStore(
+    subscribeToNoChanges,
+    () => normalizeIsoTimestamp(value),
+    () => "",
+  );
   const localValue = editedValue ?? initialLocalValue;
   const utcValue =
     editedValue === null
-      ? normalizeIsoTimestamp(value)
+      ? initialUtcValue
       : editedValue === ""
         ? ""
         : (localDateTimeToIso(editedValue) ?? "");
@@ -92,6 +132,7 @@ function useLocalScheduleInput(value?: string | null) {
     localValue,
     utcValue,
     timeZone,
+    enhanced,
     invalid,
     onChange: setEditedValue,
   };
@@ -125,6 +166,7 @@ function ScheduleInputMessage({
 
 function LocalScheduleDateTimeControl({
   id,
+  name,
   value,
   invalid,
   onChange,
@@ -132,6 +174,7 @@ function LocalScheduleDateTimeControl({
   helpId,
 }: {
   id: string;
+  name: string;
   value: string;
   invalid: boolean;
   onChange: (value: string) => void;
@@ -153,6 +196,7 @@ function LocalScheduleDateTimeControl({
     <Input
       ref={inputRef}
       id={id}
+      name={name}
       type="datetime-local"
       value={value}
       onChange={(event) => handleChange(event.currentTarget.value)}

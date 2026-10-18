@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { JOB_CATEGORIES, type JobCategory } from "./job-categories";
+import { utcDateTimeLocalToIso } from "./local-date-time";
 
 const categories = JOB_CATEGORIES.map((category) => category.value) as [
   JobCategory,
@@ -26,6 +27,37 @@ const optionalDatetimeSchema = z.custom<string | null>(
     val === null ||
     (typeof val === "string" && isoDateTimeSchema.safeParse(val).success),
 );
+
+function parseScheduleDatetime(
+  formData: FormData,
+  name: "opensAt" | "closesAt",
+) {
+  const legacyName = name === "opensAt" ? "opens_at" : "closes_at";
+  const rawUtc = formData.get(name) ?? formData.get(legacyName);
+  const mode = formData.get(`${name}Mode`);
+  const localWallTime = formData.get(`${name}Local`);
+
+  if (mode === "browser") {
+    const value = parseOptionalDatetime(rawUtc);
+    if (
+      value === null &&
+      typeof localWallTime === "string" &&
+      localWallTime.trim() !== ""
+    ) {
+      return undefined;
+    }
+    return value;
+  }
+  if (mode !== null && mode !== "") return undefined;
+
+  const utcValue = parseOptionalDatetime(rawUtc);
+  if (utcValue !== null) return utcValue;
+  if (localWallTime === null) return null;
+  if (typeof localWallTime !== "string") return undefined;
+  const trimmed = localWallTime.trim();
+  if (trimmed === "") return null;
+  return utcDateTimeLocalToIso(trimmed) ?? undefined;
+}
 
 const jobFieldsSchema = z
   .object({
@@ -53,11 +85,8 @@ type ParseResult<T> = { success: true; value: T } | { success: false };
 export type HRJobFields = z.infer<typeof jobFieldsSchema>;
 
 export function parseHRJobFields(formData: FormData): ParseResult<HRJobFields> {
-  const opensAtRaw = formData.get("opensAt") ?? formData.get("opens_at");
-  const closesAtRaw = formData.get("closesAt") ?? formData.get("closes_at");
-
-  const opensAt = parseOptionalDatetime(opensAtRaw);
-  const closesAt = parseOptionalDatetime(closesAtRaw);
+  const opensAt = parseScheduleDatetime(formData, "opensAt");
+  const closesAt = parseScheduleDatetime(formData, "closesAt");
 
   if (opensAt === undefined || closesAt === undefined) {
     return { success: false };

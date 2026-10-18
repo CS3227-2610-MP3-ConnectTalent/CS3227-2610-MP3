@@ -5,7 +5,9 @@ import {
   formatUtcDateTime,
   getBrowserTimeZone,
   isoToLocalDateTime,
+  isoToUtcDateTimeLocal,
   localDateTimeToIso,
+  utcDateTimeLocalToIso,
 } from "../../src/lib/local-date-time";
 
 const initialTimeZone = process.env.TZ;
@@ -20,6 +22,13 @@ afterEach(() => {
 
 it("converts and displays schedules in the active browser timezone", () => {
   process.env.TZ = "America/Los_Angeles";
+  expect(isoToUtcDateTimeLocal("2026-01-15T01:00:00.000Z")).toBe(
+    "2026-01-15T01:00",
+  );
+  expect(utcDateTimeLocalToIso("2026-01-15T01:00")).toBe(
+    "2026-01-15T01:00:00.000Z",
+  );
+  expect(utcDateTimeLocalToIso("2026-02-30T01:00")).toBeNull();
   expect(localDateTimeToIso("2026-01-15T09:00")).toBe(
     "2026-01-15T17:00:00.000Z",
   );

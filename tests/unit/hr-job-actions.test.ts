@@ -75,6 +75,39 @@ it("denies invalid fields before the RPC and reports a generic failure", async (
   });
 });
 
+it("denies an enhanced schedule without a UTC conversion before the RPC", async () => {
+  const rpc = vi.fn();
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  await expect(
+    createHRJobDraft(
+      form({
+        opensAt: "",
+        opensAtLocal: "2026-03-08T02:30",
+        opensAtMode: "browser",
+      }),
+    ),
+  ).rejects.toThrow("REDIRECT:/hr/jobs/new?error=invalid");
+  expect(rpc).not.toHaveBeenCalled();
+});
+
+it("persists native no-JavaScript schedules as explicit UTC instants", async () => {
+  const rpc = vi.fn().mockResolvedValue({ data: jobId, error: null });
+  mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });
+  await expect(
+    createHRJobDraft(
+      form({
+        opensAt: "",
+        opensAtLocal: "2026-10-20T10:00",
+        opensAtMode: "",
+      }),
+    ),
+  ).rejects.toThrow(`REDIRECT:/hr/jobs/${jobId}?notice=created`);
+  expect(rpc).toHaveBeenCalledWith(
+    "create_hr_job_draft",
+    expect.objectContaining({ p_opens_at: "2026-10-20T10:00:00.000Z" }),
+  );
+});
+
 it("uses distinct edit, publish and close RPCs", async () => {
   const rpc = vi.fn().mockResolvedValue({ data: jobId, error: null });
   mocks.requireHR.mockResolvedValue({ client: { rpc }, user: { id: jobId } });

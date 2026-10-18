@@ -15,7 +15,7 @@ JMG-004 defines optional `opens_at` and `closes_at` values and the operational b
 
 ### Proposed after (recommended contract; pending approval)
 
-HR's opening and closing date/time inputs MUST be interpreted in the HR user's browser-local timezone and converted to UTC instants before submission. The database MUST continue to store those instants as UTC. When schedule values are shown, HR and public job-detail views MUST display the instant in the current viewer's browser-local timezone and identify that timezone. Server process timezone MUST NOT affect parsing, persistence, edit-form values, or displayed schedule times. Existing ordering, publication, application, and closure rules remain unchanged; `closes_at` MUST be strictly after `opens_at` after conversion.
+When JavaScript is available, HR's opening and closing date/time inputs MUST be interpreted in the HR user's browser-local timezone and converted to UTC instants before submission. The database MUST continue to store those instants as UTC. When schedule values are shown, HR and public job-detail views MUST display the instant in the current viewer's browser-local timezone and identify that timezone. Server process timezone MUST NOT affect parsing, persistence, edit-form values, or displayed schedule times. Native HR forms MUST remain usable without JavaScript: the server MUST render schedule inputs in UTC, label that fallback, and interpret no-JavaScript submissions explicitly as UTC. Empty no-JavaScript schedule fields MUST continue to clear optional values. Existing ordering, publication, application, and closure rules remain unchanged; `closes_at` MUST be strictly after `opens_at` after conversion.
 
 ### Scenarios
 
@@ -23,3 +23,4 @@ HR's opening and closing date/time inputs MUST be interpreted in the HR user's b
 - **sched-tz-AC-02:** Given a job already stores a UTC opening/closing instant, when HR opens the editor and saves without changing it, then the browser-local field round-trips without shifting the stored instant.
 - **sched-tz-AC-03:** Given the same UTC closing instant, when viewers in different browser timezones see it, then each sees the equivalent wall-clock value and timezone identifier for their own browser timezone.
 - **sched-tz-AC-04:** Given malformed, impossible, or reversed schedule values, when HR saves, then the existing invalid-form behavior prevents persistence.
+- **sched-tz-AC-05:** Given JavaScript is disabled, when HR creates, edits, or clears an optional schedule and submits the native form, then the UTC fallback value is preserved and interpreted independently of the server timezone.

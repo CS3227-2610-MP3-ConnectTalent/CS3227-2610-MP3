@@ -158,9 +158,11 @@ it("renders editable draft controls and save or publish feedback", async () => {
   expect(html).toContain("Publish job");
   expect(html).toContain(`value="${job.id}"`);
   expect(html).toContain('type="datetime-local"');
-  expect(html).toContain('name="opensAt"');
-  expect(html).toContain('value="2026-01-15T01:00:00.000Z"');
-  expect(html).toContain("Uses your browser timezone");
+  expect(html).toContain('name="opensAtLocal"');
+  expect(html).toContain('value="2026-01-15T01:00"');
+  expect(html).toContain('name="opensAt" value=""');
+  expect(html).toContain('name="opensAtMode" value=""');
+  expect(html).toContain("Without JavaScript, schedule times use UTC.");
 });
 
 it("renders published job text and closing controls but no close action for a closed job", async () => {

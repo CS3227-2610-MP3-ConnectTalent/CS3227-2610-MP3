@@ -30,6 +30,29 @@ export function isoToLocalDateTime(value?: string | null): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+export function isoToUtcDateTimeLocal(value?: string | null): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+}
+
+export function utcDateTimeLocalToIso(value: string): string | null {
+  const match = LOCAL_DATE_TIME_PATTERN.exec(value);
+  if (!match) return null;
+
+  const date = new Date(`${value}:00.000Z`);
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 16) !== value
+  ) {
+    return null;
+  }
+  return date.toISOString();
+}
+
 export function normalizeIsoTimestamp(value?: string | null): string {
   if (!value) return "";
   const date = new Date(value);

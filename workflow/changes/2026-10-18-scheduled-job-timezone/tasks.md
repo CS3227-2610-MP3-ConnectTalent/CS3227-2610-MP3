@@ -7,6 +7,7 @@
 ## Before implementation
 
 - [x] T00 — John approves HR-browser-local interpretation, UTC storage, viewer-browser-local display, and proposal/delta/design/plan. Evidence: direct chat response on 2026-10-18, recorded in record.md; dependencies: none.
+- [x] T00b — After initial review finds a no-JavaScript form regression, John selects the labeled UTC fallback. Evidence: direct chat response on 2026-10-18; see design.md and record.md.
 
 ## Ordered implementation
 
@@ -17,10 +18,12 @@
 
 ## Review and closeout
 
-- [ ] T05 — A separate reviewer checks final diff, acceptance cases, and risks. Evidence: independent review artifact and commit range.
-- [ ] T06 — John records student acceptance separately from implementation/review.
+- [x] T05 — Separate test engineer reviewed `09ba17a..252b731`, independently ran the focused suite, and found a P2 no-JavaScript native form regression. Evidence: `handoffs/T05-independent-review.md`.
+- [x] T05a — Added failing native no-JavaScript SSR/parser/action tests, then restored UTC-labeled native create/edit/clear and explicit UTC server parsing; browser-enhanced submissions still require converted UTC. Pre-fix run failed 3 regression assertions; final focused suite passed 44/44, full suite 651/651. Evidence: record.md.
+- [ ] T05b — A separate reviewer rechecks the remediation and final acceptance coverage. Evidence: follow-up review handoff and commit range.
+- [ ] T06 — John records student acceptance separately from implementation/review after T05b.
 - [ ] T07 — Sync the accepted delta to canonical JMG-004 and product index/version; complete logs and archive packet after checking links.
-- [ ] T08 — Open issue-linked PR to `develop` with `Closes #111` after closeout. Merge and release remain separate decisions.
+- [ ] T08 — Commit final closeout and open issue-linked PR to `develop` with `Closes #111` after closeout. Merge and release remain separate decisions.
 
 ## Post-submission
 
