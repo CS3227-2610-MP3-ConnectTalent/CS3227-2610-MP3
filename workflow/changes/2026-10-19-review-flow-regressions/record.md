@@ -12,7 +12,7 @@ Date: 2026-10-19
 
 - Change ID/classification: 2026-10-19-review-flow-regressions; defects restoring existing behavior
 - GitHub issues: [#120](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/120), [#121](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/121), [#122](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/122), [#123](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/123)
-- Branch/commits/PR: `fix/120-review-flow-regressions`; baseline `7495e576e8a4426834b294d4b36ab25300e6b65a`; implementation/closeout commit and PR pending
+- Branch/commits/PR: `fix/120-review-flow-regressions`; implementation commit [`2998aeb`](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/commit/2998aebac419ed8ef3613d8383c0f63562b9e005) pushed to origin; baseline `7495e576e8a4426834b294d4b36ab25300e6b65a`; PR pending
 - Proposal: `proposal.md`
 - Design: `design.md`
 - Deltas: none; restoration of APP-002/003/004/005/007/008/010
@@ -72,4 +72,4 @@ Known limitations: the final production build compiled and completed TypeScript,
 - Accepted delta/human decision: no requirement change expected; final confirmation pending student acceptance.
 - Canonical sync: expected N/A because these repairs restore existing clauses; verify before closeout.
 - Archive: pending acceptance and complete closeout.
-- Outstanding work: commit/push, independent review and findings, separate student acceptance, then PR-last closeout and submission. Packet archive remains pending acceptance.
+- Outstanding work: independent review and findings, separate student acceptance, then final PR-last closeout and submission. Packet archive remains pending acceptance.
