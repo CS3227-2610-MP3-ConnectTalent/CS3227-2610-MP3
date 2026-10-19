@@ -44,6 +44,44 @@ const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
 export function ApplicationForm(props: Props) {
+  const [formInstance, setFormInstance] = useState(() => ({
+    jobId: props.jobId,
+    lastApplicationId: props.applicationId ?? null,
+    generation: 0,
+  }));
+  let nextFormInstance = formInstance;
+
+  if (formInstance.jobId !== props.jobId) {
+    nextFormInstance = {
+      jobId: props.jobId,
+      lastApplicationId: props.applicationId ?? null,
+      generation: formInstance.generation + 1,
+    };
+  } else if (
+    props.applicationId &&
+    formInstance.lastApplicationId &&
+    formInstance.lastApplicationId !== props.applicationId
+  ) {
+    nextFormInstance = {
+      ...formInstance,
+      lastApplicationId: props.applicationId,
+      generation: formInstance.generation + 1,
+    };
+  } else if (props.applicationId && !formInstance.lastApplicationId) {
+    nextFormInstance = {
+      ...formInstance,
+      lastApplicationId: props.applicationId,
+    };
+  }
+
+  if (nextFormInstance !== formInstance) setFormInstance(nextFormInstance);
+
+  return (
+    <ApplicationFormState key={nextFormInstance.generation} props={props} />
+  );
+}
+
+function ApplicationFormState({ props }: { props: Props }) {
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
     getClientHydrationSnapshot,

@@ -2,7 +2,7 @@
 
 - Change/issues: [#120](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/120), [#121](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/121), [#122](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/122), [#123](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/123)
 - Plan/record: `plan.md`; `record.md`
-- Status/owner: in progress; student owner pending assignment
+- Status/owner: in progress; student owner pending formal assignment
 
 ## Before implementation
 
@@ -18,7 +18,7 @@
 
 ## Review and closeout
 
-- [ ] T06 — Separate reviewer execution assesses final revision. Evidence: independent review handoff; pending because this environment disallows subagent delegation and current implementer cannot provide an independent review.
-- [ ] T07 — Student owner records acceptance/conditions after evidence review. Pending.
+- [ ] T06 — Separate reviewer execution assesses final revision. First pass at `69987fb` found a P2 in review-AC-01; the identity-switch regression and correction are recorded in `handoffs/T06-independent-review.md`. Re-review after the fix push is pending.
+- [x] T07 — User recorded “I accept and approve. Please proceed” on 2026-10-19. This preceded the independent finding; the user authorized proceeding with the review-driven correction within #122's existing acceptance behavior.
 - [ ] T08 — Record dated session log and complete pre-PR closeout; sync/archive only after acceptance; open issue-linked PR to `develop` last. Pending.
 - [ ] T09 — Student records later merge/release decision as separate gates. Pending.

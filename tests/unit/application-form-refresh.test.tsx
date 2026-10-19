@@ -14,7 +14,9 @@ vi.mock("@/components/application-contact-details", () => ({
   ApplicationContactDetails: () => null,
 }));
 vi.mock("@/components/application-form-fields", () => ({
-  ApplicantContactFields: () => null,
+  ApplicantContactFields: ({ values }: { values: { full_name: string } }) => (
+    <output id="full-name-value">{values.full_name}</output>
+  ),
   ApplicationBackgroundFields: () => null,
   ApplicationFormActions: () => null,
   CoverLetterField: ({ value }: { value: string }) => (
@@ -50,8 +52,9 @@ let root: Root;
 
 async function renderForm(
   revision: number,
-  applicationId = "application-1",
+  applicationId: string | null = "application-1",
   value = "Initial letter",
+  fullName = "Initial applicant",
 ) {
   await act(async () => {
     root.render(
@@ -61,7 +64,7 @@ async function renderForm(
         revision={revision}
         submitted={false}
         email="synthetic@example.test"
-        details={details}
+        details={{ ...details, full_name: fullName }}
         applicationId={applicationId}
       />,
     );
@@ -104,11 +107,13 @@ describe("application form server-prop refresh", () => {
       "Initial letter",
     );
   });
+});
 
-  it("adopts a new application identity and its refreshed revision", async () => {
+describe("application form identity changes", () => {
+  it("adopts a new application identity and resets prior form values", async () => {
     await renderForm(3);
 
-    await renderForm(1, "application-2");
+    await renderForm(1, "application-2", "Second letter", "Second applicant");
 
     expect(
       container.querySelector<HTMLInputElement>('input[name="revision"]')
@@ -119,6 +124,25 @@ describe("application form server-prop refresh", () => {
     ).toBe("application-2");
     expect(container.querySelector("#resume-panel-revision")?.textContent).toBe(
       "1",
+    );
+    expect(container.querySelector("#full-name-value")?.textContent).toBe(
+      "Second applicant",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Second letter",
+    );
+  });
+
+  it("keeps entered values when a new draft gains its first application ID", async () => {
+    await renderForm(0, null, "Entered before first save", "Entered applicant");
+
+    await renderForm(1, "application-1", "Server copy", "Server copy");
+
+    expect(container.querySelector("#full-name-value")?.textContent).toBe(
+      "Entered applicant",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Entered before first save",
     );
   });
 });
