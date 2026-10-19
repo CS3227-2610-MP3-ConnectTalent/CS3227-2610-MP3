@@ -10,6 +10,7 @@ type ProfileCopyAttempt = {
 type ResumeResponseState = {
   setOperation: (value: string) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
+  setRevision: (value: number) => void;
   setUploadFailed: (value: boolean) => void;
   setProfileCopyRetryAvailable: (value: boolean) => void;
   setProfileCopyAttempt: (value: ProfileCopyAttempt | null) => void;
@@ -69,6 +70,7 @@ function applySuccessfulResumeResponse(
 ) {
   if ("resume" in result)
     state.setAttachment(result.resume as ResumeMetadata | null);
+  if (typeof result.revision === "number") state.setRevision(result.revision);
   props.onChange?.({
     applicationId:
       typeof result.applicationId === "string"

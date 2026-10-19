@@ -4,11 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ResumeMetadata } from "@/lib/application-resumes";
 import { applyResumeResponse } from "./resume-panel-response";
+import {
+  useResumeActionAttachment,
+  useResumeActionRevision,
+} from "./resume-panel-local-state";
 import type { ResumeIntent, ResumePanelProps } from "./resume-panel-state";
 
 export function useResumePanelActions(props: ResumePanelProps) {
   const router = useRouter();
-  const state = useResumeActionState(props.resume);
+  const state = useResumeActionState(
+    props.resume,
+    props.applicationId,
+    props.revision,
+  );
   const change = (intent: ResumeIntent, retry = false) => {
     const shouldRetry = retry || (intent === "upload" && state.uploadFailed);
     return performResumeChange(
@@ -41,7 +49,11 @@ export function useResumePanelActions(props: ResumePanelProps) {
   return { ...state, selectFile, change, deleteResume };
 }
 
-function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
+function useResumeActionState(
+  initialResume: ResumePanelProps["resume"],
+  initialApplicationId: string | null,
+  initialRevision: number | null,
+) {
   const [file, setFile] = useState<File | null>(null);
   const [operation, setOperation] = useState("");
   const [pending, setPending] = useState(false);
@@ -53,14 +65,12 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
     useState(false);
   const [profileCopyAttempt, setProfileCopyAttempt] =
     useState<ProfileCopyAttempt | null>(null);
-  const [attachment, setAttachment] = useState(initialResume);
-  const [prevResume, setPrevResume] = useState(initialResume);
-  let currentAttachment = attachment;
-  if (initialResume !== prevResume) {
-    setPrevResume(initialResume);
-    setAttachment(initialResume);
-    currentAttachment = initialResume;
-  }
+  const { attachment, setAttachment } =
+    useResumeActionAttachment(initialResume);
+  const { revision, setRevision } = useResumeActionRevision(
+    initialApplicationId,
+    initialRevision,
+  );
   return {
     file,
     operation,
@@ -71,7 +81,8 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
     uploadFailed,
     profileCopyRetryAvailable,
     profileCopyAttempt,
-    attachment: currentAttachment,
+    attachment,
+    revision,
     setFile,
     setOperation,
     setPending,
@@ -82,6 +93,7 @@ function useResumeActionState(initialResume: ResumePanelProps["resume"]) {
     setProfileCopyRetryAvailable,
     setProfileCopyAttempt,
     setAttachment,
+    setRevision,
   };
 }
 
@@ -96,6 +108,7 @@ type ActionState = {
   profileCopyRetryAvailable: boolean;
   profileCopyAttempt: ProfileCopyAttempt | null;
   attachment: ResumeMetadata | null;
+  revision: number | null;
   setOperation: (value: string) => void;
   setPending: (value: boolean) => void;
   setActiveIntent: (value: ResumeIntent | null) => void;
@@ -105,6 +118,7 @@ type ActionState = {
   setProfileCopyRetryAvailable: (value: boolean) => void;
   setProfileCopyAttempt: (value: ProfileCopyAttempt | null) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
+  setRevision: (value: number) => void;
 };
 
 type ProfileCopyAttempt = {
@@ -121,7 +135,7 @@ function resolveProfileCopyAttempt(
   if (retry) return state.profileCopyAttempt;
   const sourceId = props.profileResume?.id;
   return sourceId
-    ? { operation: crypto.randomUUID(), sourceId, revision: props.revision }
+    ? { operation: crypto.randomUUID(), sourceId, revision: state.revision }
     : null;
 }
 
