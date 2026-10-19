@@ -26,8 +26,8 @@
 
 ## Review independence and decision
 
-- Implementer identity/range: primary Codex execution; branch `fix/115-pr110-review-followups`; baseline `3c9ba769f536679a3f546b5e5fbf5a254f059104`; commit pending.
-- Reviewer identity/context: separate read-only test-engineer invocation; final recheck of current-URL synchronization is pending.
+- Implementer identity/range: primary Codex execution; branch `fix/115-pr110-review-followups`; baseline `3c9ba769f536679a3f546b5e5fbf5a254f059104`; commit `b9c448e713a5083c833be1b461c2179c4303f555`, pushed to origin.
+- Reviewer identity/context: separate read-only test-engineer invocation reviewed the committed range `3c9ba769f536679a3f546b5e5fbf5a254f059104..b9c448e713a5083c833be1b461c2179c4303f555`.
 - Independence: reviewer is a separate execution and did not implement; it shares this workspace and receives the recorded acceptance criteria.
-- Findings and resolutions: initial ESLint finding about effect-time `setState` was corrected with guarded previous-props reconciliation. The independent reviewer found the first `isPending`-only filter guard could adopt stale props after transition idle; synchronization now additionally requires a semantic match with parsed Next URL parameters. Final independent recheck is pending.
+- Findings and resolutions: initial ESLint finding about effect-time `setState` was corrected with guarded previous-props reconciliation. The independent reviewer found the first `isPending`-only filter guard could adopt stale props after transition idle; synchronization now additionally requires a semantic match with parsed Next URL parameters. Final review found no new source issue; overlapping-transition runtime behavior remains unverified.
 - Human decision: implementation authorization is recorded; final student acceptance remains pending.

@@ -18,7 +18,7 @@
 
 ## Review and closeout
 
-- [ ] T06 — Separate reviewer execution checks final diff, acceptance cases, privacy and maintainability; records independence, findings and rechecks.
+- [x] T06 — Separate read-only test-engineer review of committed range `3c9ba769f536679a3f546b5e5fbf5a254f059104..b9c448e713a5083c833be1b461c2179c4303f555`. The reviewer found no remaining source defect after the URL-match guard and exact page-one slice assertion. Runtime transition/dashboard cases were not exercised; see `record.md`.
 - [ ] T07 — Student owner records acceptance or requested changes with date, source and conditions.
 - [ ] T08 — After acceptance, archive complete packet; canonical sync is N/A because no product requirement changes; check navigation and links.
 - [ ] T09 — Complete dated summary and record links before PR submission.
