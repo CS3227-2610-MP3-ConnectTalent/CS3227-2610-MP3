@@ -18,7 +18,7 @@
 
 ## Review and closeout
 
-- [ ] T06 — Separate reviewer rechecks the mounted navigation/form tests and test-environment dependency through the final test commit. Re-review through `31cbf34` found no source defect and confirmed the original gaps were substantially covered, with one identity assertion gap now fixed. Final re-review is pending. A real Next/browser transition-interruption check remains outside the mocked-router tests.
+- [x] T06 — Separate reviewer rechecked the mounted navigation/form tests and test-environment dependency through `182b4a2`. No source defect was found; the refreshed identity assertion closes the prior P3 test gap. Remaining P2 validation limit: actual Next/browser transition interruption or out-of-order navigation is not exercised by the synchronous router mock. See `handoffs/T06-independent-review.md`.
 - [ ] T07 — Student owner records acceptance or requested changes with date, source and conditions.
 - [ ] T08 — After acceptance, archive complete packet; canonical sync is N/A because no product requirement changes; check navigation and links.
 - [ ] T09 — Complete dated summary and record links before PR submission.
