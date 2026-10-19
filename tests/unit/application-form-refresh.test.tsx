@@ -27,13 +27,26 @@ vi.mock("@/components/resume-panel", () => ({
   ResumePanel: ({
     applicationId,
     revision,
+    onChange,
   }: {
     applicationId: string | null;
     revision: number | null;
+    onChange?: (result: { applicationId?: string; revision?: number }) => void;
   }) => (
     <>
       <output id="resume-panel-application-id">{applicationId ?? ""}</output>
       <output id="resume-panel-revision">{revision ?? ""}</output>
+      {onChange && (
+        <button
+          id="establish-local-application"
+          type="button"
+          onClick={() =>
+            onChange({ applicationId: "application-1", revision: 1 })
+          }
+        >
+          Establish local application
+        </button>
+      )}
     </>
   ),
 }));
@@ -133,16 +146,76 @@ describe("application form identity changes", () => {
     );
   });
 
-  it("keeps entered values when a new draft gains its first application ID", async () => {
+  it("resets values when another tab creates the first application ID", async () => {
     await renderForm(0, null, "Entered before first save", "Entered applicant");
 
+    await renderForm(1, "application-1", "Server copy", "Server copy");
+
+    expect(container.querySelector("#full-name-value")?.textContent).toBe(
+      "Server copy",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Server copy",
+    );
+  });
+});
+
+describe("application forms retain locally created draft identity", () => {
+  it("keeps entered values when a local resume response establishes the first ID", async () => {
+    await renderForm(0, null, "Entered before upload", "Entered applicant");
+
+    await act(async () => {
+      container
+        .querySelector<HTMLButtonElement>("#establish-local-application")
+        ?.click();
+    });
     await renderForm(1, "application-1", "Server copy", "Server copy");
 
     expect(container.querySelector("#full-name-value")?.textContent).toBe(
       "Entered applicant",
     );
     expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
-      "Entered before first save",
+      "Entered before upload",
+    );
+  });
+});
+
+describe("application forms reject mismatched local draft identity", () => {
+  it("resets values when the server adopts a different ID than the local response", async () => {
+    await renderForm(0, null, "Entered before upload", "Entered applicant");
+
+    await act(async () => {
+      container
+        .querySelector<HTMLButtonElement>("#establish-local-application")
+        ?.click();
+    });
+    await renderForm(1, "application-2", "Other tab draft", "Other applicant");
+
+    expect(container.querySelector("#full-name-value")?.textContent).toBe(
+      "Other applicant",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Other tab draft",
+    );
+  });
+});
+
+describe("application form identity disappearance", () => {
+  it("resets values when the existing application identity disappears", async () => {
+    await renderForm(
+      3,
+      "application-1",
+      "Withdrawn letter",
+      "Withdrawn applicant",
+    );
+
+    await renderForm(0, null, "Replacement draft", "Replacement applicant");
+
+    expect(container.querySelector("#full-name-value")?.textContent).toBe(
+      "Replacement applicant",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Replacement draft",
     );
   });
 });

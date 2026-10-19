@@ -12,6 +12,11 @@ import {
 } from "@/components/application-form-fields";
 import { ResumePanel } from "@/components/resume-panel";
 import {
+  createApplicationFormInstance,
+  reconcileApplicationFormInstance,
+  type ApplicationFormInstance,
+} from "@/lib/application-form-instance";
+import {
   reconcileApplicationAttachment,
   type ApplicationAttachment,
 } from "@/lib/application-attachment";
@@ -44,44 +49,43 @@ const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
 export function ApplicationForm(props: Props) {
-  const [formInstance, setFormInstance] = useState(() => ({
-    jobId: props.jobId,
-    lastApplicationId: props.applicationId ?? null,
-    generation: 0,
-  }));
-  let nextFormInstance = formInstance;
-
-  if (formInstance.jobId !== props.jobId) {
-    nextFormInstance = {
-      jobId: props.jobId,
-      lastApplicationId: props.applicationId ?? null,
-      generation: formInstance.generation + 1,
-    };
-  } else if (
-    props.applicationId &&
-    formInstance.lastApplicationId &&
-    formInstance.lastApplicationId !== props.applicationId
-  ) {
-    nextFormInstance = {
-      ...formInstance,
-      lastApplicationId: props.applicationId,
-      generation: formInstance.generation + 1,
-    };
-  } else if (props.applicationId && !formInstance.lastApplicationId) {
-    nextFormInstance = {
-      ...formInstance,
-      lastApplicationId: props.applicationId,
-    };
-  }
+  const [formInstance, setFormInstance] = useState<ApplicationFormInstance>(
+    () =>
+      createApplicationFormInstance(props.jobId, props.applicationId ?? null),
+  );
+  const nextFormInstance = reconcileApplicationFormInstance(
+    formInstance,
+    props.jobId,
+    props.applicationId ?? null,
+  );
 
   if (nextFormInstance !== formInstance) setFormInstance(nextFormInstance);
 
   return (
-    <ApplicationFormState key={nextFormInstance.generation} props={props} />
+    <ApplicationFormState
+      key={nextFormInstance.generation}
+      props={props}
+      onLocalApplicationCreated={(applicationId) => {
+        setFormInstance((current) => {
+          if (
+            current.jobId !== props.jobId ||
+            current.lastApplicationId !== null
+          )
+            return current;
+          return { ...current, locallyCreatedApplicationId: applicationId };
+        });
+      }}
+    />
   );
 }
 
-function ApplicationFormState({ props }: { props: Props }) {
+function ApplicationFormState({
+  props,
+  onLocalApplicationCreated,
+}: {
+  props: Props;
+  onLocalApplicationCreated: (applicationId: string) => void;
+}) {
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
     getClientHydrationSnapshot,
@@ -112,6 +116,7 @@ function ApplicationFormState({ props }: { props: Props }) {
       hydrated={hydrated}
       coverLetter={coverLetter}
       setCoverLetter={setCoverLetter}
+      onLocalApplicationCreated={onLocalApplicationCreated}
     />
   );
 }
@@ -186,6 +191,7 @@ type DraftProps = Props & {
   onAttachmentPending: (value: boolean) => void;
   coverLetter: string;
   setCoverLetter: (value: string) => void;
+  onLocalApplicationCreated: (applicationId: string) => void;
 };
 
 function ApplicationDraftForm(props: DraftProps) {
@@ -248,11 +254,14 @@ function ApplicationResumeFields(props: DraftProps) {
         if (
           typeof result.applicationId === "string" &&
           typeof result.revision === "number"
-        )
+        ) {
           props.setAttachment({
             applicationId: result.applicationId,
             revision: result.revision,
           });
+          if (!props.applicationId)
+            props.onLocalApplicationCreated(result.applicationId);
+        }
       }}
     />
   );
