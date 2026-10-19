@@ -5,11 +5,11 @@
 - Date and time zone: 2026-10-19; active work occurred during the afternoon/evening Singapore time. Exact start time unavailable.
 - Session identifier and scope: identifier unavailable; repository review follow-up, four issue-linked fixes and pre-PR evidence.
 - Student owner and participants: student owner not formally assigned; current Codex implementation execution; separate read-only reviewer `/root/independent_review`.
-- Evidence available and missing coverage: local source/test outputs, issue links, user acceptance in chat and first-round independent review report; reviewer recheck of the correction, browser E2E and hosted smoke remain pending.
+- Evidence available and missing coverage: local source/test outputs, issue links, user acceptance in chat, two-round independent review; browser E2E and hosted smoke remain unrun.
 - GitHub issues: [#120](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/120), [#121](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/121), [#122](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/122), [#123](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/123)
-- Change packet and feature record: [active packet](../workflow/changes/2026-10-19-review-flow-regressions/); [record](../workflow/changes/2026-10-19-review-flow-regressions/record.md)
-- Branch and commits: `fix/120-review-flow-regressions` from `develop` at `7495e576e8a4426834b294d4b36ab25300e6b65a`; implementation commit `2998aeb` and packet commit `69987fb` pushed; review-fix commit and push pending.
-- PR: pending reviewer recheck and pre-PR closeout.
+- Change packet and feature record: [archived packet](../workflow/archive/2026-10-19-review-flow-regressions/); [record](../workflow/archive/2026-10-19-review-flow-regressions/record.md)
+- Branch and commits: `fix/120-review-flow-regressions` from `develop` at `7495e576e8a4426834b294d4b36ab25300e6b65a`; `2998aeb`, `69987fb`, and `257804b` pushed; local and origin refs matched `257804b81d35b80ffec3ac7e8bdccd6f107ed982`.
+- PR: pending final pre-PR closeout; no PR has been opened yet.
 - Related session summaries: none known.
 
 ## Chronological interactions and handoffs
@@ -21,13 +21,14 @@
 | 3 | User → Codex | Supplied repository `AGENTS.md` requirements and said “continue.” | Read required Next.js route-handler and mutating-data guides, implemented the four fixes test-first, ran validation and prepared evidence. | Repository requires independent review and student acceptance before PR; independent review cannot be supplied by the implementing execution. |
 | 4 | User → Codex | Said “I accept and approve. Please proceed.” | Acceptance recorded on 2026-10-19; user authorized continued review, finding resolution and closeout. | This decision preceded the first independent review result; no merge/release authorization. |
 | 5 | Separate reviewer → Codex | `/root/independent_review` reviewed head `69987fb` read-only against review-AC-01..04. | Passed 5 focused files/22 tests and `git diff --check`; found P2: app-1 values persisted when a mounted form adopted app-2's revision. | PR held per reviewer recommendation; regression test and same-scope fix added. Re-review requested after push. |
+| 6 | Separate reviewer → Codex | `/root/independent_review` re-reviewed pushed `257804b`. | No remaining material defect; passed five focused files/23 tests and baseline-to-head `git diff --check`. | Reviewer recommends PR after repository closeout; browser, current-schema database and hosted behavior remain unverified. |
 
 ## Tool and agent executions
 
 | Role / assignment state | Actual agent, tool, model / run identifier | Inputs and scope | Material actions, output and outcome | Evidence / independence / limits |
 | ----------------------- | ----------------------------------------- | ----------------- | ------------------------------------ | -------------------------------- |
 | Issue intake and implementation / completed | Current Codex execution; model/run identifier unavailable | Issues #120–#123 and packet acceptance criteria | Added regression tests, observed intended failures, implemented fixes, ran tests and static checks. | Implementation review remains self-review; separate reviewer run is listed below. |
-| Independent reviewer / first pass complete; recheck pending | Separate agent `/root/independent_review`, test-engineer role | Branch `69987fb`, issues #120–#123, review-AC-01..04 | Reported one P2 in review-AC-01; exact finding, tests and limitations are in [handoff](../workflow/changes/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Independent from implementation; the corrective commit still needs a separate re-review. |
+| Independent reviewer / completed | Separate agent `/root/independent_review`, test-engineer role | First head `69987fb`, corrected head `257804b`, issues #120–#123, review-AC-01..04 | First pass reported one P2 in review-AC-01; re-review found no remaining material defect. Full reports, commands and limitations are in the [handoff](../workflow/archive/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Independent from implementation; read-only source review and focused tests, not browser or hosted verification. |
 
 ## Decisions and changed files
 
@@ -35,16 +36,18 @@
 | -------- | ------------------------------ | --------------------------- | -------------------------- |
 | Preserve issue scope as four fixes with no canonical behavior change. | User request and existing ProductSpec; 2026-10-19 | Fixes restore existing requirements APP-002/003/004/005/007/008/010. | User acceptance recorded; canonical sync is N/A. |
 | Reject the unused unscoped `cancel` intent on application résumé URLs. | Source inspection during implementation; 2026-10-19 | The route request carries no application/operation identity, and no UI caller uses it; it cannot safely cancel by old application URL. Internal operation-scoped cleanup remains unchanged. | Reviewer checked route behavior and found no blocker in the first pass. |
-| Changed app route/page/components and focused tests. | Implementation; 2026-10-19 | Keep form revision with displayed fields; apply successful résumé response metadata only; reject unscoped cancellation; cancel pending HR search on `popstate`; show current and differing original letters. | Reviewer checked initial revision; recheck follows the correction. |
-| Reset state on identified application/job switch, preserving initial draft values when its first ID appears. | First-round independent finding #122; correction on 2026-10-19 | The mounted form otherwise retained one application's `useActionState` and cover-letter state while adopting another application's current revision. | Focused red/green regression observed; reviewer recheck pending. |
-| Updated proposal/design/plan/tasks/record and this summary. | Implementation; 2026-10-19 | Keep issue traceability and true check/review/acceptance states. | Acceptance, final closeout and archive pending. |
+| Changed app route/page/components and focused tests. | Implementation; 2026-10-19 | Keep form revision with displayed fields; apply successful résumé response metadata only; reject unscoped cancellation; cancel pending HR search on `popstate`; show current and differing original letters. | Reviewer checked both revisions; re-review passed after the correction. |
+| Reset state on identified application/job switch, preserving initial draft values when its first ID appears. | First-round independent finding #122; correction on 2026-10-19 | The mounted form otherwise retained one application's `useActionState` and cover-letter state while adopting another application's current revision. | Focused red/green regression observed; reviewer confirmed correction on `257804b`. |
+| Updated packet, handoff and this summary. | Implementation and closeout; 2026-10-19 | Preserve issue traceability, actual review/acceptance timing and full evidence. | Complete packet archived; PR is the remaining contributor action. |
 
 ## Verification evidence
 
 | Date / environment / commit | Exact command or manual check | Status and observed result | Evidence reference | Scope and limitations |
 | --------------------------- | ---------------------------- | -------------------------- | ------------------ | --------------------- |
 | 2026-10-19 / local Bun / branch worktree before reviewer correction | `bun --bun node_modules/.pnpm/vitest@5.0.3_@types+node@24_3f5461d4c27fbc78f4e0e94741e4e655/node_modules/vitest/vitest.mjs run --pool=forks --maxWorkers=1` | Passed: 109 test files, 667 tests. | Vitest output from implementation session. | Full unit suite before first-round P2 correction; no browser or hosted runtime. |
-| 2026-10-19 / reviewer / head `69987fb` | `bun node_modules/vitest/vitest.mjs run tests/unit/application-form-refresh.test.tsx tests/unit/resume-panel-response.test.ts tests/unit/application-resume-route.test.ts tests/unit/hr-application-navigation.test.tsx tests/unit/applicant-pages.test.tsx` | Passed: 5 files, 22 tests. | [Independent-review handoff](../workflow/changes/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Reviewer found an uncovered identity-switch state bug in review-AC-01; not a clean approval. |
+| 2026-10-19 / reviewer / head `69987fb` | `bun node_modules/vitest/vitest.mjs run tests/unit/application-form-refresh.test.tsx tests/unit/resume-panel-response.test.ts tests/unit/application-resume-route.test.ts tests/unit/hr-application-navigation.test.tsx tests/unit/applicant-pages.test.tsx` | Passed: 5 files, 22 tests. | [Independent-review handoff](../workflow/archive/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Reviewer found an uncovered identity-switch state bug in review-AC-01; not a clean approval. |
+| 2026-10-19 / reviewer / head `257804b` | `bun node_modules/vitest/vitest.mjs run tests/unit/application-form-refresh.test.tsx tests/unit/resume-panel-response.test.ts tests/unit/application-resume-route.test.ts tests/unit/hr-application-navigation.test.tsx tests/unit/applicant-pages.test.tsx` | Passed: 5 files, 23 tests; no remaining material findings. | [Independent-review handoff](../workflow/archive/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Re-review of correction; browser/hosted paths untested. |
+| 2026-10-19 / reviewer / `257804b` | `git diff --check 7495e576e8a4426834b294d4b36ab25300e6b65a..257804b` | Passed with no output. | Independent-review handoff. | Whitespace check. |
 | 2026-10-19 / local Bun / corrected worktree | `bun node_modules/vitest/vitest.mjs run tests/unit/application-form-refresh.test.tsx` | Red before fix: 1 failed assertion (`Second applicant` expected, `Initial applicant` received); green after fix: 1 file, 3 tests. | Focused Vitest output in active session. | Identity-switch and first-ID preservation regression cases. |
 | 2026-10-19 / local Bun / corrected worktree | `bun node_modules/vitest/vitest.mjs run` | Passed: 110 files, 668 tests. | Vitest output in active session. | Full unit suite on corrected source; no browser or hosted runtime. |
 | 2026-10-19 / local Bun / corrected worktree | `bun node_modules/typescript/bin/tsc --noEmit` | Passed, exit 0. | TypeScript output in active session. | Static type check. |
@@ -62,9 +65,9 @@
 ## Open work, blockers and limitations
 
 - Outstanding work and owner: push the correction and obtain independent re-review; complete packet/log closeout and archive; open the issue-linked PR last.
-- Blockers and missing evidence: reviewer recheck of the corrected revision; browser E2E and hosted smoke remain unrun. PR stays pending until recheck and closeout.
-- Review findings and disposition: original four issues #120–#123 repaired; first-round P2 in #122 corrected test-first; independent recheck remains pending.
-- Approval, acceptance, archive, PR, merge and deployment: user acceptance and authorization to proceed were recorded 2026-10-19; implementation and packet commits are pushed; corrected revision push, reviewer recheck, archive and PR remain pending. No product delta expected. Merge and deployment remain separate.
+- Blockers and missing evidence: no source-review blocker remains; browser E2E, current-schema database integration and hosted smoke were not run. PR awaits completion of the pre-PR archive/index and then is opened as the final contributor action.
+- Review findings and disposition: original four issues #120–#123 repaired; first-round P2 in #122 corrected test-first and cleared by independent re-review on `257804b`.
+- Approval, acceptance, archive, PR, merge and deployment: user acceptance and authorization to proceed were recorded 2026-10-19; all branch commits are pushed; complete packet archive and issue-index updates are prepared before PR. No product delta expected. Merge and deployment remain separate.
 - Historical interaction coverage: exact prior review command transcript and session identifier were not available in this continuation; no claim to reconstruct them.
 
 ## Student verification
@@ -73,4 +76,4 @@
 - Student verifier and date: user, 2026-10-19; account identity not independently verified.
 - Evidence inspected and verification performed: user stated “I accept and approve. Please proceed”; subsequent review finding and repair remain within #122's existing success condition.
 - Decision source and conditions: explicit chat decision; user also authorized proceeding with review, fix and closeout. No merge or release decision.
-- Remaining concerns and next owner: independent reviewer must confirm the corrected revision before PR; browser and hosted behavior remain unverified.
+- Remaining concerns and next owner: none blocking PR submission after packet archive/index updates; browser and hosted behavior remain unverified. Merge/release decisions remain with the student.

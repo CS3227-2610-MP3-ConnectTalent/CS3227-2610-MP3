@@ -10,7 +10,7 @@
 
 ## Ordered implementation
 
-- [x] T01 — Keep the form revision aligned with its displayed field snapshot and advance it only after a successful résumé mutation. Depends on: T00. IDs: APP-005/form39-AC-06, review-AC-01. Files: `src/components/application-form.tsx`, `src/components/resume-panel-response.ts`, focused tests. Verification: red/green mounted/action tests and related résumé retries; full unit suite.
+- [x] T01 — Keep the form revision aligned with its displayed field snapshot, reset state between identified applications, and advance revision only after a successful résumé mutation. Preserve values when a new draft first receives its ID. Depends on: T00. IDs: APP-005/form39-AC-06, review-AC-01. Files: `src/components/application-form.tsx`, `src/components/resume-panel-response.ts`, focused tests. Verification: red/green mounted/action tests and related résumé retries; full unit suite.
 - [x] T02 — Reject the unused unscoped cancellation intent from application résumé URLs. Depends on: T00. IDs: APP-007/008, review-AC-02. Files: API route and route tests. Verification: red/green route denial; route, data, and lifecycle suites.
 - [x] T03 — Cancel stale debounced searches on history restoration. Depends on: T00. IDs: APP-010, review-AC-03. Files: HR filters and mounted navigation tests. Verification: red/green mounted history test and HR navigation suite.
 - [x] T04 — Render current and distinct original letter to Applicant. Depends on: T00. IDs: APP-002/003/004, review-AC-04. Files: Applicant detail page and page tests. Verification: red/green render test and Applicant page tests.
@@ -18,7 +18,7 @@
 
 ## Review and closeout
 
-- [ ] T06 — Separate reviewer execution assesses final revision. First pass at `69987fb` found a P2 in review-AC-01; the identity-switch regression and correction are recorded in `handoffs/T06-independent-review.md`. Re-review after the fix push is pending.
+- [x] T06 — Separate reviewer execution assessed `257804b` after first finding a P2 in review-AC-01 at `69987fb`. The regression, correction, five-file/23-test recheck and no-material-findings result are recorded in `handoffs/T06-independent-review.md`.
 - [x] T07 — User recorded “I accept and approve. Please proceed” on 2026-10-19. This preceded the independent finding; the user authorized proceeding with the review-driven correction within #122's existing acceptance behavior.
-- [ ] T08 — Record dated session log and complete pre-PR closeout; sync/archive only after acceptance; open issue-linked PR to `develop` last. Pending.
+- [ ] T08 — Pre-PR dated log, complete packet archive, canonical sync N/A, and index links are complete. Open the issue-linked PR to `develop` as the final contributor action.
 - [ ] T09 — Student records later merge/release decision as separate gates. Pending.
