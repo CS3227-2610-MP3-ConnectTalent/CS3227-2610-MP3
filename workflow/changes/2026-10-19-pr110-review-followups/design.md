@@ -28,4 +28,4 @@
 - [x] Applicant/HR permissions and data boundaries remain unchanged.
 - [x] No database, storage, secret, prompt, deployment, or rollback migration is needed.
 - [x] Focused tests cover filter merge/sync decisions and attachment revision reconciliation.
-- [ ] Independent reviewer to verify the final test/helper follow-up and risk boundaries.
+- [x] Independent reviewer checked the final test/helper follow-up and risk boundaries; the handoff records remaining test-coverage limits.

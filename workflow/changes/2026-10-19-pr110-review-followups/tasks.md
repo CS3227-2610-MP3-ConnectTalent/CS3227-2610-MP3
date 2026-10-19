@@ -18,7 +18,7 @@
 
 ## Review and closeout
 
-- [ ] T06 — Separate reviewer rechecks the new helper extraction, added focused tests, and final commit range; records independence, findings and rechecks. Previous committed range review found no source issue; final recheck after test-driven follow-up is pending.
+- [x] T06 — Separate reviewer rechecked the helper extraction, focused tests, and final commit range. No source defect found. Recorded two evidence limits: no actual router-transition hook test (P2) and no mounted form prop-refresh test (P3); these are limits, not confirmed behavior defects. See `handoffs/T06-independent-review.md`.
 - [ ] T07 — Student owner records acceptance or requested changes with date, source and conditions.
 - [ ] T08 — After acceptance, archive complete packet; canonical sync is N/A because no product requirement changes; check navigation and links.
 - [ ] T09 — Complete dated summary and record links before PR submission.
