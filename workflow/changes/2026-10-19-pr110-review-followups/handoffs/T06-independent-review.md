@@ -23,8 +23,15 @@
 
 ## Decision
 
-- No code change requested by the reviewer. Student acceptance of the reviewed commit and the listed evidence limits remains pending.
+- No source change requested by the reviewer. The reviewer asked that the mounted form test assert the refreshed application identity reaches the résumé panel. That assertion was added afterward, and the updated focused test, typecheck, lint, formatting and whitespace checks passed. A read-only review of the final follow-up is pending. Student acceptance remains pending.
 
 ## Post-review implementation follow-up
 
-After this review, the requester selected “Add the missing focused tests first.” The implementation added mounted Happy DOM tests for pending filter transitions/debounce/clear cancellation and refreshed application-form revision/identity props. Against the develop baseline, 4 of the 5 new tests failed and the clear-cancellation case passed; the complete focused suite now passes 11 files / 47 tests. These tests and the dev-only Happy DOM dependency were not part of the range reviewed above. A separate re-review of the new tests and current branch revision is pending; this section does not extend the original review or establish acceptance.
+After the initial review, the requester selected “Add the missing focused tests first.” The implementation added mounted Happy DOM tests for pending filter transitions/debounce/clear cancellation and refreshed application-form revision/identity props. Against the develop baseline, 4 of the 5 new tests failed and the clear-cancellation case passed; the complete focused suite passed 11 files / 47 tests. A separate re-review of range `3c9ba769f536679a3f546b5e5fbf5a254f059104..31cbf34d6df0f0852f0e65f3b6e3698fe6f8c4eb` found no source defect and confirmed the original test gaps were covered. It retained an integration limit for actual Next/browser navigation interruption and noted the form test did not assert refreshed identity reached `ResumePanel`. The latter assertion has since been added and checked; independent review of the final follow-up is pending. Happy DOM and the dev-only dependency were reviewed; the tests still use a mocked router and do not establish actual Next/browser behavior. This follow-up evidence does not establish student acceptance.
+
+## Re-review execution record
+
+- Reviewer: separate read-only test-engineer execution `/root/pr110_fix_review`; final follow-up assignment dispatched after the identity assertion commit. Run identifier/model unavailable.
+- Requested range: `3c9ba769f536679a3f546b5e5fbf5a254f059104..PENDING`.
+- Prior follow-up review commands and findings are recorded above. The reviewer ran no tests/checks. For the final follow-up, no results are available yet.
+- Student acceptance remains pending; the remaining mocked-router runtime limit must be disclosed in the acceptance request.

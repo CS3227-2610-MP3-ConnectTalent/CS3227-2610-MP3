@@ -20,8 +20,17 @@ vi.mock("@/components/application-form-fields", () => ({
   CoverLetterField: () => null,
 }));
 vi.mock("@/components/resume-panel", () => ({
-  ResumePanel: ({ revision }: { revision: number | null }) => (
-    <output id="resume-panel-revision">{revision ?? ""}</output>
+  ResumePanel: ({
+    applicationId,
+    revision,
+  }: {
+    applicationId: string | null;
+    revision: number | null;
+  }) => (
+    <>
+      <output id="resume-panel-application-id">{applicationId ?? ""}</output>
+      <output id="resume-panel-revision">{revision ?? ""}</output>
+    </>
   ),
 }));
 
@@ -96,6 +105,9 @@ describe("application form server-prop refresh", () => {
       container.querySelector<HTMLInputElement>('input[name="revision"]')
         ?.value,
     ).toBe("1");
+    expect(
+      container.querySelector("#resume-panel-application-id")?.textContent,
+    ).toBe("application-2");
     expect(container.querySelector("#resume-panel-revision")?.textContent).toBe(
       "1",
     );

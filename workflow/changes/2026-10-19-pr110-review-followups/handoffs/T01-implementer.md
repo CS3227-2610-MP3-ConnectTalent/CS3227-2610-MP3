@@ -47,3 +47,10 @@
 - Independence: reviewer is a separate execution and did not implement; it shares this workspace and receives the recorded acceptance criteria.
 - Findings and resolutions: initial ESLint finding about effect-time `setState` was corrected with guarded previous-props reconciliation. The independent reviewer found the first `isPending`-only filter guard could adopt stale props after transition idle; synchronization now additionally requires a semantic match with parsed Next URL parameters. Final source re-review found no confirmed defect. It recorded missing mounted hook/router-transition coverage (P2 evidence gap) and missing mounted form-refresh coverage (P3 evidence gap); runtime transition behavior remains unverified.
 - Human decision: implementation authorization is recorded; final student acceptance remains pending.
+
+## Final mounted-test assertion follow-up (2026-10-19)
+
+- Separate reviewer re-reviewed `3c9ba769f536679a3f546b5e5fbf5a254f059104..31cbf34d6df0f0852f0e65f3b6e3698fe6f8c4eb` and found no source defect. It confirmed the original filter and form-refresh evidence gaps were addressed, but noted the form test did not assert the changed application ID reached the résumé panel. It also identified a residual integration limit: actual Next/browser transition interruption and out-of-order navigation are not exercised by the synchronous router mock.
+- Updated `tests/unit/application-form-refresh.test.tsx` so the `ResumePanel` mock renders both its `applicationId` and revision, and the identity-refresh case asserts `application-2` reaches the panel.
+- Rechecked the focused suite (11 files / 47 tests), `bun node_modules/typescript/bin/tsc --noEmit`, ESLint on the changed test, Prettier on the changed test, and `git diff --check`. All passed. Initial sandboxed Bun invocations returned EPERM reading existing `.pnpm` files; the same commands were rerun successfully with approved elevated execution. No application/browser/hosted smoke was run.
+- Final source/test follow-up commit and independent re-review: pending.
