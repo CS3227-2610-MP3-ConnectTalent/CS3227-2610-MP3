@@ -11,6 +11,10 @@ import {
   CoverLetterField,
 } from "@/components/application-form-fields";
 import { ResumePanel } from "@/components/resume-panel";
+import {
+  reconcileApplicationAttachment,
+  type ApplicationAttachment,
+} from "@/lib/application-attachment";
 import type { ResumeMetadata } from "@/lib/application-resumes";
 import type { ApplicationFormState } from "@/lib/application-form-state";
 
@@ -52,10 +56,7 @@ export function ApplicationForm(props: Props) {
     `/jobs/${props.jobId}/apply`,
   );
   const [coverLetter, setCoverLetter] = useState(state.values.cover_letter);
-  const [attachment, setAttachment] = useState({
-    applicationId: props.applicationId ?? null,
-    revision: props.revision,
-  });
+  const { attachment, setAttachment } = useApplicationAttachment(props);
   const [attachmentPending, setAttachmentPending] = useState(false);
   if (props.submitted)
     return (
@@ -75,6 +76,30 @@ export function ApplicationForm(props: Props) {
       setCoverLetter={setCoverLetter}
     />
   );
+}
+
+function useApplicationAttachment(
+  props: Pick<Props, "applicationId" | "revision">,
+) {
+  const serverAttachment: ApplicationAttachment = {
+    applicationId: props.applicationId ?? null,
+    revision: props.revision,
+  };
+  const [previousServerAttachment, setPreviousServerAttachment] =
+    useState(serverAttachment);
+  const [attachment, setAttachment] = useState(serverAttachment);
+
+  if (
+    previousServerAttachment.applicationId !== serverAttachment.applicationId ||
+    previousServerAttachment.revision !== serverAttachment.revision
+  ) {
+    setPreviousServerAttachment(serverAttachment);
+    setAttachment((current) =>
+      reconcileApplicationAttachment(current, serverAttachment),
+    );
+  }
+
+  return { attachment, setAttachment };
 }
 
 function createInitialState(
@@ -116,14 +141,13 @@ function SubmittedApplication({
   );
 }
 
-type Attachment = { applicationId: string | null; revision: number | null };
 type DraftProps = Props & {
   state: ApplicationFormState;
   formAction: (formData: FormData) => void;
   pending: boolean;
   hydrated: boolean;
-  attachment: Attachment;
-  setAttachment: (value: Attachment) => void;
+  attachment: ApplicationAttachment;
+  setAttachment: (value: ApplicationAttachment) => void;
   onAttachmentPending: (value: boolean) => void;
   coverLetter: string;
   setCoverLetter: (value: string) => void;

@@ -1,7 +1,7 @@
-import type { HRJob } from "@/lib/hr-jobs";
+import { getHROperationalJobStatus, type HRJob } from "@/lib/hr-jobs";
 import type { HRReviewStatus } from "@/lib/hr-input";
 
-type Job = Pick<HRJob, "id" | "title" | "status">;
+type Job = Pick<HRJob, "id" | "title" | "status" | "opens_at" | "closes_at">;
 type Application = {
   job_id: string;
   review_status: HRReviewStatus;
@@ -23,15 +23,20 @@ export function aggregateHRDashboard(jobs: Job[], applications: Application[]) {
   const applicationCounts = Object.fromEntries(
     reviewStatuses.map((status) => [status, 0]),
   ) as Record<(typeof reviewStatuses)[number], number>;
-  const dashboardJobs = jobs.map((job) => ({
-    ...job,
-    activeCount: 0,
-    withdrawnCount: 0,
-  }));
+  const now = new Date();
+  const dashboardJobs = jobs.map((job) => {
+    const status = getHROperationalJobStatus(job, now);
+    const countStatus = status === "scheduled" ? "published" : status;
+    jobCounts[countStatus] += 1;
+    return {
+      ...job,
+      status,
+      activeCount: 0,
+      withdrawnCount: 0,
+    };
+  });
   const jobsById = new Map(dashboardJobs.map((job) => [job.id, job]));
   let withdrawnCount = 0;
-
-  for (const job of jobs) jobCounts[job.status] += 1;
 
   for (const application of applications) {
     const job = jobsById.get(application.job_id);

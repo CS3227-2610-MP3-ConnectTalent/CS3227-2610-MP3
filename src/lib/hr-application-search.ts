@@ -184,7 +184,9 @@ export function paginateApplications<T>(
   const totalCount = items.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const currentPage =
-    totalCount === 0 ? 1 : Math.max(1, Math.min(page, totalPages));
+    totalCount === 0 || !Number.isInteger(page) || page < 1 || page > totalPages
+      ? 1
+      : page;
 
   if (totalCount === 0) {
     return {
