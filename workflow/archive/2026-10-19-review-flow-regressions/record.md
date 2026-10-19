@@ -1,6 +1,6 @@
 # Feature record: application and HR review regressions
 
-Status: implementation and independent review complete; fresh student acceptance pending; PR #124 open
+Status: implementation and independent review complete; PR #124 CI green; fresh student acceptance pending
 
 Owner: Student owner pending assignment
 
@@ -65,11 +65,11 @@ Known limitations: the production build compiled and completed TypeScript, then 
 
 | Date / session              | Summary log link                             | Work / prompts / decisions covered                                                                             | Verification status / missing coverage                                                                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-10-19 / active session | [session summary](../../../logs/2026-10-19-review-flow-regressions.md) | Repository review, issues #120–#123, implementation, initial acceptance, two-round independent review, correction, PR #124 follow-up | Full unit suite, static checks and five-file independent re-review passed; packet archived. PR Supabase CI run `39249952106` passed database and integration jobs but failed one stale Playwright assertion; its correction is pending CI rerun. Fresh student acceptance remains pending. |
+| 2026-10-19 / active session | [session summary](../../../logs/2026-10-19-review-flow-regressions.md) | Repository review, issues #120–#123, implementation, initial acceptance, two-round independent review, correction, PR #124 follow-up | Full unit suite, static checks, five-file independent re-review, and PR checks passed. Supabase CI run `39269436729` passed database checks, integration race suites, and critical Playwright journeys after correcting the stale assertion. Fresh student acceptance remains pending. |
 
 ## Canonical sync and archive
 
 - Product delta: none; fixes restore APP-002/003/004/005/007/008/010. The initial user acceptance was recorded on 2026-10-19, before the later independent review finding; fresh acceptance of the corrected revision/evidence is pending.
 - Canonical sync: N/A because the accepted repairs restore existing clauses.
 - Archive: packet archived at `workflow/archive/2026-10-19-review-flow-regressions/` on 2026-10-19; packet and current indexes are preserved and this record reflects the open PR and pending acceptance gate.
-- Outstanding work: student owner assignment and fresh acceptance of the corrected revision/evidence; resolve the acceptance review thread after that decision. Merge and release remain separate.
+- Outstanding work: student owner assignment and fresh acceptance of the corrected revision/evidence; resolve the acceptance review thread after that decision. PR CI is green. Merge and release remain separate.
