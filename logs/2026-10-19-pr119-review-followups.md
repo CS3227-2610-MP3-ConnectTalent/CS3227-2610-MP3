@@ -27,4 +27,9 @@
 
 - The existing student acceptance remains the separate acceptance decision; it was not inferred from the scope-approval instruction.
 - PR #119 remains targeted to `develop`. Merge, deployment and manual promotion to `master` were not performed.
-- GitHub review replies and thread resolution are recorded after they are completed and re-queried.
+
+## GitHub thread closeout
+
+- After pushing commit `b8e33b53a792e55bbed015725662bc3b0202e7fe`, a disposition reply was posted to each of the four top-level review comments and the corresponding thread was resolved.
+- A fresh PR #119 `reviewThreads` query returned `is_resolved: true` for all four IDs in the review table above. Each thread contains the original review comment and the posted reply.
+- PR #119 remained open, unmerged, and targeted to `develop` at that verification.
