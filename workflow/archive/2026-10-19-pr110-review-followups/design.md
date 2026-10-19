@@ -1,7 +1,7 @@
 # Design: PR #110 review follow-ups
 
 - Change/issues: `2026-10-19-pr110-review-followups`; #115–#118
-- Owner/status/date: Unassigned for triage; approved bounded repair / in progress / 2026-10-19
+- Owner/status/date: Requester as student owner/verifier; accepted with stated limits / closeout / 2026-10-19
 - Inputs: current `develop` at `3c9ba769f536679a3f546b5e5fbf5a254f059104`; APP-001/005/007/008/009/010; JMG-004; PR #110 threads
 - Decision: separate architecture design is omitted because the repairs remain inside existing client components and pure server-side aggregation helpers; no schema, authorization, AI, storage, or external integration boundary changes.
 
@@ -29,4 +29,4 @@
 - [x] Applicant/HR permissions and data boundaries remain unchanged.
 - [x] No database, storage, secret, prompt, deployment, or rollback migration is needed.
 - [x] Focused unit and mounted component tests cover filter merge/transition/debounce behavior and attachment revision reconciliation/prop refresh.
-- [ ] Independent reviewer to recheck the new mounted tests and test-only dependency change.
+- [x] Independent reviewer rechecked the new mounted tests and test-only dependency through `182b4a237815579748affef08c91e5fe1840fe5d`; no source defect was found. Actual Next/browser transition interruption remains outside the mocked-router evidence.

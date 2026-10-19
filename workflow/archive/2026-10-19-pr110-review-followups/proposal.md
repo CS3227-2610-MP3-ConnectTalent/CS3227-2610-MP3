@@ -2,8 +2,8 @@
 
 - Change ID: `2026-10-19-pr110-review-followups`
 - Issues: [#115](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/115), [#116](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/116), [#117](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/117), [#118](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/118)
-- Owner: Unassigned for triage; requester identity/role not confirmed in this chat
-- Status: Approved bounded repair scope; implementation in progress
+- Owner: Requester accepted as student owner/verifier on 2026-10-19; personal name not supplied
+- Status: Accepted with stated limits; implementation complete; closeout and PR submission in progress
 - Date: 2026-10-19
 - Baseline: ProductSpec v1.17, `develop` commit `3c9ba769f536679a3f546b5e5fbf5a254f059104`
 - Affected capabilities: `applications-and-review.md` (APP-001, APP-005, APP-007, APP-008, APP-009, APP-010), `job-management.md` (JMG-004)
@@ -32,7 +32,7 @@ The requester directed that the necessary findings be fixed on a branch from `de
 - Assumptions: existing canonical requirements remain authoritative; the review scenarios use synthetic/non-private data.
 - Dependencies: the four related bug issues above; current `develop` baseline; existing operational job-status helper.
 - Risks: route transitions and refreshed server props must not overwrite newer client intent; rollback is a revert of the focused fix commit(s).
-- Open decisions: student owner and final acceptance remain pending; no product-policy decision is introduced.
+- Open decisions: none for product behavior; the accepted validation limit is actual Next/browser transition interruption or out-of-order navigation, which remains unverified by the synchronous router mock. No product-policy decision is introduced.
 
 ## Acceptance evidence and artifacts
 
@@ -55,4 +55,13 @@ The requester directed that the necessary findings be fixed on a branch from `de
 - [x] Proposal, no-delta statement, design omission, and plan approved for this bounded repair by the requester through the direct instruction on 2026-10-19 to create a branch from `develop` and implement necessary fixes from the fetched review comments.
 - Approver: Requester; personal name and student role are not confirmed by this chat context.
 - Decision/date/source: Approve bounded implementation and follow-up PR to `develop`; direct conversation, 2026-10-19 (Asia/Singapore).
-- Conditions: correct only the five still-present findings; do not promote to `master`; final student acceptance of the reviewed revision remains a distinct pending gate.
+- Conditions at the scope-approval stage: correct only the five still-present findings; do not promote to `master`; final student acceptance remained a distinct gate and was later recorded below.
+
+## Student acceptance record
+
+- [x] Student owner/verifier accepted the reviewed implementation with recorded limits.
+- Accepted by: requester as student owner/verifier; personal name was not provided.
+- Decision/date/source: “Accept with stated limits,” supplied in response to the separate acceptance gate on 2026-10-19 (Asia/Singapore).
+- Reviewed code revision: `182b4a237815579748affef08c91e5fe1840fe5d`; final branch head at acceptance: `5bdd27ae6358e64c3f2ca8b6fafd4560334e56af`.
+- Evidence inspected: 11 focused test files / 47 tests, typecheck, changed-test lint, Prettier, whitespace check, and independent read-only review. Independent review found no source defect and confirmed the refreshed identity assertion gap is closed.
+- Accepted limits: actual Next/browser transition interruption or out-of-order navigation is unverified with the synchronous mocked router; no browser or hosted smoke was run. Acceptance authorizes closeout and PR submission to `develop`; merge, deployment and manual promotion to `master` remain separate.

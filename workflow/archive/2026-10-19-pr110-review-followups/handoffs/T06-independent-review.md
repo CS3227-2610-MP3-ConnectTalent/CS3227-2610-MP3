@@ -23,7 +23,7 @@
 
 ## Decision
 
-- No source change requested by the reviewer. The requested assertion that refreshed application identity reaches the résumé panel was added, and its updated focused test, typecheck, lint, formatting and whitespace checks passed. Final read-only review found no source defect and confirmed the assertion gap is closed. Student acceptance remains pending.
+- No source change requested by the reviewer. The requested assertion that refreshed application identity reaches the résumé panel was added, and its updated focused test, typecheck, lint, formatting and whitespace checks passed. Final read-only review found no source defect and confirmed the assertion gap is closed. The requester accepted the reviewed implementation with stated limits on 2026-10-19.
 
 ## Post-review implementation follow-up
 
@@ -36,4 +36,4 @@ After the initial review, the requester selected “Add the missing focused test
 - Findings: no source defect found; prior P3 form-test gap is closed by asserting refreshed `applicationId="application-2"` reaches the `ResumePanel` mock. Prior PR110-AC-01–05 conclusions still apply. Residual P2 validation limit: actual Next/browser interruption or out-of-order navigation remains unverified because the router mock commits synchronously. No new concern from Happy DOM or its lockfile addition.
 - Reviewer commands: `git status --short --branch`, `git rev-parse HEAD`, `git diff --stat` for the requested range, `git diff --name-status` from `31cbf34` to `182b4a2`, and `git show`/`rg` on the new assertion and packet. Reviewer ran no tests/checks; all reported test and static-check results are implementer-reported.
 - Independence: read-only test-engineer execution did not implement or author tests. This review is not student acceptance.
-- Student acceptance remains pending; disclose the remaining mocked-router runtime limit in the acceptance request.
+- The acceptance decision explicitly records the remaining mocked-router runtime limit; see `../proposal.md` and `../record.md`.
