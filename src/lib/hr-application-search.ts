@@ -105,22 +105,6 @@ export function parseHRApplicationFilterParams(
   };
 }
 
-export function areHRApplicationFilterParamsEqual(
-  left: HRApplicationFilterParams,
-  right: HRApplicationFilterParams,
-): boolean {
-  return (
-    left.q === right.q &&
-    left.invalidSearch === right.invalidSearch &&
-    left.job === right.job &&
-    left.status === right.status &&
-    left.withdrawal === right.withdrawal &&
-    left.sort === right.sort &&
-    left.page === right.page &&
-    left.pageSize === right.pageSize
-  );
-}
-
 export function filterApplications(
   applications: HRApplicationListItem[],
   params: HRApplicationFilterParams,

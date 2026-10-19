@@ -7,9 +7,9 @@
 
 ## Existing data flow and bounded changes
 
-- HR filters: merge each user update into a ref holding the latest intended filter parameters and build the URL from that merged state. Resynchronize from server parameters only when no transition is pending and the parsed parameters match Next's current URL. Clearing filters resets both the query timer and intended parameter state.
+- HR filters: merge each user update into a ref holding the latest intended filter parameters and build the URL from that merged state. The shared merge/equality/synchronization decisions live in a pure helper; the navigation hook owns transition and URL coordination. Resynchronize from server parameters only when no transition is pending and the parsed parameters match Next's current URL. Clearing filters resets both the query timer and intended parameter state.
 - Pagination: preserve the current page when valid; when it exceeds the computed page count, use page 1, as APP-010 requires.
-- Applicant draft revision: when refreshed server props advance the application ID/revision, synchronize the client attachment state used for the hidden form revision. Do not alter action validation or retry semantics.
+- Applicant draft revision: reconcile refreshed server props into attachment state through a pure helper. Adopt a new application identity and a newer same-application revision, while preserving a higher local revision. Do not alter action validation or retry semantics.
 - Withdrawal: change only the confirmation wording so it distinguishes terminal withdrawal of this record from starting a separate application while a job remains open.
 - Dashboard: pass schedule fields already returned by `listHRJobs` into the existing `getHROperationalJobStatus` helper. Use one `now` value per aggregate. Count operational `closed` as Closed; retain scheduled jobs in the existing Published total while labeling their per-job row Scheduled.
 - Timezone review finding: already corrected on the baseline; no change planned.
@@ -27,4 +27,5 @@
 - [x] Existing canonical behavior is restored without a new requirement or spec delta.
 - [x] Applicant/HR permissions and data boundaries remain unchanged.
 - [x] No database, storage, secret, prompt, deployment, or rollback migration is needed.
-- [ ] Independent reviewer to verify final implementation and risk boundaries.
+- [x] Focused tests cover filter merge/sync decisions and attachment revision reconciliation.
+- [ ] Independent reviewer to verify the final test/helper follow-up and risk boundaries.

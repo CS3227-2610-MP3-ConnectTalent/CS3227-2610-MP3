@@ -10,15 +10,15 @@
 
 ## Ordered implementation
 
-- [ ] T01 — Preserve combined HR filter intent and reset oversized pages to page 1. Depends on: T00. IDs: APP-010; PR110-AC-01. Files: `src/components/hr-application-filters.tsx`, `src/lib/hr-application-search.ts`, relevant existing pagination assertion. The assertion was updated, but the test was not run and the required observed RED result is missing; keep this task open.
-- [x] T02 — Sync refreshed application identity/revision into form state. Depends on: T00. IDs: APP-005/007; PR110-AC-02. File: `src/components/application-form.tsx`. Source/type/lint review complete; tests not run.
-- [x] T03 — Correct the withdrawal explanation. Depends on: T00. IDs: APP-001/008; PR110-AC-03. File: `src/components/withdrawal-control.tsx`. Copy compared with canonical requirements; static checks passed; tests not run.
-- [x] T04 — Derive dashboard row status and totals from operational schedule state. Depends on: T00. IDs: APP-009/JMG-004; PR110-AC-04. Files: `src/lib/hr-dashboard.ts`, `src/app/hr/page.tsx`. Shared status helper and read-only path inspected; static checks passed; tests not run.
-- [x] T05 — Inspect final diff, check whitespace and applicable static checks, and record exact results. Depends on: T01–T04. IDs: PR110-AC-01–05. `git diff --check`, typecheck, changed-file lint, and formatting passed. Test suite was not run; see `record.md`.
+- [x] T01 — Preserve combined HR filter intent and reset oversized pages to page 1. Depends on: T00. IDs: APP-010; PR110-AC-01. Added unit coverage for successive merged updates and stale/pending URL synchronization; the existing pagination assertion checks the exact first-page slice. RED observed against the baseline (page 999 returned page 3; missing filter helpers failed); focused suite passed afterward. See `record.md`.
+- [x] T02 — Sync refreshed application identity/revision into form state. Depends on: T00. IDs: APP-005/007; PR110-AC-02. Extracted revision reconciliation into `src/lib/application-attachment.ts`; tests cover revision advance, preservation of newer local revision, and identity change. RED observed before the helper existed; focused suite passed afterward.
+- [x] T03 — Correct the withdrawal explanation. Depends on: T00. IDs: APP-001/008; PR110-AC-03. File: `src/components/withdrawal-control.tsx`. Added a focused confirmation-copy test; the baseline wording failed and the corrected wording passed.
+- [x] T04 — Derive dashboard row status and totals from operational schedule state. Depends on: T00. IDs: APP-009/JMG-004. Added expired and future-scheduled job cases; baseline returned Published 2 / Closed 0 where Published 1 / Closed 1 was expected; focused suite passed after the operational-status fix.
+- [x] T05 — Inspect final diff, check whitespace and applicable static checks, and record exact results. Depends on: T01–T04. IDs: PR110-AC-01–05. Focused tests: 9 files / 42 tests passed. Typecheck, changed-file ESLint, Prettier, and `git diff --check` passed; see `record.md` for exact commands and red/green evidence.
 
 ## Review and closeout
 
-- [x] T06 — Separate read-only test-engineer review of committed range `3c9ba769f536679a3f546b5e5fbf5a254f059104..b9c448e713a5083c833be1b461c2179c4303f555`. The reviewer found no remaining source defect after the URL-match guard and exact page-one slice assertion. Runtime transition/dashboard cases were not exercised; see `record.md`.
+- [ ] T06 — Separate reviewer rechecks the new helper extraction, added focused tests, and final commit range; records independence, findings and rechecks. Previous committed range review found no source issue; final recheck after test-driven follow-up is pending.
 - [ ] T07 — Student owner records acceptance or requested changes with date, source and conditions.
 - [ ] T08 — After acceptance, archive complete packet; canonical sync is N/A because no product requirement changes; check navigation and links.
 - [ ] T09 — Complete dated summary and record links before PR submission.

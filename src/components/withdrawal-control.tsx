@@ -35,7 +35,7 @@ function WithdrawButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function WithdrawalConfirmation({
+export function WithdrawalConfirmation({
   applicationId,
   action,
   pending,

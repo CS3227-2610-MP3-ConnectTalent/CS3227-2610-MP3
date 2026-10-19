@@ -8,7 +8,22 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/hr-auth", () => ({ requireHR: mocks.requireHR }));
-vi.mock("@/lib/hr-jobs", () => ({ listHRJobs: mocks.listHRJobs }));
+vi.mock("@/lib/hr-jobs", () => ({
+  listHRJobs: mocks.listHRJobs,
+  getHROperationalJobStatus: (
+    job: {
+      status: "draft" | "published" | "closed";
+      opens_at?: string | null;
+      closes_at?: string | null;
+    },
+    now: Date,
+  ) => {
+    if (job.status === "draft" || job.status === "closed") return job.status;
+    if (job.opens_at && new Date(job.opens_at) > now) return "scheduled";
+    if (job.closes_at && new Date(job.closes_at) <= now) return "closed";
+    return "published";
+  },
+}));
 vi.mock("@/lib/hr-applications", () => ({
   listSubmittedApplications: mocks.listSubmittedApplications,
 }));

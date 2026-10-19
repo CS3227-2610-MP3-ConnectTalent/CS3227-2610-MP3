@@ -11,6 +11,10 @@ import {
   CoverLetterField,
 } from "@/components/application-form-fields";
 import { ResumePanel } from "@/components/resume-panel";
+import {
+  reconcileApplicationAttachment,
+  type ApplicationAttachment,
+} from "@/lib/application-attachment";
 import type { ResumeMetadata } from "@/lib/application-resumes";
 import type { ApplicationFormState } from "@/lib/application-form-state";
 
@@ -34,8 +38,6 @@ type Props = {
   resume?: ResumeMetadata | null;
   profileResume?: ResumeMetadata | null;
 };
-
-type Attachment = { applicationId: string | null; revision: number | null };
 
 const subscribeToHydration = () => () => {};
 const getClientHydrationSnapshot = () => true;
@@ -79,7 +81,7 @@ export function ApplicationForm(props: Props) {
 function useApplicationAttachment(
   props: Pick<Props, "applicationId" | "revision">,
 ) {
-  const serverAttachment: Attachment = {
+  const serverAttachment: ApplicationAttachment = {
     applicationId: props.applicationId ?? null,
     revision: props.revision,
   };
@@ -92,23 +94,9 @@ function useApplicationAttachment(
     previousServerAttachment.revision !== serverAttachment.revision
   ) {
     setPreviousServerAttachment(serverAttachment);
-    setAttachment((current) => {
-      if (
-        current.applicationId === serverAttachment.applicationId &&
-        current.revision !== null &&
-        (serverAttachment.revision === null ||
-          serverAttachment.revision < current.revision)
-      ) {
-        return current;
-      }
-      if (
-        current.applicationId === serverAttachment.applicationId &&
-        current.revision === serverAttachment.revision
-      ) {
-        return current;
-      }
-      return serverAttachment;
-    });
+    setAttachment((current) =>
+      reconcileApplicationAttachment(current, serverAttachment),
+    );
   }
 
   return { attachment, setAttachment };
@@ -158,8 +146,8 @@ type DraftProps = Props & {
   formAction: (formData: FormData) => void;
   pending: boolean;
   hydrated: boolean;
-  attachment: Attachment;
-  setAttachment: (value: Attachment) => void;
+  attachment: ApplicationAttachment;
+  setAttachment: (value: ApplicationAttachment) => void;
   onAttachmentPending: (value: boolean) => void;
   coverLetter: string;
   setCoverLetter: (value: string) => void;

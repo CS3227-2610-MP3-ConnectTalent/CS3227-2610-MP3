@@ -23,6 +23,7 @@ vi.mock("@/lib/hr-applications", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useRouter: mocks.useRouter,
+  useSearchParams: () => new URLSearchParams(),
   notFound: vi.fn(),
 }));
 vi.mock("next/link", async () => {

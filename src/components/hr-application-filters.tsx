@@ -1,23 +1,18 @@
 "use client";
 
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
-  useTransition,
   type FormEvent,
   type MutableRefObject,
 } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { LoaderCircle, RotateCcw, Search } from "lucide-react";
+import { useHRApplicationNavigation } from "@/components/use-hr-application-navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  buildHRApplicationsUrl,
-  areHRApplicationFilterParamsEqual,
   HR_APPLICATION_SEARCH_DELAY,
-  parseHRApplicationFilterParams,
   type HRApplicationFilterParams,
 } from "@/lib/hr-application-search";
 import { FilterDropdowns } from "@/components/hr-application-filter-dropdowns";
@@ -31,7 +26,7 @@ export function HRApplicationFilters({
   initialParams,
   jobs,
 }: HRApplicationFiltersProps) {
-  const { isPending, navigate } = useHRFiltersNavigation(initialParams);
+  const { isPending, navigate } = useHRApplicationNavigation(initialParams);
 
   const [query, setQuery] = useState(initialParams.q);
   const [prevQ, setPrevQ] = useState(initialParams.q);
@@ -71,49 +66,6 @@ export function HRApplicationFilters({
       </p>
     </div>
   );
-}
-
-function useHRFiltersNavigation(initialParams: HRApplicationFilterParams) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-  const latestParams = useRef(initialParams);
-  const currentSearch = searchParams?.toString() ?? null;
-
-  useEffect(() => {
-    if (isPending || searchParams === null) return;
-
-    const currentParams = parseHRApplicationFilterParams(
-      Object.fromEntries(
-        Array.from(new Set(searchParams.keys())).map((key) => {
-          const values = searchParams.getAll(key);
-          return [key, values.length > 1 ? values : values[0]];
-        }),
-      ),
-    );
-    if (areHRApplicationFilterParamsEqual(initialParams, currentParams)) {
-      latestParams.current = initialParams;
-    }
-  }, [currentSearch, initialParams, isPending, searchParams]);
-
-  const navigate = useCallback(
-    (updates: Partial<HRApplicationFilterParams>, replace = false) => {
-      const nextParams = {
-        ...latestParams.current,
-        ...updates,
-        page: updates.page ?? 1,
-      };
-      latestParams.current = nextParams;
-      const url = buildHRApplicationsUrl(nextParams);
-      startTransition(() => {
-        if (replace) router.replace(url, { scroll: false });
-        else router.push(url, { scroll: false });
-      });
-    },
-    [router, startTransition],
-  );
-
-  return { isPending, navigate };
 }
 
 interface SearchFormProps {
