@@ -35,6 +35,8 @@ type Props = {
   profileResume?: ResumeMetadata | null;
 };
 
+type Attachment = { applicationId: string | null; revision: number | null };
+
 const subscribeToHydration = () => () => {};
 const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
@@ -52,10 +54,7 @@ export function ApplicationForm(props: Props) {
     `/jobs/${props.jobId}/apply`,
   );
   const [coverLetter, setCoverLetter] = useState(state.values.cover_letter);
-  const [attachment, setAttachment] = useState({
-    applicationId: props.applicationId ?? null,
-    revision: props.revision,
-  });
+  const { attachment, setAttachment } = useApplicationAttachment(props);
   const [attachmentPending, setAttachmentPending] = useState(false);
   if (props.submitted)
     return (
@@ -75,6 +74,44 @@ export function ApplicationForm(props: Props) {
       setCoverLetter={setCoverLetter}
     />
   );
+}
+
+function useApplicationAttachment(
+  props: Pick<Props, "applicationId" | "revision">,
+) {
+  const serverAttachment: Attachment = {
+    applicationId: props.applicationId ?? null,
+    revision: props.revision,
+  };
+  const [previousServerAttachment, setPreviousServerAttachment] =
+    useState(serverAttachment);
+  const [attachment, setAttachment] = useState(serverAttachment);
+
+  if (
+    previousServerAttachment.applicationId !== serverAttachment.applicationId ||
+    previousServerAttachment.revision !== serverAttachment.revision
+  ) {
+    setPreviousServerAttachment(serverAttachment);
+    setAttachment((current) => {
+      if (
+        current.applicationId === serverAttachment.applicationId &&
+        current.revision !== null &&
+        (serverAttachment.revision === null ||
+          serverAttachment.revision < current.revision)
+      ) {
+        return current;
+      }
+      if (
+        current.applicationId === serverAttachment.applicationId &&
+        current.revision === serverAttachment.revision
+      ) {
+        return current;
+      }
+      return serverAttachment;
+    });
+  }
+
+  return { attachment, setAttachment };
 }
 
 function createInitialState(
@@ -116,7 +153,6 @@ function SubmittedApplication({
   );
 }
 
-type Attachment = { applicationId: string | null; revision: number | null };
 type DraftProps = Props & {
   state: ApplicationFormState;
   formAction: (formData: FormData) => void;

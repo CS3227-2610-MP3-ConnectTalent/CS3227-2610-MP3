@@ -4,7 +4,7 @@ import { unstable_rethrow } from "next/navigation";
 import { requireHR } from "@/lib/hr-auth";
 import { listSubmittedApplications } from "@/lib/hr-applications";
 import { aggregateHRDashboard } from "@/lib/hr-dashboard";
-import { listHRJobs } from "@/lib/hr-jobs";
+import { listHRJobs, type HROperationalJobStatus } from "@/lib/hr-jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -181,10 +181,15 @@ function Metric({ label, value }: { label: string; value: number }) {
   );
 }
 
-function jobStatusLabel(status: Dashboard["jobs"][number]["status"]) {
-  return status === "draft"
-    ? "Draft"
-    : status === "published"
-      ? "Published"
-      : "Closed";
+function jobStatusLabel(status: HROperationalJobStatus) {
+  switch (status) {
+    case "draft":
+      return "Draft";
+    case "scheduled":
+      return "Scheduled";
+    case "published":
+      return "Published";
+    case "closed":
+      return "Closed";
+  }
 }

@@ -9,13 +9,15 @@ import {
   type FormEvent,
   type MutableRefObject,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LoaderCircle, RotateCcw, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   buildHRApplicationsUrl,
+  areHRApplicationFilterParamsEqual,
   HR_APPLICATION_SEARCH_DELAY,
+  parseHRApplicationFilterParams,
   type HRApplicationFilterParams,
 } from "@/lib/hr-application-search";
 import { FilterDropdowns } from "@/components/hr-application-filter-dropdowns";
@@ -29,8 +31,7 @@ export function HRApplicationFilters({
   initialParams,
   jobs,
 }: HRApplicationFiltersProps) {
-  const { router, isPending, startTransition, navigate } =
-    useHRFiltersNavigation(initialParams);
+  const { isPending, navigate } = useHRFiltersNavigation(initialParams);
 
   const [query, setQuery] = useState(initialParams.q);
   const [prevQ, setPrevQ] = useState(initialParams.q);
@@ -59,8 +60,6 @@ export function HRApplicationFilters({
         debounceTimerRef={debounceTimerRef}
         isComposingRef={isComposingRef}
         initialParams={initialParams}
-        startTransition={startTransition}
-        router={router}
       />
       <FilterDropdowns
         initialParams={initialParams}
@@ -76,23 +75,45 @@ export function HRApplicationFilters({
 
 function useHRFiltersNavigation(initialParams: HRApplicationFilterParams) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const latestParams = useRef(initialParams);
+  const currentSearch = searchParams?.toString() ?? null;
+
+  useEffect(() => {
+    if (isPending || searchParams === null) return;
+
+    const currentParams = parseHRApplicationFilterParams(
+      Object.fromEntries(
+        Array.from(new Set(searchParams.keys())).map((key) => {
+          const values = searchParams.getAll(key);
+          return [key, values.length > 1 ? values : values[0]];
+        }),
+      ),
+    );
+    if (areHRApplicationFilterParamsEqual(initialParams, currentParams)) {
+      latestParams.current = initialParams;
+    }
+  }, [currentSearch, initialParams, isPending, searchParams]);
 
   const navigate = useCallback(
     (updates: Partial<HRApplicationFilterParams>, replace = false) => {
-      const url = buildHRApplicationsUrl(initialParams, {
+      const nextParams = {
+        ...latestParams.current,
         ...updates,
         page: updates.page ?? 1,
-      });
+      };
+      latestParams.current = nextParams;
+      const url = buildHRApplicationsUrl(nextParams);
       startTransition(() => {
         if (replace) router.replace(url, { scroll: false });
         else router.push(url, { scroll: false });
       });
     },
-    [initialParams, router],
+    [router, startTransition],
   );
 
-  return { router, isPending, startTransition, navigate };
+  return { isPending, navigate };
 }
 
 interface SearchFormProps {
@@ -106,8 +127,6 @@ interface SearchFormProps {
   debounceTimerRef: MutableRefObject<NodeJS.Timeout | null>;
   isComposingRef: MutableRefObject<boolean>;
   initialParams: HRApplicationFilterParams;
-  startTransition: (fn: () => void) => void;
-  router: ReturnType<typeof useRouter>;
 }
 
 function useSearchFormHandlers({
@@ -116,8 +135,6 @@ function useSearchFormHandlers({
   navigate,
   debounceTimerRef,
   isComposingRef,
-  startTransition,
-  router,
 }: {
   query: string;
   setQuery: (val: string) => void;
@@ -127,8 +144,6 @@ function useSearchFormHandlers({
   ) => void;
   debounceTimerRef: MutableRefObject<NodeJS.Timeout | null>;
   isComposingRef: MutableRefObject<boolean>;
-  startTransition: (fn: () => void) => void;
-  router: ReturnType<typeof useRouter>;
 }) {
   const onTextChange = (val: string) => {
     setQuery(val);
@@ -148,7 +163,18 @@ function useSearchFormHandlers({
   const onClear = () => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     setQuery("");
-    startTransition(() => router.push("/hr/applications", { scroll: false }));
+    navigate(
+      {
+        q: "",
+        invalidSearch: false,
+        job: undefined,
+        status: undefined,
+        withdrawal: "all",
+        sort: "newest",
+        page: 1,
+      },
+      false,
+    );
   };
 
   return { onTextChange, onSubmit, onClear };
