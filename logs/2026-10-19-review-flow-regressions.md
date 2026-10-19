@@ -5,11 +5,11 @@
 - Date and time zone: 2026-10-19; active work occurred during the afternoon/evening Singapore time. Exact start time unavailable.
 - Session identifier and scope: identifier unavailable; repository review follow-up, four issue-linked fixes and pre-PR evidence.
 - Student owner and participants: student owner not formally assigned; current Codex implementation execution; separate read-only reviewer `/root/independent_review`.
-- Evidence available and missing coverage: local source/test outputs, issue links, user acceptance in chat, two-round independent review; browser E2E and hosted smoke remain unrun.
+- Evidence available and missing coverage: local source/test outputs, issue links, initial user acceptance in chat, two-round independent review, and PR #124 CI logs. The first PR Supabase CI run passed database and integration jobs but failed one Playwright assertion; the corrected assertion is awaiting a CI rerun. Fresh student acceptance remains pending.
 - GitHub issues: [#120](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/120), [#121](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/121), [#122](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/122), [#123](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/123)
 - Change packet and feature record: [archived packet](../workflow/archive/2026-10-19-review-flow-regressions/); [record](../workflow/archive/2026-10-19-review-flow-regressions/record.md)
-- Branch and commits: `fix/120-review-flow-regressions` from `develop` at `7495e576e8a4426834b294d4b36ab25300e6b65a`; `2998aeb`, `69987fb`, and `257804b` pushed; local and origin refs matched `257804b81d35b80ffec3ac7e8bdccd6f107ed982`.
-- PR: pending final pre-PR closeout; no PR has been opened yet.
+- Branch and commits: `fix/120-review-flow-regressions` from `develop` at `7495e576e8a4426834b294d4b36ab25300e6b65a`; `2998aeb`, `69987fb`, `257804b`, and `2d050a4` pushed before this continuation.
+- PR: [#124](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/124), open against `develop`; initial head `2d050a423c82446eafce5126e1d6bba8ecb43f14`.
 - Related session summaries: none known.
 
 ## Chronological interactions and handoffs
@@ -22,6 +22,8 @@
 | 4 | User → Codex | Said “I accept and approve. Please proceed.” | Acceptance recorded on 2026-10-19; user authorized continued review, finding resolution and closeout. | This decision preceded the first independent review result; no merge/release authorization. |
 | 5 | Separate reviewer → Codex | `/root/independent_review` reviewed head `69987fb` read-only against review-AC-01..04. | Passed 5 focused files/22 tests and `git diff --check`; found P2: app-1 values persisted when a mounted form adopted app-2's revision. | PR held per reviewer recommendation; regression test and same-scope fix added. Re-review requested after push. |
 | 6 | Separate reviewer → Codex | `/root/independent_review` re-reviewed pushed `257804b`. | No remaining material defect; passed five focused files/23 tests and baseline-to-head `git diff --check`. | Reviewer recommends PR after repository closeout; browser, current-schema database and hosted behavior remain unverified. |
+| 7 | PR reviewer → Codex | Two inline comments on PR #124 requested fresh student acceptance after the review finding and correction of stale dated closeout status. | Updated the feature record and this log to mark fresh acceptance pending and PR #124 open. The initial user acceptance predates the review finding and is not being reused as final acceptance. | Acceptance thread remains open until the student reviews corrected evidence and records a new decision. |
+| 8 | Supabase CI → Codex | PR run `39249952106` failed in the `Playwright Chromium` job. | `Database checks` and `Integration race suites` passed. The critical browser test failed because it expected an “Original submission” heading when the submitted original and current letters are identical; the page correctly renders only the current letter. Updated the E2E assertion to match that behavior. | Corrected test is awaiting remote rerun; no local Supabase/browser run was available in this environment. |
 
 ## Tool and agent executions
 
@@ -64,16 +66,16 @@
 
 ## Open work, blockers and limitations
 
-- Outstanding work and owner: push the correction and obtain independent re-review; complete packet/log closeout and archive; open the issue-linked PR last.
-- Blockers and missing evidence: no source-review blocker remains; browser E2E, current-schema database integration and hosted smoke were not run. PR awaits completion of the pre-PR archive/index and then is opened as the final contributor action.
+- Outstanding work and owner: push this PR follow-up, verify the Supabase CI rerun, and obtain fresh student acceptance after reviewing the corrected revision/evidence. Keep the acceptance review thread unresolved until the student decision is recorded.
+- Blockers and missing evidence: PR #124 is open and its archived packet/log are current. The failed browser assertion is corrected locally; remote E2E verification remains pending. No separate live hosted Supabase smoke was performed.
 - Review findings and disposition: original four issues #120–#123 repaired; first-round P2 in #122 corrected test-first and cleared by independent re-review on `257804b`.
-- Approval, acceptance, archive, PR, merge and deployment: user acceptance and authorization to proceed were recorded 2026-10-19; all branch commits are pushed; complete packet archive and issue-index updates are prepared before PR. No product delta expected. Merge and deployment remain separate.
+- Approval, acceptance, archive, PR, merge and deployment: initial user acceptance and authorization to proceed were recorded 2026-10-19, before the first-round review finding. The packet is archived and PR #124 is open; fresh student acceptance after the corrected revision/evidence is pending. No product delta is expected. Merge and deployment remain separate.
 - Historical interaction coverage: exact prior review command transcript and session identifier were not available in this continuation; no claim to reconstruct them.
 
 ## Student verification
 
-- Status: accepted for the approved issue scope; user decision preceded the first-round review report.
+- Status: initial revision accepted on 2026-10-19; fresh acceptance after the first-round finding and correction is pending.
 - Student verifier and date: user, 2026-10-19; account identity not independently verified.
-- Evidence inspected and verification performed: user stated “I accept and approve. Please proceed”; subsequent review finding and repair remain within #122's existing success condition.
+- Evidence inspected and verification performed: the earlier user statement was “I accept and approve. Please proceed”; it preceded the independent review finding, so it is not treated as final acceptance of the corrected revision. Await the student's decision after reviewing the final evidence.
 - Decision source and conditions: explicit chat decision; user also authorized proceeding with review, fix and closeout. No merge or release decision.
-- Remaining concerns and next owner: none blocking PR submission after packet archive/index updates; browser and hosted behavior remain unverified. Merge/release decisions remain with the student.
+- Remaining concerns and next owner: student owner assignment and fresh acceptance of the corrected revision/evidence; Supabase CI rerun for the corrected E2E expectation. Merge/release decisions remain with the student.
