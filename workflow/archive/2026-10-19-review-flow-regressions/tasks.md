@@ -2,7 +2,7 @@
 
 - Change/issues: [#120](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/120), [#121](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/121), [#122](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/122), [#123](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/123)
 - Plan/record: `plan.md`; `record.md`
-- Status/owner: in progress; student owner pending formal assignment
+- Status/owner: post-submission follow-up; student owner pending formal assignment
 
 ## Before implementation
 
@@ -18,7 +18,8 @@
 
 ## Review and closeout
 
-- [x] T06 — Separate reviewer execution assessed `257804b` after first finding a P2 in review-AC-01 at `69987fb`. The regression, correction, five-file/23-test recheck and no-material-findings result are recorded in `handoffs/T06-independent-review.md`.
+- [x] T06 — Separate reviewer execution assessed `114ba259` after the earlier identity fixes and CI-driven revision correction. The final reviewer passed six focused files/27 tests and found no new source defect. Hosted CI remains pending. Evidence is in `handoffs/T06-independent-review.md`.
 - [x] T07 — User recorded “I accept and approve. Please proceed” on 2026-10-19. This preceded the independent finding; the user authorized proceeding with the review-driven correction within #122's existing acceptance behavior.
-- [ ] T08 — Pre-PR dated log, complete packet archive, canonical sync N/A, and index links are complete. Open the issue-linked PR to `develop` as the final contributor action.
+- [x] T08 — Pre-PR dated log, complete packet archive and canonical sync N/A were completed; issue-linked PR #124 is open against `develop`. Post-submission review and CI follow-ups are recorded separately.
 - [ ] T09 — Student records later merge/release decision as separate gates. Pending.
+- [ ] T10 — Confirm final hosted CI and obtain fresh student acceptance of the reviewed, corrected revision. Keep acceptance pending until a student decision is recorded.

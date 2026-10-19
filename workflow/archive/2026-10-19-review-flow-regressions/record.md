@@ -1,6 +1,6 @@
 # Feature record: application and HR review regressions
 
-Status: implementation and independent review complete; latest review corrections await CI; fresh student acceptance pending
+Status: implementation and independent review complete through `114ba259`; current-head hosted CI and fresh student acceptance pending
 
 Owner: Student owner pending assignment
 
@@ -12,7 +12,7 @@ Date: 2026-10-19
 
 - Change ID/classification: 2026-10-19-review-flow-regressions; defects restoring existing behavior
 - GitHub issues: [#120](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/120), [#121](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/121), [#122](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/122), [#123](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/123)
-- Branch/commits/PR: `fix/120-review-flow-regressions`; implementation `2998aeb`, first packet `69987fb`, review correction `257804b`, and archive/PR preparation `2d050a4` are pushed to origin; baseline `7495e576e8a4426834b294d4b36ab25300e6b65a`; [PR #124](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/124) is open against `develop`.
+- Branch/commits/PR: `fix/120-review-flow-regressions`; follow-up corrections `a194e89` and `114ba25914547a54b207415f32118d367c1faec3` are pushed to origin; baseline `7495e576e8a4426834b294d4b36ab25300e6b65a`; [PR #124](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/124) is open against `develop`.
 - Proposal: `proposal.md`
 - Design: `design.md`
 - Deltas: none; restoration of APP-002/003/004/005/007/008/010
@@ -25,9 +25,9 @@ Date: 2026-10-19
 - [x] Issue intake and bounded issue criteria recorded.
 - [x] User directly requested the four fixes, issue creation, commit/push, and PR preparation on 2026-10-19.
 - [x] Implementation and relevant checks complete.
-- [x] Independent review recheck complete; first-round finding and resolution recorded in `handoffs/T06-independent-review.md`.
+- [x] Independent review recheck complete through `114ba259`; first-round finding, subsequent identity fixes, and the CI-driven revision fix are recorded in `handoffs/T06-independent-review.md`.
 - [ ] Fresh human acceptance recorded after review of corrected revision and final evidence. The earlier “I accept and approve. Please proceed” predates the independent review finding and does not satisfy this gate.
-- [x] Dated session log and archive updated for PR #124 and current CI evidence.
+- [x] Dated session log and archive updated for PR #124 and latest known evidence; current-head hosted CI is pending.
 - [x] Issue-linked PR #124 opened against `develop`.
 - [x] Canonical sync decision recorded; no product delta, so sync is N/A.
 
@@ -42,7 +42,7 @@ Date: 2026-10-19
 
 ## Agent handoffs
 
-Implementation and self-review are by the current Codex execution. Separate reviewer `/root/independent_review` completed a first read-only pass at `69987fb`, found a P2 in review-AC-01, then completed a clean re-review on `257804b`. Both reports and checks are recorded in [`handoffs/T06-independent-review.md`](handoffs/T06-independent-review.md).
+Implementation and self-review are by the current Codex execution. Separate reviewer `/root/independent_review` completed read-only reviews at `69987fb`, `257804b`, `a194e89`, and `114ba259`. The final review found no new source defect and recommends holding readiness pending hosted CI and fresh student acceptance. Reports and checks are recorded in [`handoffs/T06-independent-review.md`](handoffs/T06-independent-review.md).
 
 ## Implementation and tests
 
@@ -54,24 +54,25 @@ Review follow-up red/green evidence: added tests for external null-to-ID draft a
 
 Security/adversarial cases and results: the application résumé route remains same-origin, authenticated, and owner-resolved. The old unscoped `cancel` intent is rejected with 400; the cancellation service is not called. Existing upload/removal revision checks and internal operation-scoped cleanup tests passed. No database schema was changed.
 
-Known limitations: the production build compiled and completed TypeScript, then failed during page-data collection for `/auth/reset-requested` because Bun reported a Next.js CommonJS wrapper error. Local Supabase was two migrations behind. PR Supabase CI run `39249952106` passed database and integration checks but exposed a stale Playwright assertion for the identical current/original submitted letter; that assertion was corrected and later passed in `39269436729`. No separate live hosted Supabase smoke was performed. The new application identity findings now have red/green regression coverage; the focused file passes 6 tests and the full unit suite passed 110 files/671 tests before a small lint-motivated helper extraction. TypeScript, ESLint, formatting and focused tests pass after the extraction; the updated branch awaits hosted CI. No product-spec delta is expected because the repairs restore existing requirements APP-002/003/004/005/007/008/010; canonical sync is N/A. The initial user acceptance was recorded on 2026-10-19 before the first-round review finding; fresh student acceptance of the corrected revision/evidence remains pending. The separate reviewer rechecked the corrected revision and found no material issue.
+Known limitations: the production build compiled and completed TypeScript, then failed during page-data collection for `/auth/reset-requested` because Bun reported a Next.js CommonJS wrapper error. Local Supabase was two migrations behind; no separate live hosted Supabase smoke was performed. Supabase CI run `39281163224` on `a194e89` passed database and integration race suites but failed one Playwright critical journey: profile-copy used stale server revision props immediately after a successful local résumé response. A red/green regression reproduced the stale revision header, and `114ba259` now uses the confirmed response revision until props refresh. On `114ba259`, the six-file focused suite passed (27 tests), TypeScript, ESLint, Prettier and `git diff --check` passed; the full unit run stalled without a result. Hosted general CI run `39281163135` and Supabase CI run `39281163224` are pending for the final pushed commit. No current-head hosted pass is claimed. No product-spec delta is expected because repairs restore existing requirements APP-002/003/004/005/007/008/010; canonical sync is N/A. The initial user acceptance predates the review findings; fresh student acceptance of the corrected revision/evidence remains pending.
 
 ## Review and decision
 
-- Reviewer identity and independence: separate read-only agent `/root/independent_review` completed a first review at `69987fb` and clean re-review at `257804b`. The implementer is this Codex execution and does not count as independent.
-- Findings/resolutions: original four issues #120–#123 were fixed. First-round reviewer found P2 review-AC-01: stale form values could be retained when the mounted form changed to another identified application. A regression failed before the correction; reviewer rechecked application switching, first-ID preservation, same-application refresh, and the five focused test files. No material findings remain.
+- Reviewer identity and independence: separate read-only agent `/root/independent_review` completed reviews at `69987fb`, `257804b`, `a194e89`, and `114ba259`. The implementer is this Codex execution and does not count as independent.
+- Findings/resolutions: original four issues #120–#123 and the form identity/revision findings were fixed. The final review on `114ba259` found no new source defect and independently passed six focused files/27 tests. The prior CI Playwright failure was diagnosed to a stale revision header after local upload; a red/green test and `114ba259` fix it. Hosted validation for that fix remains pending.
 - Human decisions: the user accepted and approved the initial revision on 2026-10-19 and instructed work to proceed. That decision predates the later review finding, so fresh student acceptance of the corrected revision and final evidence remains pending; merge and release remain separate decisions.
-- Documentation/reflection/log updates: [dated session log](../../../logs/2026-10-19-review-flow-regressions.md); complete packet archived at `workflow/archive/2026-10-19-review-flow-regressions/` before PR submission.
+- Documentation/reflection/log updates: [implementation log](../../../logs/2026-10-19-review-flow-regressions.md); [PR #124 review/CI follow-up](../../../logs/2026-10-20-pr124-review-followups.md); complete packet archived at `workflow/archive/2026-10-19-review-flow-regressions/` before PR submission.
 
 ## Session evidence index
 
 | Date / session              | Summary log link                             | Work / prompts / decisions covered                                                                             | Verification status / missing coverage                                                                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-10-19 / active session | [session summary](../../../logs/2026-10-19-review-flow-regressions.md) | Repository review, issues #120–#123, implementation, initial acceptance, two-round independent review, correction, PR #124 follow-up | Full unit suite, static checks, five-file independent re-review, and PR checks passed. Supabase CI run `39269436729` passed database checks, integration race suites, and critical Playwright journeys after correcting the stale assertion. New form-identity review corrections await CI; fresh student acceptance remains pending. |
+| 2026-10-19 / active session | [session summary](../../../logs/2026-10-19-review-flow-regressions.md) | Repository review, issues #120–#123, implementation, initial review and PR preparation | Earlier implementation and review evidence; see the later [PR #124 follow-up](../../../logs/2026-10-20-pr124-review-followups.md) for current source-head findings and CI. |
+| 2026-10-20 / PR #124 follow-up | [follow-up summary](../../../logs/2026-10-20-pr124-review-followups.md) | CI-driven revision repair, final independent review, review-thread and acceptance state | Final independent review on `114ba259` passed six focused files/27 tests and found no new source defect. Hosted CI runs `39281163135` and `39281163224` are pending; fresh student acceptance remains pending. |
 
 ## Canonical sync and archive
 
 - Product delta: none; fixes restore APP-002/003/004/005/007/008/010. The initial user acceptance was recorded on 2026-10-19, before the later independent review finding; fresh acceptance of the corrected revision/evidence is pending.
 - Canonical sync: N/A because the accepted repairs restore existing clauses.
 - Archive: packet archived at `workflow/archive/2026-10-19-review-flow-regressions/` on 2026-10-19; packet and current indexes are preserved and this record reflects the open PR and pending acceptance gate.
-- Outstanding work: commit and push the latest form-identity review correction, verify its CI, and obtain fresh student acceptance of the corrected revision/evidence; resolve the acceptance review thread after that decision. Merge and release remain separate.
+- Outstanding work: verify current-head hosted CI, then obtain fresh student acceptance of the corrected revision and evidence. Keep the acceptance review thread unresolved until that decision. Merge and release remain separate.
