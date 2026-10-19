@@ -44,4 +44,10 @@ On 2026-10-19, each thread received an evidence-based reply before resolution. A
 - Canonical sync: N/A; accepted requirements already cover the desired behavior.
 - Archive: complete at `workflow/archive/2026-10-19-pr110-review-followups/`; index navigation is recorded in the archive and changes README files.
 - Dated session summary: [2026-10-19 closeout](../../../logs/2026-10-19-pr110-review-followups-closeout.md), completed before PR submission; includes all six reply/resolution results and the stated evidence limits.
-- PR to `develop`: the only remaining contributor action is to open the issue-linked PR after this closeout commit is pushed; all pre-PR gates are complete. Merge to `develop`, master promotion, and deployment remain separate.
+- PR to `develop`: [#119](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/119) was opened on 2026-10-19 and remains open/unmerged. The post-submission CI repair is commit `284d7f186257b70b45377b437f982ae0dcb8d653`; hosted CI, Supabase CI, and Vercel passed on that repair head. See the [CI follow-up summary](../../../logs/2026-10-19-pr119-ci-followup.md) for diagnosis and verification details. Merge to `develop`, master promotion, and deployment remain separate.
+
+## Post-submission CI follow-up
+
+- The first PR #119 `CI` run (run 223, ID `39204046569`) failed in Unit tests: six cases in `tests/unit/hr-application-pages.test.tsx` threw because its `next/navigation` mock omitted `useSearchParams`, now used by the HR filter navigation hook. Other CI steps before Unit tests passed; later build steps were skipped.
+- The test file now mocks `useSearchParams` with an empty `URLSearchParams`, consistent with the existing HR edge-case test. No application behavior or product requirement changed. The repair is commit `284d7f186257b70b45377b437f982ae0dcb8d653`.
+- A fresh local run passed all 11 tests in the affected file. On the repair commit, hosted `CI` run 224 (`39221016549`), Supabase CI run 204 (`39221016543`), and the Vercel status all passed. Local full-suite Bun limitations are documented in [the follow-up summary](../../../logs/2026-10-19-pr119-ci-followup.md).
