@@ -13,6 +13,7 @@
 - Withdrawal: change only the confirmation wording so it distinguishes terminal withdrawal of this record from starting a separate application while a job remains open.
 - Dashboard: pass schedule fields already returned by `listHRJobs` into the existing `getHROperationalJobStatus` helper. Use one `now` value per aggregate. Count operational `closed` as Closed; retain scheduled jobs in the existing Published total while labeling their per-job row Scheduled.
 - Timezone review finding: already corrected on the baseline; no change planned.
+- Test environment: add Happy DOM as a dev-only dependency so Vitest can mount the actual filter and application form components. The tests mock Next navigation and non-target form children; no production dependency or browser/hosted behavior is implied.
 
 ## Boundaries and failure behavior
 
@@ -27,5 +28,5 @@
 - [x] Existing canonical behavior is restored without a new requirement or spec delta.
 - [x] Applicant/HR permissions and data boundaries remain unchanged.
 - [x] No database, storage, secret, prompt, deployment, or rollback migration is needed.
-- [x] Focused tests cover filter merge/sync decisions and attachment revision reconciliation.
-- [x] Independent reviewer checked the final test/helper follow-up and risk boundaries; the handoff records remaining test-coverage limits.
+- [x] Focused unit and mounted component tests cover filter merge/transition/debounce behavior and attachment revision reconciliation/prop refresh.
+- [ ] Independent reviewer to recheck the new mounted tests and test-only dependency change.
