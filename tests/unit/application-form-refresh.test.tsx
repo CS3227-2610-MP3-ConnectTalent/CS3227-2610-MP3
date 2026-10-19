@@ -17,7 +17,9 @@ vi.mock("@/components/application-form-fields", () => ({
   ApplicantContactFields: () => null,
   ApplicationBackgroundFields: () => null,
   ApplicationFormActions: () => null,
-  CoverLetterField: () => null,
+  CoverLetterField: ({ value }: { value: string }) => (
+    <output id="cover-letter-value">{value}</output>
+  ),
 }));
 vi.mock("@/components/resume-panel", () => ({
   ResumePanel: ({
@@ -46,12 +48,16 @@ const details = {
 let container: HTMLDivElement;
 let root: Root;
 
-async function renderForm(revision: number, applicationId = "application-1") {
+async function renderForm(
+  revision: number,
+  applicationId = "application-1",
+  value = "Initial letter",
+) {
   await act(async () => {
     root.render(
       <ApplicationForm
         jobId="synthetic-job"
-        value=""
+        value={value}
         revision={revision}
         submitted={false}
         email="synthetic@example.test"
@@ -75,7 +81,7 @@ afterEach(async () => {
 });
 
 describe("application form server-prop refresh", () => {
-  it("updates the hidden and résumé revisions when refreshed props advance", async () => {
+  it("keeps the revision aligned with stale displayed values on server refresh", async () => {
     await renderForm(2);
     expect(
       container.querySelector<HTMLInputElement>('input[name="revision"]')
@@ -85,14 +91,17 @@ describe("application form server-prop refresh", () => {
       "2",
     );
 
-    await renderForm(3);
+    await renderForm(3, "application-1", "Changed in another tab");
 
     expect(
       container.querySelector<HTMLInputElement>('input[name="revision"]')
         ?.value,
-    ).toBe("3");
+    ).toBe("2");
     expect(container.querySelector("#resume-panel-revision")?.textContent).toBe(
-      "3",
+      "2",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Initial letter",
     );
   });
 

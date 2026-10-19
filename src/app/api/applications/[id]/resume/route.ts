@@ -3,7 +3,6 @@ import { resumeFailureStatus } from "@/lib/resume-errors";
 import { currentApplicant } from "@/lib/auth";
 import { getOwnApplication } from "@/lib/applications";
 import {
-  cancelResumeUpload,
   downloadApplicationResume,
   removeApplicationResume,
   uploadApplicationResume,
@@ -78,12 +77,11 @@ function errorResponse(message: string, status: number) {
 
 async function updateResume(request: Request, context: UploadContext) {
   const intent = request.headers.get("x-resume-intent");
-  if (intent === "cancel")
-    return cancelResumeUpload(context.actorId, context.jobId);
+  if (intent !== "remove" && intent !== "upload")
+    throw new Error("Choose an upload action.");
   const revision = readRevision(request);
   if (intent === "remove")
     return removeApplicationResume(context.actorId, context.jobId, revision);
-  if (intent !== "upload") throw new Error("Choose an upload action.");
   return uploadResume(request, context, revision);
 }
 

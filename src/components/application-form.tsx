@@ -90,13 +90,10 @@ function useApplicationAttachment(
   const [attachment, setAttachment] = useState(serverAttachment);
 
   if (
-    previousServerAttachment.applicationId !== serverAttachment.applicationId ||
-    previousServerAttachment.revision !== serverAttachment.revision
+    previousServerAttachment.applicationId !== serverAttachment.applicationId
   ) {
     setPreviousServerAttachment(serverAttachment);
-    setAttachment((current) =>
-      reconcileApplicationAttachment(current, serverAttachment),
-    );
+    setAttachment(reconcileApplicationAttachment(attachment, serverAttachment));
   }
 
   return { attachment, setAttachment };

@@ -48,15 +48,7 @@ export async function applyResumeResponse(
   }
   if (intent === "remove" && response.ok)
     state.setOperation(crypto.randomUUID());
-  if ("resume" in result)
-    state.setAttachment(result.resume as ResumeMetadata | null);
-  props.onChange?.({
-    applicationId:
-      typeof result.applicationId === "string"
-        ? result.applicationId
-        : undefined,
-    revision: typeof result.revision === "number" ? result.revision : undefined,
-  });
+  if (response.ok) applySuccessfulResumeResponse(result, props, state);
   state.setUploadFailed(intent === "upload" && !response.ok);
   const retryable = canRetryProfileCopy(result.code);
   state.setProfileCopyRetryAvailable(
@@ -68,6 +60,22 @@ export async function applyResumeResponse(
   state.setMessage(
     responseMessage(response.ok, result.error, result.reference),
   );
+}
+
+function applySuccessfulResumeResponse(
+  result: Record<string, unknown>,
+  props: ResumePanelProps,
+  state: ResumeResponseState,
+) {
+  if ("resume" in result)
+    state.setAttachment(result.resume as ResumeMetadata | null);
+  props.onChange?.({
+    applicationId:
+      typeof result.applicationId === "string"
+        ? result.applicationId
+        : undefined,
+    revision: typeof result.revision === "number" ? result.revision : undefined,
+  });
 }
 
 export function responseMessage(
