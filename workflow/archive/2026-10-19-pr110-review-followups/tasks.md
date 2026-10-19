@@ -2,7 +2,7 @@
 
 - Change/issues: [#115](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/115), [#116](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/116), [#117](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/117), [#118](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/118)
 - Plan/record: `plan.md`; `record.md`
-- Status/owner: Accepted with stated limits; closeout in progress; requester is student owner/verifier (personal name not supplied)
+- Status/owner: Accepted with stated limits; packet archived; PR #119 open; requester explicitly accepted in the student owner/verifier role (personal name not supplied); post-submission review follow-up in progress
 
 ## Before implementation
 
@@ -18,11 +18,11 @@
 
 ## Review and closeout
 
-- [x] T06 — Separate reviewer rechecked the mounted navigation/form tests and test-environment dependency through `182b4a2`. No source defect was found; the refreshed identity assertion closes the prior P3 test gap. Remaining P2 validation limit: actual Next/browser transition interruption or out-of-order navigation is not exercised by the synchronous router mock. See `handoffs/T06-independent-review.md`.
+- [x] T06 — Separate reviewer rechecked the mounted navigation/form tests and test-environment dependency through `182b4a2`, then re-reviewed the post-submission CI fixture repair and packet corrections at `450ecbd`. No source or fixture defect was found; the refreshed identity assertion closes the prior P3 test gap. Remaining P2 validation limit: actual Next/browser transition interruption or out-of-order navigation is not exercised by the synchronous router mock. See `handoffs/T06-independent-review.md`.
 - [x] T07 — Requester accepted as student owner/verifier with stated limits on 2026-10-19; source and limits are recorded in `proposal.md` and `record.md`.
 - [x] T08 — Archived the complete packet after acceptance at `workflow/archive/2026-10-19-pr110-review-followups/`; updated the active/archive indexes. Canonical sync is N/A because no product requirements changed.
 - [x] T09 — Completed [the dated closeout summary](../../../logs/2026-10-19-pr110-review-followups-closeout.md) and linked it from the archived record and indexes before PR submission.
-- [ ] T10 — Open issue-linked PR to `develop` as final contributor action after all gates.
+- [x] T10 — Open issue-linked [PR #119](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/119) to `develop` as the final contributor action after the recorded gates. Opened 2026-10-19; PR remains open and unmerged. Subsequent review follow-up is recorded separately; it does not change the completed PR-submission task.
 
 ## Post-submission
 

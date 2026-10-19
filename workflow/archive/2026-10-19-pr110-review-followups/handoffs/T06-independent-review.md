@@ -37,3 +37,29 @@ After the initial review, the requester selected “Add the missing focused test
 - Reviewer commands: `git status --short --branch`, `git rev-parse HEAD`, `git diff --stat` for the requested range, `git diff --name-status` from `31cbf34` to `182b4a2`, and `git show`/`rg` on the new assertion and packet. Reviewer ran no tests/checks; all reported test and static-check results are implementer-reported.
 - Independence: read-only test-engineer execution did not implement or author tests. This review is not student acceptance.
 - The acceptance decision explicitly records the remaining mocked-router runtime limit; see `../proposal.md` and `../record.md`.
+
+## PR #119 post-submission re-review
+
+- Reviewer: separate read-only test-engineer execution `/root/pr110_fix_review`; no implementation or test authorship. This is not student acceptance.
+- Reviewed branch: `fix/115-pr110-review-followups` at `450ecbd87e804134fa1fe020a2ab3620faf02976`, including the uncommitted documentation changes to `proposal.md`, `tasks.md`, and both workflow indexes. Follow-up read-only link/attribution check also reviewed the new `logs/2026-10-19-pr119-review-followups.md` and this handoff.
+- Compared with the prior accepted review through `182b4a2`, the only product-adjacent change was commit `284d7f1`, which adds `useSearchParams` to the `next/navigation` mock in `tests/unit/hr-application-pages.test.tsx`. No application source changed; no source or test-fixture defect was found in the repair.
+- The packet updates correctly cite ProductSpec v1.18 at the recorded baseline, distinguish role-framed student acceptance from the earlier scope approval, mark T10 complete, and state that PR #119 is open and unmerged. The spec version was verified against the baseline `workflow/ProductSpec.md`, `workflow/specs/README.md`, and JMG-004.
+- Initial documentation finding: both indexes linked to a not-yet-created summary. The new follow-up summary was added; a separate read-only check confirmed the links from both indexes and the archived feature record resolve. The summary accurately describes review scope and limitations.
+- Reviewer commands for the source/test/docs re-review:
+
+  ```text
+  git status --short --branch
+  git rev-parse HEAD
+  git log -6 --oneline --decorate
+  git diff --stat
+  git diff --name-status
+  git show --stat --oneline 284d7f1
+  git show --format=fuller --no-ext-diff 284d7f1 -- tests/unit/hr-application-pages.test.tsx
+  git diff --stat 182b4a237815579748affef08c91e5fe1840fe5d..450ecbd87e804134fa1fe020a2ab3620faf02976
+  git diff --name-status 182b4a237815579748affef08c91e5fe1840fe5d..450ecbd87e804134fa1fe020a2ab3620faf02976
+  git show 3c9ba769f536679a3f546b5e5fbf5a254f059104:workflow/ProductSpec.md | Select-Object -First 18
+  git show 3c9ba769f536679a3f546b5e5fbf5a254f059104:workflow/specs/job-management.md | Select-Object -Skip 24 -First 20
+  ```
+
+- In the final link/attribution check, the reviewer ran `git status --short --branch`, `git rev-parse HEAD`, a targeted `rg -n` lookup for the three summary links, and `Get-Content` on the summary and this handoff. Exact search arguments were not retained.
+- No application tests, formatting checks, or hosted product checks were run by the reviewer. No browser, hosted product, or runtime smoke is claimed by this re-review.

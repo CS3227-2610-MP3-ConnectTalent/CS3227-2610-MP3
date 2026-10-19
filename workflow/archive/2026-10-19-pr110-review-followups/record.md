@@ -5,10 +5,10 @@
 - Change: `2026-10-19-pr110-review-followups`
 - Issues: #115, #116, #117, #118
 - Branch: `fix/115-pr110-review-followups`
-- Baseline: `develop` `3c9ba769f536679a3f546b5e5fbf5a254f059104`
+- Baseline: ProductSpec v1.18; `develop` `3c9ba769f536679a3f546b5e5fbf5a254f059104`
 - Requirements: APP-001/005/007/008/009/010; JMG-004
 - Classification: behavior corrections restoring already-accepted behavior
-- Student owner/verifier: requester accepted the reviewed revision on 2026-10-19; personal name was not supplied
+- Student owner/verifier: requester explicitly accepted in that role on 2026-10-19 in response to the role-framed acceptance gate; personal name was not supplied
 - Requester approval: on 2026-10-19, requester instructed the contributor to create a branch from `develop`, fix necessary PR #110 review findings, and open a PR to `develop`; promotion to `master` remains a separate manual step. This approves the bounded repair scope, not final acceptance of the implementation.
 
 ## Review-comment disposition
@@ -45,6 +45,14 @@ On 2026-10-19, each thread received an evidence-based reply before resolution. A
 - Archive: complete at `workflow/archive/2026-10-19-pr110-review-followups/`; index navigation is recorded in the archive and changes README files.
 - Dated session summary: [2026-10-19 closeout](../../../logs/2026-10-19-pr110-review-followups-closeout.md), completed before PR submission; includes all six reply/resolution results and the stated evidence limits.
 - PR to `develop`: [#119](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/pull/119) was opened on 2026-10-19 and remains open/unmerged. The post-submission CI repair is commit `284d7f186257b70b45377b437f982ae0dcb8d653`; hosted CI, Supabase CI, and Vercel passed on that repair head. See the [CI follow-up summary](../../../logs/2026-10-19-pr119-ci-followup.md) for diagnosis and verification details. Merge to `develop`, master promotion, and deployment remain separate.
+
+## PR #119 review follow-up
+
+- The proposal baseline was corrected to ProductSpec v1.18 after confirming that both canonical indexes at the recorded `develop` commit identify v1.18. Reassessment confirms the APP criteria and JMG-004 schedule behavior were already requirements; PR110-AC-05 preserves the existing UTC no-JavaScript fallback. No product delta or canonical sync is introduced.
+- The acceptance record now cites the explicit prompt asking whether the requester, “as the student owner/verifier,” accepted the changes and the response “Accept with stated limits.” The earlier implementation-scope approval remains a separate decision; no personal name was supplied.
+- T10 and both workflow indexes now record PR #119 as open and unmerged. Its submission task is complete; merge, deployment and promotion to `master` remain separate.
+- Separate read-only re-review of the final post-submission tree is recorded in [T06](handoffs/T06-independent-review.md). It includes the `284d7f1` test-fixture repair and the PR #119 review follow-up edits.
+- See the [PR #119 review follow-up summary](../../../logs/2026-10-19-pr119-review-followups.md) for review dispositions, static checks, and GitHub thread closeout evidence.
 
 ## Post-submission CI follow-up
 

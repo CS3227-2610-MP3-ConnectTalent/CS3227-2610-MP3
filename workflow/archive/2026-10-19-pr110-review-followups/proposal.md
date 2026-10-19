@@ -3,9 +3,9 @@
 - Change ID: `2026-10-19-pr110-review-followups`
 - Issues: [#115](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/115), [#116](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/116), [#117](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/117), [#118](https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/118)
 - Owner: Requester accepted as student owner/verifier on 2026-10-19; personal name not supplied
-- Status: Accepted with stated limits; implementation complete; closeout and PR submission in progress
+- Status: Accepted with stated limits; packet archived; PR #119 open; post-submission review follow-up in progress
 - Date: 2026-10-19
-- Baseline: ProductSpec v1.17, `develop` commit `3c9ba769f536679a3f546b5e5fbf5a254f059104`
+- Baseline: ProductSpec v1.18, `develop` commit `3c9ba769f536679a3f546b5e5fbf5a254f059104`
 - Affected capabilities: `applications-and-review.md` (APP-001, APP-005, APP-007, APP-008, APP-009, APP-010), `job-management.md` (JMG-004)
 - Classification: Behavior corrections restoring existing requirements; no new product behavior
 
@@ -45,6 +45,7 @@ The requester directed that the necessary findings be fixed on a branch from `de
 | PR110-AC-05   | PR #110 timezone finding          | Given current `develop`, when schedule input is parsed without an explicit browser timestamp, then the existing UTC fallback remains present and unchanged.                                                         | Baseline/source comparison; contributor                                                     |
 
 - Spec deltas: none; fixes restore existing clauses.
+- Baseline reassessment: At the recorded `develop` baseline, `workflow/ProductSpec.md` and `workflow/specs/README.md` identify v1.18 as current. APP-001/005/007/008/009/010 remain the applicable existing requirements, and JMG-004 includes the v1.18 browser-local/UTC schedule rules and no-JavaScript UTC fallback. PR110-AC-05 verifies that this already-present timezone behavior is retained; no new product behavior or canonical sync is needed.
 - Design: separate architecture design omitted; see `design.md` for the bounded rationale and data-flow notes.
 - Plan and tasks: `plan.md`, `tasks.md`.
 - Evidence: `record.md`.
@@ -53,15 +54,15 @@ The requester directed that the necessary findings be fixed on a branch from `de
 
 - [x] Scope, issue criteria, affected IDs, and unresolved questions reviewed against PR #110 feedback and canonical requirements.
 - [x] Proposal, no-delta statement, design omission, and plan approved for this bounded repair by the requester through the direct instruction on 2026-10-19 to create a branch from `develop` and implement necessary fixes from the fetched review comments.
-- Approver: Requester; personal name and student role are not confirmed by this chat context.
+- Approver: Requester; personal name was not supplied. The role had not been confirmed at this scope-approval stage; the later student-owner acceptance is separately evidenced below.
 - Decision/date/source: Approve bounded implementation and follow-up PR to `develop`; direct conversation, 2026-10-19 (Asia/Singapore).
 - Conditions at the scope-approval stage: correct only the five still-present findings; do not promote to `master`; final student acceptance remained a distinct gate and was later recorded below.
 
 ## Student acceptance record
 
 - [x] Student owner/verifier accepted the reviewed implementation with recorded limits.
-- Accepted by: requester as student owner/verifier; personal name was not provided.
-- Decision/date/source: “Accept with stated limits,” supplied in response to the separate acceptance gate on 2026-10-19 (Asia/Singapore).
+- Accepted by: requester, explicitly responding in the student owner/verifier role; personal name was not provided.
+- Decision/date/source: The requester was asked, “Do you, as the student owner/verifier, accept the reviewed fixes ...?” and replied “Accept with stated limits” on 2026-10-19 (Asia/Singapore). This is the explicit role-framed student acceptance; the earlier scope approval did not itself serve as acceptance.
 - Reviewed code revision: `182b4a237815579748affef08c91e5fe1840fe5d`; final branch head at acceptance: `5bdd27ae6358e64c3f2ca8b6fafd4560334e56af`.
 - Evidence inspected: 11 focused test files / 47 tests, typecheck, changed-test lint, Prettier, whitespace check, and independent read-only review. Independent review found no source defect and confirmed the refreshed identity assertion gap is closed.
 - Accepted limits: actual Next/browser transition interruption or out-of-order navigation is unverified with the synchronous mocked router; no browser or hosted smoke was run. Acceptance authorizes closeout and PR submission to `develop`; merge, deployment and manual promotion to `master` remain separate.
