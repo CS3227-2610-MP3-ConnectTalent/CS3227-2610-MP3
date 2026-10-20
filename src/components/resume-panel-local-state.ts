@@ -21,8 +21,9 @@ export function useResumeActionRevision(
 ) {
   const [applicationId, setApplicationId] = useState(initialApplicationId);
   const [revision, setRevision] = useState(initialRevision);
-  const [revisionApplicationId, setRevisionApplicationId] =
-    useState<string | null>(null);
+  const [revisionApplicationId, setRevisionApplicationId] = useState<
+    string | null
+  >(null);
   if (applicationId !== initialApplicationId) {
     setApplicationId(initialApplicationId);
     const newlyCreatedApplication =
