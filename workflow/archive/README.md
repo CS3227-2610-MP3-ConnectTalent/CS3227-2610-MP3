@@ -6,6 +6,8 @@ Archive whole change packets at `workflow/archive/<YYYY-MM-DD-short-name>/`. Arc
 
 Archived packets:
 
+- [2026-10-20 User Guide UI workflow screenshots — #127](2026-10-20-user-guide-screenshots/record.md): John Wong authorized adding visual UI walkthrough screenshots across Applicant and HR sections in the User Guide; documentation change, canonical sync N/A. Prettier and Docusaurus website build passed with 0 errors. [Session summary](../../logs/2026-10-20-user-guide-screenshots.md). Issue-linked PR #128 submission targets `develop`.
+
 - [2026-10-20 review repairs — #125](2026-10-20-review-application-identity/record.md): Paul separately accepted with recorded limits on 20 October after local verification and independent source review. Restores application identity boundaries, strict HR pagination and guide consistency; canonical sync N/A. Hosted rollout, clean replay, full standard Docker runners and full accessibility remain unverified. Paul subsequently authorized commit, push and PR creation on 20 October; merge and hosted rollout remain separate. [Session summary](../../logs/2026-10-20-review-application-identity.md).
 
 
