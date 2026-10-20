@@ -33,7 +33,7 @@ export function useResumeActionRevision(
     const keepLocalRevision =
       newlyCreatedApplication &&
       revision !== null &&
-      (initialRevision === null || revision > initialRevision);
+      (initialRevision === null || revision >= initialRevision);
     setRevision(keepLocalRevision ? revision : initialRevision);
     setRevisionApplicationId(keepLocalRevision ? initialApplicationId : null);
   } else if (

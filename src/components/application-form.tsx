@@ -17,11 +17,15 @@ import {
   type ApplicationFormInstance,
 } from "@/lib/application-form-instance";
 import {
+  hasStaleDisplayedFields,
   reconcileApplicationAttachment,
   type ApplicationAttachment,
 } from "@/lib/application-attachment";
 import type { ResumeMetadata } from "@/lib/application-resumes";
-import type { ApplicationFormState } from "@/lib/application-form-state";
+import {
+  createInitialApplicationState,
+  type ApplicationFormState,
+} from "@/lib/application-form-state";
 
 type ApplicationDetails = {
   full_name: string | null;
@@ -91,14 +95,18 @@ function ApplicationFormState({
     getClientHydrationSnapshot,
     getServerHydrationSnapshot,
   );
-  const initial = createInitialState(props.details, props.value);
+  const initial = createInitialApplicationState(props.details, props.value);
   const [state, formAction, pending] = useActionState(
     updateApplication,
     initial,
     `/jobs/${props.jobId}/apply`,
   );
   const [coverLetter, setCoverLetter] = useState(state.values.cover_letter);
-  const { attachment, setAttachment } = useApplicationAttachment(props);
+  const { attachment, setAttachment } = useApplicationAttachment(
+    props,
+    state.values,
+    coverLetter,
+  );
   const [attachmentPending, setAttachmentPending] = useState(false);
   if (props.submitted)
     return (
@@ -122,7 +130,9 @@ function ApplicationFormState({
 }
 
 function useApplicationAttachment(
-  props: Pick<Props, "applicationId" | "revision">,
+  props: Pick<Props, "applicationId" | "revision" | "value" | "details">,
+  displayedValues: ApplicationFormState["values"],
+  displayedLetter: string,
 ) {
   const serverAttachment: ApplicationAttachment = {
     applicationId: props.applicationId ?? null,
@@ -132,31 +142,28 @@ function useApplicationAttachment(
     useState(serverAttachment);
   const [attachment, setAttachment] = useState(serverAttachment);
 
+  const serverFieldsChanged = hasStaleDisplayedFields(
+    props.value,
+    props.details,
+    displayedValues,
+    displayedLetter,
+  );
+
   if (
     previousServerAttachment.applicationId !== serverAttachment.applicationId
   ) {
     setPreviousServerAttachment(serverAttachment);
     setAttachment(reconcileApplicationAttachment(attachment, serverAttachment));
+  } else if (previousServerAttachment.revision !== serverAttachment.revision) {
+    setPreviousServerAttachment(serverAttachment);
+    if (!serverFieldsChanged) {
+      setAttachment(
+        reconcileApplicationAttachment(attachment, serverAttachment),
+      );
+    }
   }
 
   return { attachment, setAttachment };
-}
-
-function createInitialState(
-  details: ApplicationDetails,
-  coverLetter: string,
-): ApplicationFormState {
-  return {
-    values: {
-      education: details.education ?? "",
-      work_experience: details.work_experience ?? "",
-      full_name: details.full_name ?? "",
-      phone: details.phone ?? "",
-      portfolio_url: details.portfolio_url ?? "",
-      cover_letter: coverLetter,
-    },
-    errors: {},
-  };
 }
 
 function SubmittedApplication({

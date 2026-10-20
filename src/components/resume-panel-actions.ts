@@ -127,6 +127,16 @@ type ProfileCopyAttempt = {
   revision: number | null;
 };
 
+function resolveConfirmedRevision(
+  stateRevision: number | null,
+  propRevision: number | null,
+): number | null {
+  if (stateRevision !== null && propRevision !== null) {
+    return Math.max(stateRevision, propRevision);
+  }
+  return stateRevision ?? propRevision ?? null;
+}
+
 function resolveProfileCopyAttempt(
   props: ResumePanelProps,
   state: ActionState,
@@ -134,8 +144,9 @@ function resolveProfileCopyAttempt(
 ): ProfileCopyAttempt | null {
   if (retry) return state.profileCopyAttempt;
   const sourceId = props.profileResume?.id;
+  const revision = resolveConfirmedRevision(state.revision, props.revision);
   return sourceId
-    ? { operation: crypto.randomUUID(), sourceId, revision: state.revision }
+    ? { operation: crypto.randomUUID(), sourceId, revision }
     : null;
 }
 
@@ -251,7 +262,8 @@ function requestOptions(
   operation: string,
   profileAttempt: ProfileCopyAttempt | null,
 ): Pick<RequestInit, "headers" | "body"> {
-  const revision = profileAttempt ? profileAttempt.revision : props.revision;
+  const confirmed = resolveConfirmedRevision(state.revision, props.revision);
+  const revision = profileAttempt ? profileAttempt.revision : confirmed;
   const headers: Record<string, string> = {
     "x-resume-intent": intent,
     "x-application-revision": String(revision ?? ""),

@@ -18,8 +18,8 @@
 
 ## Review and closeout
 
-- [x] T06 — Separate reviewer execution assessed `114ba259` after the earlier identity fixes and CI-driven revision correction. The final reviewer passed six focused files/27 tests and found no new source defect. Hosted CI remains pending. Evidence is in `handoffs/T06-independent-review.md`.
+- [x] T06 — Separate reviewer executions assessed `114ba259` and `cedb8f1`/`eb9de94` after identity fixes, CI-driven revision correction, and revision-ownership refinements. Evidence is in `handoffs/T06-independent-review.md`.
 - [x] T07 — User recorded “I accept and approve. Please proceed” on 2026-10-19. This preceded the independent finding; the user authorized proceeding with the review-driven correction within #122's existing acceptance behavior.
-- [x] T08 — Pre-PR dated log, complete packet archive and canonical sync N/A were completed; issue-linked PR #124 is open against `develop`. Post-submission review and CI follow-ups are recorded separately.
+- [x] T08 — Pre-PR dated log and canonical sync N/A completed; issue-linked PR #124 is open against `develop`. Packet returned to `workflow/changes/` while fresh student acceptance remains pending.
 - [ ] T09 — Student records later merge/release decision as separate gates. Pending.
 - [ ] T10 — Confirm final hosted CI and obtain fresh student acceptance of the reviewed, corrected revision. Keep acceptance pending until a student decision is recorded.

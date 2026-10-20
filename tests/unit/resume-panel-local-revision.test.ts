@@ -155,3 +155,39 @@ it("does not carry a local revision to a different newly adopted application", a
     }),
   );
 });
+
+it("uses confirmed prop revision for profile copy if state revision is lower", async () => {
+  const profileResume = {
+    id: "60000000-0000-4000-8000-000000000b02",
+    filename: "profile.pdf",
+    byte_size: 2048,
+    object_path: "private/profile.pdf",
+  };
+  const props: Parameters<typeof useResumePanelActions>[0] = {
+    applicationId: "application-1",
+    jobId: "job-1",
+    revision: 1,
+    editable: true,
+    resume: null,
+    profileResume,
+    onChange: vi.fn(),
+  };
+  const fetch = vi.fn().mockResolvedValue(response({}));
+  vi.stubGlobal("fetch", fetch);
+
+  renderActions(props);
+  props.revision = 2;
+  const actions = renderActions(props);
+  await actions.change("profile");
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    "/api/jobs/job-1/resume",
+    expect.objectContaining({
+      headers: expect.objectContaining({
+        "x-resume-intent": "profile",
+        "x-application-revision": "2",
+        "x-profile-resume": profileResume.id,
+      }),
+    }),
+  );
+});

@@ -120,6 +120,27 @@ describe("application form server-prop refresh", () => {
       "Initial letter",
     );
   });
+
+  it("adopts server revision when displayed values are not stale", async () => {
+    await renderForm(1);
+    expect(
+      container.querySelector<HTMLInputElement>('input[name="revision"]')
+        ?.value,
+    ).toBe("1");
+    expect(container.querySelector("#resume-panel-revision")?.textContent).toBe(
+      "1",
+    );
+
+    await renderForm(2, "application-1", "Initial letter", "Initial applicant");
+
+    expect(
+      container.querySelector<HTMLInputElement>('input[name="revision"]')
+        ?.value,
+    ).toBe("2");
+    expect(container.querySelector("#resume-panel-revision")?.textContent).toBe(
+      "2",
+    );
+  });
 });
 
 describe("application form identity changes", () => {
