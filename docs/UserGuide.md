@@ -21,7 +21,8 @@ Job details, **My profile** and **Manage jobs** have a **Back to open roles** li
 
 ### 1.2 Create and verify an Applicant account
 
-![Create Account](./assets/user-guide/create-account.png)
+![Applicant: Create and verify an Applicant account (desktop viewport)](./assets/user-guide/create-account.png)
+_Role: Applicant | Page: Create account | Viewport: Desktop (1520px)_
 
 1. Choose **Create account**.
 2. Enter email, a password of 8–72 characters and the same password in **Confirm password**.
@@ -34,7 +35,8 @@ A password mismatch keeps the entered email available for correction. Eye contro
 
 An incomplete signed-in Applicant is directed to **My profile** and cannot use other product pages until completion. Profile file upload, password recovery and Sign out remain available.
 
-![Complete Profile](./assets/user-guide/complete-profile.png)
+![Applicant: Complete and maintain profile (desktop viewport)](./assets/user-guide/complete-profile.png)
+_Role: Applicant | Page: My profile | Viewport: Desktop (1520px)_
 
 | Field                       | Rule                                                                                                                                      |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -70,7 +72,8 @@ Categories are **Engineering, Human Resources, Legal, Sales and Other**. Cards i
 
 ### 3.1 Browse jobs
 
-![Careers](./assets/user-guide/careers.png)
+![Applicant: Browse open roles (desktop viewport)](./assets/user-guide/careers.png)
+_Role: Applicant / Guest | Page: Careers | Viewport: Desktop (1520px)_
 
 Guests can browse; signed-in Applicants complete their profile first. Open **Careers**, use category links to filter, and open a job to read title, team, description and requirements. Choose **Apply for this role** and sign in if necessary. Draft/closed jobs, jobs scheduled to open later and jobs past their closing time are hidden publicly. HR is not offered Applicant apply controls.
 
@@ -82,7 +85,8 @@ While a search request is pending, **Search** shows **Searching…** and cannot 
 
 ### 3.2 Complete and save an application
 
-![Application Form](./assets/user-guide/application-form.png)
+![Applicant: Complete and save an application (desktop viewport)](./assets/user-guide/application-form.png)
+_Role: Applicant | Page: Application form | Viewport: Desktop (1520px)_
 
 New forms prefill saved profile details without AI. Existing drafts take precedence; later profile edits do not overwrite them. The form includes contact details, optional portfolio/background, résumé and cover letter.
 
@@ -133,13 +137,15 @@ There is no public HR signup or role switch. An administrator assigns HR to a ve
 
 ### 4.2 HR dashboard
 
-![HR Dashboard](./assets/user-guide/hr-dashboard.png)
+![HR: Recruitment overview dashboard (desktop viewport)](./assets/user-guide/hr-dashboard.png)
+_Role: HR Reviewer | Page: HR Dashboard | Viewport: Desktop (1520px)_
 
 Open **Dashboard** to see job totals by Draft, Published and Closed, submitted applications by review status, and a separate Withdrawn total. The per-job table includes jobs with no applications and closed jobs; choose a job title to open its details. Use **Manage jobs** or **Application review** to continue into the existing HR workflows. The dashboard is read-only and does not show applicant names, contact details, application text, HR notes or résumé information.
 
 ### 4.3 Manage jobs
 
-![Manage Jobs](./assets/user-guide/hr-manage-jobs.png)
+![HR: Manage jobs and scheduling (desktop viewport)](./assets/user-guide/hr-manage-jobs.png)
+_Role: HR Reviewer | Page: Manage jobs | Viewport: Desktop (1520px)_
 
 1. Open **Manage jobs**, then **Create draft**.
 2. Enter title, team, category, description and requirements. Optionally set **Scheduled opening time** and **Scheduled closing time** under **Schedule (optional)**, then choose **Save draft**.
@@ -154,7 +160,8 @@ A published job with a future opening time displays **Scheduled** to HR and stay
 
 Open **Application review**, then a submission. HR sees submitted applications and withdrawn history, never unsubmitted drafts or mutable private Applicant profiles/profile files.
 
-![Application Review](./assets/user-guide/hr-application-review.png)
+![HR: Review applications and status management (desktop viewport)](./assets/user-guide/hr-application-review.png)
+_Role: HR Reviewer | Page: Application review | Viewport: Desktop (1520px)_
 
 The **Application review** dashboard provides search, filtering, sorting, and pagination across submissions:
 
