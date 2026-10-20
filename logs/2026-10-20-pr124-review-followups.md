@@ -82,3 +82,18 @@ Local verification evidence (red/green test execution):
 - Focused suites: `pnpm vitest run tests/unit/resume-panel-local-revision.test.ts` passed (3/3); `pnpm vitest run tests/unit/application-form-refresh.test.tsx` passed (7/7).
 - Full unit suite: `pnpm test:unit` passed across all 111 test files (675 tests).
 - Packet returned to active work under `workflow/changes/2026-10-19-review-flow-regressions/` until student acceptance is recorded. Hosted CI verification and fresh student acceptance remain pending.
+## Follow-up: Preserved unsaved fields across initial empty draft allocation
+
+On commit `72c3c5f`, Supabase CI run `39365303058` passed Database checks (2m19s) and Integration race suites (3m8s), and general CI run `39365303130` passed (1m15s), but Playwright Chromium failed on `tests/e2e/resume-first-profile.spec.ts` at line 183:
+`expect(page.getByLabel("Full name")).toHaveValue("Unsaved application name")` received `""`.
+
+Diagnosis:
+- In `runResumeFirstProfileJourney`, an interrupted upload calls `prepare_application_resume` via RPC, which inserts a draft application into the database with empty details (`full_name = null`, `cover_letter = ''`).
+- Because the network request was aborted, `onChange` / `onLocalApplicationCreated` did not run on the client, leaving `locallyCreatedApplicationId: null`.
+- When `router.refresh()` executed, the server returned the newly allocated `applicationId` with null details.
+- `reconcileApplicationFormInstance` treated this as a foreign application created by another tab, incrementing `generation` and remounting the form, which wiped out the user's unsaved form fields ("Unsaved application name").
+
+Resolution:
+- Introduced `hasPersistedApplicationFields` in `src/lib/application-form-instance.ts` to detect whether the server application has saved user content (e.g., from another tab).
+- Updated `reconcileApplicationFormInstance` so that allocating an empty server draft without saved user details does not increment `generation`, preserving the applicant's unsaved input in accordance with APP-007 / "upload before saving and preserved unsaved fields".
+- Added regression test `keeps unsaved entered fields when an initial upload allocates an empty server draft without prior details` to `tests/unit/application-form-refresh.test.tsx` (8/8 passed). Full suite `pnpm test:unit` passed across all 111 files (676 tests).

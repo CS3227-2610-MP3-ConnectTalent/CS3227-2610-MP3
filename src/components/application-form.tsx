@@ -13,6 +13,7 @@ import {
 import { ResumePanel } from "@/components/resume-panel";
 import {
   createApplicationFormInstance,
+  hasPersistedApplicationFields,
   reconcileApplicationFormInstance,
   type ApplicationFormInstance,
 } from "@/lib/application-form-instance";
@@ -57,10 +58,15 @@ export function ApplicationForm(props: Props) {
     () =>
       createApplicationFormInstance(props.jobId, props.applicationId ?? null),
   );
+  const hasServerFields = hasPersistedApplicationFields(
+    props.details,
+    props.value,
+  );
   const nextFormInstance = reconcileApplicationFormInstance(
     formInstance,
     props.jobId,
     props.applicationId ?? null,
+    hasServerFields,
   );
 
   if (nextFormInstance !== formInstance) setFormInstance(nextFormInstance);

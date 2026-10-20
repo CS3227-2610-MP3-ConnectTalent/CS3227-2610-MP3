@@ -199,6 +199,19 @@ describe("application forms retain locally created draft identity", () => {
       "Entered before upload",
     );
   });
+
+  it("keeps unsaved entered fields when an initial upload allocates an empty server draft without prior details", async () => {
+    await renderForm(0, null, "Entered before upload", "Entered applicant");
+
+    await renderForm(1, "application-1", "", "");
+
+    expect(container.querySelector("#full-name-value")?.textContent).toBe(
+      "Entered applicant",
+    );
+    expect(container.querySelector("#cover-letter-value")?.textContent).toBe(
+      "Entered before upload",
+    );
+  });
 });
 
 describe("application forms reject mismatched local draft identity", () => {
