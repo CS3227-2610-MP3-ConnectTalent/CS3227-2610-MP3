@@ -94,13 +94,13 @@ function hold(sql, marker) {
 }
 function write(job, mode, revision) {
   return `set local role authenticated; select set_config('request.jwt.claim.sub','${actor}',true);
- select public.${mode}_application_details_v3('${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,'College','Internship',${revision})`;
+ select public.${mode}_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='${job}'::uuid and withdrawn_at is null),'${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,'College','Internship',${revision})`;
 }
 function reserve(index) {
-  return `select public.reserve_application_resume('${actor}','${jobs[index]}',1,'${operations[index]}','synthetic.pdf',512,repeat('a',64))`;
+  return `select public.prepare_application_resume((select id from public.applications where applicant_id='${actor}' and job_id='${jobs[index]}' and withdrawn_at is null),'${actor}','${jobs[index]}',1,'${operations[index]}','synthetic.pdf',512,repeat('a',64))`;
 }
 function finalize(index) {
-  return `select public.finalize_application_resume('${actor}','${jobs[index]}',1,'${operations[index]}')`;
+  return `select public.finalize_application_resume((select id from public.applications where applicant_id='${actor}' and job_id='${jobs[index]}' and withdrawn_at is null),'${actor}','${jobs[index]}',1,'${operations[index]}')`;
 }
 async function pair(firstSql, secondSql, failure) {
   const marker = `LOCK_${randomUUID().replaceAll("-", "")}`;

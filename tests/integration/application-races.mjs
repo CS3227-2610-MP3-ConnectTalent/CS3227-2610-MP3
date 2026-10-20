@@ -109,7 +109,9 @@ try {
   if (
     firstResult.code !== 0 ||
     duplicateResult.code === 0 ||
-    !duplicateResult.errors.includes("Application already submitted")
+    !duplicateResult.errors.includes(
+      "Application changed; reload before saving",
+    )
   ) {
     throw new Error(
       `Concurrent submit outcome unexpected: first=${firstResult.code}, second=${duplicateResult.code}; ${duplicateResult.errors.trim()}`,
@@ -120,6 +122,11 @@ try {
   );
   if (duplicateCount.output.trim() !== "1")
     throw new Error("Concurrent submissions created more than one row");
+  const submittedState = await runSql(
+    `select submission_state || ':' || cover_letter from public.applications where job_id = '${jobs[0]}'`,
+  );
+  if (submittedState.output.trim() !== "submitted:First synthetic letter")
+    throw new Error("Duplicate submission changed the winning application");
 
   // Closure wins the job lock: the waiting submit must be rejected.
   const closingAppName = `race-close-first-${userId}`;

@@ -1,5 +1,13 @@
 # Review repairs — #125
 
+## PR #126 integration follow-up
+
+Paul requested a repair of the failing Supabase integration check after PR submission. The supplied CI run shows the duplicate submit correctly rejected by the new identity guard, while the race assertion still expects the older submission error. Source inspection also found profile-résumé race fixtures calling retired identity-less application RPCs. This follow-up restores the approved test contract without changing application behavior or database grants: update those fixture calls with explicit expected identity, retain actual lock-wait and final-state assertions, rerun the race suite where local infrastructure permits, and obtain independent review. No new product delta; commit/push requires separate authorization.
+
+Repair completed locally: duplicate-submit expectation now matches the identity guard and asserts the winning letter remains submitted. Profile-résumé races use the guarded write/prepare/finalize overloads; first-upload save remains explicitly create-only. [Separate source review](handoffs/pr126-ci-review.md) found no blocking issue. [Follow-up session summary](../../../logs/2026-10-20-pr126-integration-followup.md).
+
+Verification: Node syntax, scoped Prettier/ESLint and whitespace passed; four focused unit files passed 19/19 tests. Four native local Postgres concurrency probes passed with observed Lock waits: duplicate submit, pending upload versus submit, submit versus prepare, and first unsaved upload versus Save. The first duplicate probe also checked the retained winning submitted letter; the first-upload probe checked one unchanged empty draft at revision 1. Temporary native-harness attempts initially failed to parse the CLI's plain `DO` output; after correcting that helper, one probe missed the lock observation with its eight-second hold, although the expected rejection occurred. A twenty-second temporary hold resolved the native CLI startup timing; all four probes then passed across runs. Task fixtures were cleaned, including setup records from the parser failures. These are focused native probes, not execution of the full Docker-backed suite. Docker commands hung; full integration runner and hosted CI remain unverified. No application/schema change or hosted operation. Paul separately accepted this follow-up with its recorded limits and authorized commit/push to PR #126 on 20 October 2026 via “Accept and commit/push to PR #126”. This does not authorize merge or hosted rollout.
+
 - Owner: Paul Cheng.
 - Issue: https://github.com/CS3227-2610-MP3-ConnectTalent/CS3227-2610-MP3/issues/125
 - Baseline: `develop` / `09e59a2`.
