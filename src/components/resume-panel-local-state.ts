@@ -21,22 +21,32 @@ export function useResumeActionRevision(
 ) {
   const [applicationId, setApplicationId] = useState(initialApplicationId);
   const [revision, setRevision] = useState(initialRevision);
+  const [revisionApplicationId, setRevisionApplicationId] = useState<
+    string | null
+  >(null);
   if (applicationId !== initialApplicationId) {
     setApplicationId(initialApplicationId);
     const newlyCreatedApplication =
-      applicationId === null && initialApplicationId !== null;
-    setRevision(
+      applicationId === null &&
+      initialApplicationId !== null &&
+      revisionApplicationId === initialApplicationId;
+    const keepLocalRevision =
       newlyCreatedApplication &&
         revision !== null &&
-        (initialRevision === null || revision > initialRevision)
-        ? revision
-        : initialRevision,
-    );
+        (initialRevision === null || revision > initialRevision);
+    setRevision(keepLocalRevision ? revision : initialRevision);
+    setRevisionApplicationId(keepLocalRevision ? initialApplicationId : null);
   } else if (
     initialRevision !== null &&
     (revision === null || initialRevision > revision)
   ) {
     setRevision(initialRevision);
   }
-  return { revision, setRevision };
+  return {
+    revision,
+    setRevision: (value: number, forApplicationId?: string) => {
+      setRevision(value);
+      setRevisionApplicationId(forApplicationId ?? null);
+    },
+  };
 }

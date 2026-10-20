@@ -118,7 +118,7 @@ type ActionState = {
   setProfileCopyRetryAvailable: (value: boolean) => void;
   setProfileCopyAttempt: (value: ProfileCopyAttempt | null) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
-  setRevision: (value: number) => void;
+  setRevision: (value: number, forApplicationId?: string) => void;
 };
 
 type ProfileCopyAttempt = {

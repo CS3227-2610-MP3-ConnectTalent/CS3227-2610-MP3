@@ -109,3 +109,49 @@ it("uses the revision returned by a local upload before server props refresh", a
     }),
   );
 });
+
+it("does not carry a local revision to a different newly adopted application", async () => {
+  const profileResume = {
+    id: "60000000-0000-4000-8000-000000000b02",
+    filename: "profile.pdf",
+    byte_size: 2048,
+    object_path: "private/profile.pdf",
+  };
+  const applicationResume = {
+    ...profileResume,
+    id: "60000000-0000-4000-8000-000000000b01",
+    filename: "direct.pdf",
+  };
+  const props: Parameters<typeof useResumePanelActions>[0] = {
+    applicationId: null,
+    jobId: "job-1",
+    revision: null,
+    editable: true,
+    resume: null,
+    profileResume,
+    onChange: vi.fn(),
+  };
+  const fetch = uploadThenProfileFetch(applicationResume);
+  vi.stubGlobal("fetch", fetch);
+
+  renderActions(props).selectFile(
+    new File(["synthetic PDF bytes"], "direct.pdf", {
+      type: "application/pdf",
+    }),
+  );
+  await renderActions(props).change("upload");
+  props.applicationId = "application-2";
+  props.revision = 1;
+  renderActions(props);
+  await renderActions(props).change("profile");
+
+  expect(fetch).toHaveBeenLastCalledWith(
+    "/api/jobs/job-1/resume",
+    expect.objectContaining({
+      headers: expect.objectContaining({
+        "x-resume-intent": "profile",
+        "x-application-revision": "1",
+      }),
+    }),
+  );
+});
