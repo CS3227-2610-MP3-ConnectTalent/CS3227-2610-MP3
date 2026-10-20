@@ -96,11 +96,11 @@ select ok(case when to_regclass('public.application_submission_events') is null 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000a01', true);
 select lives_ok(
-  $$select public.submit_application_details_v2('20000000-0000-4000-8000-000000000b01', 'Synthetic private letter','Synthetic Applicant','+6591234567',null, null)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='20000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'20000000-0000-4000-8000-000000000b01', 'Synthetic private letter','Synthetic Applicant','+6591234567',null, null)$$,
   'Applicant submission succeeds and invokes the audit trigger');
 select set_config('ai.test_application_id', (select id::text from public.applications where job_id = '20000000-0000-4000-8000-000000000b01'), true);
 select lives_ok(
-  $$select public.save_application_details_v2('20000000-0000-4000-8000-000000000b03', 'Synthetic unsubmitted draft','Synthetic Applicant',null,null, null)$$,
+  $$select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='20000000-0000-4000-8000-000000000b03'::uuid and withdrawn_at is null),'20000000-0000-4000-8000-000000000b03', 'Synthetic unsubmitted draft','Synthetic Applicant',null,null, null)$$,
   'Applicant creates an unsubmitted draft for another published role');
 select set_config('ai.test_draft_application_id', (select id::text from public.applications where job_id = '20000000-0000-4000-8000-000000000b03'), true);
 select is((select count(*) from public.application_submission_events), 0::bigint,

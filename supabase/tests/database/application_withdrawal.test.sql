@@ -20,8 +20,8 @@ insert into public.jobs(id,title,team,category,description,requirements,status,p
  ('50000000-0000-4000-8000-000000000102','Withdrawal draft','Synthetic','engineering','Synthetic','Synthetic requirements','published',now());
 set local role authenticated;
 select set_config('request.jwt.claim.sub','50000000-0000-4000-8000-000000000001',true);
-select public.submit_application_details_v3('50000000-0000-4000-8000-000000000101','Original synthetic letter','Synthetic owner','+6591234567',null,'Synthetic education','Synthetic experience',null);
-select public.save_application_details_v3('50000000-0000-4000-8000-000000000102','Private draft','Synthetic owner',null,null,null,null,null);
+select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='50000000-0000-4000-8000-000000000101'::uuid and withdrawn_at is null),'50000000-0000-4000-8000-000000000101','Original synthetic letter','Synthetic owner','+6591234567',null,'Synthetic education','Synthetic experience',null);
+select public.save_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='50000000-0000-4000-8000-000000000102'::uuid and withdrawn_at is null),'50000000-0000-4000-8000-000000000102','Private draft','Synthetic owner',null,null,null,null,null);
 select throws_ok($$select public.withdraw_application((select id from public.applications where job_title='Withdrawal draft'))$$,'42501','Submitted application unavailable','draft withdrawal denied');
 reset role;
 -- Read fixture IDs without bypassing the actor checks on the invoked operation.

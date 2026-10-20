@@ -43,6 +43,7 @@ import {
   cancelResumeUpload,
   uploadApplicationResume,
 } from "../../src/lib/application-resumes";
+const applicationId = "44000000-0000-4000-8000-000000000301";
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
@@ -124,7 +125,7 @@ it("keeps cleanup tombstones retryable when cancel/delete happens before upload 
     new File(["synthetic"], "synthetic.pdf"),
   );
   await vi.waitFor(() => expect(mocks.upload).toHaveBeenCalled());
-  await cancelResumeUpload("actor", "job");
+  await cancelResumeUpload("actor", "job", applicationId);
   resolveUpload({ error: null });
   await expect(uploading).rejects.toMatchObject({
     code: "RESUME_UPLOAD_PERSISTENCE_FAILED",
@@ -223,6 +224,7 @@ it("recovers an owned stale pending upload only on explicit retry", async () => 
     true,
   );
   expect(mocks.rpc).toHaveBeenCalledWith("recover_pending_application_resume", {
+    p_application: null,
     p_actor: "actor",
     p_job: "job",
     p_revision: 1,

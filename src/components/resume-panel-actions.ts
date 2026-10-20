@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ResumeMetadata } from "@/lib/application-resumes";
+import {
+  resumeEndpoint,
+  resumeRequestOptions,
+  resolveConfirmedRevision,
+  type ProfileCopyAttempt,
+} from "./resume-panel-request";
 import { applyResumeResponse } from "./resume-panel-response";
 import {
   useResumeActionAttachment,
@@ -67,7 +73,7 @@ function useResumeActionState(
     useState<ProfileCopyAttempt | null>(null);
   const { attachment, setAttachment } =
     useResumeActionAttachment(initialResume);
-  const { revision, setRevision } = useResumeActionRevision(
+  const { applicationId, revision, setRevision } = useResumeActionRevision(
     initialApplicationId,
     initialRevision,
   );
@@ -82,6 +88,7 @@ function useResumeActionState(
     profileCopyRetryAvailable,
     profileCopyAttempt,
     attachment,
+    applicationId,
     revision,
     setFile,
     setOperation,
@@ -98,6 +105,7 @@ function useResumeActionState(
 }
 
 type ActionState = {
+  applicationId: string | null;
   file: File | null;
   operation: string;
   pending: boolean;
@@ -121,22 +129,6 @@ type ActionState = {
   setRevision: (value: number, forApplicationId?: string) => void;
 };
 
-type ProfileCopyAttempt = {
-  operation: string;
-  sourceId: string;
-  revision: number | null;
-};
-
-function resolveConfirmedRevision(
-  stateRevision: number | null,
-  propRevision: number | null,
-): number | null {
-  if (stateRevision !== null && propRevision !== null) {
-    return Math.max(stateRevision, propRevision);
-  }
-  return stateRevision ?? propRevision ?? null;
-}
-
 function resolveProfileCopyAttempt(
   props: ResumePanelProps,
   state: ActionState,
@@ -146,7 +138,12 @@ function resolveProfileCopyAttempt(
   const sourceId = props.profileResume?.id;
   const revision = resolveConfirmedRevision(state.revision, props.revision);
   return sourceId
-    ? { operation: crypto.randomUUID(), sourceId, revision }
+    ? {
+        operation: crypto.randomUUID(),
+        sourceId,
+        revision,
+        applicationId: state.applicationId ?? props.applicationId,
+      }
     : null;
 }
 
@@ -241,59 +238,26 @@ async function sendResumeRequest(
   operation: string,
   profileAttempt: ProfileCopyAttempt | null,
 ) {
-  const response = await fetch(endpoint(props), {
+  const response = await fetch(resumeEndpoint(props), {
     method: "POST",
-    ...requestOptions(props, state, intent, retry, operation, profileAttempt),
+    ...resumeRequestOptions(
+      props,
+      state,
+      intent,
+      retry,
+      operation,
+      profileAttempt,
+    ),
   });
-  await applyResumeResponse(response, props, state, intent);
-}
-
-function endpoint(props: ResumePanelProps) {
-  if (props.profileMode) return "/api/profile/resume";
-  if (props.jobId) return `/api/jobs/${props.jobId}/resume`;
-  return `/api/applications/${props.applicationId}/resume`;
-}
-
-function requestOptions(
-  props: ResumePanelProps,
-  state: ActionState,
-  intent: ResumeIntent,
-  retry: boolean,
-  operation: string,
-  profileAttempt: ProfileCopyAttempt | null,
-): Pick<RequestInit, "headers" | "body"> {
-  const confirmed = resolveConfirmedRevision(state.revision, props.revision);
-  const revision = profileAttempt ? profileAttempt.revision : confirmed;
-  const headers: Record<string, string> = {
-    "x-resume-intent": intent,
-    "x-application-revision": String(revision ?? ""),
-    "x-profile-resume":
-      profileAttempt?.sourceId ?? profileResumeId(props, state.attachment),
-    "x-resume-operation": operation,
-    "x-resume-retry": String(retry),
-    ...uploadHeaders(intent, state.file, operation, retry),
-  };
-  return { headers, body: intent === "upload" ? state.file : undefined };
-}
-
-function profileResumeId(
-  props: ResumePanelProps,
-  attachment: ResumeMetadata | null,
-) {
-  return (props.profileMode ? attachment?.id : props.profileResume?.id) ?? "";
-}
-
-function uploadHeaders(
-  intent: ResumeIntent,
-  file: File | null,
-  operation: string,
-  retry: boolean,
-): Record<string, string> {
-  if (intent !== "upload" || !file) return {};
-  return {
-    "content-type": file.type,
-    "x-resume-filename": encodeURIComponent(file.name),
-    "x-resume-operation": operation,
-    "x-resume-retry": String(retry),
-  };
+  await applyResumeResponse(
+    response,
+    {
+      ...props,
+      applicationId: profileAttempt
+        ? (profileAttempt.applicationId ?? null)
+        : (state.applicationId ?? props.applicationId),
+    },
+    state,
+    intent,
+  );
 }

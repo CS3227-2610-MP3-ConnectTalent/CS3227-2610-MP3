@@ -94,7 +94,7 @@ function hold(sql, marker) {
 }
 function write(job, mode, revision) {
   return `set local role authenticated; select set_config('request.jwt.claim.sub','${actor}',true);
- select public.${mode}_application_details_v3('${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,'College','Internship',${revision})`;
+ select public.${mode}_application_details_v3(${revision === "null" ? "null::uuid" : `(select id from public.applications where applicant_id=auth.uid() and job_id='${job}'::uuid and withdrawn_at is null)`},'${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,'College','Internship',${revision})`;
 }
 async function pair(firstSql, secondSql, failure) {
   const marker = `LOCK_${randomUUID().replaceAll("-", "")}`;
@@ -117,7 +117,7 @@ try {
     insert into public.applicant_profiles(user_id,full_name,phone) values('${actor}','Fixture Applicant','+6591234567');
     insert into public.jobs(id,title,team,category,description,requirements,status,published_at)
     values('${jobs[0]}','First upload race','Synthetic','engineering','Synthetic','Synthetic','published',now());`);
-  const firstUpload = `select public.prepare_application_resume('${actor}','${jobs[0]}',null,'${operations[0]}','synthetic.pdf',512,repeat('a',64))`;
+  const firstUpload = `select public.prepare_application_resume(null::uuid,'${actor}','${jobs[0]}',null,'${operations[0]}','synthetic.pdf',512,repeat('a',64))`;
   await pair(firstUpload, write(jobs[0], "save", "null"), "changed");
   const count = await runSql(
     `select count(*) from public.applications where applicant_id='${actor}' and job_id='${jobs[0]}'`,

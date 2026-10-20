@@ -43,6 +43,7 @@ export function useResumeActionRevision(
     setRevision(initialRevision);
   }
   return {
+    applicationId: revisionApplicationId ?? initialApplicationId,
     revision,
     setRevision: (value: number, forApplicationId?: string) => {
       setRevision(value);

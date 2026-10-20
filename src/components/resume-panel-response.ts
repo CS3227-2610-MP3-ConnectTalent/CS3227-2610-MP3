@@ -42,6 +42,14 @@ export async function applyResumeResponse(
   const result: unknown = await response.json();
   if (!isObject(result)) throw new Error("Invalid résumé response.");
   if (
+    !props.profileMode &&
+    response.ok &&
+    props.applicationId &&
+    typeof result.applicationId === "string" &&
+    result.applicationId !== props.applicationId
+  )
+    throw new Error("The application changed. Reload before continuing.");
+  if (
     intent === "upload" &&
     shouldRotateUploadOperation(result.code, props.profileMode)
   ) {

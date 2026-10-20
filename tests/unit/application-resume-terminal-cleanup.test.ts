@@ -96,6 +96,7 @@ it("retires and cleans its pending object after the job closes before finalizati
   });
   expect(resumeFailureStatus(caught)).toBe(409);
   expect(mocks.rpc).toHaveBeenCalledWith("cancel_application_resume", {
+    p_application: objectPath.split("/")[0],
     p_actor: actor,
     p_job: job,
     p_operation: operation,

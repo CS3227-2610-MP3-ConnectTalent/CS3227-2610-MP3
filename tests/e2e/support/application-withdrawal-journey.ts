@@ -94,7 +94,8 @@ async function reserveInterruptedResume(
     .select("revision")
     .eq("id", fixture.applicationId!)
     .single();
-  const reservation = await admin.rpc("reserve_application_resume", {
+  const reservation = await admin.rpc("prepare_application_resume", {
+    p_application: fixture.applicationId!,
     p_actor: fixture.users[0],
     p_job: fixture.jobId,
     p_revision: result.data!.revision,

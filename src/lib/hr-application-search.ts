@@ -78,12 +78,13 @@ function parseSortParam(raw: unknown): HRApplicationSort {
 }
 
 function parsePageParam(raw: unknown): number {
-  const val = Array.isArray(raw) ? raw[0] : raw;
+  const val = raw;
   if (typeof val === "string") {
-    const parsed = parseInt(val, 10);
-    return !Number.isNaN(parsed) && parsed > 0 ? parsed : 1;
+    if (!/^[0-9]+$/.test(val)) return 1;
+    const parsed = Number(val);
+    return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 1;
   }
-  if (typeof val === "number" && Number.isInteger(val) && val > 0) {
+  if (typeof val === "number" && Number.isSafeInteger(val) && val > 0) {
     return val;
   }
   return 1;

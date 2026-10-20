@@ -218,6 +218,11 @@ function ApplicationDraftForm(props: DraftProps) {
         <input type="hidden" name="jobId" value={props.jobId} />
         <input
           type="hidden"
+          name="applicationId"
+          value={props.attachment.applicationId ?? ""}
+        />
+        <input
+          type="hidden"
           name="revision"
           value={props.attachment.revision ?? ""}
         />

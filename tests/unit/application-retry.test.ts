@@ -14,9 +14,9 @@ const existing = {
 };
 describe("complete-field uncertain write reconciliation", () => {
   it("recognizes exactly the expected saved field set and revision", () => {
-    expect(reconcileApplicationWrite("save", attempted, 1, existing)).toBe(
-      existing.id,
-    );
+    expect(
+      reconcileApplicationWrite("save", attempted, 1, existing, existing.id),
+    ).toBe(existing.id);
   });
   it.each([
     { full_name: "Other" },
@@ -26,25 +26,39 @@ describe("complete-field uncertain write reconciliation", () => {
     { revision: 3 },
   ])("does not falsely report a mismatched save %j", (change) => {
     expect(
-      reconcileApplicationWrite("save", attempted, 1, {
-        ...existing,
-        ...change,
-      }),
+      reconcileApplicationWrite(
+        "save",
+        attempted,
+        1,
+        {
+          ...existing,
+          ...change,
+        },
+        existing.id,
+      ),
     ).toBeNull();
   });
   it("shows an existing frozen submission without claiming the attempted fields were saved", () => {
     expect(
-      reconcileApplicationWrite("submit", attempted, 1, {
-        ...existing,
-        full_name: "Original",
-        submission_state: "submitted",
-      }),
+      reconcileApplicationWrite(
+        "submit",
+        attempted,
+        1,
+        {
+          ...existing,
+          full_name: "Original",
+          submission_state: "submitted",
+        },
+        existing.id,
+      ),
     ).toBe(existing.id);
   });
   it("does not mistake a draft or failed read for submission", () => {
     expect(
-      reconcileApplicationWrite("submit", attempted, 1, existing),
+      reconcileApplicationWrite("submit", attempted, 1, existing, existing.id),
     ).toBeNull();
-    expect(reconcileApplicationWrite("save", attempted, 1, null)).toBeNull();
+    expect(
+      reconcileApplicationWrite("save", attempted, 1, null, null),
+    ).toBeNull();
   });
 });

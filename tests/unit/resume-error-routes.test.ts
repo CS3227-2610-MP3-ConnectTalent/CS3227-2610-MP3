@@ -11,7 +11,7 @@ vi.mock("@/lib/applications", () => ({
     job_id: "44000000-0000-4000-8000-000000000102",
   })),
   getOwnApplicationForJob: vi.fn(async () => ({
-    id: "saved-draft",
+    id: "44000000-0000-4000-8000-000000000105",
     revision: 3,
   })),
 }));
@@ -37,6 +37,7 @@ function request() {
       "x-resume-intent": "upload",
       "x-resume-operation": id,
       "x-application-revision": "3",
+      "x-application-id": "44000000-0000-4000-8000-000000000105",
     },
     body: "synthetic",
   });
@@ -77,7 +78,7 @@ for (const [name, post] of [
       expect(JSON.stringify(body)).not.toContain("private document");
       if (name === "job")
         expect(body).toMatchObject({
-          applicationId: "saved-draft",
+          applicationId: "44000000-0000-4000-8000-000000000105",
           revision: 3,
           resume: { filename: "previous.pdf" },
         });

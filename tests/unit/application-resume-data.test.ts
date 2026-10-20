@@ -141,6 +141,7 @@ it("sanitizes failed removal and cancellation while cleaning up successful opera
 
   await removeApplicationResume(confirmedUser.id, "job-1", 3);
   expect(mocks.rpc).toHaveBeenLastCalledWith("remove_application_resume", {
+    p_application: null,
     p_actor: confirmedUser.id,
     p_job: "job-1",
     p_revision: 3,
@@ -148,6 +149,7 @@ it("sanitizes failed removal and cancellation while cleaning up successful opera
   expect(mocks.cleanupApplicationResume).toHaveBeenCalledWith(
     confirmedUser.id,
     "job-1",
+    null,
   );
 
   mocks.rpc.mockResolvedValueOnce({
@@ -158,11 +160,13 @@ it("sanitizes failed removal and cancellation while cleaning up successful opera
   );
   await cancelResumeUpload(confirmedUser.id, "job-2");
   expect(mocks.rpc).toHaveBeenLastCalledWith("cancel_application_resume", {
+    p_application: null,
     p_actor: confirmedUser.id,
     p_job: "job-2",
   });
   expect(mocks.cleanupApplicationResume).toHaveBeenLastCalledWith(
     confirmedUser.id,
     "job-2",
+    null,
   );
 });
