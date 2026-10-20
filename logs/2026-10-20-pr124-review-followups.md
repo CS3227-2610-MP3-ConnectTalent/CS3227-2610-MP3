@@ -51,7 +51,7 @@
 | 2026-10-20 / local environment | `docker ps` | Blocked: Docker API access denied. | Current session output. | Local Supabase/browser journeys could not be run through Docker.
 | Hosted / previous source head `a194e89` | Supabase run `39275416736`; fetched failed job logs | Failed Playwright `resume-first-profile` profile-copy journey; database checks and integration race suites passed. Logs showed repeated `RESUME_APPLICATION_CHANGED` at `prepare_application_resume`. | GitHub Actions run/job logs. | Failure identified the stale-revision path; final-head hosted rerun required.
 | Hosted / final source head `114ba259` | General run `39281163135`, Supabase run `39281163224` | Queued at last check. | GitHub Actions workflow run/job status. | No result yet.
-| Independent reviewer / `114ba259` | Six-file focused suite plus `git diff --check 7495e576e8a4426834b294d4b36ab25300e6b65a..HEAD` | Passed: 6 files / 27 tests; diff check clean; no new source defect. | [Handoff](../workflow/archive/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Read-only code review; not browser or hosted acceptance.
+| Independent reviewer / `114ba259` | Six-file focused suite plus `git diff --check 7495e576e8a4426834b294d4b36ab25300e6b65a..HEAD` | Passed: 6 files / 27 tests; diff check clean; no new source defect. | [Handoff](../workflow/changes/2026-10-19-review-flow-regressions/handoffs/T06-independent-review.md). | Read-only code review; not browser or hosted acceptance.
 
 ## Open work, blockers and limitations
 
