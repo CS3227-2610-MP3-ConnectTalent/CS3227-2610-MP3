@@ -63,7 +63,7 @@ select is(
 
 -- Applicant cannot submit to a future-scheduled job
 select throws_ok(
-  $$select public.submit_application_details_v3(current_setting('test.future_job_id')::uuid, 'Letter', 'Applicant', '+6591234567', null, null, null)$$,
+  $$select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id=current_setting('test.future_job_id')::uuid::uuid and withdrawn_at is null),current_setting('test.future_job_id')::uuid, 'Letter', 'Applicant', '+6591234567', null, null, null)$$,
   'P0001',
   'Job is not open for applications',
   'Applicant cannot submit to future-scheduled job'
@@ -97,7 +97,7 @@ select is(
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '30000000-0000-4000-8000-000000000a01', true);
 select throws_ok(
-  $$select public.submit_application_details_v3('30000000-0000-4000-8000-000000000b01'::uuid, 'Letter', 'Applicant', '+6591234567', null, null, null)$$,
+  $$select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='30000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'30000000-0000-4000-8000-000000000b01'::uuid, 'Letter', 'Applicant', '+6591234567', null, null, null)$$,
   'P0001',
   'Job is not open for applications',
   'Applicant cannot submit to expired job'

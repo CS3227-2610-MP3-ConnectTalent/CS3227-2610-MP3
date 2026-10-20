@@ -37,25 +37,25 @@ select ok(not has_table_privilege('anon', 'public.applications', 'SELECT'), 'ano
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000a04', true);
 select throws_ok(
-  $$select public.save_application_details_v2('00000000-0000-4000-8000-000000000b01', 'Unverified','Synthetic Applicant',null,null, null)$$,
+  $$select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b01', 'Unverified','Synthetic Applicant',null,null, null)$$,
   '42501', 'Verified Applicant account required', 'unverified account cannot save a draft'
 );
 
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000a01', true);
 select throws_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b02', 'Letter','Synthetic Applicant','+6591234567',null, null)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b02'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b02', 'Letter','Synthetic Applicant','+6591234567',null, null)$$,
   'P0001', 'Job is not open for applications', 'draft job rejects direct submission'
 );
 select throws_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b03', 'Letter','Synthetic Applicant','+6591234567',null, null)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b03'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b03', 'Letter','Synthetic Applicant','+6591234567',null, null)$$,
   'P0001', 'Job is not open for applications', 'closed job rejects direct submission'
 );
 select throws_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b01', repeat('x', 5001),'Synthetic Applicant',null,null, null)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b01', repeat('x', 5001),'Synthetic Applicant',null,null, null)$$,
   '22023', 'Enter a cover letter of at most 5,000 characters', 'direct RPC enforces length limit'
 );
 select lives_ok(
-  $$select public.save_application_details_v2('00000000-0000-4000-8000-000000000b01', 'First draft','Synthetic Applicant',null,null, null)$$,
+  $$select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b01', 'First draft','Synthetic Applicant',null,null, null)$$,
   'Applicant saves a private draft'
 );
 select is((select submission_state from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
@@ -63,15 +63,15 @@ select is((select submission_state from public.applications where job_id = '0000
 select is((select count(*) from public.applications where job_id = '00000000-0000-4000-8000-000000000b01'),
   1::bigint, 'only one application row exists');
 select throws_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b01', 'Letter','Synthetic Applicant','+6591234567',null, 9)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b01', 'Letter','Synthetic Applicant','+6591234567',null, 9)$$,
   'P0001', 'Application changed; reload before submitting', 'stale revision cannot overwrite draft'
 );
 select lives_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b01', 'Original letter','Synthetic Applicant','+6591234567',null, 1)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b01', 'Original letter','Synthetic Applicant','+6591234567',null, 1)$$,
   'explicit submission succeeds'
 );
 select throws_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b01', 'Again','Synthetic Applicant','+6591234567',null, 2)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b01'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b01', 'Again','Synthetic Applicant','+6591234567',null, 2)$$,
   'P0001', 'Application already submitted', 'duplicate submission denied'
 );
 select ok(not has_function_privilege('authenticated', 'public.edit_submitted_letter(uuid,text,integer)', 'EXECUTE'),
@@ -98,7 +98,7 @@ select throws_ok(
   'other Applicant cannot invoke submitted-letter edit RPC'
 );
 select lives_ok(
-  $$select public.save_application_details_v2('00000000-0000-4000-8000-000000000b04', 'Private draft','Synthetic Applicant',null,null, null)$$,
+  $$select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b04'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b04', 'Private draft','Synthetic Applicant',null,null, null)$$,
   'second Applicant has a separate saved draft'
 );
 
@@ -108,7 +108,7 @@ select is((select count(*) from public.applications where job_id = '00000000-000
 select is((select count(*) from public.applications where job_id = '00000000-0000-4000-8000-000000000b04'),
   0::bigint, 'HR cannot read an unsubmitted draft');
 select throws_ok(
-  $$select public.submit_application_details_v2('00000000-0000-4000-8000-000000000b04', 'HR attack','Synthetic Applicant','+6591234567',null, 1)$$,
+  $$select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='00000000-0000-4000-8000-000000000b04'::uuid and withdrawn_at is null),'00000000-0000-4000-8000-000000000b04', 'HR attack','Synthetic Applicant','+6591234567',null, 1)$$,
   '42501', 'Verified Applicant account required', 'HR cannot invoke Applicant submit function'
 );
 

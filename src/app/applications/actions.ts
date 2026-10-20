@@ -63,6 +63,7 @@ type SaveInput = {
   background: Extract<ReturnType<typeof parseBackground>, { success: true }>;
   letter: Extract<ReturnType<typeof parseCoverLetter>, { success: true }>;
   revision: number | null;
+  applicationId: string | null;
 };
 
 type ParseResult =
@@ -122,7 +123,12 @@ function parseApplicationInput(formData: FormData): ParseResult {
   if (!details.success || !background.success || !letter.success)
     return parseFailure(values, details, background, letter);
   const revision = parseRevision(formData.get("revision"));
-  if (!revision.ok)
+  const applicationId = formData.get("applicationId") || null;
+  if (
+    !revision.ok ||
+    (applicationId !== null && !z.uuid().safeParse(applicationId).success) ||
+    (revision.ok && revision.value !== null && applicationId === null)
+  )
     return {
       ok: false,
       state: failure(
@@ -139,6 +145,7 @@ function parseApplicationInput(formData: FormData): ParseResult {
       background,
       letter,
       revision: revision.value,
+      applicationId: applicationId as string | null,
     },
   };
 }
@@ -199,6 +206,7 @@ async function callApplicationWrite(
       : "submit_application_details_v3";
   try {
     const { data, error } = await client.rpc(functionName, {
+      p_application: input.applicationId,
       p_job_id: jobId,
       p_cover_letter: input.letter.value,
       p_full_name: input.details.data.full_name,
@@ -208,7 +216,11 @@ async function callApplicationWrite(
       p_portfolio_url: input.details.data.portfolio_url,
       p_expected_revision: input.revision,
     });
-    return !error && z.uuid().safeParse(data).success ? (data as string) : null;
+    return !error &&
+      z.uuid().safeParse(data).success &&
+      (input.applicationId === null || input.applicationId === data)
+      ? (data as string)
+      : null;
   } catch {
     /* A lost response can follow a committed write; check only the owner's row. */
     return null;
@@ -241,6 +253,7 @@ async function reconcileApplication(
       },
       input.revision,
       parsed?.success ? parsed.data : null,
+      input.applicationId,
     );
   } catch {
     /* Retain inputs and give generic feedback below. */

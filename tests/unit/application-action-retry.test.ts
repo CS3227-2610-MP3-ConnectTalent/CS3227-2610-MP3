@@ -44,6 +44,7 @@ function submission() {
   const form = new FormData();
   form.set("jobId", jobId);
   form.set("intent", "submit");
+  form.set("applicationId", applicationId);
   form.set("full_name", "Synthetic Applicant");
   form.set("phone", "+6591234567");
   form.set("cover_letter", "Retried letter");
@@ -141,6 +142,7 @@ it("never passes browser-supplied email to the database", async () => {
     `REDIRECT:/applications/${applicationId}`,
   );
   expect(rpc).toHaveBeenCalledWith("submit_application_details_v3", {
+    p_application: applicationId,
     p_job_id: jobId,
     p_cover_letter: "Retried letter",
     p_full_name: "Synthetic Applicant",
@@ -203,6 +205,7 @@ it("saves an empty draft through the save RPC with a null initial revision", asy
     `REDIRECT:/applications/${applicationId}`,
   );
   expect(rpc).toHaveBeenCalledWith("save_application_details_v3", {
+    p_application: null,
     p_job_id: jobId,
     p_cover_letter: "",
     p_full_name: "",
@@ -214,7 +217,7 @@ it("saves an empty draft through the save RPC with a null initial revision", asy
   });
 });
 
-it("reconciles a committed save after a lost RPC response only when the complete draft matches", async () => {
+it("reconciles a committed save after a lost RPC response only when the original record and complete draft match", async () => {
   rpc.mockRejectedValueOnce(new Error("response was lost"));
   maybeSingle.mockResolvedValueOnce({
     data: {
@@ -226,12 +229,36 @@ it("reconciles a committed save after a lost RPC response only when the complete
       portfolio_url: null,
       education: null,
       work_experience: null,
-      revision: 1,
+      revision: 2,
     },
     error: null,
   });
-  await expect(updateApplication(initial, draft())).rejects.toThrow(
+  const savedDraft = draft();
+  savedDraft.set("applicationId", applicationId);
+  savedDraft.set("revision", "1");
+  await expect(updateApplication(initial, savedDraft)).rejects.toThrow(
     `REDIRECT:/applications/${applicationId}?notice=saved`,
   );
   expect(revalidatePath).toHaveBeenCalledWith("/applications");
+});
+
+it("does not redirect an old form to a different application returned by the write or reconciliation", async () => {
+  const newId = "00000000-0000-4000-8000-000000000b11";
+  rpc.mockResolvedValueOnce({ data: newId, error: null });
+  const row = existingSubmission();
+  row.data.id = newId;
+  maybeSingle.mockResolvedValueOnce(row);
+  expect(await updateApplication(initial, submission())).toMatchObject({
+    message: expect.stringContaining("could not save"),
+  });
+  expect(revalidatePath).not.toHaveBeenCalled();
+});
+
+it("rejects updates without an application identity before calling the database", async () => {
+  const form = submission();
+  form.delete("applicationId");
+  expect(await updateApplication(initial, form)).toMatchObject({
+    message: expect.stringContaining("version is invalid"),
+  });
+  expect(rpc).not.toHaveBeenCalled();
 });

@@ -51,6 +51,7 @@ function retryProfileCopy() {
     method: "POST",
     headers: {
       origin: "https://careers.example.test",
+      "x-application-id": application.id,
       "x-resume-intent": "profile",
       "x-resume-operation": operation,
       "x-profile-resume": sourceId,
@@ -71,7 +72,7 @@ beforeEach(() => {
   mocks.getOwnApplicationForJob.mockResolvedValue(application);
   mocks.getApplicationResume.mockResolvedValue(attachment);
   mocks.removeApplicationResume.mockResolvedValue(undefined);
-  mocks.uploadResumeForJob.mockResolvedValue(undefined);
+  mocks.uploadResumeForJob.mockResolvedValue(application.id);
   mocks.downloadProfileResume.mockResolvedValue(null);
   mocks.readResumeFile.mockResolvedValue(new File(["synthetic"], "upload.pdf"));
   mocks.resumeFailure.mockImplementation((error: unknown) => {
@@ -100,6 +101,20 @@ it("reconciles a completed retry after its selected profile source was replaced"
   expect(mocks.uploadResumeForJob).not.toHaveBeenCalled();
 });
 
+it("recovers a lost first-copy response without the original profile file or application identity", async () => {
+  const request = retryProfileCopy();
+  request.headers.set("x-application-id", "");
+  request.headers.set("x-application-revision", "");
+  const response = await POST(request, context());
+  expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({
+    applicationId: application.id,
+    resume: attachment,
+  });
+  expect(mocks.downloadProfileResume).not.toHaveBeenCalled();
+  expect(mocks.uploadResumeForJob).not.toHaveBeenCalled();
+});
+
 it("forwards the snapshot revision when an explicit profile-copy retry is pending", async () => {
   mocks.getApplicationResume.mockResolvedValue({
     ...attachment,
@@ -120,6 +135,7 @@ it("forwards the snapshot revision when an explicit profile-copy retry is pendin
     expect.any(File),
     operation,
     true,
+    application.id,
   );
 });
 

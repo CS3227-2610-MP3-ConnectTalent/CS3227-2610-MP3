@@ -147,7 +147,12 @@ it("rejects unscoped cancellation and removes an attachment with the current rev
     context(),
   );
   expect(removed.status).toBe(200);
-  expect(mocks.removeApplicationResume).toHaveBeenCalledWith(actor, jobId, 3);
+  expect(mocks.removeApplicationResume).toHaveBeenCalledWith(
+    actor,
+    jobId,
+    3,
+    applicationId,
+  );
 });
 
 it("does not cancel a replacement application through a withdrawn application URL", async () => {
@@ -215,6 +220,7 @@ it("validates operation metadata and uploads the request file only for an Applic
     expect.any(File),
     operation,
     true,
+    applicationId,
   );
 });
 

@@ -1,4 +1,5 @@
 import "server-only";
+import { applicationResumeIdentity } from "./application-resume-client";
 import { randomUUID } from "node:crypto";
 import {
   ResumeUploadPreparationError,
@@ -43,14 +44,22 @@ export async function uploadAndFinalizeApplicationResume(
           },
         );
         if (cancelError) throw new Error("Cancellation was not confirmed.");
-        await cleanupApplicationResume(actor, job);
+        await cleanupApplicationResume(
+          actor,
+          job,
+          applicationResumeIdentity(client),
+        );
       } catch {
         throw persistenceFailure("application_terminal_cleanup");
       }
       throw error;
     }
     try {
-      await cleanupApplicationResume(actor, job);
+      await cleanupApplicationResume(
+        actor,
+        job,
+        applicationResumeIdentity(client),
+      );
     } catch {
       // Cleanup is best effort for retryable storage/finalization failures.
     }

@@ -6,7 +6,7 @@ hide_title: true
 
 # ConnectTalent Developer Guide
 
-This guide describes the current careers-portal implementation, local setup and the team's software engineering evidence. User actions are in the [User Guide](UserGuide.md). Requirements are authoritative in [workflow/specs](../workflow/specs/README.md), integrated PR #86 branch baseline **v1.14**.
+This guide describes the current careers-portal implementation, local setup and the team's software engineering evidence. User actions are in the [User Guide](UserGuide.md). Requirements are authoritative in [workflow/specs](../workflow/specs/README.md), integrated baseline **v1.18**.
 
 Documentation reviewed on **12 October 2026**, against local `develop` at `c9678b6`. Paul reports the feature PRs merged. The team-supplied public URL is [cs3227-mp3.vercel.app](https://cs3227-mp3.vercel.app/). A public URL, merged code or local acceptance does not establish a working production release. Authenticated hosted smoke testing remains unverified here.
 
@@ -724,7 +724,7 @@ Issue #83 adds a disabled **Searching…** state to the Search submit button dur
 
 [supabase/migrations](../supabase/migrations) defines jobs, role profiles, Applicant profiles, applications, HR notes/status events, file lifecycle metadata and AI invocation/audit metadata. A partial unique index on `(applicant_id, job_id) WHERE (withdrawn_at IS NULL)` enforces at most one active application while preserving withdrawn history and permitting reapplication. Supabase Auth owns account identity; submitted email is snapshotted from verified Auth, not browser input.
 
-Jobs move Draft → Published → Closed. Only draft content is editable. Applications remain owner-private until submission, which freezes contacts, background, letters and finalized file references. Revision checks and ordered locks serialize save/submit/job closure/file operations; stale requests fail rather than silently overwrite. Legacy missing snapshots remain null and display Not provided.
+Jobs move Draft → Published → Closed. Only draft content is editable. Applications remain owner-private until submission, which freezes contacts, background, letters and finalized file references. Expected application IDs, revision checks and ordered locks serialize save/submit/job closure/file operations; an old form cannot target a newer reapplication with the same revision. Legacy missing snapshots remain null and display Not provided.
 
 Withdrawal retains submitted rows/files and prior review history, adds owner/time lifecycle metadata, and forbids subsequent HR processing. Repeated withdrawal reconciles the same committed state. Applicants who have withdrawn can create and submit a new application for the same job while it remains open. An already dispatched AI call cannot be recalled; eligibility is rechecked before returning results.
 
@@ -872,7 +872,7 @@ The three résumé upload endpoints share safe error codes and messages: empty/n
 
 Mutation routes validate Origin/actor/target/input before narrowly privileged reserve → upload → finalize operations. First upload can allocate a blank owned draft without saving typed fields. Explicit profile reuse creates independent application bytes, not a mutable shared reference. Invalid files are rejected before allocation/recovery.
 
-Interrupted first-upload Retry resolves the owned persisted revision only when no client revision was supplied; explicit revisions retain stale-write checks. Current implementation splits this behavior into [application-resume-retry.ts](../src/lib/application-resume-retry.ts) and [application-resume-uploads.ts](../src/lib/application-resume-uploads.ts). See the [accepted repair evidence](../workflow/archive/2026-10-10-first-upload-retry/record.md).
+Interrupted first-upload Retry reconciles only its original upload operation and owned application binding; it does not adopt an arbitrary active draft. Existing-form writes and file mutations carry the expected application ID as well as revision. The identity-aware RPC overloads require a coordinated migration/app cutover: identity-less browser writes and privileged application-file mutations are denied. For an uncertain first text Save/Submit without a known application ID, inspect My applications before retrying; the server does not claim that a different matching record proves success. Current implementation splits file retry behavior into [application-resume-retry.ts](../src/lib/application-resume-retry.ts) and [application-resume-uploads.ts](../src/lib/application-resume-uploads.ts). The [earlier repair evidence](../workflow/archive/2026-10-10-first-upload-retry/record.md) preserves the historical implementation; [#125](../workflow/archive/2026-10-20-review-application-identity/record.md) records the identity repair and current verification limits.
 
 Cleanup retains unreferenced deleting tombstones after best-effort Storage removal because older in-flight uploads may finish later. Later mutations retry exact tracked keys; there is no scheduled sweeper or guaranteed cleanup after all workers disappear. Never remove referenced files or arbitrary bucket prefixes. Structural validation is not antivirus scanning.
 
@@ -925,7 +925,7 @@ sequenceDiagram
     Action->>Guard: Verify Applicant session and profile readiness
     Guard-->>Action: Authorized Complete Applicant
     Action->>DB: Execute submit_application_details_v3 RPC
-    Note over DB: Database-internal transaction: acquires advisory transaction lock, locks job row (FOR UPDATE), checks publication status, locks existing application row (FOR UPDATE), checks revision, freezes candidate snapshots, updates submission_state = 'submitted' and submitted_at = NOW()
+    Note over DB: Database-internal transaction: acquires advisory transaction lock, locks job row (FOR UPDATE), checks publication status, locks existing application row (FOR UPDATE), checks expected application ID and revision, freezes candidate snapshots, updates submission_state = 'submitted' and submitted_at = NOW()
     DB-->>Action: Returns application ID on committed success
     Action-->>Client: Success response (application immutable)
     Client->>Applicant: Render submitted read-only confirmation
@@ -962,7 +962,7 @@ sequenceDiagram
             Route->>DB: Finalize tracking record to ready (finalize_application_resume)
             DB-->>Route: File finalized and linked to application draft
         else Profile onboarding upload (/api/profile/resume)
-            Route->>DB: Reserve pending profile tracking record (prepare_profile_resume)
+            Route->>DB: Reserve pending profile tracking record (reserve_profile_resume)
             DB-->>Route: Pending tracking record created
             Route->>Storage: Store file bytes in private "profile-resumes" bucket
             Storage-->>Route: Storage write confirmed

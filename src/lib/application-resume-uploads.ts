@@ -2,6 +2,10 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import {
+  applicationResumeIdentity,
+  bindApplicationResumeClient,
+} from "./application-resume-client";
+import {
   readResumeInput,
   validateResume,
   type ResumeInput,
@@ -26,6 +30,12 @@ type MutationClient = ReturnType<typeof resumeMutationClient>;
 type ValidatedResume = ResumeInput;
 type PreparedResume = Awaited<ReturnType<typeof prepareJobResume>>;
 type UploadArguments = ApplicationResumeUploadArguments;
+const preparedResumeSchema = z.object({
+  id: z.uuid(),
+  revision: z.number().int().positive(),
+  object_path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/i),
+  state: z.enum(["ready", "pending"]),
+});
 
 export async function uploadApplicationResume(
   actor: string,
@@ -34,9 +44,13 @@ export async function uploadApplicationResume(
   file: File,
   operation: string = randomUUID(),
   retry = false,
+  applicationId: string | null = null,
 ) {
   const normalizedOperation = normalizeOperation(operation);
-  const client = resumeMutationClient();
+  const client = bindApplicationResumeClient(
+    resumeMutationClient(),
+    applicationId,
+  );
   const retryState = retry
     ? await prepareCompletedRetry(
         client,
@@ -47,7 +61,7 @@ export async function uploadApplicationResume(
         file,
       )
     : null;
-  if (retryState?.prepared?.state === "ready") return;
+  if (retryState?.prepared?.state === "ready") return retryState.prepared.id;
   const validated = await validateResume(file, retryState?.input);
   const prepared =
     retryState?.prepared ??
@@ -70,6 +84,7 @@ export async function uploadApplicationResume(
     prepared,
     retry,
   );
+  return prepared.id;
 }
 
 function uploadArguments(
@@ -93,9 +108,13 @@ export async function uploadResumeForJob(
   file: File,
   operation: string,
   retry = false,
+  applicationId: string | null = null,
 ) {
   const normalizedOperation = normalizeOperation(operation);
-  const client = resumeMutationClient();
+  const client = bindApplicationResumeClient(
+    resumeMutationClient(),
+    applicationId,
+  );
   const retryState = retry
     ? await prepareCompletedRetry(
         client,
@@ -106,7 +125,7 @@ export async function uploadResumeForJob(
         file,
       )
     : null;
-  if (retryState?.prepared?.state === "ready") return;
+  if (retryState?.prepared?.state === "ready") return retryState.prepared.id;
   const validated = await validateResume(file, retryState?.input);
   const prepared =
     retryState?.prepared ??
@@ -129,6 +148,7 @@ export async function uploadResumeForJob(
     prepared,
     retry,
   );
+  return prepared.id;
 }
 
 async function prepareCompletedRetry(
@@ -178,14 +198,7 @@ async function prepareJobResume(
     p_size: validated.bytes.length,
     p_sha256: validated.sha256,
   });
-  const prepared = z
-    .object({
-      id: z.uuid(),
-      revision: z.number().int().positive(),
-      object_path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/i),
-      state: z.enum(["ready", "pending"]),
-    })
-    .safeParse(data);
+  const prepared = preparedResumeSchema.safeParse(data);
   if (error) {
     const code = resumePreparationCode(error);
     const reference = randomUUID();
@@ -194,6 +207,8 @@ async function prepareJobResume(
   }
   if (
     !prepared.success ||
+    (applicationResumeIdentity(client) !== null &&
+      prepared.data.id !== applicationResumeIdentity(client)) ||
     prepared.data.object_path !==
       `${prepared.data.id.toLowerCase()}/${operation}.pdf`
   ) {
@@ -230,7 +245,7 @@ async function finishPreparedJobResume(
   if (prepared.state === "ready") return;
   const args = uploadArguments(actor, job, prepared.revision, operation);
   await uploadAndFinalizeApplicationResume(
-    client,
+    bindApplicationResumeClient(client, prepared.id),
     actor,
     job,
     prepared.object_path,
@@ -238,7 +253,7 @@ async function finishPreparedJobResume(
     args,
     retry,
   );
-  await cleanupApplicationResume(actor, job);
+  await cleanupApplicationResume(actor, job, prepared.id);
 }
 
 function logPreparationFailure(

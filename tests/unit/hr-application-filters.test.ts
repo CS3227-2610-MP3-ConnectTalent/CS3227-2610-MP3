@@ -103,7 +103,7 @@ describe("HR application sort, page, and array parameters", () => {
       status: "in_review",
       withdrawal: "withdrawn",
       sort: "oldest",
-      page: 2,
+      page: 1,
     });
   });
 });

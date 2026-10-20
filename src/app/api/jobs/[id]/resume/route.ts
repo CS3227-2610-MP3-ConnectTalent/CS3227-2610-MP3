@@ -22,10 +22,16 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type Context = { params: Promise<{ id: string }> };
-type UploadContext = { actorId: string; jobId: string };
+type UploadContext = {
+  actorId: string;
+  jobId: string;
+  applicationId: string | null;
+};
 
-async function currentResult(jobId: string) {
+async function currentResult(jobId: string, expectedId: string | null) {
   const application = await getOwnApplicationForJob(jobId);
+  if (!expectedId || application?.id !== expectedId)
+    throw new Error("Reload the application before continuing.");
   return application
     ? {
         applicationId: application.id,
@@ -39,13 +45,13 @@ export async function POST(request: Request, { params }: Context) {
   const context = await getUploadContext(request, params);
   if (context instanceof Response) return context;
   try {
-    await updateResume(request, context);
+    const applicationId = await updateResume(request, context);
     return Response.json(
-      { ok: true, ...(await currentResult(context.jobId)) },
+      { ok: true, ...(await currentResult(context.jobId, applicationId)) },
       { headers: resumeHeaders },
     );
   } catch (error) {
-    return failedResumeResponse(error, context.jobId);
+    return failedResumeResponse(error, context.jobId, context.applicationId);
   }
 }
 
@@ -59,7 +65,14 @@ async function getUploadContext(
   const { id } = await params;
   if (!z.uuid().safeParse(id).success)
     return errorResponse("Job unavailable.", 404);
-  return { actorId: account.user.id, jobId: id };
+  const rawApplicationId = request.headers.get("x-application-id");
+  if (rawApplicationId && !z.uuid().safeParse(rawApplicationId).success)
+    return errorResponse("Reload the application before continuing.", 400);
+  return {
+    actorId: account.user.id,
+    jobId: id,
+    applicationId: rawApplicationId || null,
+  };
 }
 
 function sameOrigin(request: Request) {
@@ -74,8 +87,15 @@ async function updateResume(request: Request, context: UploadContext) {
   const revision = readRevision(request);
   const intent = request.headers.get("x-resume-intent");
   if (intent === "remove") {
-    if (revision === null) throw new Error("Reload the application.");
-    return removeApplicationResume(context.actorId, context.jobId, revision);
+    if (revision === null || context.applicationId === null)
+      throw new Error("Reload the application.");
+    await removeApplicationResume(
+      context.actorId,
+      context.jobId,
+      revision,
+      context.applicationId,
+    );
+    return context.applicationId;
   }
   if (intent !== "upload" && intent !== "profile")
     throw new Error("Choose an upload action.");
@@ -103,12 +123,13 @@ async function uploadResume(
     throw new Error("Choose the file again.");
   const profileResumeId =
     intent === "profile" ? readProfileResumeId(request) : null;
-  if (
-    profileResumeId &&
-    retry &&
-    (await isCompletedProfileCopy(context.jobId, operation!))
-  ) {
-    return;
+  if (profileResumeId && retry) {
+    const completedId = await completedProfileCopy(
+      context.jobId,
+      context.applicationId,
+      operation!,
+    );
+    if (completedId) return completedId;
   }
   const file = profileResumeId
     ? await readProfileResume(profileResumeId)
@@ -120,6 +141,7 @@ async function uploadResume(
     file,
     operation!,
     retry,
+    context.applicationId,
   );
 }
 
@@ -138,10 +160,25 @@ async function readProfileResume(sourceId: string) {
   });
 }
 
-async function isCompletedProfileCopy(jobId: string, operation: string) {
+async function completedProfileCopy(
+  jobId: string,
+  applicationId: string | null,
+  operation: string,
+) {
   let current: Awaited<ReturnType<typeof currentResult>>;
   try {
-    current = await currentResult(jobId);
+    const application = await getOwnApplicationForJob(jobId);
+    if (!application) return null;
+    if (applicationId && application.id !== applicationId)
+      throw new ResumeUploadPreparationError(
+        "RESUME_APPLICATION_CHANGED",
+        randomUUID(),
+      );
+    current = {
+      applicationId: application.id,
+      revision: application.revision,
+      resume: await getApplicationResume(application.id),
+    };
   } catch (error) {
     if (error instanceof ResumeUploadPreparationError) throw error;
     const reference = randomUUID();
@@ -155,20 +192,29 @@ async function isCompletedProfileCopy(jobId: string, operation: string) {
       reference,
     );
   }
-  return current.resume?.id.toLowerCase() === operation.toLowerCase();
+  return current.resume?.id.toLowerCase() === operation.toLowerCase()
+    ? current.applicationId
+    : null;
 }
 
-async function failedResumeResponse(error: unknown, jobId: string) {
-  const current = await currentResultSafely(jobId);
+async function failedResumeResponse(
+  error: unknown,
+  jobId: string,
+  applicationId: string | null,
+) {
+  const current = await currentResultSafely(jobId, applicationId);
   return Response.json(
     { ...resumeFailure(error), ...current },
     { status: resumeFailureStatus(error), headers: resumeHeaders },
   );
 }
 
-async function currentResultSafely(jobId: string) {
+async function currentResultSafely(
+  jobId: string,
+  applicationId: string | null,
+) {
   try {
-    return await currentResult(jobId);
+    return await currentResult(jobId, applicationId);
   } catch {
     /* Safe error responses do not expose database details. */
     return {};

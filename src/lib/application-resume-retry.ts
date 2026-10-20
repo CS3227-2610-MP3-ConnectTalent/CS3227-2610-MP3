@@ -1,4 +1,5 @@
 import "server-only";
+import { applicationResumeIdentity } from "./application-resume-client";
 import { ResumeUploadPreparationError } from "./resume-errors";
 import {
   cleanupApplicationResume,
@@ -44,5 +45,5 @@ export async function recoverPendingJobResume(
   });
   if (error)
     throw new Error("Reload the application before retrying this upload.");
-  await cleanupApplicationResume(actor, job);
+  await cleanupApplicationResume(actor, job, applicationResumeIdentity(client));
 }

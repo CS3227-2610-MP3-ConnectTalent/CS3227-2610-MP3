@@ -18,7 +18,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type Context = { params: Promise<{ id: string }> };
-type UploadContext = { actorId: string; jobId: string };
+type UploadContext = { actorId: string; jobId: string; applicationId: string };
 
 export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
@@ -59,7 +59,7 @@ async function getUploadContext(
   if (!isUuid(id)) return errorResponse("Application unavailable.", 404);
   const application = await getOwnApplication(id);
   return application
-    ? { actorId: account.user.id, jobId: application.job_id }
+    ? { actorId: account.user.id, jobId: application.job_id, applicationId: id }
     : errorResponse("Application unavailable.", 404);
 }
 
@@ -81,7 +81,12 @@ async function updateResume(request: Request, context: UploadContext) {
     throw new Error("Choose an upload action.");
   const revision = readRevision(request);
   if (intent === "remove")
-    return removeApplicationResume(context.actorId, context.jobId, revision);
+    return removeApplicationResume(
+      context.actorId,
+      context.jobId,
+      revision,
+      context.applicationId,
+    );
   return uploadResume(request, context, revision);
 }
 
@@ -108,5 +113,6 @@ async function uploadResume(
     file,
     operation,
     request.headers.get("x-resume-retry") === "true",
+    context.applicationId,
   );
 }
