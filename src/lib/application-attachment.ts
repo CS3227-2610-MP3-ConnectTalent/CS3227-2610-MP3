@@ -19,3 +19,24 @@ export function reconcileApplicationAttachment(
 
   return server;
 }
+export function hasStaleDisplayedFields(
+  serverValue: string,
+  serverDetails: {
+    full_name?: string | null;
+    phone?: string | null;
+    portfolio_url?: string | null;
+    education?: string | null;
+    work_experience?: string | null;
+  },
+  displayedValues: Record<string, string>,
+  displayedLetter: string,
+): boolean {
+  return (
+    serverValue !== displayedLetter ||
+    (serverDetails.full_name ?? "") !== displayedValues.full_name ||
+    (serverDetails.phone ?? "") !== displayedValues.phone ||
+    (serverDetails.portfolio_url ?? "") !== displayedValues.portfolio_url ||
+    (serverDetails.education ?? "") !== displayedValues.education ||
+    (serverDetails.work_experience ?? "") !== displayedValues.work_experience
+  );
+}

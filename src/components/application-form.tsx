@@ -12,11 +12,21 @@ import {
 } from "@/components/application-form-fields";
 import { ResumePanel } from "@/components/resume-panel";
 import {
+  createApplicationFormInstance,
+  hasPersistedApplicationFields,
+  reconcileApplicationFormInstance,
+  type ApplicationFormInstance,
+} from "@/lib/application-form-instance";
+import {
+  hasStaleDisplayedFields,
   reconcileApplicationAttachment,
   type ApplicationAttachment,
 } from "@/lib/application-attachment";
 import type { ResumeMetadata } from "@/lib/application-resumes";
-import type { ApplicationFormState } from "@/lib/application-form-state";
+import {
+  createInitialApplicationState,
+  type ApplicationFormState,
+} from "@/lib/application-form-state";
 
 type ApplicationDetails = {
   full_name: string | null;
@@ -44,19 +54,65 @@ const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
 export function ApplicationForm(props: Props) {
+  const [formInstance, setFormInstance] = useState<ApplicationFormInstance>(
+    () =>
+      createApplicationFormInstance(props.jobId, props.applicationId ?? null),
+  );
+  const hasServerFields = hasPersistedApplicationFields(
+    props.details,
+    props.value,
+  );
+  const nextFormInstance = reconcileApplicationFormInstance(
+    formInstance,
+    props.jobId,
+    props.applicationId ?? null,
+    hasServerFields,
+  );
+
+  if (nextFormInstance !== formInstance) setFormInstance(nextFormInstance);
+
+  return (
+    <ApplicationFormState
+      key={nextFormInstance.generation}
+      props={props}
+      onLocalApplicationCreated={(applicationId) => {
+        setFormInstance((current) => {
+          if (
+            current.jobId !== props.jobId ||
+            current.lastApplicationId !== null
+          )
+            return current;
+          return { ...current, locallyCreatedApplicationId: applicationId };
+        });
+      }}
+    />
+  );
+}
+
+function ApplicationFormState({
+  props,
+  onLocalApplicationCreated,
+}: {
+  props: Props;
+  onLocalApplicationCreated: (applicationId: string) => void;
+}) {
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
     getClientHydrationSnapshot,
     getServerHydrationSnapshot,
   );
-  const initial = createInitialState(props.details, props.value);
+  const initial = createInitialApplicationState(props.details, props.value);
   const [state, formAction, pending] = useActionState(
     updateApplication,
     initial,
     `/jobs/${props.jobId}/apply`,
   );
   const [coverLetter, setCoverLetter] = useState(state.values.cover_letter);
-  const { attachment, setAttachment } = useApplicationAttachment(props);
+  const { attachment, setAttachment } = useApplicationAttachment(
+    props,
+    state.values,
+    coverLetter,
+  );
   const [attachmentPending, setAttachmentPending] = useState(false);
   if (props.submitted)
     return (
@@ -74,12 +130,15 @@ export function ApplicationForm(props: Props) {
       hydrated={hydrated}
       coverLetter={coverLetter}
       setCoverLetter={setCoverLetter}
+      onLocalApplicationCreated={onLocalApplicationCreated}
     />
   );
 }
 
 function useApplicationAttachment(
-  props: Pick<Props, "applicationId" | "revision">,
+  props: Pick<Props, "applicationId" | "revision" | "value" | "details">,
+  displayedValues: ApplicationFormState["values"],
+  displayedLetter: string,
 ) {
   const serverAttachment: ApplicationAttachment = {
     applicationId: props.applicationId ?? null,
@@ -89,34 +148,28 @@ function useApplicationAttachment(
     useState(serverAttachment);
   const [attachment, setAttachment] = useState(serverAttachment);
 
+  const serverFieldsChanged = hasStaleDisplayedFields(
+    props.value,
+    props.details,
+    displayedValues,
+    displayedLetter,
+  );
+
   if (
-    previousServerAttachment.applicationId !== serverAttachment.applicationId ||
-    previousServerAttachment.revision !== serverAttachment.revision
+    previousServerAttachment.applicationId !== serverAttachment.applicationId
   ) {
     setPreviousServerAttachment(serverAttachment);
-    setAttachment((current) =>
-      reconcileApplicationAttachment(current, serverAttachment),
-    );
+    setAttachment(reconcileApplicationAttachment(attachment, serverAttachment));
+  } else if (previousServerAttachment.revision !== serverAttachment.revision) {
+    setPreviousServerAttachment(serverAttachment);
+    if (!serverFieldsChanged) {
+      setAttachment(
+        reconcileApplicationAttachment(attachment, serverAttachment),
+      );
+    }
   }
 
   return { attachment, setAttachment };
-}
-
-function createInitialState(
-  details: ApplicationDetails,
-  coverLetter: string,
-): ApplicationFormState {
-  return {
-    values: {
-      education: details.education ?? "",
-      work_experience: details.work_experience ?? "",
-      full_name: details.full_name ?? "",
-      phone: details.phone ?? "",
-      portfolio_url: details.portfolio_url ?? "",
-      cover_letter: coverLetter,
-    },
-    errors: {},
-  };
 }
 
 function SubmittedApplication({
@@ -151,6 +204,7 @@ type DraftProps = Props & {
   onAttachmentPending: (value: boolean) => void;
   coverLetter: string;
   setCoverLetter: (value: string) => void;
+  onLocalApplicationCreated: (applicationId: string) => void;
 };
 
 function ApplicationDraftForm(props: DraftProps) {
@@ -213,11 +267,14 @@ function ApplicationResumeFields(props: DraftProps) {
         if (
           typeof result.applicationId === "string" &&
           typeof result.revision === "number"
-        )
+        ) {
           props.setAttachment({
             applicationId: result.applicationId,
             revision: result.revision,
           });
+          if (!props.applicationId)
+            props.onLocalApplicationCreated(result.applicationId);
+        }
       }}
     />
   );

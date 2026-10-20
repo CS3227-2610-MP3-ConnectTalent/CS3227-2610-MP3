@@ -79,6 +79,14 @@ async function mountFilters(
   });
 }
 
+async function rerenderFilters(
+  params: ReturnType<typeof parseHRApplicationFilterParams>,
+) {
+  await act(async () => {
+    root.render(<NavigationHarness initialParams={params} />);
+  });
+}
+
 function dispatchSelectChange(id: string, value: string) {
   const select = container.querySelector<HTMLSelectElement>(`#${id}`);
   if (!select) throw new Error(`Missing select #${id}`);
@@ -148,6 +156,29 @@ describe("pending HR application search", () => {
     );
     expect(searchUrl.searchParams.get("q")).toBe("Taylor");
     expect(searchUrl.searchParams.get("status")).toBe("in_review");
+  });
+
+  it("cancels a pending search when browser history restores an earlier query", async () => {
+    vi.useFakeTimers();
+    await mountFilters(parseHRApplicationFilterParams({ q: "Earlier" }));
+
+    navigation.search = "?q=Later";
+    await rerenderFilters(parseHRApplicationFilterParams({ q: "Later" }));
+
+    await act(async () => dispatchSearchInput("Unsubmitted"));
+    navigation.search = "?q=Earlier";
+    await act(async () => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await rerenderFilters(parseHRApplicationFilterParams({ q: "Earlier" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(HR_APPLICATION_SEARCH_DELAY + 1);
+    });
+
+    expect(
+      container.querySelector<HTMLInputElement>("#hr-app-search")?.value,
+    ).toBe("Earlier");
+    expect(navigation.replacements).toHaveLength(0);
   });
 });
 

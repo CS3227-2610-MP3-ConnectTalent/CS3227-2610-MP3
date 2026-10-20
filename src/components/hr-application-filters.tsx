@@ -37,13 +37,7 @@ export function HRApplicationFilters({
 
   const isComposingRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const timerRef = debounceTimerRef;
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  useCancelSearchOnHistory(debounceTimerRef);
 
   return (
     <div className="space-y-4 rounded-xl border bg-card p-5 shadow-sm">
@@ -66,6 +60,22 @@ export function HRApplicationFilters({
       </p>
     </div>
   );
+}
+
+function useCancelSearchOnHistory(
+  timerRef: MutableRefObject<NodeJS.Timeout | null>,
+) {
+  useEffect(() => {
+    const cancelPendingSearch = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+    window.addEventListener("popstate", cancelPendingSearch);
+    return () => {
+      window.removeEventListener("popstate", cancelPendingSearch);
+      cancelPendingSearch();
+    };
+  }, [timerRef]);
 }
 
 interface SearchFormProps {
