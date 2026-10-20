@@ -1,6 +1,6 @@
 # Feature record: application and HR review regressions
 
-Status: implementation and independent review complete through `114ba259`; current-head hosted CI and fresh student acceptance pending
+Status: review-flow implementation and independent review complete through `114ba259`; a follow-up Chromium revision regression is being fixed, with hosted CI and fresh student acceptance pending
 
 Owner: Student owner pending assignment
 
@@ -76,3 +76,4 @@ Known limitations: the production build compiled and completed TypeScript, then 
 - Canonical sync: N/A because the accepted repairs restore existing clauses.
 - Archive: packet archived at `workflow/archive/2026-10-19-review-flow-regressions/` on 2026-10-19; packet and current indexes are preserved and this record reflects the open PR and pending acceptance gate.
 - Outstanding work: verify current-head hosted CI, then obtain fresh student acceptance of the corrected revision and evidence. Keep the acceptance review thread unresolved until that decision. Merge and release remain separate.
+- Follow-up from Supabase CI on `8a01474`: the interrupted first-upload journey received API revision `2` after retry but sent revision `1` for profile copy. A focused regression now models refreshed props adopting the new application ID with stale revision `1`; `useResumeActionRevision` retains the higher locally confirmed revision only for the null-to-new-ID transition. The local Vitest command is blocked because pnpm/Node are unavailable and Bun cannot read the Vitest package-store path (`EPERM`). Hosted verification is pending on the pushed follow-up commit; no pass is claimed yet.

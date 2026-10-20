@@ -23,7 +23,15 @@ export function useResumeActionRevision(
   const [revision, setRevision] = useState(initialRevision);
   if (applicationId !== initialApplicationId) {
     setApplicationId(initialApplicationId);
-    setRevision(initialRevision);
+    const newlyCreatedApplication =
+      applicationId === null && initialApplicationId !== null;
+    setRevision(
+      newlyCreatedApplication &&
+        revision !== null &&
+        (initialRevision === null || revision > initialRevision)
+        ? revision
+        : initialRevision,
+    );
   } else if (
     initialRevision !== null &&
     (revision === null || initialRevision > revision)

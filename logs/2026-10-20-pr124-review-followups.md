@@ -68,3 +68,11 @@
 - Evidence inspected and verification performed: no fresh acceptance decision has been supplied for the latest reviewed revision.
 - Decision source and conditions: prior acceptance predates subsequent review findings and is not treated as acceptance of final evidence.
 - Remaining concerns and next owner: student reviews final CI and review evidence and records a fresh decision; merge/release remain separate.
+
+## Follow-up: Chromium profile-copy revision regression
+
+The latest Supabase CI run (`39282909715`) on PR head `8a01474` failed one critical Chromium journey at the résumé download assertion. The browser trace showed the retried direct upload returned `applicationId` and revision `2`; the following profile-copy request sent `x-application-revision: 1` and received `RESUME_APPLICATION_CHANGED` (409). The database and integration-race jobs passed, isolating this failure to client-side revision reconciliation.
+
+Added a regression to `tests/unit/resume-panel-local-revision.test.ts` that simulates server props adopting the newly created application ID with stale revision `1` after a successful local response established revision `2`. Updated `useResumeActionRevision` to retain the higher local revision for this null-to-first-ID transition while preserving the existing reset behavior when switching between established application IDs. This addresses the trace evidence without weakening server stale-write checks.
+
+Local verification limitation: `pnpm` and Node are unavailable in this checkout. Running Vitest through Bun failed with `EPERM` while reading the Vitest package under `node_modules/.pnpm`; the Node REPL runtime was unavailable. `git diff --check` passes. The regression has not been observed red/green locally, and hosted verification on the follow-up commit is pending. Fresh student acceptance remains pending; no merge, deployment, or release is authorized by this work.
