@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { bindApplicationResumeClient } from "./application-resume-client";
 import {
   applicationResumeBucket,
   cleanupApplicationResume,
@@ -53,24 +54,33 @@ export async function removeApplicationResume(
   actor: string,
   job: string,
   revision: number,
+  applicationId: string | null = null,
 ) {
-  const { error } = await resumeMutationClient().rpc(
-    "remove_application_resume",
-    { p_actor: actor, p_job: job, p_revision: revision },
-  );
+  const { error } = await bindApplicationResumeClient(
+    resumeMutationClient(),
+    applicationId,
+  ).rpc("remove_application_resume", {
+    p_actor: actor,
+    p_job: job,
+    p_revision: revision,
+  });
   if (error)
     throw new Error(
       "We could not remove the résumé. Reload for the latest draft and try again.",
     );
-  await cleanupApplicationResume(actor, job);
+  await cleanupApplicationResume(actor, job, applicationId);
 }
 
-export async function cancelResumeUpload(actor: string, job: string) {
-  const { error } = await resumeMutationClient().rpc(
-    "cancel_application_resume",
-    { p_actor: actor, p_job: job },
-  );
+export async function cancelResumeUpload(
+  actor: string,
+  job: string,
+  applicationId: string | null = null,
+) {
+  const { error } = await bindApplicationResumeClient(
+    resumeMutationClient(),
+    applicationId,
+  ).rpc("cancel_application_resume", { p_actor: actor, p_job: job });
   if (error)
     throw new Error("We could not cancel the upload. Try again later.");
-  await cleanupApplicationResume(actor, job);
+  await cleanupApplicationResume(actor, job, applicationId);
 }

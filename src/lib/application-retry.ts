@@ -16,8 +16,10 @@ export function reconcileApplicationWrite(
   },
   expectedRevision: number | null,
   existing: ExistingApplication | null,
+  expectedApplicationId: string | null,
 ): string | null {
   if (!existing) return null;
+  if (existing.id !== expectedApplicationId) return null;
   if (intent === "submit" && existing.submission_state === "submitted")
     return existing.id;
   if (

@@ -104,6 +104,7 @@ async function interruptInitialUpload(
       expect(headers["x-application-revision"]).toBe("");
       operation = headers["x-resume-operation"];
       const prepared = await admin.rpc("prepare_application_resume", {
+        p_application: null,
         p_actor: ownerId,
         p_job: fixture.jobId,
         p_revision: null,

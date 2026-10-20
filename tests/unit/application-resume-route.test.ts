@@ -35,7 +35,12 @@ const actor = "44000000-0000-4000-8000-000000000101";
 const applicationId = "44000000-0000-4000-8000-000000000102";
 const jobId = "44000000-0000-4000-8000-000000000103";
 const operation = "44000000-0000-4000-8000-000000000104";
-const application = { id: applicationId, job_id: jobId };
+const application = {
+  id: applicationId,
+  job_id: jobId,
+  submission_state: "draft",
+  withdrawn_at: null,
+};
 const metadata = { id: operation, filename: "synthetic.pdf", byte_size: 8 };
 
 function post(headers: Record<string, string> = {}) {
@@ -126,20 +131,41 @@ it("rejects cross-origin, unauthenticated, malformed, and unavailable applicatio
   expect((await POST(post({}), context())).status).toBe(404);
 });
 
-it("cancels an upload and removes an existing attachment with the current revision", async () => {
+it("rejects unscoped cancellation and removes an attachment with the current revision", async () => {
   const cancelled = await POST(
     post({ "x-resume-intent": "cancel" }),
     context(),
   );
-  expect(cancelled.status).toBe(200);
-  expect(mocks.cancelResumeUpload).toHaveBeenCalledWith(actor, jobId);
+  expect(cancelled.status).toBe(400);
+  await expect(cancelled.json()).resolves.toMatchObject({
+    error: "Choose an upload action.",
+  });
+  expect(mocks.cancelResumeUpload).not.toHaveBeenCalled();
 
   const removed = await POST(
     post({ "x-resume-intent": "remove", "x-application-revision": "3" }),
     context(),
   );
   expect(removed.status).toBe(200);
-  expect(mocks.removeApplicationResume).toHaveBeenCalledWith(actor, jobId, 3);
+  expect(mocks.removeApplicationResume).toHaveBeenCalledWith(
+    actor,
+    jobId,
+    3,
+    applicationId,
+  );
+});
+
+it("does not cancel a replacement application through a withdrawn application URL", async () => {
+  mocks.getOwnApplication.mockResolvedValueOnce({
+    ...application,
+    submission_state: "submitted",
+    withdrawn_at: "2026-10-11T00:00:00Z",
+  });
+
+  const response = await POST(post({ "x-resume-intent": "cancel" }), context());
+
+  expect(response.status).toBe(400);
+  expect(mocks.cancelResumeUpload).not.toHaveBeenCalled();
 });
 
 it("rejects invalid revisions and unknown resume intents", async () => {
@@ -194,6 +220,7 @@ it("validates operation metadata and uploads the request file only for an Applic
     expect.any(File),
     operation,
     true,
+    applicationId,
   );
 });
 

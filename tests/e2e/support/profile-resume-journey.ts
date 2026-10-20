@@ -34,7 +34,12 @@ export async function saveProfileAndCreateDraft(page: Page, jobId: string) {
     .getByLabel("Work experience (optional)")
     .fill("Synthetic internship");
   await page.getByRole("button", { name: "Save profile" }).click();
-  await expect(page.getByRole("status")).toContainText("Profile saved");
+  await expect(
+    page
+      .locator("main form")
+      .getByRole("status")
+      .filter({ hasText: /^Profile saved\.$/ }),
+  ).toHaveText("Profile saved.");
   await page.reload();
   await expect(page.getByLabel("Education (optional)")).toHaveValue(
     "Synthetic College\nComputing",
@@ -85,7 +90,12 @@ export async function verifyProfileDoesNotOverwriteApplication(
     .getByLabel("Full name", { exact: true })
     .fill("Changed profile name");
   await page.getByRole("button", { name: "Save profile" }).click();
-  await expect(page.getByRole("status")).toContainText("Profile saved");
+  await expect(
+    page
+      .locator("main form")
+      .getByRole("status")
+      .filter({ hasText: /^Profile saved\.$/ }),
+  ).toHaveText("Profile saved.");
   await page.goto(`/jobs/${jobId}/apply`);
   await expect(page.getByLabel("Full name", { exact: true })).toHaveValue(
     "Synthetic Profile Applicant",

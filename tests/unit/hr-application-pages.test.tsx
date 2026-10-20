@@ -35,6 +35,7 @@ vi.mock("@/lib/application-resumes", () => ({
 vi.mock("next/navigation", () => ({
   notFound: mocks.notFound,
   useRouter: mocks.useRouter,
+  useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("next/link", async () => {
   const React = await import("react");

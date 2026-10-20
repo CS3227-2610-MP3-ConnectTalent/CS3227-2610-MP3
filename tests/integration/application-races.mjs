@@ -91,7 +91,7 @@ try {
   const firstAppName = `race-first-submit-${userId}`;
   const first = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[0]}', 'First synthetic letter','Synthetic Applicant','+6591234567',null, null)`,
+      `select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[0]}'::uuid and withdrawn_at is null),'${jobs[0]}', 'First synthetic letter','Synthetic Applicant','+6591234567',null, null)`,
     ),
     firstAppName,
   );
@@ -99,7 +99,7 @@ try {
   const duplicateAppName = `race-duplicate-${userId}`;
   const duplicate = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[0]}', 'Second synthetic letter','Synthetic Applicant','+6591234567',null, null)`,
+      `select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[0]}'::uuid and withdrawn_at is null),'${jobs[0]}', 'Second synthetic letter','Synthetic Applicant','+6591234567',null, null)`,
     ),
     duplicateAppName,
   );
@@ -109,7 +109,9 @@ try {
   if (
     firstResult.code !== 0 ||
     duplicateResult.code === 0 ||
-    !duplicateResult.errors.includes("Application already submitted")
+    !duplicateResult.errors.includes(
+      "Application changed; reload before saving",
+    )
   ) {
     throw new Error(
       `Concurrent submit outcome unexpected: first=${firstResult.code}, second=${duplicateResult.code}; ${duplicateResult.errors.trim()}`,
@@ -120,6 +122,11 @@ try {
   );
   if (duplicateCount.output.trim() !== "1")
     throw new Error("Concurrent submissions created more than one row");
+  const submittedState = await runSql(
+    `select submission_state || ':' || cover_letter from public.applications where job_id = '${jobs[0]}'`,
+  );
+  if (submittedState.output.trim() !== "submitted:First synthetic letter")
+    throw new Error("Duplicate submission changed the winning application");
 
   // Closure wins the job lock: the waiting submit must be rejected.
   const closingAppName = `race-close-first-${userId}`;
@@ -131,7 +138,7 @@ try {
   const lateAppName = `race-too-late-${userId}`;
   const tooLate = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[1]}', 'Too late','Synthetic Applicant','+6591234567',null, null)`,
+      `select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[1]}'::uuid and withdrawn_at is null),'${jobs[1]}', 'Too late','Synthetic Applicant','+6591234567',null, null)`,
     ),
     lateAppName,
   );
@@ -157,7 +164,7 @@ try {
   const beforeCloseAppName = `race-submit-first-${userId}`;
   const beforeClose = startSql(
     applicantSql(
-      `select public.submit_application_details_v2('${jobs[2]}', 'Before close','Synthetic Applicant','+6591234567',null, null)`,
+      `select public.submit_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[2]}'::uuid and withdrawn_at is null),'${jobs[2]}', 'Before close','Synthetic Applicant','+6591234567',null, null)`,
     ),
     beforeCloseAppName,
   );
@@ -183,11 +190,11 @@ try {
 
   // Competing revisions cannot save a letter from one request and contacts from another.
   await runSql(`begin; set local role authenticated; select set_config('request.jwt.claim.sub', '${userId}', true);
-    select public.save_application_details_v2('${jobs[3]}', 'Initial', 'Initial Name', null, null, null); commit;`);
+    select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[3]}'::uuid and withdrawn_at is null),'${jobs[3]}', 'Initial', 'Initial Name', null, null, null); commit;`);
   const savingAppName = `race-save-winning-${userId}`;
   const saving = startSql(
     applicantSql(
-      `select public.save_application_details_v2('${jobs[3]}', 'Winning letter', 'Winning Name', '+6591234567', 'https://example.test/winner', 1)`,
+      `select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[3]}'::uuid and withdrawn_at is null),'${jobs[3]}', 'Winning letter', 'Winning Name', '+6591234567', 'https://example.test/winner', 1)`,
     ),
     savingAppName,
   );
@@ -195,7 +202,7 @@ try {
   const staleAppName = `race-stale-details-${userId}`;
   const stale = startSql(
     applicantSql(
-      `select public.save_application_details_v2('${jobs[3]}', 'Losing letter', 'Losing Name', '+6598765432', null, 1)`,
+      `select public.save_application_details_v2((select id from public.applications where applicant_id=auth.uid() and job_id='${jobs[3]}'::uuid and withdrawn_at is null),'${jobs[3]}', 'Losing letter', 'Losing Name', '+6598765432', null, 1)`,
     ),
     staleAppName,
   );

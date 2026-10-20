@@ -10,6 +10,7 @@ type ProfileCopyAttempt = {
 type ResumeResponseState = {
   setOperation: (value: string) => void;
   setAttachment: (value: ResumeMetadata | null) => void;
+  setRevision: (value: number, forApplicationId?: string) => void;
   setUploadFailed: (value: boolean) => void;
   setProfileCopyRetryAvailable: (value: boolean) => void;
   setProfileCopyAttempt: (value: ProfileCopyAttempt | null) => void;
@@ -41,6 +42,14 @@ export async function applyResumeResponse(
   const result: unknown = await response.json();
   if (!isObject(result)) throw new Error("Invalid résumé response.");
   if (
+    !props.profileMode &&
+    response.ok &&
+    props.applicationId &&
+    typeof result.applicationId === "string" &&
+    result.applicationId !== props.applicationId
+  )
+    throw new Error("The application changed. Reload before continuing.");
+  if (
     intent === "upload" &&
     shouldRotateUploadOperation(result.code, props.profileMode)
   ) {
@@ -48,15 +57,7 @@ export async function applyResumeResponse(
   }
   if (intent === "remove" && response.ok)
     state.setOperation(crypto.randomUUID());
-  if ("resume" in result)
-    state.setAttachment(result.resume as ResumeMetadata | null);
-  props.onChange?.({
-    applicationId:
-      typeof result.applicationId === "string"
-        ? result.applicationId
-        : undefined,
-    revision: typeof result.revision === "number" ? result.revision : undefined,
-  });
+  if (response.ok) applySuccessfulResumeResponse(result, props, state);
   state.setUploadFailed(intent === "upload" && !response.ok);
   const retryable = canRetryProfileCopy(result.code);
   state.setProfileCopyRetryAvailable(
@@ -68,6 +69,29 @@ export async function applyResumeResponse(
   state.setMessage(
     responseMessage(response.ok, result.error, result.reference),
   );
+}
+
+function applySuccessfulResumeResponse(
+  result: Record<string, unknown>,
+  props: ResumePanelProps,
+  state: ResumeResponseState,
+) {
+  if ("resume" in result)
+    state.setAttachment(result.resume as ResumeMetadata | null);
+  if (typeof result.revision === "number")
+    state.setRevision(
+      result.revision,
+      typeof result.applicationId === "string"
+        ? result.applicationId
+        : undefined,
+    );
+  props.onChange?.({
+    applicationId:
+      typeof result.applicationId === "string"
+        ? result.applicationId
+        : undefined,
+    revision: typeof result.revision === "number" ? result.revision : undefined,
+  });
 }
 
 export function responseMessage(

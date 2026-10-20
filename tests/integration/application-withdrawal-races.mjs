@@ -123,7 +123,7 @@ try {
  update public.profiles set role='hr' where user_id='${hr}';
  insert into public.jobs(id,title,team,category,description,requirements,status,published_at) values
  ${jobs.map((job) => `('${job}','Withdrawal race','Synthetic','engineering','Synthetic','Synthetic','published',now())`).join(",")};
- begin; ${asActor(actor, jobs.map((job) => `select public.submit_application_details_v3('${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,null,null,null);`).join(" "))} commit;`);
+ begin; ${asActor(actor, jobs.map((job) => `select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='${job}'::uuid and withdrawn_at is null),'${job}','Synthetic letter','Synthetic Applicant','+6591234567',null,null,null,null);`).join(" "))} commit;`);
   await pair(
     withdraw(0),
     note(0),

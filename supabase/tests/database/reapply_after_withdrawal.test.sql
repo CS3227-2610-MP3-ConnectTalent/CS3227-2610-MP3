@@ -33,7 +33,7 @@ insert into public.jobs(id, title, team, category, description, requirements, st
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '60000000-0000-4000-8000-000000000001', true);
 select lives_ok(
-  $$select public.submit_application_details_v3('60000000-0000-4000-8000-000000000101', 'First submission letter', 'Reapply Applicant', '+6591234567', null, 'First education', 'First experience', null)$$,
+  $$select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='60000000-0000-4000-8000-000000000101'::uuid and withdrawn_at is null),'60000000-0000-4000-8000-000000000101', 'First submission letter', 'Reapply Applicant', '+6591234567', null, 'First education', 'First experience', null)$$,
   'initial application submits successfully'
 );
 
@@ -50,13 +50,13 @@ select lives_ok(
 
 -- Applicant saves a new draft for the same job after withdrawal
 select lives_ok(
-  $$select public.save_application_details_v3('60000000-0000-4000-8000-000000000101', 'Second draft letter', 'Reapply Applicant', '+6591234567', null, 'Second education', 'Second experience', null)$$,
+  $$select public.save_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='60000000-0000-4000-8000-000000000101'::uuid and withdrawn_at is null),'60000000-0000-4000-8000-000000000101', 'Second draft letter', 'Reapply Applicant', '+6591234567', null, 'Second education', 'Second experience', null)$$,
   'applicant saves new draft after withdrawal'
 );
 
 -- Applicant submits second application
 select lives_ok(
-  $$select public.submit_application_details_v3('60000000-0000-4000-8000-000000000101', 'Second submission letter', 'Reapply Applicant', '+6591234567', null, 'Second education', 'Second experience', 1)$$,
+  $$select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='60000000-0000-4000-8000-000000000101'::uuid and withdrawn_at is null),'60000000-0000-4000-8000-000000000101', 'Second submission letter', 'Reapply Applicant', '+6591234567', null, 'Second education', 'Second experience', 1)$$,
   'applicant submits second application'
 );
 
@@ -84,7 +84,7 @@ select ok(
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '60000000-0000-4000-8000-000000000001', true);
 select throws_ok(
-  $$select public.submit_application_details_v3('60000000-0000-4000-8000-000000000101', 'Third letter', 'Reapply Applicant', '+6591234567', null, 'Education', 'Experience', null)$$,
+  $$select public.submit_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='60000000-0000-4000-8000-000000000101'::uuid and withdrawn_at is null),'60000000-0000-4000-8000-000000000101', 'Third letter', 'Reapply Applicant', '+6591234567', null, 'Education', 'Experience', null)$$,
   'P0001',
   'Application already submitted',
   'third application while second is active is rejected'
@@ -122,7 +122,7 @@ select lives_ok(
 );
 -- Attempting to reapply to closed job
 select throws_ok(
-  $$select public.save_application_details_v3('60000000-0000-4000-8000-000000000101', 'Draft to closed job', 'Reapply Applicant', '+6591234567', null, null, null, null)$$,
+  $$select public.save_application_details_v3((select id from public.applications where applicant_id=auth.uid() and job_id='60000000-0000-4000-8000-000000000101'::uuid and withdrawn_at is null),'60000000-0000-4000-8000-000000000101', 'Draft to closed job', 'Reapply Applicant', '+6591234567', null, null, null, null)$$,
   'P0001',
   'Job is not open for applications',
   'reapplying to closed job is rejected'

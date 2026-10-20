@@ -235,10 +235,13 @@ async function submitApplication(page: Page) {
   ).toBeVisible();
   await expect(
     page
-      .getByRole("heading", { name: "Original submission" })
+      .getByRole("heading", { name: "Current cover letter" })
       .locator("..")
       .getByText("Original submitted letter"),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Original submission" }),
+  ).toHaveCount(0);
   await expect(
     page.getByText("Original submitted letter", { exact: true }),
   ).toHaveCount(1);

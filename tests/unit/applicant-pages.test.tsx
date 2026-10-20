@@ -182,6 +182,7 @@ it("renders submitted letter, status, withdrawal, and already-submitted notice",
   expect(html).toContain('data-testid="withdrawal-control"');
   expect(html).toContain("Original submission");
   expect(html).toContain("Original synthetic letter");
+  expect(html).toContain("Current synthetic letter");
   expect(html).toContain('data-testid="contact-details"');
   expect(html).toContain('data-testid="resume-panel"');
 });

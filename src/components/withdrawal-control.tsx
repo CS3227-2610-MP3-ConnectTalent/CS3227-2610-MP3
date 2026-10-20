@@ -35,7 +35,7 @@ function WithdrawButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function WithdrawalConfirmation({
+export function WithdrawalConfirmation({
   applicationId,
   action,
   pending,
@@ -54,8 +54,9 @@ function WithdrawalConfirmation({
       aria-label="Confirm withdrawal"
     >
       <p>
-        Withdraw this application? This cannot be undone. You cannot apply for
-        this job again. Your submission remains available as a record.
+        Withdraw this application? This cannot be undone. You cannot reopen this
+        submission, but you can start a new application while the job is still
+        published and open. Your submission remains available as a record.
       </p>
       <WithdrawalForm
         applicationId={applicationId}

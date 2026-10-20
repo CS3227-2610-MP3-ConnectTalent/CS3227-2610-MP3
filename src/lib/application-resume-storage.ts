@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { bindApplicationResumeClient } from "./application-resume-client";
 
 export const applicationResumeBucket = "application-resumes";
 
@@ -20,8 +21,16 @@ export function resumeMutationClient() {
   });
 }
 
-export async function cleanupApplicationResume(actor: string, job: string) {
-  const client = resumeMutationClient();
+export async function cleanupApplicationResume(
+  actor: string,
+  job: string,
+  applicationId: string | null = null,
+) {
+  if (!applicationId) return;
+  const client = bindApplicationResumeClient(
+    resumeMutationClient(),
+    applicationId,
+  );
   const { data, error } = await client.rpc("claim_resume_cleanup", {
     p_actor: actor,
     p_job: job,

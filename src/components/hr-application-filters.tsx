@@ -1,20 +1,17 @@
 "use client";
 
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
-  useTransition,
   type FormEvent,
   type MutableRefObject,
 } from "react";
-import { useRouter } from "next/navigation";
 import { LoaderCircle, RotateCcw, Search } from "lucide-react";
+import { useHRApplicationNavigation } from "@/components/use-hr-application-navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  buildHRApplicationsUrl,
   HR_APPLICATION_SEARCH_DELAY,
   type HRApplicationFilterParams,
 } from "@/lib/hr-application-search";
@@ -29,8 +26,7 @@ export function HRApplicationFilters({
   initialParams,
   jobs,
 }: HRApplicationFiltersProps) {
-  const { router, isPending, startTransition, navigate } =
-    useHRFiltersNavigation(initialParams);
+  const { isPending, navigate } = useHRApplicationNavigation(initialParams);
 
   const [query, setQuery] = useState(initialParams.q);
   const [prevQ, setPrevQ] = useState(initialParams.q);
@@ -41,13 +37,7 @@ export function HRApplicationFilters({
 
   const isComposingRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const timerRef = debounceTimerRef;
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  useCancelSearchOnHistory(debounceTimerRef);
 
   return (
     <div className="space-y-4 rounded-xl border bg-card p-5 shadow-sm">
@@ -59,8 +49,6 @@ export function HRApplicationFilters({
         debounceTimerRef={debounceTimerRef}
         isComposingRef={isComposingRef}
         initialParams={initialParams}
-        startTransition={startTransition}
-        router={router}
       />
       <FilterDropdowns
         initialParams={initialParams}
@@ -74,25 +62,20 @@ export function HRApplicationFilters({
   );
 }
 
-function useHRFiltersNavigation(initialParams: HRApplicationFilterParams) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  const navigate = useCallback(
-    (updates: Partial<HRApplicationFilterParams>, replace = false) => {
-      const url = buildHRApplicationsUrl(initialParams, {
-        ...updates,
-        page: updates.page ?? 1,
-      });
-      startTransition(() => {
-        if (replace) router.replace(url, { scroll: false });
-        else router.push(url, { scroll: false });
-      });
-    },
-    [initialParams, router],
-  );
-
-  return { router, isPending, startTransition, navigate };
+function useCancelSearchOnHistory(
+  timerRef: MutableRefObject<NodeJS.Timeout | null>,
+) {
+  useEffect(() => {
+    const cancelPendingSearch = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+    window.addEventListener("popstate", cancelPendingSearch);
+    return () => {
+      window.removeEventListener("popstate", cancelPendingSearch);
+      cancelPendingSearch();
+    };
+  }, [timerRef]);
 }
 
 interface SearchFormProps {
@@ -106,8 +89,6 @@ interface SearchFormProps {
   debounceTimerRef: MutableRefObject<NodeJS.Timeout | null>;
   isComposingRef: MutableRefObject<boolean>;
   initialParams: HRApplicationFilterParams;
-  startTransition: (fn: () => void) => void;
-  router: ReturnType<typeof useRouter>;
 }
 
 function useSearchFormHandlers({
@@ -116,8 +97,6 @@ function useSearchFormHandlers({
   navigate,
   debounceTimerRef,
   isComposingRef,
-  startTransition,
-  router,
 }: {
   query: string;
   setQuery: (val: string) => void;
@@ -127,8 +106,6 @@ function useSearchFormHandlers({
   ) => void;
   debounceTimerRef: MutableRefObject<NodeJS.Timeout | null>;
   isComposingRef: MutableRefObject<boolean>;
-  startTransition: (fn: () => void) => void;
-  router: ReturnType<typeof useRouter>;
 }) {
   const onTextChange = (val: string) => {
     setQuery(val);
@@ -148,7 +125,18 @@ function useSearchFormHandlers({
   const onClear = () => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     setQuery("");
-    startTransition(() => router.push("/hr/applications", { scroll: false }));
+    navigate(
+      {
+        q: "",
+        invalidSearch: false,
+        job: undefined,
+        status: undefined,
+        withdrawal: "all",
+        sort: "newest",
+        page: 1,
+      },
+      false,
+    );
   };
 
   return { onTextChange, onSubmit, onClear };

@@ -165,7 +165,12 @@ function ApplicationBody({
   profileResume: ProfileResume;
 }) {
   if (application.submission_state === "submitted")
-    return <SubmittedLetter letter={application.original_submitted_letter} />;
+    return (
+      <SubmittedLetter
+        letter={application.cover_letter}
+        originalLetter={application.original_submitted_letter}
+      />
+    );
   if (!job) return <SavedLetter letter={application.cover_letter} />;
   return (
     <ApplicationForm
@@ -182,13 +187,25 @@ function ApplicationBody({
   );
 }
 
-function SubmittedLetter({ letter }: { letter: string | null }) {
+function SubmittedLetter({
+  letter,
+  originalLetter,
+}: {
+  letter: string;
+  originalLetter: string | null;
+}) {
   return (
     <section className="space-y-2">
-      <h2 className="text-xl font-semibold">Original submission</h2>
-      <p className="whitespace-pre-wrap rounded-lg border p-4">
-        {letter ?? ""}
-      </p>
+      <h2 className="text-xl font-semibold">Current cover letter</h2>
+      <p className="whitespace-pre-wrap rounded-lg border p-4">{letter}</p>
+      {originalLetter !== null && originalLetter !== letter && (
+        <>
+          <h2 className="text-xl font-semibold">Original submission</h2>
+          <p className="whitespace-pre-wrap rounded-lg border p-4">
+            {originalLetter}
+          </p>
+        </>
+      )}
       <p className="text-sm text-muted-foreground">
         Submitted applications are locked. Contact HR if you need to request a
         correction.

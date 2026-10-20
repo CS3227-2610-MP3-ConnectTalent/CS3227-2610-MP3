@@ -1,5 +1,4 @@
 import { beforeEach, expect, it, vi } from "vitest";
-
 const mocks = vi.hoisted(() => ({
   currentApplicant: vi.fn(),
   getOwnApplicationForJob: vi.fn(),
@@ -10,7 +9,6 @@ const mocks = vi.hoisted(() => ({
   readResumeFile: vi.fn(),
   resumeFailure: vi.fn(),
 }));
-
 vi.mock("@/lib/auth", () => ({ currentApplicant: mocks.currentApplicant }));
 vi.mock("@/lib/applications", () => ({
   getOwnApplicationForJob: mocks.getOwnApplicationForJob,
@@ -28,13 +26,11 @@ vi.mock("@/lib/resume-request", () => ({
   resumeFailure: mocks.resumeFailure,
   resumeHeaders: { "Cache-Control": "private, no-store" },
 }));
-
 import { POST } from "@/app/api/jobs/[id]/resume/route";
 import {
   ResumeUploadPreparationError,
   resumeUploadPreparationFailure,
 } from "@/lib/resume-errors";
-
 const actor = "44000000-0000-4000-8000-000000000101";
 const jobId = "44000000-0000-4000-8000-000000000102";
 const operation = "44000000-0000-4000-8000-000000000103";
@@ -48,7 +44,11 @@ const metadata = { id: operation, filename: "synthetic.pdf", byte_size: 8 };
 function post(headers: Record<string, string> = {}, id = jobId) {
   return new Request(`https://careers.example.test/api/jobs/${id}/resume`, {
     method: "POST",
-    headers: { origin: "https://careers.example.test", ...headers },
+    headers: {
+      origin: "https://careers.example.test",
+      "x-application-id": application.id,
+      ...headers,
+    },
     body: "synthetic upload bytes",
   });
 }
@@ -71,7 +71,7 @@ beforeEach(() => {
   mocks.getOwnApplicationForJob.mockResolvedValue(application);
   mocks.getApplicationResume.mockResolvedValue(metadata);
   mocks.removeApplicationResume.mockResolvedValue(undefined);
-  mocks.uploadResumeForJob.mockResolvedValue(undefined);
+  mocks.uploadResumeForJob.mockResolvedValue(application.id);
   mocks.downloadProfileResume.mockResolvedValue(null);
   mocks.readResumeFile.mockResolvedValue(new File(["synthetic"], "upload.pdf"));
   mocks.resumeFailure.mockImplementation((error: unknown) => {
@@ -133,7 +133,12 @@ it("allows removing an application résumé only with a valid revision", async (
     context(),
   );
   expect(removed.status).toBe(200);
-  expect(mocks.removeApplicationResume).toHaveBeenCalledWith(actor, jobId, 3);
+  expect(mocks.removeApplicationResume).toHaveBeenCalledWith(
+    actor,
+    jobId,
+    3,
+    application.id,
+  );
   await expect(removed.json()).resolves.toMatchObject({
     ok: true,
     applicationId: application.id,
@@ -169,6 +174,7 @@ it("allows first upload without an application revision but rejects malformed op
     expect.any(File),
     operation,
     true,
+    application.id,
   );
 });
 
@@ -227,6 +233,7 @@ it("copies the Applicant's selected profile résumé into the selected job draft
     expect.any(File),
     operation,
     false,
+    application.id,
   );
 });
 

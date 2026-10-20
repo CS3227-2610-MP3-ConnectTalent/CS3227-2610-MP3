@@ -55,10 +55,10 @@ describe("HR application pagination edge cases", () => {
     expect(result.totalCount).toBe(0);
   });
 
-  it("clamps out-of-bounds page requests", () => {
+  it("falls back to the first page for out-of-bounds requests", () => {
     const result = paginateApplications(samplePaginationItems, 999, 10);
-    expect(result.currentPage).toBe(3);
-    expect(result.items).toHaveLength(5);
+    expect(result.currentPage).toBe(1);
+    expect(result.items).toEqual(samplePaginationItems.slice(0, 10));
   });
 });
 

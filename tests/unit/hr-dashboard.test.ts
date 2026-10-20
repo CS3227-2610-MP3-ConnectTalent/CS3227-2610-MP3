@@ -112,3 +112,29 @@ it("returns zero totals and preserves jobs when there are no submitted applicati
   expect(dashboard.jobs).toHaveLength(jobs.length);
   expect(dashboard.jobs.every((job) => job.activeCount === 0)).toBe(true);
 });
+
+it("counts expired published jobs as closed and keeps future jobs scheduled", () => {
+  const dashboard = aggregateHRDashboard(
+    [
+      {
+        id: "44000000-0000-4000-8000-000000000105",
+        title: "Expired published role",
+        status: "published" as const,
+        closes_at: "2000-01-01T00:00:00.000Z",
+      },
+      {
+        id: "44000000-0000-4000-8000-000000000106",
+        title: "Future scheduled role",
+        status: "published" as const,
+        opens_at: "2100-01-01T00:00:00.000Z",
+      },
+    ],
+    [],
+  );
+
+  expect(dashboard.jobCounts).toEqual({ draft: 0, published: 1, closed: 1 });
+  expect(dashboard.jobs.map(({ title, status }) => [title, status])).toEqual([
+    ["Expired published role", "closed"],
+    ["Future scheduled role", "scheduled"],
+  ]);
+});
