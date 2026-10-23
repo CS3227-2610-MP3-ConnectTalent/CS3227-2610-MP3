@@ -21,7 +21,7 @@ jobs:
     name: Database checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: supabase/setup-cli@v3
         with:
           version: 2.119.0
@@ -58,7 +58,7 @@ jobs:
     name: Integration race suites
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/setup@v3
         with:
           runtime: node@24
@@ -100,7 +100,7 @@ jobs:
     name: Playwright Chromium
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/setup@v3
         with:
           runtime: node@24
